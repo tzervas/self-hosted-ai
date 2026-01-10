@@ -1,0 +1,96 @@
+{
+  "_comment": "OpenWebUI configuration template - sanitized for version control",
+  "_usage": "Import via Admin Settings > Export/Import or apply with bootstrap.sh",
+
+  "ui": {
+    "default_locale": "en-US",
+    "show_username": true,
+    "chat_bubble_ui": false,
+    "wide_screen_mode": true
+  },
+
+  "model_defaults": {
+    "_comment": "Applied to all models unless overridden",
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "top_k": 40,
+    "repeat_penalty": 1.1,
+    "num_ctx": 8192,
+    "num_predict": -1,
+    "stop": []
+  },
+
+  "model_configs": {
+    "qwen2.5-coder:14b": {
+      "name": "Qwen 2.5 Coder 14B",
+      "description": "Primary coding model - Rust, Python, Shell",
+      "params": {
+        "temperature": 0.3,
+        "top_p": 0.95,
+        "num_ctx": 32768,
+        "repeat_penalty": 1.05
+      },
+      "system_prompt": "You are an expert software engineer specializing in Rust, Python, and Shell scripting. Write clean, idiomatic, well-documented code. Prefer explicit error handling over exceptions. Use type hints in Python. Follow Rust best practices for ownership and borrowing. For shell scripts, use strict mode (set -euo pipefail) and quote variables."
+    },
+
+    "phi4:latest": {
+      "name": "Phi-4",
+      "description": "Reasoning and complex problem solving",
+      "params": {
+        "temperature": 0.5,
+        "top_p": 0.9,
+        "num_ctx": 16384,
+        "repeat_penalty": 1.1
+      },
+      "system_prompt": "You are a thoughtful assistant that excels at reasoning through complex problems step by step. When given a coding task, first analyze the requirements, consider edge cases, then provide a well-structured solution with clear explanations."
+    },
+
+    "deepseek-coder-v2:16b": {
+      "name": "DeepSeek Coder V2 16B",
+      "description": "Advanced code generation and analysis",
+      "params": {
+        "temperature": 0.2,
+        "top_p": 0.95,
+        "num_ctx": 32768,
+        "repeat_penalty": 1.0
+      },
+      "system_prompt": "You are DeepSeek Coder, an expert programming assistant. Generate production-quality code with comprehensive error handling, proper typing, and inline documentation. When refactoring, preserve existing functionality while improving code quality."
+    },
+
+    "mistral:7b": {
+      "name": "Mistral 7B",
+      "description": "General chat and quick tasks (CPU)",
+      "params": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "num_ctx": 8192
+      },
+      "system_prompt": "You are a helpful assistant running on CPU. Keep responses concise and focused. For complex coding tasks, suggest using a GPU model instead."
+    },
+
+    "nomic-embed-text:latest": {
+      "name": "Nomic Embed Text",
+      "description": "Text embeddings for RAG",
+      "params": {},
+      "system_prompt": ""
+    }
+  },
+
+  "workspace": {
+    "default_model": "qwen2.5-coder:14b",
+    "default_prompt_suggestions": [
+      "Review this code for bugs and suggest improvements",
+      "Explain this function and suggest better naming",
+      "Write unit tests for this module",
+      "Refactor this to be more idiomatic Rust/Python",
+      "Convert this Python script to a proper CLI with argparse"
+    ]
+  },
+
+  "admin": {
+    "_comment": "Settings that require admin access to apply",
+    "enable_signup": true,
+    "enable_community_sharing": false,
+    "default_user_role": "user"
+  }
+}

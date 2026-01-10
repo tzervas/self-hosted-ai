@@ -1,0 +1,135 @@
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:latest
+    container_name: open-webui-server
+    ports:
+      - "${WEBUI_PORT:-3000}:8080"
+    volumes:
+      - ${DATA_PATH:-/data}/open-webui:/app/backend/data
+    environment:
+      - OLLAMA_BASE_URLS=http://ollama-cpu:11434;http://192.168.1.99:11434
+      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY}
+      - WEBUI_NAME=${WEBUI_NAME:-Self-Hosted AI Server}
+      - ENABLE_SIGNUP=${ENABLE_SIGNUP:-true}
+      - ENABLE_COMMUNITY_SHARING=${ENABLE_COMMUNITY_SHARING:-false}
+      - ENABLE_RAG_WEB_SEARCH=${ENABLE_RAG_WEB_SEARCH:-false}
+      - RAG_WEB_SEARCH_ENGINE=${RAG_WEB_SEARCH_ENGINE:-searxng}
+      - SEARXNG_QUERY_URL=${SEARXNG_QUERY_URL}
+      - ENABLE_IMAGE_GENERATION=${ENABLE_IMAGE_GENERATION:-false}
+      - AUTOMATIC1111_BASE_URL=${AUTOMATIC1111_BASE_URL}
+      - COMFYUI_BASE_URL=${COMFYUI_BASE_URL}
+      - IMAGES_OPENAI_API_KEY=${IMAGES_OPENAI_API_KEY}
+      - IMAGES_OPENAI_API_BASE_URL=${IMAGES_OPENAI_API_BASE_URL}
+      - ENABLE_CODE_EXECUTION=${ENABLE_CODE_EXECUTION:-true}
+      - CODE_EXECUTION_ENGINE=${CODE_EXECUTION_ENGINE:-gvisor}
+      - CODE_EXECUTION_API_URL=${CODE_EXECUTION_API_URL:-http://code-executor:8080}
+    depends_on:
+      - ollama-cpu
+      # - code-executor
+      - redis
+    restart: unless-stopped
+    profiles:
+      - basic
+      - full
+      - monitoring
+
+  ollama-cpu:
+    image: ollama/ollama:latest
+    container_name: ollama-cpu-server
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ${DATA_PATH:-/data}/ollama-cpu:/root/.ollama
+    environment:
+      - OLLAMA_NUM_PARALLEL=${OLLAMA_CPU_NUM_PARALLEL:-8}
+      - OLLAMA_MAX_LOADED_MODELS=${OLLAMA_CPU_MAX_LOADED_MODELS:-4}
+      - OLLAMA_KEEP_ALIVE=${OLLAMA_KEEP_ALIVE:-30m}
+      - OLLAMA_NUM_THREADS=${OLLAMA_NUM_THREADS:-56}
+    restart: unless-stopped
+    profiles:
+      - basic
+      - full
+      - monitoring
+
+  # code-executor:
+  #   image: ghcr.io/etienneperot/safe-code-execution:latest
+  #   container_name: code-executor-server
+  #   ports:
+  #     - "${CODE_EXECUTOR_PORT:-8090}:8080"
+  #   environment:
+  #     - SANDBOX_RUNTIME=${SANDBOX_RUNTIME:-runsc}
+  #     - MAX_EXECUTION_TIME=${MAX_EXECUTION_TIME:-60}
+  #     - MAX_MEMORY_MB=${MAX_MEMORY_MB:-1024}
+  #     - MAX_OUTPUT_SIZE_MB=${MAX_OUTPUT_SIZE_MB:-10}
+  #   restart: unless-stopped
+  #   profiles:
+  #     - basic
+  #     - full
+  #     - monitoring
+
+  redis:
+    image: redis:alpine
+    container_name: redis-server
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - ${DATA_PATH:-/data}/redis:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    profiles:
+      - basic
+      - full
+      - monitoring
+
+  # Monitoring Profile Services
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus-server
+    ports:
+      - "9090:9090"
+    volumes:
+      - ${DATA_PATH:-/data}/prometheus:/prometheus
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana-server
+    ports:
+      - "3001:3000"
+    volumes:
+      - ${DATA_PATH:-/data}/grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    profiles:
+      - monitoring
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter-server
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    restart: unless-stopped
+    profiles:
+      - monitoring
