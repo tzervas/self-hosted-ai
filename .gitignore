@@ -1,0 +1,52 @@
+# Environment files with secrets
+.env.local
+.env.production
+*.env.secret
+
+# Keep example env files
+!.env.example
+!*/.env.example
+
+# Sensitive data
+secrets/
+*.key
+*.pem
+*.crt
+id_rsa*
+*.secret
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build artifacts
+dist/
+build/
+*.tar.gz
+*.zip
+
+# Docker
+.docker/
+
+# Logs
+*.log
+logs/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Rust
+target/
+Cargo.lock
+
+# Node
+node_modules/
