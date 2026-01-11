@@ -1,0 +1,154 @@
+{
+  "name": "text2video-svd",
+  "description": "Text-to-Video using Stable Video Diffusion",
+  "version": "1.0",
+  "workflow": {
+    "1": {
+      "inputs": {
+        "text": "{{prompt}}",
+        "clip": ["4", 0]
+      },
+      "class_type": "CLIPTextEncode",
+      "_meta": {
+        "title": "Positive Prompt"
+      }
+    },
+    "2": {
+      "inputs": {
+        "text": "{{negative_prompt}}",
+        "clip": ["4", 0]
+      },
+      "class_type": "CLIPTextEncode",
+      "_meta": {
+        "title": "Negative Prompt"
+      }
+    },
+    "3": {
+      "inputs": {
+        "seed": "{{seed}}",
+        "steps": "{{steps}}",
+        "cfg": "{{cfg_scale}}",
+        "sampler_name": "euler",
+        "scheduler": "normal",
+        "denoise": 1.0,
+        "model": ["4", 0],
+        "positive": ["1", 0],
+        "negative": ["2", 0],
+        "latent_image": ["5", 0]
+      },
+      "class_type": "KSampler",
+      "_meta": {
+        "title": "KSampler"
+      }
+    },
+    "4": {
+      "inputs": {
+        "ckpt_name": "svd_xt_1_1.safetensors"
+      },
+      "class_type": "CheckpointLoaderSimple",
+      "_meta": {
+        "title": "Load SVD Checkpoint"
+      }
+    },
+    "5": {
+      "inputs": {
+        "width": "{{width}}",
+        "height": "{{height}}",
+        "batch_size": "{{num_frames}}"
+      },
+      "class_type": "EmptyLatentImage",
+      "_meta": {
+        "title": "Empty Latent"
+      }
+    },
+    "6": {
+      "inputs": {
+        "samples": ["3", 0],
+        "vae": ["4", 2]
+      },
+      "class_type": "VAEDecode",
+      "_meta": {
+        "title": "VAE Decode"
+      }
+    },
+    "7": {
+      "inputs": {
+        "filename_prefix": "video_{{timestamp}}",
+        "fps": "{{fps}}",
+        "images": ["6", 0]
+      },
+      "class_type": "VHS_VideoCombine",
+      "_meta": {
+        "title": "Combine to Video"
+      }
+    }
+  },
+  "parameters": {
+    "prompt": {
+      "type": "string",
+      "required": true,
+      "description": "Video generation prompt"
+    },
+    "negative_prompt": {
+      "type": "string",
+      "default": "blurry, distorted, low quality",
+      "description": "Negative prompt"
+    },
+    "width": {
+      "type": "integer",
+      "default": 1024,
+      "min": 512,
+      "max": 2048
+    },
+    "height": {
+      "type": "integer",
+      "default": 576,
+      "min": 512,
+      "max": 2048
+    },
+    "num_frames": {
+      "type": "integer",
+      "default": 25,
+      "min": 14,
+      "max": 60,
+      "description": "Number of frames to generate"
+    },
+    "fps": {
+      "type": "integer",
+      "default": 8,
+      "min": 4,
+      "max": 30,
+      "description": "Frames per second"
+    },
+    "steps": {
+      "type": "integer",
+      "default": 20,
+      "min": 1,
+      "max": 100
+    },
+    "cfg_scale": {
+      "type": "float",
+      "default": 2.5,
+      "min": 1.0,
+      "max": 20.0
+    },
+    "seed": {
+      "type": "integer",
+      "default": -1,
+      "description": "Random seed (-1 for random)"
+    }
+  },
+  "security": {
+    "max_steps": 100,
+    "max_width": 2048,
+    "max_height": 2048,
+    "max_frames": 60,
+    "max_duration": 10,
+    "rate_limit_rpm": 5
+  },
+  "requirements": {
+    "models": ["svd_xt_1_1.safetensors"],
+    "custom_nodes": ["ComfyUI-VideoHelperSuite"],
+    "vram": "12GB"
+  }
+}

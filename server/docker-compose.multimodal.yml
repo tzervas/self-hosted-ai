@@ -1,0 +1,219 @@
+# Extended Multi-Modal Services
+# Audio, Video, and Advanced AI Processing
+# Deploy with: docker compose -f docker-compose.yml -f docker-compose.multimodal.yml up -d
+
+services:
+  # === AUDIO SERVICES ===
+  
+  # Whisper - Speech-to-Text (OpenAI Whisper)
+  whisper:
+    image: onerahmet/openai-whisper-asr-webservice:latest
+    container_name: whisper-stt
+    ports:
+      - "${WHISPER_PORT:-9000}:9000"
+    environment:
+      - ASR_MODEL=${WHISPER_MODEL:-base}
+      - ASR_ENGINE=openai_whisper
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - ${DATA_PATH:-/data}/whisper:/root/.cache
+    restart: unless-stopped
+    profiles:
+      - multimodal
+      - audio
+
+  # Piper TTS - Text-to-Speech
+  piper-tts:
+    image: rhasspy/piper:latest
+    container_name: piper-tts
+    ports:
+      - "${PIPER_PORT:-5000}:5000"
+    volumes:
+      - ${DATA_PATH:-/data}/piper/voices:/voices
+      - ${DATA_PATH:-/data}/piper/cache:/cache
+    command: --port 5000 --voices-dir /voices
+    restart: unless-stopped
+    profiles:
+      - multimodal
+      - audio
+
+  # Coqui TTS - Advanced Text-to-Speech with voice cloning
+  coqui-tts:
+    image: ghcr.io/coqui-ai/tts:latest
+    container_name: coqui-tts
+    ports:
+      - "${COQUI_PORT:-5002}:5002"
+    environment:
+      - TTS_MODEL=${TTS_MODEL:-tts_models/en/ljspeech/tacotron2-DDC}
+    volumes:
+      - ${DATA_PATH:-/data}/coqui:/root/.local/share/tts
+    command: --port 5002 --use_cuda true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    profiles:
+      - multimodal
+      - audio
+
+  # === VECTOR DATABASE & EMBEDDINGS ===
+  
+  # Qdrant - Vector database for embeddings
+  qdrant:
+    image: qdrant/qdrant:v1.7.4
+    container_name: qdrant-vector-db
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+      - "${QDRANT_GRPC_PORT:-6334}:6334"
+    volumes:
+      - ${DATA_PATH:-/data}/qdrant/storage:/qdrant/storage
+      - ${DATA_PATH:-/data}/qdrant/snapshots:/qdrant/snapshots
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+      - QDRANT__LOG_LEVEL=${QDRANT_LOG_LEVEL:-INFO}
+    restart: unless-stopped
+    profiles:
+      - multimodal
+      - embeddings
+      - full
+
+  # === VIDEO PROCESSING ===
+  
+  # FFmpeg service for video processing
+  ffmpeg-service:
+    image: jrottenberg/ffmpeg:6-alpine
+    container_name: ffmpeg-processor
+    volumes:
+      - ${DATA_PATH:-/data}/video/input:/input
+      - ${DATA_PATH:-/data}/video/output:/output
+      - ${DATA_PATH:-/data}/video/temp:/temp
+    entrypoint: /bin/sh
+    command: -c "while true; do sleep 3600; done"
+    restart: unless-stopped
+    profiles:
+      - multimodal
+      - video
+
+  # === DOCUMENT PROCESSING ===
+  
+  # Tika - Document parsing and content extraction
+  tika:
+    image: apache/tika:2.9.1.0
+    container_name: tika-parser
+    ports:
+      - "${TIKA_PORT:-9998}:9998"
+    environment:
+      - TIKA_CONFIG=/config/tika-config.xml
+    restart: unless-stopped
+    profiles:
+      - multimodal
+      - documents
+
+  # === API GATEWAY & ORCHESTRATION ===
+  
+  # LiteLLM Proxy - Unified API gateway for all models
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    container_name: litellm-proxy
+    ports:
+      - "${LITELLM_PORT:-4000}:4000"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-litellm}:${POSTGRES_PASSWORD}@postgres:5432/litellm
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY}
+      - OLLAMA_BASE_URL=http://ollama-cpu:11434
+      - OLLAMA_GPU_URL=http://${GPU_WORKER_HOST:-192.168.1.99}:11434
+    volumes:
+      - ./config/litellm-config.yaml:/app/config.yaml
+    command: --config /app/config.yaml --port 4000
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    profiles:
+      - full
+      - api-gateway
+
+  # PostgreSQL for LiteLLM and metadata storage
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-litellm}
+      - POSTGRES_USER=${POSTGRES_USER:-litellm}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ${DATA_PATH:-/data}/postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+    profiles:
+      - full
+      - api-gateway
+
+  # === WORKFLOW ORCHESTRATION ===
+  
+  # n8n - Workflow automation and orchestration
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n-workflows
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_USER:-admin}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD}
+      - N8N_HOST=${N8N_HOST:-0.0.0.0}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
+      - NODE_ENV=production
+      - WEBHOOK_URL=${N8N_WEBHOOK_URL:-http://localhost:5678}
+      - GENERIC_TIMEZONE=${TZ:-America/New_York}
+    volumes:
+      - ${DATA_PATH:-/data}/n8n:/home/node/.n8n
+    restart: unless-stopped
+    profiles:
+      - full
+      - orchestration
+
+  # === MONITORING & METRICS ===
+  
+  # Grafana Loki - Log aggregation
+  loki:
+    image: grafana/loki:2.9.3
+    container_name: loki-logs
+    ports:
+      - "${LOKI_PORT:-3100}:3100"
+    volumes:
+      - ${DATA_PATH:-/data}/loki:/loki
+      - ./monitoring/loki-config.yml:/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+    profiles:
+      - monitoring
+      - full
+
+  # Promtail - Log collector for Loki
+  promtail:
+    image: grafana/promtail:2.9.3
+    container_name: promtail-collector
+    volumes:
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./monitoring/promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    restart: unless-stopped
+    profiles:
+      - monitoring
+      - full

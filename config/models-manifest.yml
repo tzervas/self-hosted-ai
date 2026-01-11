@@ -1,51 +1,156 @@
 # Model Manifest for Self-Hosted AI Stack
+# Comprehensive production-ready multi-modal AI setup
 # Used by bootstrap.sh to ensure required models are available
 # Models are checked against Ollama API before pulling (no re-downloads)
 
 # GPU Worker Models (akula-prime)
-# Optimized for RTX 5080 16GB VRAM - coding focus
+# Optimized for RTX 5080 16GB VRAM - Multi-modal capabilities
 gpu_worker:
   host: ${GPU_WORKER_HOST:-192.168.1.99}
   port: ${GPU_WORKER_PORT:-11434}
   models:
-    # Primary coding model - excellent for Rust, Python, Shell
+    # === CODE GENERATION ===
+    # Primary coding model - excellent for Rust, Python, Shell, multi-language
     - name: qwen2.5-coder:14b
       size: 8GB
       purpose: coding
       priority: required
+      capabilities: [code_generation, code_review, refactoring, debugging]
 
-    # Reasoning + coding - good for complex problems
+    # Advanced coding with reasoning - complex problem solving
+    - name: deepseek-coder-v2:16b
+      size: 8GB
+      purpose: coding
+      priority: required
+      capabilities: [code_generation, architecture, optimization]
+
+    # Specialized code model - alternative for variety
+    - name: codellama:13b
+      size: 7GB
+      purpose: coding
+      priority: optional
+      capabilities: [code_completion, code_explanation]
+
+    # === REASONING & PROBLEM SOLVING ===
+    # Advanced reasoning for research and analysis
     - name: phi4:latest
       size: 8GB
       purpose: reasoning
       priority: required
+      capabilities: [logical_reasoning, mathematics, analysis]
 
-    # Advanced coding - alternative for variety
-    - name: deepseek-coder-v2:16b
+    # General reasoning and instruction following
+    - name: llama3.1:8b
+      size: 4.7GB
+      purpose: reasoning
+      priority: required
+      capabilities: [instruction_following, reasoning, chat]
+
+    # === VISION & MULTI-MODAL ===
+    # Vision language model - image understanding and analysis
+    - name: llava:13b
       size: 8GB
-      purpose: coding
+      purpose: vision
+      priority: required
+      capabilities: [image_understanding, ocr, visual_reasoning, image_description]
+
+    # Advanced vision model for detailed analysis
+    - name: bakllava:latest
+      size: 4.7GB
+      purpose: vision
       priority: optional
+      capabilities: [image_analysis, visual_qa, scene_understanding]
+
+    # === FUNCTION CALLING & TOOL USE ===
+    # Function calling specialist
+    - name: mistral:7b-instruct-v0.3
+      size: 4.1GB
+      purpose: function_calling
+      priority: required
+      capabilities: [function_calling, tool_use, api_integration, json_mode]
+
+    # Advanced tool use with large context
+    - name: llama3.1:70b-instruct-q4_0
+      size: 40GB
+      purpose: function_calling
+      priority: optional
+      capabilities: [function_calling, tool_use, complex_reasoning, large_context]
 
 # CPU Server Models (homelab)
-# Optimized for 120GB RAM - fallback and embeddings
+# Optimized for 120GB RAM - Embeddings, fallback, and specialized tasks
 cpu_server:
   host: ${CPU_SERVER_HOST:-192.168.1.170}
   port: ${CPU_SERVER_PORT:-11434}
   models:
-    # General chat fallback
+    # === GENERAL PURPOSE ===
+    # Fast general chat and fallback
     - name: mistral:7b
       size: 4GB
       purpose: chat
       priority: required
+      capabilities: [chat, general_qa, summarization]
 
-    # Fast lightweight model
+    # Lightweight fast model for simple tasks
     - name: phi3:latest
       size: 2GB
       purpose: chat
-      priority: optional
+      priority: required
+      capabilities: [chat, quick_responses, simple_tasks]
 
-    # Embeddings for RAG
+    # Small efficient model for testing
+    - name: gemma2:2b
+      size: 1.6GB
+      purpose: chat
+      priority: optional
+      capabilities: [chat, fast_inference]
+
+    # === EMBEDDINGS & RAG ===
+    # Primary embedding model - semantic search
     - name: nomic-embed-text:latest
       size: 274MB
       purpose: embeddings
       priority: required
+      capabilities: [text_embeddings, semantic_search, rag, document_retrieval]
+
+    # Advanced embeddings - better quality
+    - name: mxbai-embed-large:latest
+      size: 669MB
+      purpose: embeddings
+      priority: required
+      capabilities: [text_embeddings, semantic_search, high_quality]
+
+    # Specialized embeddings for code
+    - name: nomic-embed-text:137m-v1.5-q8_0
+      size: 137MB
+      purpose: embeddings
+      priority: optional
+      capabilities: [code_embeddings, fast_embeddings]
+
+    # === SPECIALIZED TASKS ===
+    # SQL generation and database queries
+    - name: sqlcoder:15b
+      size: 8.5GB
+      purpose: sql
+      priority: optional
+      capabilities: [sql_generation, database_queries, data_analysis]
+
+    # Document analysis and extraction
+    - name: llama3.1:8b-instruct-q8_0
+      size: 8.5GB
+      purpose: documents
+      priority: optional
+      capabilities: [document_analysis, information_extraction, summarization]
+
+    # Math and scientific computing
+    - name: deepseek-math:7b
+      size: 4.1GB
+      purpose: mathematics
+      priority: optional
+      capabilities: [mathematical_reasoning, symbolic_math, problem_solving]
+
+    # Long context processing (128k tokens)
+    - name: qwen2.5:7b
+      size: 4.7GB
+      purpose: long_context
+      priority: optional
+      capabilities: [long_context, document_processing, analysis]

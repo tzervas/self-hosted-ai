@@ -15,6 +15,11 @@ from agents.specialized.development import DevelopmentAgent
 from agents.specialized.code_review import CodeReviewAgent
 from agents.specialized.testing import TestingAgent
 from agents.specialized.documentation import DocumentationAgent
+from agents.specialized.multimodal import (
+    MultiModalAgent,
+    EmbeddingAgent,
+    FunctionCallingAgent,
+)
 
 __all__ = [
     # Core
@@ -31,4 +36,8 @@ __all__ = [
     "CodeReviewAgent",
     "TestingAgent",
     "DocumentationAgent",
+    # Multi-Modal Agents
+    "MultiModalAgent",
+    "EmbeddingAgent",
+    "FunctionCallingAgent",
 ]
