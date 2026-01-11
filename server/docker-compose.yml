@@ -1,13 +1,13 @@
 services:
   open-webui:
-    image: ghcr.io/open-webui/open-webui:latest
+    image: ghcr.io/open-webui/open-webui:v0.7.2
     container_name: open-webui-server
     ports:
       - "${WEBUI_PORT:-3000}:8080"
     volumes:
       - ${DATA_PATH:-/data}/open-webui:/app/backend/data
     environment:
-      - OLLAMA_BASE_URLS=http://ollama-cpu:11434;http://192.168.1.99:11434
+      - OLLAMA_BASE_URLS=http://ollama-cpu:11434;http://${GPU_WORKER_HOST:-192.168.1.99}:11434
       - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY}
       - WEBUI_NAME=${WEBUI_NAME:-Self-Hosted AI Server}
       - ENABLE_SIGNUP=${ENABLE_SIGNUP:-true}
@@ -15,9 +15,13 @@ services:
       - ENABLE_RAG_WEB_SEARCH=${ENABLE_RAG_WEB_SEARCH:-false}
       - RAG_WEB_SEARCH_ENGINE=${RAG_WEB_SEARCH_ENGINE:-searxng}
       - SEARXNG_QUERY_URL=${SEARXNG_QUERY_URL}
-      - ENABLE_IMAGE_GENERATION=${ENABLE_IMAGE_GENERATION:-false}
+      # Image Generation (ComfyUI)
+      - ENABLE_IMAGE_GENERATION=${ENABLE_IMAGE_GENERATION:-true}
+      - IMAGE_GENERATION_ENGINE=${IMAGE_GENERATION_ENGINE:-comfyui}
+      - COMFYUI_BASE_URL=${COMFYUI_BASE_URL:-http://${GPU_WORKER_HOST:-192.168.1.99}:8188}
+      - COMFYUI_WORKFLOW=${COMFYUI_WORKFLOW}
+      # Legacy/Alternative image generation
       - AUTOMATIC1111_BASE_URL=${AUTOMATIC1111_BASE_URL}
-      - COMFYUI_BASE_URL=${COMFYUI_BASE_URL}
       - IMAGES_OPENAI_API_KEY=${IMAGES_OPENAI_API_KEY}
       - IMAGES_OPENAI_API_BASE_URL=${IMAGES_OPENAI_API_BASE_URL}
       - ENABLE_CODE_EXECUTION=${ENABLE_CODE_EXECUTION:-true}
@@ -34,7 +38,7 @@ services:
       - monitoring
 
   ollama-cpu:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.13.5
     container_name: ollama-cpu-server
     ports:
       - "${OLLAMA_PORT:-11434}:11434"
@@ -68,7 +72,7 @@ services:
   #     - monitoring
 
   redis:
-    image: redis:alpine
+    image: redis:8.4.0-alpine
     container_name: redis-server
     ports:
       - "${REDIS_PORT:-6379}:6379"
@@ -83,7 +87,7 @@ services:
 
   # Monitoring Profile Services
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.54.0
     container_name: prometheus-server
     ports:
       - "9090:9090"
@@ -102,7 +106,7 @@ services:
       - monitoring
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.3.0
     container_name: grafana-server
     ports:
       - "3001:3000"
@@ -117,7 +121,7 @@ services:
       - monitoring
 
   node-exporter:
-    image: prom/node-exporter:latest
+    image: prom/node-exporter:v1.8.2
     container_name: node-exporter-server
     ports:
       - "9100:9100"
