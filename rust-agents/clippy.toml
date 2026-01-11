@@ -1,0 +1,15 @@
+# Clippy linting configuration
+# Run with: cargo clippy
+
+# Cognitive complexity threshold
+cognitive-complexity-threshold = 25
+
+# Documentation
+missing-docs-in-crate-items = false
+
+# Avoid false positives
+allow-mixed-uninlined-format-args = true
+
+# Performance
+too-many-arguments-threshold = 8
+type-complexity-threshold = 250

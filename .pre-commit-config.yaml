@@ -83,3 +83,43 @@ repos:
       - id: conventional-pre-commit
         stages: [commit-msg]
         args: [feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert]
+  # Python formatting and linting (agents/)
+  - repo: https://github.com/psf/black
+    rev: 24.1.1
+    hooks:
+      - id: black
+        files: ^agents/
+        args: [--line-length=100]
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        files: ^agents/
+        args: [--profile=black, --line-length=100]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        files: ^agents/
+        additional_dependencies: [types-pyyaml, httpx, pydantic]
+        args: [--ignore-missing-imports, --no-strict-optional]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.15
+    hooks:
+      - id: ruff
+        files: ^agents/
+        args: [--fix, --line-length=100]
+
+  # Rust formatting and linting (rust-agents/)
+  - repo: https://github.com/doublify/pre-commit-rust
+    rev: v1.0
+    hooks:
+      - id: fmt
+        files: ^rust-agents/
+        args: [--manifest-path=rust-agents/Cargo.toml, --]
+      - id: clippy
+        files: ^rust-agents/
+        args: [--manifest-path=rust-agents/Cargo.toml, --, -D, warnings]
