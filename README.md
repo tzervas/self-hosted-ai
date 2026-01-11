@@ -330,6 +330,282 @@ git clone https://github.com/Fannovel16/comfyui_controlnet_aux.git
 docker restart comfyui-worker
 ```
 
+## Multi-Agent Development Framework
+
+The repository includes a comprehensive multi-agent framework for autonomous development workflows, powered by LLMs and orchestrated with declarative YAML configurations.
+
+### Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│                     Workflow Orchestrator                    │
+│  (DAG resolution, parallel execution, dependency management) │
+└──────────────────┬──────────────────────────────────────────┘
+                   │
+    ┌──────────────┼──────────────┬─────────────┬──────────────┐
+    │              │              │             │              │
+┌───▼───┐    ┌────▼────┐    ┌────▼────┐   ┌───▼────┐   ┌─────▼─────┐
+│Research│    │Development│    │CodeReview│   │Testing │   │Documentation│
+│Agent  │    │Agent      │    │Agent    │   │Agent   │   │Agent      │
+└───┬───┘    └────┬────┘    └────┬────┘   └───┬────┘   └─────┬─────┘
+    │             │              │             │              │
+    └─────────────┴──────────────┴─────────────┴──────────────┘
+                              │
+                    ┌─────────▼─────────┐
+                    │  Ollama LLM API   │
+                    │  (Llama 3.1 8B)   │
+                    └───────────────────┘
+```
+
+### Available Agents
+
+| Agent | Purpose | Capabilities |
+|-------|---------|--------------|
+| **ResearchAgent** | Information gathering & analysis | Web search, documentation analysis, confidence scoring |
+| **DevelopmentAgent** | Code generation | Python/Rust code generation, multi-file projects, best practices |
+| **CodeReviewAgent** | Quality & security analysis | Static analysis, security scanning, complexity metrics |
+| **TestingAgent** | Test generation | pytest/cargo test generation, AAA pattern, fixtures |
+| **DocumentationAgent** | Technical documentation | README, API docs, architecture diagrams, Markdown |
+
+### Quick Start
+
+**1. Install Python Framework:**
+
+```bash
+cd agents
+pip install -e .
+```
+
+**2. Install Rust Runtime (optional - for parallel execution):**
+
+```bash
+cd rust-agents
+cargo build --release
+```
+
+**3. Create a Simple Agent:**
+
+```python
+from agents import ResearchAgent, AgentConfig
+
+# Configure agent
+config = AgentConfig(
+    model="llama3.1:8b",
+    temperature=0.7,
+    max_tokens=2000,
+    timeout=120
+)
+
+# Create and execute
+agent = ResearchAgent(config)
+result = await agent.execute("Research Docker security best practices")
+
+print(f"Status: {result.status}")
+print(f"Output: {result.output}")
+print(f"Confidence: {result.metadata.get('confidence', 'N/A')}")
+```
+
+### Workflow Orchestration
+
+Define multi-agent workflows in YAML:
+
+```yaml
+# workflows/research_and_develop.yaml
+name: "Research and Implementation Pipeline"
+description: "Research topic then implement solution"
+
+agents:
+  - id: researcher
+    type: ResearchAgent
+    config:
+      model: "llama3.1:8b"
+      temperature: 0.7
+  
+  - id: developer
+    type: DevelopmentAgent
+    config:
+      model: "codellama:13b"
+      temperature: 0.2
+
+tasks:
+  - id: research_task
+    agent_id: researcher
+    name: "Research Implementation"
+    description: "Research ${topic} and identify requirements"
+    priority: 1
+  
+  - id: implement_task
+    agent_id: developer
+    name: "Implement Solution"
+    description: "Implement ${topic} based on research"
+    dependencies: [research_task]
+    priority: 2
+```
+
+**Execute workflow:**
+
+```python
+from agents import WorkflowOrchestrator
+import yaml
+
+# Load workflow
+with open("workflows/research_and_develop.yaml") as f:
+    workflow_config = yaml.safe_load(f)
+
+# Execute with variables
+orchestrator = WorkflowOrchestrator()
+results = await orchestrator.execute_workflow(
+    workflow_config,
+    variables={"topic": "Redis caching layer"}
+)
+
+for task_id, result in results.items():
+    print(f"{task_id}: {result.status} - {result.output[:100]}...")
+```
+
+### Pre-Built Workflows
+
+| Workflow | Stages | Description |
+|----------|--------|-------------|
+| `research_and_develop.yaml` | 2 | Research → Implementation |
+| `full_development_cycle.yaml` | 6 | Research → Implement → Review → Test → Document → Final Review |
+
+### Rust Parallel Execution
+
+For high-performance parallel agent execution:
+
+```rust
+use rust_agents::{execute_parallel, AgentConfig, RustAgent};
+
+#[tokio::main]
+async fn main() {
+    let agents = vec![
+        RustAgent::new("agent1".to_string(), AgentConfig {
+            model: "llama3.1:8b".to_string(),
+            temperature: 0.7,
+            timeout: 120,
+        }),
+        // ... more agents
+    ];
+
+    let results = execute_parallel(agents, "Research Rust async patterns").await;
+    
+    for result in results {
+        println!("{}: {:?}", result.agent_id, result.status);
+    }
+}
+```
+
+**Build and run:**
+
+```bash
+cd rust-agents
+cargo build --release
+./target/release/rust-agents
+```
+
+### Testing
+
+Run the comprehensive test suite:
+
+```bash
+cd agents
+pytest tests/ -v --cov=agents --cov-report=html
+```
+
+**Test coverage:**
+- Core agent abstractions (Agent, Task, Workflow)
+- All specialized agents with mocked LLM responses
+- Workflow orchestration and DAG resolution
+- Error handling and timeout scenarios
+
+### Code Quality
+
+The framework includes comprehensive tooling:
+
+```bash
+# Format code
+black agents/
+isort agents/
+
+# Type checking
+mypy agents/
+
+# Linting
+pylint agents/
+ruff check agents/
+```
+
+Configuration in `agents/pyproject.toml`.
+
+### Development Tips
+
+**1. Custom Agent Creation:**
+
+```python
+from agents.core.base import Agent, AgentConfig, AgentResult, AgentStatus
+
+class CustomAgent(Agent):
+    async def execute(self, input_data: str) -> AgentResult:
+        # Validate input
+        if not self.validate_input(input_data):
+            return AgentResult(
+                status=AgentStatus.FAILED,
+                output="",
+                error="Invalid input"
+            )
+        
+        # Build prompt
+        prompt = f"{self.system_prompt}\n\nTask: {input_data}"
+        
+        # Call LLM
+        response = await self._call_llm(prompt)
+        
+        return AgentResult(
+            status=AgentStatus.COMPLETED,
+            output=response,
+            metadata={"custom_metric": 42}
+        )
+```
+
+**2. Workflow Variables:**
+
+Use `${variable}` syntax in workflow YAML files. Variables are interpolated at runtime:
+
+```yaml
+tasks:
+  - id: task1
+    description: "Analyze ${repository_url} for ${language} code"
+```
+
+**3. Error Handling:**
+
+All agents include timeout protection, retry logic, and graceful failure:
+
+```python
+config = AgentConfig(
+    timeout=120,        # 2 minute timeout
+    max_retries=3,      # Retry on transient failures
+    retry_delay=5       # 5 second delay between retries
+)
+```
+
+### Performance
+
+**Python Framework:**
+- Async/await throughout for I/O concurrency
+- Parallel task execution with configurable limits
+- Connection pooling for HTTP requests
+
+**Rust Runtime:**
+- Tokio async runtime for maximum concurrency
+- Zero-copy deserialization with Serde
+- LTO and optimization level 3 for performance
+
+**Benchmarks** (6-task workflow):
+- Python: ~45s (sequential), ~18s (parallel)
+- Rust: ~12s (parallel with 4 workers)
+
 ## Configuration
 
 ### Environment Files
