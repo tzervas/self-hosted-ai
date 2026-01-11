@@ -14,6 +14,7 @@ MANIFEST_FILE="$CONFIG_DIR/models-manifest.yml"
 # Default hosts (can be overridden via environment)
 GPU_WORKER_HOST="${GPU_WORKER_HOST:-192.168.1.99}"
 GPU_WORKER_PORT="${GPU_WORKER_PORT:-11434}"
+COMFYUI_PORT="${COMFYUI_PORT:-8188}"
 CPU_SERVER_HOST="${CPU_SERVER_HOST:-192.168.1.170}"
 CPU_SERVER_PORT="${CPU_SERVER_PORT:-11434}"
 
@@ -52,6 +53,28 @@ check_ollama() {
     log_error "Cannot reach Ollama at ${url}"
     return 1
   fi
+}
+
+# Check if ComfyUI endpoint is reachable
+check_comfyui() {
+  local host="$1"
+  local port="$2"
+  local url="http://${host}:${port}"
+
+  if curl -s --connect-timeout 5 "${url}/system_stats" &>/dev/null; then
+    log_success "ComfyUI reachable at ${url}"
+    return 0
+  else
+    log_error "Cannot reach ComfyUI at ${url}"
+    return 1
+  fi
+}
+
+# Get ComfyUI system info
+get_comfyui_info() {
+  local host="$1"
+  local port="$2"
+  curl -s "http://${host}:${port}/system_stats" 2>/dev/null | jq -r '.system // empty' 2>/dev/null || echo ""
 }
 
 # Get list of models on an Ollama instance
@@ -253,13 +276,41 @@ show_status() {
   log_info "=== Self-Hosted AI Stack Status ==="
   echo ""
 
-  # GPU Worker
-  echo -e "${BLUE}GPU Worker (${GPU_WORKER_HOST}:${GPU_WORKER_PORT})${NC}"
+  # GPU Worker - Ollama
+  echo -e "${BLUE}GPU Worker - Ollama (${GPU_WORKER_HOST}:${GPU_WORKER_PORT})${NC}"
   if check_ollama "$GPU_WORKER_HOST" "$GPU_WORKER_PORT" 2>/dev/null; then
     echo "  Models:"
     get_models "$GPU_WORKER_HOST" "$GPU_WORKER_PORT" | while read -r model; do
       echo "    - $model"
     done
+  fi
+  echo ""
+
+  # GPU Worker - ComfyUI
+  echo -e "${BLUE}GPU Worker - ComfyUI (${GPU_WORKER_HOST}:${COMFYUI_PORT})${NC}"
+  if check_comfyui "$GPU_WORKER_HOST" "$COMFYUI_PORT" 2>/dev/null; then
+    local comfyui_info
+    comfyui_info=$(curl -s "http://${GPU_WORKER_HOST}:${COMFYUI_PORT}/system_stats" 2>/dev/null)
+    if [[ -n "$comfyui_info" ]]; then
+      local vram_total vram_used gpu_name
+      vram_total=$(echo "$comfyui_info" | jq -r '.devices[0].vram_total // 0' 2>/dev/null)
+      vram_used=$(echo "$comfyui_info" | jq -r '.devices[0].vram_free // 0' 2>/dev/null)
+      gpu_name=$(echo "$comfyui_info" | jq -r '.devices[0].name // "Unknown GPU"' 2>/dev/null)
+      echo "  GPU: $gpu_name"
+      if [[ "$vram_total" != "0" ]]; then
+        local vram_gb=$((vram_total / 1024 / 1024 / 1024))
+        echo "  VRAM: ${vram_gb}GB"
+      fi
+    fi
+    # Check for checkpoint models
+    local models_dir="${DATA_PATH:-/data}/comfyui/models/checkpoints"
+    if [[ -d "$models_dir" ]]; then
+      local model_count
+      model_count=$(find "$models_dir" -name "*.safetensors" -o -name "*.ckpt" 2>/dev/null | wc -l)
+      echo "  Checkpoints: $model_count model(s) found"
+    else
+      echo "  Checkpoints: Directory not initialized"
+    fi
   fi
   echo ""
 
@@ -278,6 +329,7 @@ show_status() {
   echo -e "${BLUE}Open WebUI${NC}"
   if curl -s --connect-timeout 5 "${webui_url}/health" &>/dev/null; then
     log_success "Open WebUI: ${webui_url}"
+    echo "  Image Generation: ComfyUI @ http://${GPU_WORKER_HOST}:${COMFYUI_PORT}"
   else
     log_error "Open WebUI not reachable: ${webui_url}"
   fi
@@ -303,7 +355,8 @@ Options:
 
 Environment Variables:
   GPU_WORKER_HOST   GPU worker IP (default: 192.168.1.99)
-  GPU_WORKER_PORT   GPU worker port (default: 11434)
+  GPU_WORKER_PORT   GPU worker Ollama port (default: 11434)
+  COMFYUI_PORT      ComfyUI API port (default: 8188)
   CPU_SERVER_HOST   CPU server IP (default: 192.168.1.170)
   CPU_SERVER_PORT   CPU server port (default: 11434)
 
