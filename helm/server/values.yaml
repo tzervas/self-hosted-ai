@@ -1,0 +1,262 @@
+# Default values for self-hosted-ai-server
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Global configuration
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+
+# Open WebUI configuration
+openwebui:
+  enabled: true
+  image:
+    repository: ghcr.io/open-webui/open-webui
+    tag: v0.8.5
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+    annotations: {}
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: openwebui.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+  env:
+    - name: OLLAMA_BASE_URLS
+      value: "http://ollama-cpu:11434;http://gpu-worker-ollama:11434"
+    - name: WEBUI_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: webui-secret
+          key: secret-key
+    - name: WEBUI_NAME
+      value: "Self-Hosted AI Server"
+    - name: ENABLE_SIGNUP
+      value: "true"
+    - name: ENABLE_COMMUNITY_SHARING
+      value: "false"
+    - name: ENABLE_RAG_WEB_SEARCH
+      value: "false"
+    - name: RAG_WEB_SEARCH_ENGINE
+      value: "searxng"
+    - name: ENABLE_IMAGE_GENERATION
+      value: "true"
+    - name: IMAGE_GENERATION_ENGINE
+      value: "comfyui"
+    - name: COMFYUI_BASE_URL
+      value: "http://gpu-worker-comfyui:8188"
+    - name: ENABLE_CODE_EXECUTION
+      value: "true"
+    - name: CODE_EXECUTION_ENGINE
+      value: "gvisor"
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    annotations: {}
+
+# Ollama CPU configuration
+ollama:
+  cpu:
+    enabled: true
+    image:
+      repository: ollama/ollama
+      tag: 0.15.2
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 11434
+      annotations: {}
+    env:
+      - name: OLLAMA_NUM_PARALLEL
+        value: "8"
+      - name: OLLAMA_MAX_LOADED_MODELS
+        value: "4"
+      - name: OLLAMA_KEEP_ALIVE
+        value: "30m"
+      - name: OLLAMA_NUM_THREADS
+        value: "56"
+    persistence:
+      enabled: true
+      size: 50Gi
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      annotations: {}
+
+# Redis configuration
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: 8.5.2-alpine
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 6379
+    annotations: {}
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    annotations: {}
+  config:
+    appendonly: "yes"
+
+# Monitoring configuration
+monitoring:
+  enabled: true
+  prometheus:
+    enabled: true
+    image:
+      repository: prom/prometheus
+      tag: v2.56.1
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 9090
+      annotations: {}
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      annotations: {}
+    config:
+      global:
+        scrape_interval: 15s
+      rule_files:
+        - /etc/prometheus/alert_rules.yml
+      alerting:
+        alertmanagers:
+          - static_configs:
+              - targets:
+                - alertmanager:9093
+      scrape_configs:
+        - job_name: 'prometheus'
+          static_configs:
+            - targets: ['localhost:9090']
+        - job_name: 'openwebui'
+          static_configs:
+            - targets: ['openwebui:8080']
+        - job_name: 'ollama'
+          static_configs:
+            - targets: ['ollama-cpu:11434']
+        - job_name: 'redis'
+          static_configs:
+            - targets: ['redis:6379']
+
+  grafana:
+    enabled: true
+    image:
+      repository: grafana/grafana
+      tag: 11.5.0
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 3000
+      annotations: {}
+    adminUser: admin
+    adminPassword: admin
+    persistence:
+      enabled: true
+      size: 5Gi
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      annotations: {}
+
+  loki:
+    enabled: true
+    image:
+      repository: grafana/loki
+      tag: 3.3.2
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 3100
+      annotations: {}
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      annotations: {}
+
+  promtail:
+    enabled: true
+    image:
+      repository: grafana/promtail
+      tag: 3.3.2
+      pullPolicy: IfNotPresent
+    config:
+      server:
+        http_listen_port: 9080
+        grpc_listen_port: 0
+      positions:
+        filename: /tmp/positions.yaml
+      clients:
+        - url: http://loki:3100/loki/api/v1/push
+      scrape_configs:
+        - job_name: kubernetes-pods
+          kubernetes_sd_configs:
+            - role: pod
+          pipeline_stages:
+            - docker: {}
+          relabel_configs:
+            - source_labels:
+                - __meta_kubernetes_pod_node_name
+              target_label: __host__
+            - action: labelmap
+              regex: __meta_kubernetes_pod_label_(.+)
+            - action: replace
+              replacement: $1
+              separator: /
+              source_labels:
+                - __meta_kubernetes_namespace
+                - __meta_kubernetes_pod_name
+              target_label: job
+            - action: replace
+              source_labels:
+                - __meta_kubernetes_namespace
+              target_label: namespace
+            - action: replace
+              source_labels:
+                - __meta_kubernetes_pod_name
+              target_label: pod
+            - action: replace
+              source_labels:
+                - __meta_kubernetes_pod_name
+              target_label: container
+            - action: replace
+              replacement: /var/log/pods/*$1/*.log
+              separator: /
+              source_labels:
+                - __meta_kubernetes_pod_uid
+                - __meta_kubernetes_pod_container_name
+              target_label: __path__
+
+  nodeExporter:
+    enabled: true
+    image:
+      repository: prom/node-exporter
+      tag: v1.9.0
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 9100
+      annotations: {}

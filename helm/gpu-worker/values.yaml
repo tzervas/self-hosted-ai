@@ -1,0 +1,84 @@
+# Default values for self-hosted-ai-gpu-worker
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Ollama GPU configuration
+ollama:
+  gpu:
+    enabled: true
+    image:
+      repository: ollama/ollama
+      tag: 0.15.2
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 11434
+      annotations: {}
+    env:
+      - name: OLLAMA_NUM_PARALLEL
+        value: "4"
+      - name: OLLAMA_MAX_LOADED_MODELS
+        value: "2"
+      - name: OLLAMA_KEEP_ALIVE
+        value: "30m"
+      - name: OLLAMA_NUM_GPU
+        value: "1"
+    persistence:
+      enabled: true
+      size: 100Gi
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      annotations: {}
+    nodeSelector:
+      gpu: "true"
+    tolerations:
+      - key: "nvidia.com/gpu"
+        operator: "Exists"
+        effect: "NoSchedule"
+    resources:
+      requests:
+        nvidia.com/gpu: 1
+        memory: "8Gi"
+        cpu: "2000m"
+      limits:
+        nvidia.com/gpu: 1
+        memory: "32Gi"
+        cpu: "8000m"
+
+# ComfyUI configuration
+comfyui:
+  enabled: true
+  image:
+    repository: ghcr.io/yolandawu/comfyui
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8188
+    annotations: {}
+  env:
+    - name: CLI_ARGS
+      value: "--listen 0.0.0.0 --port 8188"
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    annotations: {}
+  nodeSelector:
+    gpu: "true"
+  tolerations:
+    - key: "nvidia.com/gpu"
+      operator: "Exists"
+      effect: "NoSchedule"
+  resources:
+    requests:
+      nvidia.com/gpu: 1
+      memory: "4Gi"
+      cpu: "1000m"
+    limits:
+      nvidia.com/gpu: 1
+      memory: "16Gi"
+      cpu: "4000m"

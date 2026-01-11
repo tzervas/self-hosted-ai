@@ -6,7 +6,7 @@ Tracks agent execution times, success rates, and workflow performance.
 import logging
 from typing import Any, Dict, Optional
 
-from prometheus_client import Counter, Gauge, Histogram, Info, Summary, start_http_server
+from prometheus_client import Counter, Histogram, start_http_server
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -144,7 +144,18 @@ class MetricsCollector:
     def record_agent_execution(
         self, agent_id: str, agent_type: str, duration: float, status: str, **labels: Any
     ) -> None:
-        """Record metrics for an agent execution."""
+        """Record metrics for an agent execution.
+        
+        Args:
+            agent_id: Unique identifier for the agent instance
+            agent_type: Type/category of the agent (e.g., 'research', 'multimodal')
+            duration: Execution time in seconds
+            status: Execution status ('completed', 'failed', etc.)
+            **labels: Additional metric labels to record
+            
+        Returns:
+            None
+        """
         self.agent_executions.labels(
             agent_id=agent_id, agent_type=agent_type, status=status
         ).inc()
@@ -159,7 +170,17 @@ class MetricsCollector:
     def record_workflow_execution(
         self, workflow_id: str, task_count: int, duration: float, success: bool
     ) -> None:
-        """Record workflow execution metrics."""
+        """Record workflow execution metrics.
+        
+        Args:
+            workflow_id: Unique identifier for the workflow
+            task_count: Number of tasks in the workflow
+            duration: Total execution time in seconds
+            success: Whether the workflow completed successfully
+            
+        Returns:
+            None
+        """
         self.workflow_executions.inc()
         self.workflow_duration.observe(duration)
 
@@ -180,7 +201,14 @@ _metrics_collector: Optional[MetricsCollector] = None
 
 
 def get_metrics_collector() -> MetricsCollector:
-    """Get or create global metrics collector instance."""
+    """Get or create global metrics collector instance.
+    
+    Returns singleton instance of MetricsCollector for recording metrics
+    across the application.
+    
+    Returns:
+        MetricsCollector: Global metrics collector instance
+    """
     global _metrics_collector
     if _metrics_collector is None:
         _metrics_collector = MetricsCollector()
@@ -192,13 +220,22 @@ def setup_metrics(
     prometheus_port: int = 9090,
     export_interval: int = 60,
 ) -> None:
-    """
-    Configure metrics collection for the agent framework.
+    """Configure metrics collection for the agent framework.
+    
+    Initializes Prometheus metrics server if enabled. This should be called
+    once during application startup before any metrics are recorded.
 
     Args:
-        enable_prometheus: Enable Prometheus metrics export
-        prometheus_port: Port for Prometheus metrics server
-        export_interval: Interval for exporting metrics (seconds)
+        enable_prometheus: Enable Prometheus metrics HTTP server
+        prometheus_port: Port number for Prometheus scraping endpoint
+        export_interval: Metrics export interval in seconds (currently unused)
+        
+    Returns:
+        None
+        
+    Example:
+        >>> setup_metrics(enable_prometheus=True, prometheus_port=8000)
+        >>> # Metrics now available at http://localhost:8000/metrics
     """
     if prometheus_enabled:
         # Start HTTP server for Prometheus scraping

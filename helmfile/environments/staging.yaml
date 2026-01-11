@@ -1,0 +1,31 @@
+# Staging environment values
+global:
+  storageClass: "nfs-client"
+
+openwebui:
+  persistence:
+    size: 20Gi
+
+ollama:
+  cpu:
+    persistence:
+      size: 100Gi
+  gpu:
+    persistence:
+      size: 200Gi
+
+comfyui:
+  persistence:
+    size: 100Gi
+
+monitoring:
+  enabled: true
+  prometheus:
+    persistence:
+      size: 20Gi
+  grafana:
+    persistence:
+      size: 10Gi
+  loki:
+    persistence:
+      size: 20Gi

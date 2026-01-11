@@ -1,0 +1,27 @@
+{{- if .Values.ollama.cpu.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-ollama-cpu
+  labels:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: ollama-cpu
+  {{- with .Values.ollama.cpu.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.ollama.cpu.service.type }}
+  ports:
+    - port: {{ .Values.ollama.cpu.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: ollama-cpu
+{{- end }}

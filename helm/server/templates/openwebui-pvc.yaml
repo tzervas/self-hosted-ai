@@ -1,0 +1,27 @@
+{{- if and .Values.openwebui.enabled .Values.openwebui.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-openwebui
+  labels:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: openwebui
+  {{- with .Values.openwebui.persistence.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- range .Values.openwebui.persistence.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.openwebui.persistence.size }}
+  {{- if .Values.openwebui.persistence.storageClass }}
+  storageClassName: {{ .Values.openwebui.persistence.storageClass }}
+  {{- end }}
+{{- end }}

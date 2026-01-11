@@ -1,0 +1,27 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.loki.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-loki
+  labels:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: loki
+  {{- with .Values.monitoring.loki.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.monitoring.loki.service.type }}
+  ports:
+    - port: {{ .Values.monitoring.loki.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: loki
+{{- end }}

@@ -1,0 +1,27 @@
+{{- if and .Values.ollama.cpu.enabled .Values.ollama.cpu.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-ollama-cpu
+  labels:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: ollama-cpu
+  {{- with .Values.ollama.cpu.persistence.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- range .Values.ollama.cpu.persistence.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.ollama.cpu.persistence.size }}
+  {{- if .Values.ollama.cpu.persistence.storageClass }}
+  storageClassName: {{ .Values.ollama.cpu.persistence.storageClass }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,67 @@
+{{- if .Values.ollama.cpu.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-ollama-cpu
+  labels:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: ollama-cpu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: ollama-cpu
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/component: ollama-cpu
+    spec:
+      containers:
+        - name: ollama
+          image: "{{ .Values.ollama.cpu.image.repository }}:{{ .Values.ollama.cpu.image.tag }}"
+          imagePullPolicy: {{ .Values.ollama.cpu.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 11434
+              protocol: TCP
+          env:
+            {{- range .Values.ollama.cpu.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /root/.ollama
+          livenessProbe:
+            httpGet:
+              path: /api/version
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/version
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "4Gi"
+              cpu: "2000m"
+            limits:
+              memory: "16Gi"
+              cpu: "8000m"
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "self-hosted-ai-server.fullname" . }}-ollama-cpu
+{{- end }}
