@@ -9,7 +9,7 @@ GPU_WORKER_DIR="$PROJECT_DIR/gpu-worker"
 cd "$GPU_WORKER_DIR"
 
 usage() {
-    echo "Usage: $0 {deploy|stop|status|logs|update|pull-model <model>|list-models|test|benchmark}"
+    echo "Usage: $0 {deploy|stop|status|logs|update|pull-model <model>|list-models|test|benchmark|comfyui-status}"
     exit 1
 }
 
@@ -30,9 +30,11 @@ check_dependencies() {
 }
 
 deploy() {
-    echo "Deploying GPU worker..."
+    echo "Deploying GPU worker (Ollama + ComfyUI)..."
     docker compose up -d
-    echo "GPU worker deployed. API available at http://localhost:11434"
+    echo "GPU worker deployed."
+    echo "  Ollama API: http://localhost:11434"
+    echo "  ComfyUI:    http://localhost:8188"
 }
 
 stop() {
@@ -47,6 +49,14 @@ status() {
     echo ""
     echo "GPU status:"
     nvidia-smi --query-gpu=name,memory.used,memory.total,temperature.gpu --format=csv,noheader,nounits || echo "nvidia-smi failed"
+
+    echo ""
+    echo "ComfyUI status:"
+    if curl -s http://localhost:8188/system_stats > /dev/null 2>&1; then
+        echo "✓ ComfyUI API responding at http://localhost:8188"
+    else
+        echo "✗ ComfyUI API not responding"
+    fi
 }
 
 logs() {
@@ -119,6 +129,48 @@ benchmark() {
     fi
 }
 
+comfyui_status() {
+    echo "ComfyUI Status"
+    echo "=============="
+
+    # Check if container is running
+    if docker compose ps comfyui 2>/dev/null | grep -q "running"; then
+        echo "✓ Container: Running"
+    else
+        echo "✗ Container: Not running"
+        return 1
+    fi
+
+    # Check API
+    if curl -s http://localhost:8188/system_stats > /dev/null 2>&1; then
+        echo "✓ API: Responding"
+        echo ""
+        echo "System Info:"
+        curl -s http://localhost:8188/system_stats | jq -r '
+            "  GPU: \(.devices[0].name // "Unknown")",
+            "  VRAM Total: \((.devices[0].vram_total // 0) / 1024 / 1024 / 1024 | floor)GB",
+            "  VRAM Free: \((.devices[0].vram_free // 0) / 1024 / 1024 / 1024 | floor)GB"
+        ' 2>/dev/null || echo "  (Unable to parse system stats)"
+    else
+        echo "✗ API: Not responding"
+    fi
+
+    # Check for checkpoint models
+    DATA_PATH="${DATA_PATH:-/data}"
+    echo ""
+    echo "Checkpoint Models:"
+    if [ -d "${DATA_PATH}/comfyui/models/checkpoints" ]; then
+        find "${DATA_PATH}/comfyui/models/checkpoints" -name "*.safetensors" -o -name "*.ckpt" 2>/dev/null | while read -r model; do
+            echo "  - $(basename "$model")"
+        done
+        if [ -z "$(find "${DATA_PATH}/comfyui/models/checkpoints" -name "*.safetensors" -o -name "*.ckpt" 2>/dev/null)" ]; then
+            echo "  (No models found - download SDXL or SD1.5 checkpoint)"
+        fi
+    else
+        echo "  (Directory not initialized)"
+    fi
+}
+
 check_dependencies
 
 case "$1" in
@@ -148,6 +200,9 @@ case "$1" in
         ;;
     benchmark)
         benchmark
+        ;;
+    comfyui-status)
+        comfyui_status
         ;;
     *)
         usage
