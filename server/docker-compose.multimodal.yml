@@ -122,22 +122,36 @@ services:
 
   # === API GATEWAY & ORCHESTRATION ===
   
-  # LiteLLM Proxy - Unified API gateway for all models
+  # LiteLLM Proxy - Unified API gateway for all models with GPU queue
   litellm:
     image: ghcr.io/berriai/litellm:v1.52.4
     container_name: litellm-proxy
     ports:
       - "${LITELLM_PORT:-4000}:4000"
+      - "${LITELLM_METRICS_PORT:-9091}:9090"
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-litellm}:${POSTGRES_PASSWORD}@postgres:5432/litellm
       - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY}
-      - OLLAMA_BASE_URL=http://ollama-cpu:11434
+      - OLLAMA_CPU_URL=http://ollama-cpu:11434
       - OLLAMA_GPU_URL=http://${GPU_WORKER_HOST:-192.168.1.99}:11434
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - LANGFUSE_ENABLED=${LANGFUSE_ENABLED:-false}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
+      - LANGFUSE_HOST=${LANGFUSE_HOST:-https://cloud.langfuse.com}
     volumes:
-      - ./config/litellm-config.yaml:/app/config.yaml
-    command: --config /app/config.yaml --port 4000
+      - ../config/litellm-config.yml:/app/config.yaml:ro
+    command: --config /app/config.yaml --port 4000 --detailed_debug false
     depends_on:
       - postgres
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     restart: unless-stopped
     profiles:
       - full

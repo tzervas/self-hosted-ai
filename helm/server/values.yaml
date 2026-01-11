@@ -260,3 +260,136 @@ monitoring:
       type: ClusterIP
       port: 9100
       annotations: {}
+
+# LiteLLM Proxy configuration (GPU inference queue)
+litellm:
+  enabled: true
+  image:
+    repository: ghcr.io/berriai/litellm
+    tag: v1.52.4
+    pullPolicy: IfNotPresent
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 4000
+  secretName: litellm-secrets
+  ollamaGpuUrl: "http://gpu-worker-ollama:11434"
+  ollamaCpuUrl: "http://ollama-cpu:11434"
+  maxParallelRequests: 100
+  requestTimeout: 600
+  debug: false
+  redis:
+    host: redis
+    port: 6379
+  router:
+    strategy: least-busy
+    enableFallbacks: true
+    fallbacks:
+      - qwen2.5-coder:14b: [codellama:13b, mistral:7b]
+      - llama3.1:70b-instruct-q4_0: [llama3.1:8b, phi4:latest]
+    numRetries: 3
+    retryAfter: 5
+    timeout: 300
+    allowedFails: 3
+    cooldownTime: 60
+    cache: true
+    cacheTtl: 3600
+  queue:
+    maxSize:
+      high: 50
+      normal: 200
+      low: 500
+    timeout:
+      high: 30
+      normal: 120
+      low: 600
+  guardrails:
+    maxInputTokens: 128000
+    maxOutputTokens: 32000
+  langfuse:
+    enabled: false
+    host: "https://cloud.langfuse.com"
+  models:
+    - name: qwen2.5-coder:14b
+      litellm_model: ollama/qwen2.5-coder:14b
+      api_base: "${OLLAMA_GPU_URL}"
+      timeout: 300
+      model_info:
+        mode: chat
+        supports_function_calling: true
+    - name: llama3.1:8b
+      litellm_model: ollama/llama3.1:8b
+      api_base: "${OLLAMA_GPU_URL}"
+      timeout: 300
+      model_info:
+        mode: chat
+        supports_function_calling: true
+    - name: llava:13b
+      litellm_model: ollama/llava:13b
+      api_base: "${OLLAMA_GPU_URL}"
+      timeout: 300
+      model_info:
+        mode: chat
+        supports_vision: true
+    - name: nomic-embed-text
+      litellm_model: ollama/nomic-embed-text
+      api_base: "${OLLAMA_CPU_URL}"
+      timeout: 60
+      model_info:
+        mode: embedding
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+
+# Backup configuration
+backup:
+  # Velero cluster-wide backups
+  velero:
+    enabled: false
+    schedules:
+      daily: "0 2 * * *"
+      weekly: "0 3 * * 0"
+    includedNamespaces:
+      - self-hosted-ai
+    snapshotVolumes: true
+    defaultVolumesToFsBackup: true
+    storageLocation: default
+    retention:
+      daily: "168h"   # 7 days
+      weekly: "672h"  # 4 weeks
+    backupStorageLocation:
+      create: false
+      provider: aws
+      bucket: ""
+      prefix: self-hosted-ai
+      config: {}
+      credentialSecret: velero-credentials
+  
+  # Component-specific backups
+  components:
+    enabled: true
+    storage:
+      size: 50Gi
+      storageClass: ""
+    postgres:
+      schedule: "0 * * * *"  # Hourly
+      host: postgres
+      port: "5432"
+      database: litellm
+      secretName: postgres-credentials
+    qdrant:
+      schedule: "0 3 * * *"  # Daily at 3 AM
+      host: qdrant
+      port: "6333"
+    openwebui:
+      schedule: "0 4 * * *"  # Daily at 4 AM
+  
+  # Backup verification
+  verification:
+    enabled: true
+    schedule: "0 6 * * 0"  # Weekly on Sunday 6 AM
+    pushgatewayUrl: ""

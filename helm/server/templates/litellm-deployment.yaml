@@ -1,0 +1,155 @@
+{{- if .Values.litellm.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-litellm
+  labels:
+    {{- include "self-hosted-ai-server.labels" . | nindent 4 }}
+    app.kubernetes.io/component: litellm
+spec:
+  replicas: {{ .Values.litellm.replicas | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "self-hosted-ai-server.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: litellm
+  template:
+    metadata:
+      labels:
+        {{- include "self-hosted-ai-server.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: litellm
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+        checksum/config: {{ include (print $.Template.BasePath "/litellm-configmap.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: {{ include "self-hosted-ai-server.serviceAccountName" . }}
+      {{- if .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.global.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: litellm
+          image: "{{ .Values.litellm.image.repository }}:{{ .Values.litellm.image.tag }}"
+          imagePullPolicy: {{ .Values.litellm.image.pullPolicy | default "IfNotPresent" }}
+          args:
+            - --config
+            - /app/config.yaml
+            - --port
+            - "4000"
+            - --detailed_debug
+            - "{{ .Values.litellm.debug | default false }}"
+          ports:
+            - name: http
+              containerPort: 4000
+              protocol: TCP
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+          env:
+            - name: LITELLM_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.litellm.secretName | default "litellm-secrets" }}
+                  key: master-key
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.litellm.secretName | default "litellm-secrets" }}
+                  key: database-url
+            - name: OLLAMA_GPU_URL
+              value: {{ .Values.litellm.ollamaGpuUrl | default "http://gpu-worker-ollama:11434" | quote }}
+            - name: OLLAMA_CPU_URL
+              value: {{ .Values.litellm.ollamaCpuUrl | default "http://ollama-cpu:11434" | quote }}
+            - name: REDIS_HOST
+              value: {{ .Values.litellm.redis.host | default "redis" | quote }}
+            - name: REDIS_PORT
+              value: {{ .Values.litellm.redis.port | default "6379" | quote }}
+            {{- if .Values.litellm.langfuse.enabled }}
+            - name: LANGFUSE_ENABLED
+              value: "true"
+            - name: LANGFUSE_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.litellm.secretName | default "litellm-secrets" }}
+                  key: langfuse-public-key
+            - name: LANGFUSE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.litellm.secretName | default "litellm-secrets" }}
+                  key: langfuse-secret-key
+            - name: LANGFUSE_HOST
+              value: {{ .Values.litellm.langfuse.host | default "https://cloud.langfuse.com" | quote }}
+            {{- end }}
+            {{- range .Values.litellm.extraEnv }}
+            - name: {{ .name }}
+              {{- if .value }}
+              value: {{ .value | quote }}
+              {{- else if .valueFrom }}
+              valueFrom:
+                {{- toYaml .valueFrom | nindent 16 }}
+              {{- end }}
+            {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.litellm.resources | nindent 12 }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "self-hosted-ai-server.fullname" . }}-litellm-config
+      {{- with .Values.litellm.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.litellm.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.litellm.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-litellm
+  labels:
+    {{- include "self-hosted-ai-server.labels" . | nindent 4 }}
+    app.kubernetes.io/component: litellm
+spec:
+  type: {{ .Values.litellm.service.type | default "ClusterIP" }}
+  ports:
+    - name: http
+      port: {{ .Values.litellm.service.port | default 4000 }}
+      targetPort: http
+      protocol: TCP
+    - name: metrics
+      port: 9090
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    {{- include "self-hosted-ai-server.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: litellm
+{{- end }}

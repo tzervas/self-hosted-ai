@@ -1,0 +1,254 @@
+{{- if and .Values.backup.components.enabled .Values.backup.verification.enabled }}
+---
+# Weekly Backup Verification CronJob
+# Restores snapshots to ephemeral pod and validates data integrity
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-backup-verify
+  labels:
+    {{- include "self-hosted-ai-server.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backup-verification
+spec:
+  schedule: {{ .Values.backup.verification.schedule | default "0 6 * * 0" | quote }}  # Weekly on Sunday 6 AM
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 14400  # 4 hours
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            {{- include "self-hosted-ai-server.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: backup-verification
+          annotations:
+            prometheus.io/scrape: "true"
+            prometheus.io/port: "9090"
+        spec:
+          restartPolicy: Never
+          serviceAccountName: {{ include "self-hosted-ai-server.serviceAccountName" . }}
+          initContainers:
+            # Start ephemeral PostgreSQL for restore testing
+            - name: postgres-restore-test
+              image: postgres:16-alpine
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  
+                  echo "=== PostgreSQL Backup Verification ==="
+                  
+                  # Find latest backup
+                  LATEST_BACKUP=$(ls -t /backups/daily/postgres_*.sql.gz 2>/dev/null | head -1)
+                  
+                  if [ -z "$LATEST_BACKUP" ]; then
+                    echo "ERROR: No PostgreSQL backup found"
+                    echo "postgres_verify_status 0" > /metrics/postgres_verify.prom
+                    exit 1
+                  fi
+                  
+                  echo "Testing backup: $LATEST_BACKUP"
+                  BACKUP_SIZE=$(stat -c%s "$LATEST_BACKUP")
+                  echo "Backup size: $BACKUP_SIZE bytes"
+                  
+                  # Start ephemeral PostgreSQL
+                  export PGDATA=/tmp/pgdata
+                  mkdir -p $PGDATA
+                  initdb -D $PGDATA -U postgres
+                  
+                  # Start PostgreSQL in background
+                  pg_ctl -D $PGDATA -l /tmp/postgres.log start
+                  sleep 5
+                  
+                  # Create test database
+                  createdb -U postgres restore_test
+                  
+                  # Decompress and restore
+                  echo "Restoring backup..."
+                  gunzip -c "$LATEST_BACKUP" > /tmp/backup.dump
+                  
+                  if pg_restore -U postgres -d restore_test /tmp/backup.dump 2>/dev/null; then
+                    echo "Restore successful"
+                    
+                    # Validate data integrity
+                    TABLE_COUNT=$(psql -U postgres -d restore_test -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';")
+                    echo "Tables restored: $TABLE_COUNT"
+                    
+                    # Get row counts for key tables
+                    TOTAL_ROWS=0
+                    for TABLE in $(psql -U postgres -d restore_test -t -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public';"); do
+                      if [ -n "$TABLE" ]; then
+                        ROWS=$(psql -U postgres -d restore_test -t -c "SELECT COUNT(*) FROM \"$TABLE\";" 2>/dev/null || echo "0")
+                        TOTAL_ROWS=$((TOTAL_ROWS + ROWS))
+                      fi
+                    done
+                    echo "Total rows: $TOTAL_ROWS"
+                    
+                    # Write success metrics
+                    cat > /metrics/postgres_verify.prom << EOF
+                  # HELP backup_verify_success Whether backup verification succeeded
+                  # TYPE backup_verify_success gauge
+                  backup_verify_success{component="postgres"} 1
+                  # HELP backup_verify_timestamp_seconds Timestamp of last verification
+                  # TYPE backup_verify_timestamp_seconds gauge
+                  backup_verify_timestamp_seconds{component="postgres"} $(date +%s)
+                  # HELP backup_verify_size_bytes Size of verified backup
+                  # TYPE backup_verify_size_bytes gauge
+                  backup_verify_size_bytes{component="postgres"} $BACKUP_SIZE
+                  # HELP backup_verify_tables_count Number of tables in backup
+                  # TYPE backup_verify_tables_count gauge
+                  backup_verify_tables_count{component="postgres"} $TABLE_COUNT
+                  # HELP backup_verify_rows_count Total rows in backup
+                  # TYPE backup_verify_rows_count gauge
+                  backup_verify_rows_count{component="postgres"} $TOTAL_ROWS
+                  EOF
+                    
+                    VERIFY_STATUS=0
+                  else
+                    echo "ERROR: Restore failed"
+                    cat > /metrics/postgres_verify.prom << EOF
+                  backup_verify_success{component="postgres"} 0
+                  backup_verify_timestamp_seconds{component="postgres"} $(date +%s)
+                  EOF
+                    VERIFY_STATUS=1
+                  fi
+                  
+                  # Cleanup
+                  pg_ctl -D $PGDATA stop
+                  rm -rf $PGDATA /tmp/backup.dump
+                  
+                  exit $VERIFY_STATUS
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backups
+                  readOnly: true
+                - name: metrics
+                  mountPath: /metrics
+                - name: tmp
+                  mountPath: /tmp
+              resources:
+                requests:
+                  memory: "512Mi"
+                  cpu: "200m"
+                limits:
+                  memory: "1Gi"
+                  cpu: "1000m"
+          containers:
+            # Main verification container - checks all components and reports
+            - name: verify-reporter
+              image: curlimages/curl:8.5.0
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  
+                  echo "=== Backup Verification Summary ==="
+                  
+                  # Check Qdrant snapshots
+                  echo "Checking Qdrant snapshots..."
+                  QDRANT_SNAPSHOTS=$(ls /backups/daily/*.snapshot 2>/dev/null | wc -l)
+                  if [ "$QDRANT_SNAPSHOTS" -gt 0 ]; then
+                    echo "Found $QDRANT_SNAPSHOTS Qdrant snapshots"
+                    
+                    # Verify snapshot files are valid (non-empty, correct format)
+                    VALID=0
+                    for SNAPSHOT in /backups/daily/*.snapshot; do
+                      if [ -f "$SNAPSHOT" ] && [ -s "$SNAPSHOT" ]; then
+                        VALID=$((VALID + 1))
+                      fi
+                    done
+                    
+                    cat >> /metrics/qdrant_verify.prom << EOF
+                  backup_verify_success{component="qdrant"} 1
+                  backup_verify_timestamp_seconds{component="qdrant"} $(date +%s)
+                  backup_verify_snapshots_count{component="qdrant"} $VALID
+                  EOF
+                  else
+                    echo "WARNING: No Qdrant snapshots found"
+                    cat > /metrics/qdrant_verify.prom << EOF
+                  backup_verify_success{component="qdrant"} 0
+                  backup_verify_timestamp_seconds{component="qdrant"} $(date +%s)
+                  EOF
+                  fi
+                  
+                  # Check OpenWebUI backups
+                  echo "Checking OpenWebUI backups..."
+                  WEBUI_BACKUPS=$(ls /backups/daily/openwebui_*.tar.gz 2>/dev/null | wc -l)
+                  if [ "$WEBUI_BACKUPS" -gt 0 ]; then
+                    LATEST_WEBUI=$(ls -t /backups/daily/openwebui_*.tar.gz | head -1)
+                    
+                    # Verify tarball integrity
+                    if tar -tzf "$LATEST_WEBUI" > /dev/null 2>&1; then
+                      echo "OpenWebUI backup verified: $LATEST_WEBUI"
+                      WEBUI_SIZE=$(stat -c%s "$LATEST_WEBUI")
+                      cat > /metrics/openwebui_verify.prom << EOF
+                  backup_verify_success{component="openwebui"} 1
+                  backup_verify_timestamp_seconds{component="openwebui"} $(date +%s)
+                  backup_verify_size_bytes{component="openwebui"} $WEBUI_SIZE
+                  EOF
+                    else
+                      echo "ERROR: OpenWebUI backup corrupted"
+                      cat > /metrics/openwebui_verify.prom << EOF
+                  backup_verify_success{component="openwebui"} 0
+                  backup_verify_timestamp_seconds{component="openwebui"} $(date +%s)
+                  EOF
+                    fi
+                  else
+                    echo "WARNING: No OpenWebUI backups found"
+                    cat > /metrics/openwebui_verify.prom << EOF
+                  backup_verify_success{component="openwebui"} 0
+                  backup_verify_timestamp_seconds{component="openwebui"} $(date +%s)
+                  EOF
+                  fi
+                  
+                  # Combine all metrics
+                  cat /metrics/*.prom > /metrics/backup_verify_combined.prom 2>/dev/null || true
+                  
+                  # Report to Prometheus Pushgateway if configured
+                  {{- if .Values.backup.verification.pushgatewayUrl }}
+                  echo "Pushing metrics to Pushgateway..."
+                  cat /metrics/backup_verify_combined.prom | curl --data-binary @- "{{ .Values.backup.verification.pushgatewayUrl }}/metrics/job/backup_verify"
+                  {{- end }}
+                  
+                  echo ""
+                  echo "=== Verification Complete ==="
+                  cat /metrics/backup_verify_combined.prom
+                  
+                  # Check for any failures
+                  if grep -q 'backup_verify_success{[^}]*} 0' /metrics/backup_verify_combined.prom; then
+                    echo ""
+                    echo "WARNING: Some backup verifications failed!"
+                    exit 1
+                  fi
+                  
+                  echo ""
+                  echo "All backup verifications passed!"
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backups
+                  readOnly: true
+                - name: metrics
+                  mountPath: /metrics
+              resources:
+                requests:
+                  memory: "64Mi"
+                  cpu: "50m"
+                limits:
+                  memory: "128Mi"
+                  cpu: "100m"
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: {{ include "self-hosted-ai-server.fullname" . }}-backup-pvc
+            - name: metrics
+              emptyDir: {}
+            - name: tmp
+              emptyDir:
+                sizeLimit: 2Gi
+{{- end }}

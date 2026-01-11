@@ -1,0 +1,341 @@
+{{- if .Values.backup.components.enabled }}
+---
+# PostgreSQL Incremental Backup CronJob (Hourly WAL-based)
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-postgres-backup
+  labels:
+    {{- include "self-hosted-ai-server.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backup
+spec:
+  schedule: {{ .Values.backup.components.postgres.schedule | default "0 * * * *" | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 3600
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            {{- include "self-hosted-ai-server.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: backup
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: {{ include "self-hosted-ai-server.serviceAccountName" . }}
+          containers:
+            - name: postgres-backup
+              image: postgres:16-alpine
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  BACKUP_FILE="/backups/daily/postgres_${TIMESTAMP}.sql.gz"
+                  
+                  echo "Starting PostgreSQL backup..."
+                  
+                  # Create backup using pg_dump
+                  PGPASSWORD="${POSTGRES_PASSWORD}" pg_dump \
+                    -h "${POSTGRES_HOST}" \
+                    -p "${POSTGRES_PORT}" \
+                    -U "${POSTGRES_USER}" \
+                    -d "${POSTGRES_DB}" \
+                    --format=custom \
+                    --compress=9 \
+                    -f "/tmp/backup.dump"
+                  
+                  gzip -c /tmp/backup.dump > "${BACKUP_FILE}"
+                  rm /tmp/backup.dump
+                  
+                  # Record metrics
+                  BACKUP_SIZE=$(stat -c%s "${BACKUP_FILE}")
+                  echo "Backup completed: ${BACKUP_FILE} (${BACKUP_SIZE} bytes)"
+                  
+                  # Create weekly copy on Sundays
+                  if [ "$(date +%u)" = "7" ]; then
+                    cp "${BACKUP_FILE}" "/backups/weekly/postgres_${TIMESTAMP}_weekly.sql.gz"
+                    echo "Created weekly backup copy"
+                  fi
+                  
+                  # Cleanup old daily backups (keep 7 days)
+                  find /backups/daily -name "postgres_*.sql.gz" -mtime +7 -delete || true
+                  
+                  # Cleanup old weekly backups (keep 4 weeks)
+                  ls -t /backups/weekly/postgres_*_weekly.sql.gz 2>/dev/null | tail -n +5 | xargs -r rm || true
+                  
+                  # Write Prometheus metrics
+                  cat > /metrics/backup_postgres.prom << EOF
+                  # HELP backup_last_success_timestamp_seconds Last successful backup timestamp
+                  # TYPE backup_last_success_timestamp_seconds gauge
+                  backup_last_success_timestamp_seconds{component="postgres"} $(date +%s)
+                  # HELP backup_size_bytes Size of last backup in bytes
+                  # TYPE backup_size_bytes gauge
+                  backup_size_bytes{component="postgres"} ${BACKUP_SIZE}
+                  EOF
+                  
+                  echo "PostgreSQL backup job completed successfully"
+              env:
+                - name: POSTGRES_HOST
+                  value: {{ .Values.backup.components.postgres.host | default "postgres" | quote }}
+                - name: POSTGRES_PORT
+                  value: {{ .Values.backup.components.postgres.port | default "5432" | quote }}
+                - name: POSTGRES_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.backup.components.postgres.secretName | default "postgres-credentials" }}
+                      key: username
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.backup.components.postgres.secretName | default "postgres-credentials" }}
+                      key: password
+                - name: POSTGRES_DB
+                  value: {{ .Values.backup.components.postgres.database | default "litellm" | quote }}
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backups
+                - name: metrics
+                  mountPath: /metrics
+              resources:
+                requests:
+                  memory: "256Mi"
+                  cpu: "100m"
+                limits:
+                  memory: "512Mi"
+                  cpu: "500m"
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: {{ include "self-hosted-ai-server.fullname" . }}-backup-pvc
+            - name: metrics
+              emptyDir: {}
+---
+# Qdrant Collection Snapshots CronJob (Daily)
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-qdrant-backup
+  labels:
+    {{- include "self-hosted-ai-server.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backup
+spec:
+  schedule: {{ .Values.backup.components.qdrant.schedule | default "0 3 * * *" | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 7200
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            {{- include "self-hosted-ai-server.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: backup
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: {{ include "self-hosted-ai-server.serviceAccountName" . }}
+          containers:
+            - name: qdrant-backup
+              image: curlimages/curl:8.5.0
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  QDRANT_URL="http://${QDRANT_HOST}:${QDRANT_PORT}"
+                  
+                  echo "Starting Qdrant backup..."
+                  
+                  # Check Qdrant health
+                  if ! curl -sf "${QDRANT_URL}/healthz" > /dev/null; then
+                    echo "ERROR: Cannot connect to Qdrant"
+                    exit 1
+                  fi
+                  
+                  # Get list of collections
+                  COLLECTIONS=$(curl -sf "${QDRANT_URL}/collections" | grep -o '"name":"[^"]*"' | cut -d'"' -f4)
+                  
+                  if [ -z "$COLLECTIONS" ]; then
+                    echo "No collections found"
+                    exit 0
+                  fi
+                  
+                  SUCCESS=0
+                  FAILED=0
+                  
+                  for COLLECTION in $COLLECTIONS; do
+                    echo "Creating snapshot for collection: $COLLECTION"
+                    
+                    # Create snapshot
+                    RESPONSE=$(curl -sf -X POST "${QDRANT_URL}/collections/${COLLECTION}/snapshots" || echo "")
+                    
+                    if [ -n "$RESPONSE" ]; then
+                      SNAPSHOT_NAME=$(echo "$RESPONSE" | grep -o '"name":"[^"]*"' | head -1 | cut -d'"' -f4)
+                      
+                      if [ -n "$SNAPSHOT_NAME" ]; then
+                        # Download snapshot
+                        SNAPSHOT_FILE="/backups/daily/${COLLECTION}_${TIMESTAMP}.snapshot"
+                        if curl -sf "${QDRANT_URL}/collections/${COLLECTION}/snapshots/${SNAPSHOT_NAME}" -o "$SNAPSHOT_FILE"; then
+                          echo "Snapshot saved: $SNAPSHOT_FILE"
+                          SUCCESS=$((SUCCESS + 1))
+                          
+                          # Weekly copy on Sundays
+                          if [ "$(date +%u)" = "7" ]; then
+                            cp "$SNAPSHOT_FILE" "/backups/weekly/${COLLECTION}_${TIMESTAMP}_weekly.snapshot"
+                          fi
+                        else
+                          echo "ERROR: Failed to download snapshot for $COLLECTION"
+                          FAILED=$((FAILED + 1))
+                        fi
+                      else
+                        echo "ERROR: Failed to create snapshot for $COLLECTION"
+                        FAILED=$((FAILED + 1))
+                      fi
+                    else
+                      echo "ERROR: Snapshot API failed for $COLLECTION"
+                      FAILED=$((FAILED + 1))
+                    fi
+                  done
+                  
+                  # Cleanup old backups
+                  find /backups/daily -name "*.snapshot" -mtime +7 -delete || true
+                  ls -t /backups/weekly/*_weekly.snapshot 2>/dev/null | tail -n +5 | xargs -r rm || true
+                  
+                  echo "Qdrant backup completed: $SUCCESS successful, $FAILED failed"
+                  
+                  if [ "$FAILED" -gt 0 ]; then
+                    exit 1
+                  fi
+              env:
+                - name: QDRANT_HOST
+                  value: {{ .Values.backup.components.qdrant.host | default "qdrant" | quote }}
+                - name: QDRANT_PORT
+                  value: {{ .Values.backup.components.qdrant.port | default "6333" | quote }}
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backups
+              resources:
+                requests:
+                  memory: "128Mi"
+                  cpu: "50m"
+                limits:
+                  memory: "256Mi"
+                  cpu: "200m"
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: {{ include "self-hosted-ai-server.fullname" . }}-backup-pvc
+---
+# OpenWebUI Config Export CronJob (Daily)
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-openwebui-backup
+  labels:
+    {{- include "self-hosted-ai-server.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backup
+spec:
+  schedule: {{ .Values.backup.components.openwebui.schedule | default "0 4 * * *" | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 1800
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            {{- include "self-hosted-ai-server.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: backup
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: {{ include "self-hosted-ai-server.serviceAccountName" . }}
+          containers:
+            - name: openwebui-backup
+              image: alpine:3.19
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  apk add --no-cache tar gzip
+                  
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  BACKUP_FILE="/backups/daily/openwebui_${TIMESTAMP}.tar.gz"
+                  
+                  echo "Starting OpenWebUI backup..."
+                  
+                  # Create tarball excluding cache files
+                  tar -czf "$BACKUP_FILE" \
+                    --exclude='*.cache' \
+                    --exclude='__pycache__' \
+                    --exclude='*.pyc' \
+                    --exclude='uploads/*' \
+                    -C /data \
+                    open-webui 2>/dev/null || true
+                  
+                  if [ -f "$BACKUP_FILE" ]; then
+                    BACKUP_SIZE=$(stat -c%s "$BACKUP_FILE")
+                    echo "Backup completed: $BACKUP_FILE ($BACKUP_SIZE bytes)"
+                    
+                    # Weekly copy on Sundays
+                    if [ "$(date +%u)" = "7" ]; then
+                      cp "$BACKUP_FILE" "/backups/weekly/openwebui_${TIMESTAMP}_weekly.tar.gz"
+                      echo "Created weekly backup copy"
+                    fi
+                    
+                    # Cleanup
+                    find /backups/daily -name "openwebui_*.tar.gz" -mtime +7 -delete || true
+                    ls -t /backups/weekly/openwebui_*_weekly.tar.gz 2>/dev/null | tail -n +5 | xargs -r rm || true
+                  else
+                    echo "ERROR: Backup file not created"
+                    exit 1
+                  fi
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backups
+                - name: openwebui-data
+                  mountPath: /data/open-webui
+                  readOnly: true
+              resources:
+                requests:
+                  memory: "128Mi"
+                  cpu: "50m"
+                limits:
+                  memory: "256Mi"
+                  cpu: "200m"
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: {{ include "self-hosted-ai-server.fullname" . }}-backup-pvc
+            - name: openwebui-data
+              persistentVolumeClaim:
+                claimName: {{ include "self-hosted-ai-server.fullname" . }}-openwebui-pvc
+---
+# Backup PVC for storing local backups
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-backup-pvc
+  labels:
+    {{- include "self-hosted-ai-server.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.backup.components.storage.size | default "50Gi" }}
+  {{- if .Values.backup.components.storage.storageClass }}
+  storageClassName: {{ .Values.backup.components.storage.storageClass }}
+  {{- end }}
+{{- end }}
