@@ -1,0 +1,49 @@
+name: research-and-develop
+description: Research a technical topic, then implement a solution based on findings
+
+config:
+  max_parallel_tasks: 2
+  fail_fast: false
+  timeout_seconds: 1800
+  retry_failed_tasks: true
+
+agents:
+  - type: research
+    name: primary-researcher
+    config:
+      model: qwen2.5-coder:14b
+      temperature: 0.7
+      ollama_url: http://192.168.1.99:11434
+      
+  - type: development
+    name: primary-developer
+    config:
+      model: qwen2.5-coder:14b
+      temperature: 0.3
+      ollama_url: http://192.168.1.99:11434
+
+tasks:
+  - name: research-phase
+    description: Research the technical requirements and best practices
+    agent_types:
+      - research
+    priority: high
+    dependencies: []
+    payload:
+      prompt: "Research {{topic}}: requirements, best practices, and implementation patterns"
+      context:
+        depth: "deep"
+        search_scope: "technical"
+
+  - name: development-phase
+    description: Implement solution based on research findings
+    agent_types:
+      - development
+    priority: high
+    dependencies:
+      - research-phase
+    payload:
+      prompt: "Implement {{feature}} using insights from research: {{research_findings}}"
+      context:
+        language: "{{language}}"
+        include_tests: true
