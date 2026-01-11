@@ -1,0 +1,96 @@
+{
+  "_meta": {
+    "name": "Inpainting - SDXL",
+    "description": "Edit specific regions of an image using a mask. Requires input image and mask.",
+    "version": "1.0.0",
+    "author": "self-hosted-ai",
+    "tags": ["inpaint", "edit", "sdxl", "mask"],
+    "requirements": {
+      "checkpoint": "sd_xl_base_1.0.safetensors",
+      "vram_min_gb": 10,
+      "input_image": true,
+      "input_mask": true
+    }
+  },
+  "1": {
+    "inputs": {
+      "image": "input.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Load Input Image" }
+  },
+  "2": {
+    "inputs": {
+      "image": "mask.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Load Mask" }
+  },
+  "3": {
+    "inputs": {
+      "pixels": ["1", 0],
+      "vae": ["5", 2],
+      "mask": ["2", 0],
+      "grow_mask_by": 6
+    },
+    "class_type": "VAEEncodeForInpaint",
+    "_meta": { "title": "VAE Encode (Inpaint)" }
+  },
+  "4": {
+    "inputs": {
+      "seed": 0,
+      "steps": 25,
+      "cfg": 7,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "normal",
+      "denoise": 1,
+      "model": ["5", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["3", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": { "title": "KSampler" }
+  },
+  "5": {
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": { "title": "Load Checkpoint" }
+  },
+  "6": {
+    "inputs": {
+      "text": "Prompt",
+      "clip": ["5", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "CLIP Text Encode (Positive)" }
+  },
+  "7": {
+    "inputs": {
+      "text": "blurry, bad quality, distorted",
+      "clip": ["5", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "CLIP Text Encode (Negative)" }
+  },
+  "8": {
+    "inputs": {
+      "samples": ["4", 0],
+      "vae": ["5", 2]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "VAE Decode" }
+  },
+  "9": {
+    "inputs": {
+      "filename_prefix": "SDXL_inpaint",
+      "images": ["8", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": { "title": "Save Image" }
+  }
+}

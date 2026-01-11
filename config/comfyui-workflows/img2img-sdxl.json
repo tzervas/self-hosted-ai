@@ -1,0 +1,85 @@
+{
+  "_meta": {
+    "name": "Image to Image - SDXL",
+    "description": "Transform existing images with SDXL. Requires input image upload.",
+    "version": "1.0.0",
+    "author": "self-hosted-ai",
+    "tags": ["img2img", "sdxl", "edit", "transform"],
+    "requirements": {
+      "checkpoint": "sd_xl_base_1.0.safetensors",
+      "vram_min_gb": 8,
+      "input_image": true
+    }
+  },
+  "1": {
+    "inputs": {
+      "image": "input.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Load Input Image" }
+  },
+  "2": {
+    "inputs": {
+      "pixels": ["1", 0],
+      "vae": ["4", 2]
+    },
+    "class_type": "VAEEncode",
+    "_meta": { "title": "VAE Encode" }
+  },
+  "3": {
+    "inputs": {
+      "seed": 0,
+      "steps": 25,
+      "cfg": 7,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "normal",
+      "denoise": 0.7,
+      "model": ["4", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["2", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": { "title": "KSampler" }
+  },
+  "4": {
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": { "title": "Load Checkpoint" }
+  },
+  "6": {
+    "inputs": {
+      "text": "Prompt",
+      "clip": ["4", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "CLIP Text Encode (Positive)" }
+  },
+  "7": {
+    "inputs": {
+      "text": "blurry, bad quality, distorted, ugly, deformed",
+      "clip": ["4", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "CLIP Text Encode (Negative)" }
+  },
+  "8": {
+    "inputs": {
+      "samples": ["3", 0],
+      "vae": ["4", 2]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "VAE Decode" }
+  },
+  "9": {
+    "inputs": {
+      "filename_prefix": "SDXL_img2img",
+      "images": ["8", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": { "title": "Save Image" }
+  }
+}

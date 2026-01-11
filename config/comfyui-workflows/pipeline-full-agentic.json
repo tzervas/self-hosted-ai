@@ -1,0 +1,149 @@
+{
+  "_meta": {
+    "name": "Full Agentic Pipeline - Generate + Refine + Upscale",
+    "description": "Complete multi-agent workflow: SDXL base → SDXL refiner → 2x upscale. Maximum quality output.",
+    "version": "1.0.0",
+    "author": "self-hosted-ai",
+    "tags": ["txt2img", "sdxl", "refiner", "upscale", "pipeline", "multi-step", "agentic", "high-quality"],
+    "requirements": {
+      "checkpoint": "sd_xl_base_1.0.safetensors",
+      "refiner": "sd_xl_refiner_1.0.safetensors",
+      "upscale_model": "RealESRGAN_x2plus.pth",
+      "vram_min_gb": 14
+    }
+  },
+  "1": {
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": { "title": "Load SDXL Base" }
+  },
+  "2": {
+    "inputs": {
+      "ckpt_name": "sd_xl_refiner_1.0.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": { "title": "Load SDXL Refiner" }
+  },
+  "3": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": { "title": "Empty Latent Image" }
+  },
+  "4": {
+    "inputs": {
+      "text": "Prompt",
+      "clip": ["1", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Positive (Base)" }
+  },
+  "5": {
+    "inputs": {
+      "text": "blurry, bad quality, distorted, ugly, deformed, low resolution, artifacts, watermark",
+      "clip": ["1", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Negative (Base)" }
+  },
+  "6": {
+    "inputs": {
+      "text": "Prompt",
+      "clip": ["2", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Positive (Refiner)" }
+  },
+  "7": {
+    "inputs": {
+      "text": "blurry, bad quality, distorted, ugly, deformed",
+      "clip": ["2", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Negative (Refiner)" }
+  },
+  "8": {
+    "inputs": {
+      "seed": 0,
+      "steps": 30,
+      "cfg": 7.5,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "normal",
+      "denoise": 1,
+      "model": ["1", 0],
+      "positive": ["4", 0],
+      "negative": ["5", 0],
+      "latent_image": ["3", 0],
+      "start_at_step": 0,
+      "end_at_step": 22,
+      "add_noise": "enable",
+      "return_with_leftover_noise": "enable"
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": { "title": "Stage 1: Base Generation (Steps 0-22)" }
+  },
+  "9": {
+    "inputs": {
+      "seed": 0,
+      "steps": 30,
+      "cfg": 7.5,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "normal",
+      "denoise": 1,
+      "model": ["2", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["8", 0],
+      "start_at_step": 22,
+      "end_at_step": 30,
+      "add_noise": "disable",
+      "return_with_leftover_noise": "disable"
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": { "title": "Stage 2: Refiner Enhancement (Steps 22-30)" }
+  },
+  "10": {
+    "inputs": {
+      "samples": ["9", 0],
+      "vae": ["1", 2]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "VAE Decode" }
+  },
+  "11": {
+    "inputs": {
+      "model_name": "RealESRGAN_x2plus.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": { "title": "Load Upscale Model" }
+  },
+  "12": {
+    "inputs": {
+      "upscale_model": ["11", 0],
+      "image": ["10", 0]
+    },
+    "class_type": "ImageUpscaleWithModel",
+    "_meta": { "title": "Stage 3: Upscale 2x" }
+  },
+  "13": {
+    "inputs": {
+      "filename_prefix": "Agentic_final",
+      "images": ["12", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": { "title": "Save Final (2048x2048)" }
+  },
+  "14": {
+    "inputs": {
+      "filename_prefix": "Agentic_refined",
+      "images": ["10", 0]
+    },
+    "class_type": "PreviewImage",
+    "_meta": { "title": "Preview Refined (1024x1024)" }
+  }
+}

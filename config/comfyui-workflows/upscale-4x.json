@@ -1,0 +1,45 @@
+{
+  "_meta": {
+    "name": "Upscale 4x - Real-ESRGAN",
+    "description": "Upscale images 4x using Real-ESRGAN model for high-resolution output.",
+    "version": "1.0.0",
+    "author": "self-hosted-ai",
+    "tags": ["upscale", "enhance", "post-process", "esrgan", "4x"],
+    "requirements": {
+      "upscale_model": "RealESRGAN_x4plus.pth",
+      "vram_min_gb": 6,
+      "input_image": true
+    }
+  },
+  "1": {
+    "inputs": {
+      "image": "input.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Load Input Image" }
+  },
+  "2": {
+    "inputs": {
+      "model_name": "RealESRGAN_x4plus.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": { "title": "Load Upscale Model" }
+  },
+  "3": {
+    "inputs": {
+      "upscale_model": ["2", 0],
+      "image": ["1", 0]
+    },
+    "class_type": "ImageUpscaleWithModel",
+    "_meta": { "title": "Upscale Image" }
+  },
+  "4": {
+    "inputs": {
+      "filename_prefix": "Upscaled_4x",
+      "images": ["3", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": { "title": "Save Image" }
+  }
+}

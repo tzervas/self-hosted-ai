@@ -1,0 +1,244 @@
+# ComfyUI Workflow Manifest
+# Defines available workflows, their requirements, and download URLs for models
+# Used by bootstrap.sh and deploy scripts to validate and setup workflows
+
+workflows:
+  # =============================================================================
+  # Basic Text-to-Image Workflows
+  # =============================================================================
+  txt2img-sdxl:
+    name: "Text to Image - SDXL"
+    file: txt2img-sdxl.json
+    description: "High-quality text-to-image with SDXL 1.0"
+    priority: required
+    tags: [txt2img, sdxl, basic]
+    requirements:
+      vram_min_gb: 8
+      models:
+        - type: checkpoint
+          name: sd_xl_base_1.0.safetensors
+          path: checkpoints/
+          url: https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors
+          size_gb: 6.5
+
+  txt2img-sd15:
+    name: "Text to Image - SD 1.5"
+    file: txt2img-sd15.json
+    description: "Fast text-to-image for lower VRAM systems"
+    priority: optional
+    tags: [txt2img, sd15, fast, low-vram]
+    requirements:
+      vram_min_gb: 4
+      models:
+        - type: checkpoint
+          name: v1-5-pruned-emaonly.safetensors
+          path: checkpoints/
+          url: https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors
+          size_gb: 4.0
+
+  txt2img-sdxl-turbo:
+    name: "SDXL Turbo - Fast"
+    file: txt2img-sdxl-turbo.json
+    description: "Ultra-fast 4-step generation"
+    priority: optional
+    tags: [txt2img, sdxl, turbo, fast]
+    requirements:
+      vram_min_gb: 8
+      models:
+        - type: checkpoint
+          name: sd_xl_turbo_1.0_fp16.safetensors
+          path: checkpoints/
+          url: https://huggingface.co/stabilityai/sdxl-turbo/resolve/main/sd_xl_turbo_1.0_fp16.safetensors
+          size_gb: 6.5
+
+  # =============================================================================
+  # Image Editing Workflows
+  # =============================================================================
+  img2img-sdxl:
+    name: "Image to Image - SDXL"
+    file: img2img-sdxl.json
+    description: "Transform existing images with SDXL"
+    priority: optional
+    tags: [img2img, sdxl, edit]
+    requirements:
+      vram_min_gb: 8
+      input_image: true
+      models:
+        - type: checkpoint
+          name: sd_xl_base_1.0.safetensors
+          path: checkpoints/
+
+  inpaint-sdxl:
+    name: "Inpainting - SDXL"
+    file: inpaint-sdxl.json
+    description: "Edit specific regions with masks"
+    priority: optional
+    tags: [inpaint, sdxl, edit, mask]
+    requirements:
+      vram_min_gb: 10
+      input_image: true
+      input_mask: true
+      models:
+        - type: checkpoint
+          name: sd_xl_base_1.0.safetensors
+          path: checkpoints/
+
+  # =============================================================================
+  # Upscaling Workflows
+  # =============================================================================
+  upscale-2x:
+    name: "Upscale 2x - Real-ESRGAN"
+    file: upscale-2x.json
+    description: "Upscale images 2x with Real-ESRGAN"
+    priority: required
+    tags: [upscale, enhance, esrgan]
+    requirements:
+      vram_min_gb: 4
+      input_image: true
+      models:
+        - type: upscale_model
+          name: RealESRGAN_x2plus.pth
+          path: upscale_models/
+          url: https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth
+          size_gb: 0.064
+
+  upscale-4x:
+    name: "Upscale 4x - Real-ESRGAN"
+    file: upscale-4x.json
+    description: "Upscale images 4x with Real-ESRGAN"
+    priority: optional
+    tags: [upscale, enhance, esrgan, 4x]
+    requirements:
+      vram_min_gb: 6
+      input_image: true
+      models:
+        - type: upscale_model
+          name: RealESRGAN_x4plus.pth
+          path: upscale_models/
+          url: https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
+          size_gb: 0.064
+
+  # =============================================================================
+  # Multi-Step Pipeline Workflows (Agentic)
+  # =============================================================================
+  pipeline-sdxl-refiner:
+    name: "SDXL + Refiner Pipeline"
+    file: pipeline-sdxl-refiner.json
+    description: "Two-stage: SDXL base → refiner"
+    priority: optional
+    tags: [pipeline, sdxl, refiner, multi-step, agentic]
+    requirements:
+      vram_min_gb: 12
+      models:
+        - type: checkpoint
+          name: sd_xl_base_1.0.safetensors
+          path: checkpoints/
+        - type: checkpoint
+          name: sd_xl_refiner_1.0.safetensors
+          path: checkpoints/
+          url: https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/resolve/main/sd_xl_refiner_1.0.safetensors
+          size_gb: 6.0
+
+  pipeline-generate-upscale:
+    name: "Generate + Upscale Pipeline"
+    file: pipeline-generate-upscale.json
+    description: "Generate with SDXL → upscale 2x"
+    priority: optional
+    tags: [pipeline, sdxl, upscale, multi-step, agentic]
+    requirements:
+      vram_min_gb: 10
+      models:
+        - type: checkpoint
+          name: sd_xl_base_1.0.safetensors
+          path: checkpoints/
+        - type: upscale_model
+          name: RealESRGAN_x2plus.pth
+          path: upscale_models/
+
+  pipeline-full-agentic:
+    name: "Full Agentic Pipeline"
+    file: pipeline-full-agentic.json
+    description: "Complete: base → refiner → upscale"
+    priority: optional
+    tags: [pipeline, sdxl, refiner, upscale, multi-step, agentic, high-quality]
+    requirements:
+      vram_min_gb: 14
+      models:
+        - type: checkpoint
+          name: sd_xl_base_1.0.safetensors
+          path: checkpoints/
+        - type: checkpoint
+          name: sd_xl_refiner_1.0.safetensors
+          path: checkpoints/
+        - type: upscale_model
+          name: RealESRGAN_x2plus.pth
+          path: upscale_models/
+
+  # =============================================================================
+  # Advanced / Experimental Workflows
+  # =============================================================================
+  txt2img-flux-schnell:
+    name: "FLUX.1 Schnell"
+    file: txt2img-flux-schnell.json
+    description: "Fast high-quality FLUX generation"
+    priority: optional
+    tags: [txt2img, flux, fast, high-quality, experimental]
+    requirements:
+      vram_min_gb: 12
+      custom_nodes:
+        - ComfyUI-FLUX
+      models:
+        - type: unet
+          name: flux1-schnell.safetensors
+          path: unet/
+          url: https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/flux1-schnell.safetensors
+          size_gb: 23.0
+        - type: clip
+          name: t5xxl_fp16.safetensors
+          path: clip/
+          url: https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors
+          size_gb: 9.5
+        - type: clip
+          name: clip_l.safetensors
+          path: clip/
+          url: https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors
+          size_gb: 0.234
+        - type: vae
+          name: ae.safetensors
+          path: vae/
+          url: https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/ae.safetensors
+          size_gb: 0.335
+
+# =============================================================================
+# Default Configuration
+# =============================================================================
+defaults:
+  # Default workflow for Open WebUI integration
+  primary_workflow: txt2img-sdxl
+  # Fallback for low VRAM systems
+  fallback_workflow: txt2img-sd15
+  # Edit workflow for img2img operations
+  edit_workflow: img2img-sdxl
+
+# =============================================================================
+# Security Settings
+# =============================================================================
+security:
+  # Maximum allowed steps per generation (prevents DoS)
+  max_steps: 100
+  # Maximum image dimensions
+  max_width: 2048
+  max_height: 2048
+  # Maximum batch size
+  max_batch_size: 4
+  # Allowed samplers (restrict to known-safe samplers)
+  allowed_samplers:
+    - euler
+    - euler_ancestral
+    - dpm_2
+    - dpm_2_ancestral
+    - dpmpp_2m
+    - dpmpp_sde
+    - uni_pc
+  # Rate limiting (requests per minute per user)
+  rate_limit_rpm: 10
