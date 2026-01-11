@@ -1,6 +1,6 @@
 services:
   ollama-gpu:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.13.5
     container_name: ollama-gpu-worker
     ports:
       - "${OLLAMA_PORT:-11434}:11434"
@@ -20,4 +20,44 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+    restart: unless-stopped
+
+  # ComfyUI - GPU-accelerated image generation
+  # Integrates with Open WebUI for text-to-image workflows
+  comfyui:
+    image: ghcr.io/ai-dock/comfyui:v2-cuda-12.1.1-ubuntu22.04
+    container_name: comfyui-worker
+    ports:
+      - "${COMFYUI_PORT:-8188}:8188"
+    volumes:
+      # Persistent storage for models, outputs, and customizations
+      - ${DATA_PATH:-/data}/comfyui/models:/opt/ComfyUI/models
+      - ${DATA_PATH:-/data}/comfyui/output:/opt/ComfyUI/output
+      - ${DATA_PATH:-/data}/comfyui/input:/opt/ComfyUI/input
+      - ${DATA_PATH:-/data}/comfyui/custom_nodes:/opt/ComfyUI/custom_nodes
+      # Mount workflow configurations (read-only)
+      - ${DATA_PATH:-/data}/comfyui/workflows:/opt/ComfyUI/user/default/workflows:ro
+    environment:
+      # ComfyUI server settings
+      - COMFYUI_PORT=8188
+      - CLI_ARGS=${COMFYUI_CLI_ARGS:---listen 0.0.0.0 --preview-method auto}
+      # Disable provisioning scripts (we manage models ourselves)
+      - PROVISIONING_SCRIPT=
+      - CF_QUICK_TUNNELS=false
+      - WEB_ENABLE_AUTH=false
+      - WEB_USER=${COMFYUI_WEB_USER:-admin}
+      - WEB_PASSWORD=${COMFYUI_WEB_PASSWORD:-}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8188/system_stats"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     restart: unless-stopped
