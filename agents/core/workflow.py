@@ -306,13 +306,15 @@ class WorkflowOrchestrator:
                     self.logger.error(f"Task {task.config.name} raised exception: {result}")
                     result = task.mark_failed(str(result))
                 
-                task_results.append(result)
-                
-                if result.is_success():
-                    completed_task_ids.append(task.task_id)
-                elif workflow.config.fail_fast:
-                    self.logger.warning(f"Fail-fast enabled, stopping workflow due to task failure")
-                    return task_results
+                # Type guard: only append and process valid TaskResult objects
+                if not isinstance(result, Exception):
+                    task_results.append(result)
+                    
+                    if result.is_success():
+                        completed_task_ids.append(task.task_id)
+                    elif workflow.config.fail_fast:
+                        self.logger.warning("Fail-fast enabled, stopping workflow due to task failure")
+                        return task_results
 
                 pending_tasks.remove(task)
 

@@ -7,7 +7,7 @@ services:
   
   # Whisper - Speech-to-Text (OpenAI Whisper)
   whisper:
-    image: onerahmet/openai-whisper-asr-webservice:latest
+    image: onerahmet/openai-whisper-asr-webservice:latest-gpu
     container_name: whisper-stt
     ports:
       - "${WHISPER_PORT:-9000}:9000"
@@ -30,7 +30,7 @@ services:
 
   # Piper TTS - Text-to-Speech
   piper-tts:
-    image: rhasspy/piper:latest
+    image: rhasspy/piper:1.2.0
     container_name: piper-tts
     ports:
       - "${PIPER_PORT:-5000}:5000"
@@ -43,9 +43,10 @@ services:
       - multimodal
       - audio
 
-  # Coqui TTS - Advanced Text-to-Speech with voice cloning
+  # Coqui TTS Community - Advanced Text-to-Speech with voice cloning
+  # Note: Official Coqui AI project archived; using community-maintained fork
   coqui-tts:
-    image: ghcr.io/coqui-ai/tts:latest
+    image: ghcr.io/coqui-ai-community/tts:latest
     container_name: coqui-tts
     ports:
       - "${COQUI_PORT:-5002}:5002"
@@ -70,7 +71,7 @@ services:
   
   # Qdrant - Vector database for embeddings
   qdrant:
-    image: qdrant/qdrant:v1.7.4
+    image: qdrant/qdrant:v1.12.1
     container_name: qdrant-vector-db
     ports:
       - "${QDRANT_PORT:-6333}:6333"
@@ -91,7 +92,7 @@ services:
   
   # FFmpeg service for video processing
   ffmpeg-service:
-    image: jrottenberg/ffmpeg:6-alpine
+    image: jrottenberg/ffmpeg:7.1-alpine
     container_name: ffmpeg-processor
     volumes:
       - ${DATA_PATH:-/data}/video/input:/input
@@ -108,7 +109,7 @@ services:
   
   # Tika - Document parsing and content extraction
   tika:
-    image: apache/tika:2.9.1.0
+    image: apache/tika:3.0.0-full
     container_name: tika-parser
     ports:
       - "${TIKA_PORT:-9998}:9998"
@@ -123,7 +124,7 @@ services:
   
   # LiteLLM Proxy - Unified API gateway for all models
   litellm:
-    image: ghcr.io/berriai/litellm:main-latest
+    image: ghcr.io/berriai/litellm:v1.52.4
     container_name: litellm-proxy
     ports:
       - "${LITELLM_PORT:-4000}:4000"
@@ -142,7 +143,7 @@ services:
       - full
       - api-gateway
 
-  # PostgreSQL for LiteLLM and metadata storage
+  # PostgreSQL 16 for LiteLLM and metadata storage (current production)
   postgres:
     image: postgres:16-alpine
     container_name: postgres-db
@@ -160,11 +161,29 @@ services:
       - full
       - api-gateway
 
+  # PostgreSQL 17 (new version for parallel deployment)
+  # To migrate: 1) Deploy postgres-17, 2) Run migration script, 3) Update litellm to use postgres-17, 4) Remove postgres service
+  postgres-17:
+    image: postgres:17.2-alpine
+    container_name: postgres-17-db
+    ports:
+      - "${POSTGRES_17_PORT:-5433}:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-litellm}
+      - POSTGRES_USER=${POSTGRES_USER:-litellm}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ${DATA_PATH:-/data}/postgres-17:/var/lib/postgresql/data
+    restart: unless-stopped
+    profiles:
+      - postgres-migration
+
   # === WORKFLOW ORCHESTRATION ===
   
   # n8n - Workflow automation and orchestration
   n8n:
-    image: n8nio/n8n:latest
+    image: n8nio/n8n:1.68.0
     container_name: n8n-workflows
     ports:
       - "${N8N_PORT:-5678}:5678"
@@ -187,9 +206,9 @@ services:
 
   # === MONITORING & METRICS ===
   
-  # Grafana Loki - Log aggregation
+  # Grafana Loki - Log aggregation (v3.x with new storage format)
   loki:
-    image: grafana/loki:2.9.3
+    image: grafana/loki:3.3.2
     container_name: loki-logs
     ports:
       - "${LOKI_PORT:-3100}:3100"
@@ -202,9 +221,9 @@ services:
       - monitoring
       - full
 
-  # Promtail - Log collector for Loki
+  # Promtail - Log collector for Loki (v3.x)
   promtail:
-    image: grafana/promtail:2.9.3
+    image: grafana/promtail:3.3.2
     container_name: promtail-collector
     volumes:
       - /var/log:/var/log:ro

@@ -1,6 +1,6 @@
 services:
   open-webui:
-    image: ghcr.io/open-webui/open-webui:v0.7.2
+    image: ghcr.io/open-webui/open-webui:v0.8.5
     container_name: open-webui-server
     ports:
       - "${WEBUI_PORT:-3000}:8080"
@@ -38,7 +38,7 @@ services:
       - monitoring
 
   ollama-cpu:
-    image: ollama/ollama:0.13.5
+    image: ollama/ollama:0.15.2
     container_name: ollama-cpu-server
     ports:
       - "${OLLAMA_PORT:-11434}:11434"
@@ -72,7 +72,7 @@ services:
   #     - monitoring
 
   redis:
-    image: redis:8.4.0-alpine
+    image: redis:8.5.2-alpine
     container_name: redis-server
     ports:
       - "${REDIS_PORT:-6379}:6379"
@@ -87,7 +87,7 @@ services:
 
   # Monitoring Profile Services
   prometheus:
-    image: prom/prometheus:v2.54.0
+    image: prom/prometheus:v2.56.1
     container_name: prometheus-server
     ports:
       - "9090:9090"
@@ -106,7 +106,7 @@ services:
       - monitoring
 
   grafana:
-    image: grafana/grafana:11.3.0
+    image: grafana/grafana:11.5.0
     container_name: grafana-server
     ports:
       - "3001:3000"
@@ -121,7 +121,7 @@ services:
       - monitoring
 
   node-exporter:
-    image: prom/node-exporter:v1.8.2
+    image: prom/node-exporter:v1.9.0
     container_name: node-exporter-server
     ports:
       - "9100:9100"

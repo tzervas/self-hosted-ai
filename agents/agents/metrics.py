@@ -3,9 +3,16 @@ Prometheus metrics for agent framework.
 Tracks agent execution times, success rates, and workflow performance.
 """
 
-from typing import Dict, Optional
+import logging
+from typing import Any, Dict, Optional
 
-from prometheus_client import Counter, Gauge, Histogram, Info, Summary
+from prometheus_client import Counter, Gauge, Histogram, Info, Summary, start_http_server
+
+# Configure logger
+logger = logging.getLogger(__name__)
+
+# Configuration flag for Prometheus export
+prometheus_enabled = False
 
 # Agent execution metrics
 AGENT_EXECUTIONS = Counter(
@@ -201,12 +208,11 @@ def setup_metrics(
 
 # Export main functions
 __all__ = [
-    "setup_logging",
-    "get_logger",
-    "logger",
-    "LogContext",
-    "log_agent_execution",
-    "log_workflow_execution",
     "MetricsCollector",
     "get_metrics_collector",
+    "setup_metrics",
+    "AGENT_EXECUTIONS",
+    "AGENT_EXECUTION_TIME",
+    "WORKFLOW_EXECUTION_COUNT",
+    "WORKFLOW_DURATION",
 ]

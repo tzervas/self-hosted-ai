@@ -1,6 +1,6 @@
 services:
   ollama-gpu:
-    image: ollama/ollama:0.13.5
+    image: ollama/ollama:0.15.2
     container_name: ollama-gpu-worker
     ports:
       - "${OLLAMA_PORT:-11434}:11434"
@@ -25,7 +25,7 @@ services:
   # ComfyUI - GPU-accelerated image generation
   # Integrates with Open WebUI for text-to-image workflows
   comfyui:
-    image: ghcr.io/ai-dock/comfyui:v2-cuda-12.1.1-ubuntu22.04
+    image: ghcr.io/ai-dock/comfyui:v2-cuda-12.6.3-ubuntu22.04
     container_name: comfyui-worker
     ports:
       - "${COMFYUI_PORT:-8188}:8188"

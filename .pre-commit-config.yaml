@@ -1,51 +1,57 @@
-# Pre-commit hooks for self-hosted-ai
-# Strategy: Autofix where safe, block only on unfixable errors
-# Install: pre-commit install
-# Run manually: pre-commit run --all-files
-
-default_install_hook_types: [pre-commit, commit-msg]
-default_stages: [pre-commit]
+# Pre-commit hooks for code quality
+# Install with: pre-commit install
 
 repos:
-  # General file fixers (always autofix)
+  # Code formatting
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        language_version: python3
+        args: ['--line-length=100']
+
+  # Import sorting
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ['--profile=black', '--line-length=100']
+
+  # Linting
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.7.4
+    hooks:
+      - id: ruff
+        args: ['--fix', '--exit-non-zero-on-fix']
+
+  # Type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-all]
+        args: ['--ignore-missing-imports', '--no-strict-optional']
+
+  # Security checks
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.10
+    hooks:
+      - id: bandit
+        args: ['-c', 'pyproject.toml']
+        additional_dependencies: ['bandit[toml]']
+
+  # YAML validation
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
-      - id: trailing-whitespace
-        args: [--markdown-linebreak-ext=md]
-      - id: end-of-file-fixer
       - id: check-yaml
-        args: [--unsafe]  # Allow custom tags
-      - id: check-json
-      - id: check-merge-conflict
+        args: ['--unsafe']  # Allow custom tags in docker-compose
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
       - id: check-added-large-files
-        args: [--maxkb=1024]
-      - id: mixed-line-ending
-        args: [--fix=lf]
-      - id: check-executables-have-shebangs
-      - id: check-shebang-scripts-are-executable
-
-  # Shell scripts - shellcheck with autofix via shfmt
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.6
-    hooks:
-      - id: shellcheck
-        args: [--severity=error]  # Only block on errors, not warnings
-
-  - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.8.0-1
-    hooks:
-      - id: shfmt
-        args: [-i, "2", -ci, -bn, -w]  # 2-space indent, autofix
-
-  # YAML formatting (autofix)
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.1.0
-    hooks:
-      - id: prettier
-        types_or: [yaml, json, markdown]
-        args: [--write, --prose-wrap=preserve]
-        exclude: ^config/.*\.template$
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: detect-private-key
 
   # Dockerfile linting
   - repo: https://github.com/hadolint/hadolint

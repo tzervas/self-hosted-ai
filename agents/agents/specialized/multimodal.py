@@ -4,6 +4,7 @@ Handles text, images, audio, video, and combined modalities.
 """
 
 import asyncio
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
@@ -20,13 +21,15 @@ class MultiModalAgent(Agent):
         config: AgentConfig,
         agent_id: str = "multimodal",
         vision_model: str = "llava:13b",
-        whisper_url: str = "http://localhost:9000",
-        tts_url: str = "http://localhost:5002",
+        whisper_url: Optional[str] = None,
+        tts_url: Optional[str] = None,
+        ollama_url: Optional[str] = None,
     ):
         super().__init__(config, agent_id)
         self.vision_model = vision_model
-        self.whisper_url = whisper_url
-        self.tts_url = tts_url
+        self.whisper_url = whisper_url or os.getenv("WHISPER_URL", "http://whisper:9000")
+        self.tts_url = tts_url or os.getenv("TTS_URL", "http://coqui-tts:5002")
+        self.ollama_base_url = ollama_url or os.getenv("OLLAMA_BASE_URL", "http://ollama-gpu:11434")
 
     @property
     def system_prompt(self) -> str:
@@ -99,14 +102,33 @@ Always provide detailed, accurate analysis and maintain context across modalitie
             )
 
     async def _process_image(self, image_path: Optional[str]) -> Dict[str, Any]:
-        """Process image using vision model."""
+        """Process image using vision model.
+        
+        Args:
+            image_path: Path to image file to process
+            
+        Returns:
+            Dict containing processing status and results
+        """
         if not image_path:
             return {"status": "skipped", "reason": "no_image_path"}
 
         try:
+            # Security: validate file path and check file size
+            image_file = Path(image_path).resolve()
+            
+            # Prevent path traversal attacks
+            if not image_file.is_file():
+                return {"status": "error", "error": "Invalid file path"}
+            
+            # Check file size (max 10MB for images)
+            max_size = 10 * 1024 * 1024  # 10MB
+            if image_file.stat().st_size > max_size:
+                return {"status": "error", "error": "Image file too large (max 10MB)"}
+
             # Call vision model (llava) with image
             async with httpx.AsyncClient(timeout=self.config.timeout) as client:
-                with open(image_path, "rb") as f:
+                with open(image_file, "rb") as f:
                     image_data = f.read()
 
                 response = await client.post(
@@ -130,13 +152,32 @@ Always provide detailed, accurate analysis and maintain context across modalitie
             return {"status": "error", "error": str(e)}
 
     async def _process_audio(self, audio_path: Optional[str]) -> Dict[str, Any]:
-        """Process audio using Whisper STT."""
+        """Process audio using Whisper STT.
+        
+        Args:
+            audio_path: Path to audio file to transcribe
+            
+        Returns:
+            Dict containing transcription and metadata
+        """
         if not audio_path:
             return {"status": "skipped", "reason": "no_audio_path"}
 
         try:
+            # Security: validate file path and check file size
+            audio_file = Path(audio_path).resolve()
+            
+            # Prevent path traversal attacks
+            if not audio_file.is_file():
+                return {"status": "error", "error": "Invalid file path"}
+            
+            # Check file size (max 25MB for audio)
+            max_size = 25 * 1024 * 1024  # 25MB
+            if audio_file.stat().st_size > max_size:
+                return {"status": "error", "error": "Audio file too large (max 25MB)"}
+
             async with httpx.AsyncClient(timeout=self.config.timeout) as client:
-                with open(audio_path, "rb") as f:
+                with open(audio_file, "rb") as f:
                     files = {"audio_file": f}
                     response = await client.post(
                         f"{self.whisper_url}/asr",
@@ -207,11 +248,13 @@ class EmbeddingAgent(Agent):
         config: AgentConfig,
         agent_id: str = "embedding",
         embedding_model: str = "nomic-embed-text:latest",
-        qdrant_url: str = "http://localhost:6333",
+        qdrant_url: Optional[str] = None,
+        ollama_url: Optional[str] = None,
     ):
         super().__init__(config, agent_id)
         self.embedding_model = embedding_model
-        self.qdrant_url = qdrant_url
+        self.qdrant_url = qdrant_url or os.getenv("QDRANT_URL", "http://qdrant:6333")
+        self.ollama_base_url = ollama_url or os.getenv("OLLAMA_BASE_URL", "http://ollama-cpu:11434")
 
     @property
     def system_prompt(self) -> str:
