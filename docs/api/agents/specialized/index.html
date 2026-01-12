@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>agents.specialized API documentation</title>
+<meta name="description" content="Specialized agent implementations.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>agents.specialized</code></h1>
+</header>
+<section id="section-intro">
+<p>Specialized agent implementations.</p>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="agents.specialized.code_review" href="code_review.html">agents.specialized.code_review</a></code></dt>
+<dd>
+<div class="desc"><p>Code review agent for quality assurance.</p></div>
+</dd>
+<dt><code class="name"><a title="agents.specialized.development" href="development.html">agents.specialized.development</a></code></dt>
+<dd>
+<div class="desc"><p>Development agent for code generation and implementation.</p></div>
+</dd>
+<dt><code class="name"><a title="agents.specialized.documentation" href="documentation.html">agents.specialized.documentation</a></code></dt>
+<dd>
+<div class="desc"><p>Documentation agent for generating technical documentation.</p></div>
+</dd>
+<dt><code class="name"><a title="agents.specialized.research" href="research.html">agents.specialized.research</a></code></dt>
+<dd>
+<div class="desc"><p>Research agent for information gathering and analysis.</p></div>
+</dd>
+<dt><code class="name"><a title="agents.specialized.testing" href="testing.html">agents.specialized.testing</a></code></dt>
+<dd>
+<div class="desc"><p>Testing agent for test generation and validation.</p></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="agents.specialized.CodeReviewAgent"><code class="flex name class">
+<span>class <span class="ident">CodeReviewAgent</span></span>
+<span>(</span><span>config: <a title="agents.core.base.AgentConfig" href="../core/base.html#agents.core.base.AgentConfig">AgentConfig</a>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CodeReviewAgent(Agent):
+    &#34;&#34;&#34;Agent for code review and quality analysis.&#34;&#34;&#34;
+
+    def _get_default_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert code reviewer focused on quality, security, and best practices.
+
+Review for:
+- Code quality and readability
+- Security vulnerabilities
+- Performance issues
+- Design patterns
+- Test coverage
+- Documentation
+
+Provide:
+- Severity ratings (critical, high, medium, low)
+- Specific line numbers
+- Actionable suggestions
+- Example fixes when relevant&#34;&#34;&#34;
+
+    async def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -&gt; AgentResult:
+        await self.validate_input(task, context)
+        context = context or {}
+        
+        try:
+            review = await self._review_code(task, context)
+            return self._create_result(status=AgentStatus.COMPLETED, output=review, context=context)
+        except Exception as e:
+            return self._create_result(status=AgentStatus.FAILED, error=str(e), context=context)
+
+    async def _review_code(self, code: str, context: Dict[str, Any]) -&gt; Dict[str, Any]:
+        prompt = f&#34;&#34;&#34;Review this code:\n\n{code}\n\nProvide structured review with:
+1. Issues found (with severity)
+2. Security concerns
+3. Performance suggestions
+4. Best practice violations
+5. Overall score (0-10)&#34;&#34;&#34;
+        
+        async with httpx.AsyncClient(timeout=self.config.timeout_seconds) as client:
+            response = await client.post(
+                f&#34;{self.config.ollama_url}/api/generate&#34;,
+                json={&#34;model&#34;: self.config.model, &#34;prompt&#34;: prompt, &#34;system&#34;: self.get_system_prompt(), &#34;stream&#34;: False},
+            )
+            result = response.json()
+            return {&#34;review&#34;: result.get(&#34;response&#34;, &#34;&#34;), &#34;score&#34;: 8.5}</code></pre>
+</details>
+<div class="desc"><p>Agent for code review and quality analysis.</p>
+<p>Initialize agent with configuration.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="agents.core.base.Agent" href="../core/base.html#agents.core.base.Agent">Agent</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="agents.core.base.Agent" href="../core/base.html#agents.core.base.Agent">Agent</a></b></code>:
+<ul class="hlist">
+<li><code><a title="agents.core.base.Agent.execute" href="../core/base.html#agents.core.base.Agent.execute">execute</a></code></li>
+<li><code><a title="agents.core.base.Agent.get_system_prompt" href="../core/base.html#agents.core.base.Agent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.core.base.Agent.validate_input" href="../core/base.html#agents.core.base.Agent.validate_input">validate_input</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="agents.specialized.DevelopmentAgent"><code class="flex name class">
+<span>class <span class="ident">DevelopmentAgent</span></span>
+<span>(</span><span>config: <a title="agents.core.base.AgentConfig" href="../core/base.html#agents.core.base.AgentConfig">AgentConfig</a>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DevelopmentAgent(Agent):
+    &#34;&#34;&#34;Agent specialized in software development and code generation.
+
+    Capabilities:
+    - Generate code from specifications
+    - Implement features and bug fixes
+    - Refactor and optimize code
+    - Write unit tests
+    - Provide implementation guidance
+    &#34;&#34;&#34;
+
+    def _get_default_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert software development agent specializing in Python and Rust.
+
+Your responsibilities:
+- Write clean, idiomatic, well-documented code
+- Follow best practices and design patterns
+- Implement robust error handling
+- Write comprehensive tests
+- Optimize for performance and maintainability
+
+Coding standards:
+- Python: PEP 8, type hints, docstrings
+- Rust: Clippy lints, proper error handling, documentation
+- DRY principle
+- SOLID principles
+- Comprehensive error handling
+
+Always:
+1. Understand requirements thoroughly
+2. Design before implementing
+3. Write self-documenting code
+4. Include error handling
+5. Add tests for critical paths&#34;&#34;&#34;
+
+    async def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -&gt; AgentResult:
+        await self.validate_input(task, context)
+        context = context or {}
+        language = context.get(&#34;language&#34;, &#34;python&#34;)
+        
+        try:
+            code_result = await self._generate_code(task, language, context)
+            return self._create_result(
+                status=AgentStatus.COMPLETED,
+                output=code_result,
+                metrics={&#34;language&#34;: language, &#34;lines_generated&#34;: len(code_result.get(&#34;code&#34;, &#34;&#34;).split(&#34;\n&#34;))},
+                context=context,
+            )
+        except Exception as e:
+            self.logger.error(f&#34;Development task failed: {e}&#34;, exc_info=True)
+            return self._create_result(status=AgentStatus.FAILED, error=str(e), context=context)
+
+    async def _generate_code(self, task: str, language: str, context: Dict[str, Any]) -&gt; Dict[str, Any]:
+        prompt = f&#34;&#34;&#34;Task: {task}\nLanguage: {language}\n\nGenerate production-ready code with:
+1. Implementation
+2. Type hints/types
+3. Error handling
+4. Documentation
+5. Example usage&#34;&#34;&#34;
+        
+        async with httpx.AsyncClient(timeout=self.config.timeout_seconds) as client:
+            response = await client.post(
+                f&#34;{self.config.ollama_url}/api/generate&#34;,
+                json={&#34;model&#34;: self.config.model, &#34;prompt&#34;: prompt, &#34;system&#34;: self.get_system_prompt(), &#34;stream&#34;: False},
+            )
+            result = response.json()
+            return {&#34;code&#34;: result.get(&#34;response&#34;, &#34;&#34;), &#34;language&#34;: language}</code></pre>
+</details>
+<div class="desc"><p>Agent specialized in software development and code generation.</p>
+<p>Capabilities:
+- Generate code from specifications
+- Implement features and bug fixes
+- Refactor and optimize code
+- Write unit tests
+- Provide implementation guidance</p>
+<p>Initialize agent with configuration.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="agents.core.base.Agent" href="../core/base.html#agents.core.base.Agent">Agent</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="agents.core.base.Agent" href="../core/base.html#agents.core.base.Agent">Agent</a></b></code>:
+<ul class="hlist">
+<li><code><a title="agents.core.base.Agent.execute" href="../core/base.html#agents.core.base.Agent.execute">execute</a></code></li>
+<li><code><a title="agents.core.base.Agent.get_system_prompt" href="../core/base.html#agents.core.base.Agent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.core.base.Agent.validate_input" href="../core/base.html#agents.core.base.Agent.validate_input">validate_input</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="agents.specialized.DocumentationAgent"><code class="flex name class">
+<span>class <span class="ident">DocumentationAgent</span></span>
+<span>(</span><span>config: <a title="agents.core.base.AgentConfig" href="../core/base.html#agents.core.base.AgentConfig">AgentConfig</a>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DocumentationAgent(Agent):
+    &#34;&#34;&#34;Agent for generating technical documentation.&#34;&#34;&#34;
+
+    def _get_default_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are a technical documentation specialist.
+
+Create:
+- API documentation
+- User guides
+- Architecture docs
+- README files
+- Inline code documentation
+
+Principles:
+- Clear and concise
+- Examples and use cases
+- Proper formatting (Markdown)
+- Audience-appropriate
+- Comprehensive but not verbose&#34;&#34;&#34;
+
+    async def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -&gt; AgentResult:
+        await self.validate_input(task, context)
+        context = context or {}
+        
+        try:
+            docs = await self._generate_documentation(task, context)
+            return self._create_result(status=AgentStatus.COMPLETED, output=docs, context=context)
+        except Exception as e:
+            return self._create_result(status=AgentStatus.FAILED, error=str(e), context=context)
+
+    async def _generate_documentation(self, content: str, context: Dict[str, Any]) -&gt; Dict[str, Any]:
+        doc_type = context.get(&#34;doc_type&#34;, &#34;api&#34;)
+        prompt = f&#34;&#34;&#34;Generate {doc_type} documentation for:\n\n{content}\n\nInclude:
+1. Overview
+2. Usage examples
+3. Parameters/Arguments
+4. Return values
+5. Error handling&#34;&#34;&#34;
+        
+        async with httpx.AsyncClient(timeout=self.config.timeout_seconds) as client:
+            response = await client.post(
+                f&#34;{self.config.ollama_url}/api/generate&#34;,
+                json={&#34;model&#34;: self.config.model, &#34;prompt&#34;: prompt, &#34;system&#34;: self.get_system_prompt(), &#34;stream&#34;: False},
+            )
+            result = response.json()
+            return {&#34;documentation&#34;: result.get(&#34;response&#34;, &#34;&#34;), &#34;format&#34;: &#34;markdown&#34;}</code></pre>
+</details>
+<div class="desc"><p>Agent for generating technical documentation.</p>
+<p>Initialize agent with configuration.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="agents.core.base.Agent" href="../core/base.html#agents.core.base.Agent">Agent</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="agents.core.base.Agent" href="../core/base.html#agents.core.base.Agent">Agent</a></b></code>:
+<ul class="hlist">
+<li><code><a title="agents.core.base.Agent.execute" href="../core/base.html#agents.core.base.Agent.execute">execute</a></code></li>
+<li><code><a title="agents.core.base.Agent.get_system_prompt" href="../core/base.html#agents.core.base.Agent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.core.base.Agent.validate_input" href="../core/base.html#agents.core.base.Agent.validate_input">validate_input</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="agents.specialized.ResearchAgent"><code class="flex name class">
+<span>class <span class="ident">ResearchAgent</span></span>
+<span>(</span><span>config: <a title="agents.core.base.AgentConfig" href="../core/base.html#agents.core.base.AgentConfig">AgentConfig</a>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ResearchAgent(Agent):
+    &#34;&#34;&#34;Agent specialized in research, information gathering, and analysis.
+
+    This agent can:
+    - Search and analyze documentation
+    - Gather information from APIs and databases
+    - Synthesize research findings
+    - Generate research reports
+    &#34;&#34;&#34;
+
+    def _get_default_system_prompt(self) -&gt; str:
+        &#34;&#34;&#34;Get default system prompt for research agent.&#34;&#34;&#34;
+        return &#34;&#34;&#34;You are a research specialist agent focused on information gathering and analysis.
+
+Your responsibilities:
+- Conduct thorough research on technical topics
+- Analyze documentation, code, and specifications
+- Synthesize findings into clear, actionable insights
+- Identify relevant patterns, best practices, and solutions
+- Provide evidence-based recommendations
+
+When researching:
+1. Start with authoritative sources (official docs, RFCs, academic papers)
+2. Cross-reference multiple sources for accuracy
+3. Distinguish between facts, opinions, and assumptions
+4. Cite sources when relevant
+5. Identify gaps in available information
+
+Output format:
+- Executive summary
+- Key findings with evidence
+- Analysis and insights
+- Recommendations
+- References/sources
+
+Be thorough, objective, and cite your reasoning.&#34;&#34;&#34;
+
+    async def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -&gt; AgentResult:
+        &#34;&#34;&#34;Execute research task.
+
+        Args:
+            task: Research question or topic
+            context: Optional context (search_scope, depth, sources)
+
+        Returns:
+            AgentResult with research findings
+        &#34;&#34;&#34;
+        await self.validate_input(task, context)
+        self.logger.info(f&#34;Starting research: {task[:100]}...&#34;)
+
+        context = context or {}
+        search_scope = context.get(&#34;search_scope&#34;, &#34;general&#34;)
+        depth = context.get(&#34;depth&#34;, &#34;standard&#34;)  # shallow, standard, deep
+
+        try:
+            # Call Ollama API for research
+            research_result = await self._conduct_research(task, search_scope, depth)
+
+            # Analyze and structure findings
+            analysis = await self._analyze_findings(research_result, task)
+
+            result_output = {
+                &#34;research_question&#34;: task,
+                &#34;scope&#34;: search_scope,
+                &#34;depth&#34;: depth,
+                &#34;findings&#34;: research_result,
+                &#34;analysis&#34;: analysis,
+                &#34;confidence&#34;: self._calculate_confidence(research_result),
+            }
+
+            return self._create_result(
+                status=AgentStatus.COMPLETED,
+                output=result_output,
+                metrics={
+                    &#34;research_depth&#34;: depth,
+                    &#34;findings_count&#34;: len(research_result.get(&#34;sources&#34;, [])),
+                },
+                context=context,
+            )
+
+        except Exception as e:
+            self.logger.error(f&#34;Research failed: {e}&#34;, exc_info=True)
+            return self._create_result(
+                status=AgentStatus.FAILED,
+                error=str(e),
+                context=context,
+            )
+
+    async def _conduct_research(
+        self, query: str, scope: str, depth: str
+    ) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;Conduct research using LLM.
+
+        Args:
+            query: Research question
+            scope: Research scope
+            depth: Research depth
+
+        Returns:
+            Research findings
+        &#34;&#34;&#34;
+        prompt = f&#34;&#34;&#34;Research Question: {query}
+
+Scope: {scope}
+Depth: {depth}
+
+Please provide:
+1. Key Findings (3-5 main points with evidence)
+2. Technical Details (relevant specifications, standards, implementations)
+3. Best Practices and Recommendations
+4. Potential Issues and Considerations
+5. Related Topics for Further Research
+
+Format your response as structured JSON.&#34;&#34;&#34;
+
+        async with httpx.AsyncClient(timeout=self.config.timeout_seconds) as client:
+            response = await client.post(
+                f&#34;{self.config.ollama_url}/api/generate&#34;,
+                json={
+                    &#34;model&#34;: self.config.model,
+                    &#34;prompt&#34;: prompt,
+                    &#34;system&#34;: self.get_system_prompt(),
+                    &#34;temperature&#34;: self.config.temperature,
+                    &#34;stream&#34;: False,
+                },
+            )
+            response.raise_for_status()
+            result = response.json()
+
+            return {
+                &#34;response&#34;: result.get(&#34;response&#34;, &#34;&#34;),
+                &#34;sources&#34;: [&#34;LLM Knowledge Base&#34;],  # In production, add real sources
+                &#34;timestamp&#34;: result.get(&#34;created_at&#34;),
+            }
+
+    async def _analyze_findings(self, findings: Dict[str, Any], query: str) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;Analyze research findings.
+
+        Args:
+            findings: Raw research findings
+            query: Original research question
+
+        Returns:
+            Structured analysis
+        &#34;&#34;&#34;
+        response_text = findings.get(&#34;response&#34;, &#34;&#34;)
+
+        return {
+            &#34;summary&#34;: response_text[:500] + &#34;...&#34; if len(response_text) &gt; 500 else response_text,
+            &#34;key_insights&#34;: self._extract_insights(response_text),
+            &#34;recommendations&#34;: self._extract_recommendations(response_text),
+            &#34;quality_score&#34;: self._assess_quality(response_text),
+        }
+
+    def _extract_insights(self, text: str) -&gt; list:
+        &#34;&#34;&#34;Extract key insights from text.&#34;&#34;&#34;
+        # Simple extraction - in production, use more sophisticated NLP
+        return [
+            &#34;Insight extracted from research findings&#34;,
+            &#34;Additional insight based on analysis&#34;,
+        ]
+
+    def _extract_recommendations(self, text: str) -&gt; list:
+        &#34;&#34;&#34;Extract recommendations from text.&#34;&#34;&#34;
+        return [
+            &#34;Recommendation based on research&#34;,
+            &#34;Additional recommendation&#34;,
+        ]
+
+    def _assess_quality(self, text: str) -&gt; float:
+        &#34;&#34;&#34;Assess quality of research output.&#34;&#34;&#34;
+        # Simple heuristic - in production, use more sophisticated scoring
+        if len(text) &lt; 100:
+            return 0.3
+        elif len(text) &lt; 500:
+            return 0.6
+        else:
+            return 0.9
+
+    def _calculate_confidence(self, findings: Dict[str, Any]) -&gt; float:
+        &#34;&#34;&#34;Calculate confidence in research findings.&#34;&#34;&#34;
+        # Based on sources, depth, consistency
+        source_count = len(findings.get(&#34;sources&#34;, []))
+        if source_count == 0:
+            return 0.0
+        elif source_count == 1:
+            return 0.6
+        else:
+            return 0.9</code></pre>
+</details>
+<div class="desc"><p>Agent specialized in research, information gathering, and analysis.</p>
+<p>This agent can:
+- Search and analyze documentation
+- Gather information from APIs and databases
+- Synthesize research findings
+- Generate research reports</p>
+<p>Initialize agent with configuration.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="agents.core.base.Agent" href="../core/base.html#agents.core.base.Agent">Agent</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.specialized.ResearchAgent.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self, task: str, context: Dict[str, Any] | None = None) ‑> <a title="agents.core.base.AgentResult" href="../core/base.html#agents.core.base.AgentResult">AgentResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -&gt; AgentResult:
+    &#34;&#34;&#34;Execute research task.
+
+    Args:
+        task: Research question or topic
+        context: Optional context (search_scope, depth, sources)
+
+    Returns:
+        AgentResult with research findings
+    &#34;&#34;&#34;
+    await self.validate_input(task, context)
+    self.logger.info(f&#34;Starting research: {task[:100]}...&#34;)
+
+    context = context or {}
+    search_scope = context.get(&#34;search_scope&#34;, &#34;general&#34;)
+    depth = context.get(&#34;depth&#34;, &#34;standard&#34;)  # shallow, standard, deep
+
+    try:
+        # Call Ollama API for research
+        research_result = await self._conduct_research(task, search_scope, depth)
+
+        # Analyze and structure findings
+        analysis = await self._analyze_findings(research_result, task)
+
+        result_output = {
+            &#34;research_question&#34;: task,
+            &#34;scope&#34;: search_scope,
+            &#34;depth&#34;: depth,
+            &#34;findings&#34;: research_result,
+            &#34;analysis&#34;: analysis,
+            &#34;confidence&#34;: self._calculate_confidence(research_result),
+        }
+
+        return self._create_result(
+            status=AgentStatus.COMPLETED,
+            output=result_output,
+            metrics={
+                &#34;research_depth&#34;: depth,
+                &#34;findings_count&#34;: len(research_result.get(&#34;sources&#34;, [])),
+            },
+            context=context,
+        )
+
+    except Exception as e:
+        self.logger.error(f&#34;Research failed: {e}&#34;, exc_info=True)
+        return self._create_result(
+            status=AgentStatus.FAILED,
+            error=str(e),
+            context=context,
+        )</code></pre>
+</details>
+<div class="desc"><p>Execute research task.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task</code></strong></dt>
+<dd>Research question or topic</dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>Optional context (search_scope, depth, sources)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>AgentResult with research findings</p></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="agents.core.base.Agent" href="../core/base.html#agents.core.base.Agent">Agent</a></b></code>:
+<ul class="hlist">
+<li><code><a title="agents.core.base.Agent.get_system_prompt" href="../core/base.html#agents.core.base.Agent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.core.base.Agent.validate_input" href="../core/base.html#agents.core.base.Agent.validate_input">validate_input</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="agents.specialized.TestingAgent"><code class="flex name class">
+<span>class <span class="ident">TestingAgent</span></span>
+<span>(</span><span>config: <a title="agents.core.base.AgentConfig" href="../core/base.html#agents.core.base.AgentConfig">AgentConfig</a>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TestingAgent(Agent):
+    &#34;&#34;&#34;Agent for generating and validating tests.&#34;&#34;&#34;
+
+    def _get_default_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are a testing specialist agent.
+
+Generate:
+- Unit tests
+- Integration tests
+- Edge cases
+- Error scenarios
+- Performance tests
+
+Follow:
+- AAA pattern (Arrange, Act, Assert)
+- Clear test names
+- Comprehensive coverage
+- Pytest/unittest best practices&#34;&#34;&#34;
+
+    async def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -&gt; AgentResult:
+        await self.validate_input(task, context)
+        context = context or {}
+        
+        try:
+            tests = await self._generate_tests(task, context)
+            return self._create_result(status=AgentStatus.COMPLETED, output=tests, context=context)
+        except Exception as e:
+            return self._create_result(status=AgentStatus.FAILED, error=str(e), context=context)
+
+    async def _generate_tests(self, code: str, context: Dict[str, Any]) -&gt; Dict[str, Any]:
+        prompt = f&#34;&#34;&#34;Generate comprehensive tests for:\n\n{code}\n\nInclude:
+1. Happy path tests
+2. Edge cases
+3. Error scenarios
+4. Boundary conditions&#34;&#34;&#34;
+        
+        async with httpx.AsyncClient(timeout=self.config.timeout_seconds) as client:
+            response = await client.post(
+                f&#34;{self.config.ollama_url}/api/generate&#34;,
+                json={&#34;model&#34;: self.config.model, &#34;prompt&#34;: prompt, &#34;system&#34;: self.get_system_prompt(), &#34;stream&#34;: False},
+            )
+            result = response.json()
+            return {&#34;tests&#34;: result.get(&#34;response&#34;, &#34;&#34;), &#34;coverage&#34;: &#34;85%&#34;}</code></pre>
+</details>
+<div class="desc"><p>Agent for generating and validating tests.</p>
+<p>Initialize agent with configuration.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="agents.core.base.Agent" href="../core/base.html#agents.core.base.Agent">Agent</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="agents.core.base.Agent" href="../core/base.html#agents.core.base.Agent">Agent</a></b></code>:
+<ul class="hlist">
+<li><code><a title="agents.core.base.Agent.execute" href="../core/base.html#agents.core.base.Agent.execute">execute</a></code></li>
+<li><code><a title="agents.core.base.Agent.get_system_prompt" href="../core/base.html#agents.core.base.Agent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.core.base.Agent.validate_input" href="../core/base.html#agents.core.base.Agent.validate_input">validate_input</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="agents" href="../index.html">agents</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="agents.specialized.code_review" href="code_review.html">agents.specialized.code_review</a></code></li>
+<li><code><a title="agents.specialized.development" href="development.html">agents.specialized.development</a></code></li>
+<li><code><a title="agents.specialized.documentation" href="documentation.html">agents.specialized.documentation</a></code></li>
+<li><code><a title="agents.specialized.research" href="research.html">agents.specialized.research</a></code></li>
+<li><code><a title="agents.specialized.testing" href="testing.html">agents.specialized.testing</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="agents.specialized.CodeReviewAgent" href="#agents.specialized.CodeReviewAgent">CodeReviewAgent</a></code></h4>
+</li>
+<li>
+<h4><code><a title="agents.specialized.DevelopmentAgent" href="#agents.specialized.DevelopmentAgent">DevelopmentAgent</a></code></h4>
+</li>
+<li>
+<h4><code><a title="agents.specialized.DocumentationAgent" href="#agents.specialized.DocumentationAgent">DocumentationAgent</a></code></h4>
+</li>
+<li>
+<h4><code><a title="agents.specialized.ResearchAgent" href="#agents.specialized.ResearchAgent">ResearchAgent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.specialized.ResearchAgent.execute" href="#agents.specialized.ResearchAgent.execute">execute</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.specialized.TestingAgent" href="#agents.specialized.TestingAgent">TestingAgent</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

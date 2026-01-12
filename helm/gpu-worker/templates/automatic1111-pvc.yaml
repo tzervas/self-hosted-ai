@@ -1,0 +1,27 @@
+{{- if and .Values.automatic1111.enabled .Values.automatic1111.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "self-hosted-ai-gpu-worker.fullname" . }}-automatic1111-outputs
+  labels:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-gpu-worker.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: automatic1111-outputs
+  {{- with .Values.automatic1111.persistence.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- range .Values.automatic1111.persistence.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.automatic1111.persistence.size }}
+  {{- if .Values.automatic1111.persistence.storageClass }}
+  storageClassName: {{ .Values.automatic1111.persistence.storageClass }}
+  {{- end }}
+{{- end }}

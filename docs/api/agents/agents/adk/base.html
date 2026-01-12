@@ -1,0 +1,924 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>agents.agents.adk.base API documentation</title>
+<meta name="description" content="Google ADK Base Agent Implementation …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>agents.agents.adk.base</code></h1>
+</header>
+<section id="section-intro">
+<p>Google ADK Base Agent Implementation</p>
+<p>Provides base classes for ADK-wrapped agents that use LiteLLM
+for inference backend.</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="agents.agents.adk.base.ADKAgent"><code class="flex name class">
+<span>class <span class="ident">ADKAgent</span></span>
+<span>(</span><span>config: <a title="agents.agents.adk.base.ADKConfig" href="#agents.agents.adk.base.ADKConfig">ADKConfig</a>,<br>http_client: httpx.AsyncClient | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ADKAgent(ABC):
+    &#34;&#34;&#34;Base class for Google ADK-wrapped agents.
+    
+    This class provides the foundation for creating agents that:
+    - Use LiteLLM as the inference backend
+    - Support priority-based GPU queuing
+    - Integrate with Google ADK for orchestration
+    - Provide evaluation capabilities
+    &#34;&#34;&#34;
+    
+    def __init__(self, config: ADKConfig, http_client: Optional[httpx.AsyncClient] = None):
+        &#34;&#34;&#34;Initialize ADK agent.
+        
+        Args:
+            config: Agent configuration
+            http_client: Optional shared HTTP client
+        &#34;&#34;&#34;
+        self.config = config
+        self._client = http_client
+        self._owns_client = http_client is None
+        self.logger = logger.bind(agent=config.name)
+    
+    async def __aenter__(self):
+        if self._client is None:
+            self._client = httpx.AsyncClient(timeout=self.config.timeout)
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if self._owns_client and self._client:
+            await self._client.aclose()
+    
+    @property
+    def client(self) -&gt; httpx.AsyncClient:
+        if self._client is None:
+            raise RuntimeError(&#34;Agent not initialized. Use async context manager.&#34;)
+        return self._client
+    
+    @abstractmethod
+    def get_system_prompt(self) -&gt; str:
+        &#34;&#34;&#34;Get the system prompt for this agent type.
+        
+        Returns:
+            System prompt string
+        &#34;&#34;&#34;
+        raise NotImplementedError
+    
+    @abstractmethod
+    def get_agent_type(self) -&gt; str:
+        &#34;&#34;&#34;Get the agent type identifier.
+        
+        Returns:
+            Agent type string (e.g., &#39;development&#39;, &#39;code_review&#39;)
+        &#34;&#34;&#34;
+        raise NotImplementedError
+    
+    def _build_messages(
+        self,
+        task: str,
+        context: Optional[Dict[str, Any]] = None,
+        history: Optional[List[Dict[str, str]]] = None
+    ) -&gt; List[Dict[str, str]]:
+        &#34;&#34;&#34;Build message list for LLM call.
+        
+        Args:
+            task: Task description
+            context: Additional context
+            history: Conversation history
+            
+        Returns:
+            List of message dicts
+        &#34;&#34;&#34;
+        system_prompt = self.config.system_prompt or self.get_system_prompt()
+        messages = [{&#34;role&#34;: &#34;system&#34;, &#34;content&#34;: system_prompt}]
+        
+        # Add history if provided
+        if history:
+            messages.extend(history)
+        
+        # Build user message with context
+        if context:
+            context_str = &#34;\n&#34;.join(f&#34;- {k}: {v}&#34; for k, v in context.items())
+            user_content = f&#34;Context:\n{context_str}\n\nTask: {task}&#34;
+        else:
+            user_content = task
+        
+        messages.append({&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: user_content})
+        
+        return messages
+    
+    async def _call_litellm(
+        self,
+        messages: List[Dict[str, str]],
+        **kwargs
+    ) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;Make a call to LiteLLM API.
+        
+        Args:
+            messages: Message list
+            **kwargs: Additional parameters
+            
+        Returns:
+            API response dict
+        &#34;&#34;&#34;
+        headers = {
+            &#34;Authorization&#34;: f&#34;Bearer {self.config.litellm_api_key}&#34;,
+            &#34;Content-Type&#34;: &#34;application/json&#34;,
+            &#34;X-Priority&#34;: self.config.priority.value
+        }
+        
+        payload = {
+            &#34;model&#34;: self.config.model,
+            &#34;messages&#34;: messages,
+            &#34;temperature&#34;: self.config.temperature,
+            &#34;max_tokens&#34;: self.config.max_tokens,
+            &#34;stream&#34;: False,
+            **kwargs
+        }
+        
+        response = await self.client.post(
+            f&#34;{self.config.litellm_url}/v1/chat/completions&#34;,
+            json=payload,
+            headers=headers
+        )
+        
+        if response.status_code != 200:
+            raise Exception(f&#34;LiteLLM error: {response.status_code} - {response.text}&#34;)
+        
+        return response.json()
+    
+    async def execute(
+        self,
+        task: str,
+        context: Optional[Dict[str, Any]] = None,
+        history: Optional[List[Dict[str, str]]] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Execute the agent with the given task.
+        
+        Args:
+            task: Task description
+            context: Additional context
+            history: Conversation history
+            
+        Returns:
+            ADKResult with execution outcome
+        &#34;&#34;&#34;
+        start_time = time.time()
+        self.logger.info(f&#34;Executing task: {task[:100]}...&#34;)
+        
+        for attempt in range(self.config.retry_attempts):
+            try:
+                messages = self._build_messages(task, context, history)
+                response = await self._call_litellm(messages)
+                
+                duration = time.time() - start_time
+                output = response[&#34;choices&#34;][0][&#34;message&#34;][&#34;content&#34;]
+                usage = response.get(&#34;usage&#34;, {})
+                
+                self.logger.info(f&#34;Task completed in {duration:.2f}s&#34;)
+                
+                return ADKResult(
+                    agent_name=self.config.name,
+                    status=&#34;success&#34;,
+                    output=output,
+                    model_used=response.get(&#34;model&#34;, self.config.model),
+                    tokens={
+                        &#34;prompt&#34;: usage.get(&#34;prompt_tokens&#34;, 0),
+                        &#34;completion&#34;: usage.get(&#34;completion_tokens&#34;, 0),
+                        &#34;total&#34;: usage.get(&#34;total_tokens&#34;, 0)
+                    },
+                    duration_seconds=duration,
+                    metadata={&#34;attempt&#34;: attempt + 1}
+                )
+                
+            except asyncio.TimeoutError:
+                self.logger.warning(f&#34;Attempt {attempt + 1} timed out&#34;)
+                if attempt &lt; self.config.retry_attempts - 1:
+                    await asyncio.sleep(self.config.retry_delay * (attempt + 1))
+                else:
+                    return ADKResult(
+                        agent_name=self.config.name,
+                        status=&#34;timeout&#34;,
+                        error=&#34;Request timed out after all retries&#34;,
+                        duration_seconds=time.time() - start_time
+                    )
+                    
+            except Exception as e:
+                self.logger.error(f&#34;Attempt {attempt + 1} failed: {e}&#34;)
+                if attempt &lt; self.config.retry_attempts - 1:
+                    await asyncio.sleep(self.config.retry_delay * (attempt + 1))
+                else:
+                    return ADKResult(
+                        agent_name=self.config.name,
+                        status=&#34;error&#34;,
+                        error=str(e),
+                        duration_seconds=time.time() - start_time
+                    )
+        
+        # Should not reach here
+        return ADKResult(
+            agent_name=self.config.name,
+            status=&#34;error&#34;,
+            error=&#34;Unknown error&#34;,
+            duration_seconds=time.time() - start_time
+        )
+    
+    async def execute_streaming(
+        self,
+        task: str,
+        context: Optional[Dict[str, Any]] = None,
+        callback: Optional[Callable[[str], None]] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Execute with streaming response.
+        
+        Args:
+            task: Task description
+            context: Additional context
+            callback: Callback for each chunk
+            
+        Returns:
+            ADKResult with full output
+        &#34;&#34;&#34;
+        start_time = time.time()
+        messages = self._build_messages(task, context)
+        
+        headers = {
+            &#34;Authorization&#34;: f&#34;Bearer {self.config.litellm_api_key}&#34;,
+            &#34;Content-Type&#34;: &#34;application/json&#34;,
+            &#34;X-Priority&#34;: self.config.priority.value
+        }
+        
+        payload = {
+            &#34;model&#34;: self.config.model,
+            &#34;messages&#34;: messages,
+            &#34;temperature&#34;: self.config.temperature,
+            &#34;max_tokens&#34;: self.config.max_tokens,
+            &#34;stream&#34;: True
+        }
+        
+        full_output = []
+        
+        async with self.client.stream(
+            &#34;POST&#34;,
+            f&#34;{self.config.litellm_url}/v1/chat/completions&#34;,
+            json=payload,
+            headers=headers
+        ) as response:
+            async for line in response.aiter_lines():
+                if line.startswith(&#34;data: &#34;):
+                    data = line[6:]
+                    if data == &#34;[DONE]&#34;:
+                        break
+                    try:
+                        chunk = json.loads(data)
+                        content = chunk[&#34;choices&#34;][0].get(&#34;delta&#34;, {}).get(&#34;content&#34;, &#34;&#34;)
+                        if content:
+                            full_output.append(content)
+                            if callback:
+                                callback(content)
+                    except (json.JSONDecodeError, KeyError, IndexError):
+                        pass
+        
+        return ADKResult(
+            agent_name=self.config.name,
+            status=&#34;success&#34;,
+            output=&#34;&#34;.join(full_output),
+            model_used=self.config.model,
+            duration_seconds=time.time() - start_time
+        )</code></pre>
+</details>
+<div class="desc"><p>Base class for Google ADK-wrapped agents.</p>
+<p>This class provides the foundation for creating agents that:
+- Use LiteLLM as the inference backend
+- Support priority-based GPU queuing
+- Integrate with Google ADK for orchestration
+- Provide evaluation capabilities</p>
+<p>Initialize ADK agent.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+<dt><strong><code>http_client</code></strong></dt>
+<dd>Optional shared HTTP client</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>abc.ABC</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="agents.agents.adk.base.ADKAgent.client"><code class="name">prop <span class="ident">client</span> : httpx.AsyncClient</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def client(self) -&gt; httpx.AsyncClient:
+    if self._client is None:
+        raise RuntimeError(&#34;Agent not initialized. Use async context manager.&#34;)
+    return self._client</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.adk.base.ADKAgent.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self,<br>task: str,<br>context: Dict[str, Any] | None = None,<br>history: List[Dict[str, str]] | None = None) ‑> <a title="agents.agents.adk.base.ADKResult" href="#agents.agents.adk.base.ADKResult">ADKResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def execute(
+    self,
+    task: str,
+    context: Optional[Dict[str, Any]] = None,
+    history: Optional[List[Dict[str, str]]] = None
+) -&gt; ADKResult:
+    &#34;&#34;&#34;Execute the agent with the given task.
+    
+    Args:
+        task: Task description
+        context: Additional context
+        history: Conversation history
+        
+    Returns:
+        ADKResult with execution outcome
+    &#34;&#34;&#34;
+    start_time = time.time()
+    self.logger.info(f&#34;Executing task: {task[:100]}...&#34;)
+    
+    for attempt in range(self.config.retry_attempts):
+        try:
+            messages = self._build_messages(task, context, history)
+            response = await self._call_litellm(messages)
+            
+            duration = time.time() - start_time
+            output = response[&#34;choices&#34;][0][&#34;message&#34;][&#34;content&#34;]
+            usage = response.get(&#34;usage&#34;, {})
+            
+            self.logger.info(f&#34;Task completed in {duration:.2f}s&#34;)
+            
+            return ADKResult(
+                agent_name=self.config.name,
+                status=&#34;success&#34;,
+                output=output,
+                model_used=response.get(&#34;model&#34;, self.config.model),
+                tokens={
+                    &#34;prompt&#34;: usage.get(&#34;prompt_tokens&#34;, 0),
+                    &#34;completion&#34;: usage.get(&#34;completion_tokens&#34;, 0),
+                    &#34;total&#34;: usage.get(&#34;total_tokens&#34;, 0)
+                },
+                duration_seconds=duration,
+                metadata={&#34;attempt&#34;: attempt + 1}
+            )
+            
+        except asyncio.TimeoutError:
+            self.logger.warning(f&#34;Attempt {attempt + 1} timed out&#34;)
+            if attempt &lt; self.config.retry_attempts - 1:
+                await asyncio.sleep(self.config.retry_delay * (attempt + 1))
+            else:
+                return ADKResult(
+                    agent_name=self.config.name,
+                    status=&#34;timeout&#34;,
+                    error=&#34;Request timed out after all retries&#34;,
+                    duration_seconds=time.time() - start_time
+                )
+                
+        except Exception as e:
+            self.logger.error(f&#34;Attempt {attempt + 1} failed: {e}&#34;)
+            if attempt &lt; self.config.retry_attempts - 1:
+                await asyncio.sleep(self.config.retry_delay * (attempt + 1))
+            else:
+                return ADKResult(
+                    agent_name=self.config.name,
+                    status=&#34;error&#34;,
+                    error=str(e),
+                    duration_seconds=time.time() - start_time
+                )
+    
+    # Should not reach here
+    return ADKResult(
+        agent_name=self.config.name,
+        status=&#34;error&#34;,
+        error=&#34;Unknown error&#34;,
+        duration_seconds=time.time() - start_time
+    )</code></pre>
+</details>
+<div class="desc"><p>Execute the agent with the given task.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task</code></strong></dt>
+<dd>Task description</dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>Additional context</dd>
+<dt><strong><code>history</code></strong></dt>
+<dd>Conversation history</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with execution outcome</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKAgent.execute_streaming"><code class="name flex">
+<span>async def <span class="ident">execute_streaming</span></span>(<span>self,<br>task: str,<br>context: Dict[str, Any] | None = None,<br>callback: Callable[[str], None] | None = None) ‑> <a title="agents.agents.adk.base.ADKResult" href="#agents.agents.adk.base.ADKResult">ADKResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def execute_streaming(
+    self,
+    task: str,
+    context: Optional[Dict[str, Any]] = None,
+    callback: Optional[Callable[[str], None]] = None
+) -&gt; ADKResult:
+    &#34;&#34;&#34;Execute with streaming response.
+    
+    Args:
+        task: Task description
+        context: Additional context
+        callback: Callback for each chunk
+        
+    Returns:
+        ADKResult with full output
+    &#34;&#34;&#34;
+    start_time = time.time()
+    messages = self._build_messages(task, context)
+    
+    headers = {
+        &#34;Authorization&#34;: f&#34;Bearer {self.config.litellm_api_key}&#34;,
+        &#34;Content-Type&#34;: &#34;application/json&#34;,
+        &#34;X-Priority&#34;: self.config.priority.value
+    }
+    
+    payload = {
+        &#34;model&#34;: self.config.model,
+        &#34;messages&#34;: messages,
+        &#34;temperature&#34;: self.config.temperature,
+        &#34;max_tokens&#34;: self.config.max_tokens,
+        &#34;stream&#34;: True
+    }
+    
+    full_output = []
+    
+    async with self.client.stream(
+        &#34;POST&#34;,
+        f&#34;{self.config.litellm_url}/v1/chat/completions&#34;,
+        json=payload,
+        headers=headers
+    ) as response:
+        async for line in response.aiter_lines():
+            if line.startswith(&#34;data: &#34;):
+                data = line[6:]
+                if data == &#34;[DONE]&#34;:
+                    break
+                try:
+                    chunk = json.loads(data)
+                    content = chunk[&#34;choices&#34;][0].get(&#34;delta&#34;, {}).get(&#34;content&#34;, &#34;&#34;)
+                    if content:
+                        full_output.append(content)
+                        if callback:
+                            callback(content)
+                except (json.JSONDecodeError, KeyError, IndexError):
+                    pass
+    
+    return ADKResult(
+        agent_name=self.config.name,
+        status=&#34;success&#34;,
+        output=&#34;&#34;.join(full_output),
+        model_used=self.config.model,
+        duration_seconds=time.time() - start_time
+    )</code></pre>
+</details>
+<div class="desc"><p>Execute with streaming response.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task</code></strong></dt>
+<dd>Task description</dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>Additional context</dd>
+<dt><strong><code>callback</code></strong></dt>
+<dd>Callback for each chunk</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with full output</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKAgent.get_agent_type"><code class="name flex">
+<span>def <span class="ident">get_agent_type</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abstractmethod
+def get_agent_type(self) -&gt; str:
+    &#34;&#34;&#34;Get the agent type identifier.
+    
+    Returns:
+        Agent type string (e.g., &#39;development&#39;, &#39;code_review&#39;)
+    &#34;&#34;&#34;
+    raise NotImplementedError</code></pre>
+</details>
+<div class="desc"><p>Get the agent type identifier.</p>
+<h2 id="returns">Returns</h2>
+<p>Agent type string (e.g., 'development', 'code_review')</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKAgent.get_system_prompt"><code class="name flex">
+<span>def <span class="ident">get_system_prompt</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abstractmethod
+def get_system_prompt(self) -&gt; str:
+    &#34;&#34;&#34;Get the system prompt for this agent type.
+    
+    Returns:
+        System prompt string
+    &#34;&#34;&#34;
+    raise NotImplementedError</code></pre>
+</details>
+<div class="desc"><p>Get the system prompt for this agent type.</p>
+<h2 id="returns">Returns</h2>
+<p>System prompt string</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.base.ADKConfig"><code class="flex name class">
+<span>class <span class="ident">ADKConfig</span></span>
+<span>(</span><span>name: str,<br>model: str = 'qwen2.5-coder:14b',<br>litellm_url: str = 'http://localhost:4000',<br>litellm_api_key: str = '',<br>temperature: float = 0.7,<br>max_tokens: int = 4096,<br>timeout: int = 300,<br>priority: <a title="agents.agents.adk.base.AgentPriority" href="#agents.agents.adk.base.AgentPriority">AgentPriority</a> = AgentPriority.NORMAL,<br>system_prompt: str | None = None,<br>retry_attempts: int = 3,<br>retry_delay: float = 1.0,<br>metadata: Dict[str, Any] = &lt;factory&gt;)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class ADKConfig:
+    &#34;&#34;&#34;Configuration for ADK agents.
+    
+    Attributes:
+        name: Agent name for identification
+        model: LLM model to use (routed via LiteLLM)
+        litellm_url: LiteLLM proxy URL
+        litellm_api_key: API key for LiteLLM
+        temperature: Sampling temperature (0-2)
+        max_tokens: Maximum tokens for generation
+        timeout: Request timeout in seconds
+        priority: Queue priority level
+        system_prompt: Custom system prompt override
+        retry_attempts: Number of retries on failure
+        retry_delay: Delay between retries in seconds
+    &#34;&#34;&#34;
+    name: str
+    model: str = &#34;qwen2.5-coder:14b&#34;
+    litellm_url: str = &#34;http://localhost:4000&#34;
+    litellm_api_key: str = &#34;&#34;
+    temperature: float = 0.7
+    max_tokens: int = 4096
+    timeout: int = 300
+    priority: AgentPriority = AgentPriority.NORMAL
+    system_prompt: Optional[str] = None
+    retry_attempts: int = 3
+    retry_delay: float = 1.0
+    metadata: Dict[str, Any] = field(default_factory=dict)</code></pre>
+</details>
+<div class="desc"><p>Configuration for ADK agents.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>Agent name for identification</dd>
+<dt><strong><code>model</code></strong></dt>
+<dd>LLM model to use (routed via LiteLLM)</dd>
+<dt><strong><code>litellm_url</code></strong></dt>
+<dd>LiteLLM proxy URL</dd>
+<dt><strong><code>litellm_api_key</code></strong></dt>
+<dd>API key for LiteLLM</dd>
+<dt><strong><code>temperature</code></strong></dt>
+<dd>Sampling temperature (0-2)</dd>
+<dt><strong><code>max_tokens</code></strong></dt>
+<dd>Maximum tokens for generation</dd>
+<dt><strong><code>timeout</code></strong></dt>
+<dd>Request timeout in seconds</dd>
+<dt><strong><code>priority</code></strong></dt>
+<dd>Queue priority level</dd>
+<dt><strong><code>system_prompt</code></strong></dt>
+<dd>Custom system prompt override</dd>
+<dt><strong><code>retry_attempts</code></strong></dt>
+<dd>Number of retries on failure</dd>
+<dt><strong><code>retry_delay</code></strong></dt>
+<dd>Delay between retries in seconds</dd>
+</dl></div>
+<h3>Instance variables</h3>
+<dl>
+<dt id="agents.agents.adk.base.ADKConfig.litellm_api_key"><code class="name">var <span class="ident">litellm_api_key</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKConfig.litellm_url"><code class="name">var <span class="ident">litellm_url</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKConfig.max_tokens"><code class="name">var <span class="ident">max_tokens</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKConfig.metadata"><code class="name">var <span class="ident">metadata</span> : Dict[str, Any]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKConfig.model"><code class="name">var <span class="ident">model</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKConfig.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKConfig.priority"><code class="name">var <span class="ident">priority</span> : <a title="agents.agents.adk.base.AgentPriority" href="#agents.agents.adk.base.AgentPriority">AgentPriority</a></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKConfig.retry_attempts"><code class="name">var <span class="ident">retry_attempts</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKConfig.retry_delay"><code class="name">var <span class="ident">retry_delay</span> : float</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKConfig.system_prompt"><code class="name">var <span class="ident">system_prompt</span> : str | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKConfig.temperature"><code class="name">var <span class="ident">temperature</span> : float</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKConfig.timeout"><code class="name">var <span class="ident">timeout</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.base.ADKResult"><code class="flex name class">
+<span>class <span class="ident">ADKResult</span></span>
+<span>(</span><span>agent_name: str,<br>status: str,<br>output: str | None = None,<br>model_used: str | None = None,<br>tokens: Dict[str, int] | None = None,<br>duration_seconds: float | None = None,<br>error: str | None = None,<br>metadata: Dict[str, Any] = &lt;factory&gt;)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class ADKResult:
+    &#34;&#34;&#34;Result from ADK agent execution.
+    
+    Attributes:
+        agent_name: Name of the agent
+        status: Execution status (success, error, timeout)
+        output: Agent output content
+        model_used: Actual model used
+        tokens: Token usage statistics
+        duration_seconds: Execution duration
+        error: Error message if failed
+        metadata: Additional result metadata
+    &#34;&#34;&#34;
+    agent_name: str
+    status: str
+    output: Optional[str] = None
+    model_used: Optional[str] = None
+    tokens: Optional[Dict[str, int]] = None
+    duration_seconds: Optional[float] = None
+    error: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    
+    @property
+    def is_success(self) -&gt; bool:
+        return self.status == &#34;success&#34;</code></pre>
+</details>
+<div class="desc"><p>Result from ADK agent execution.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>agent_name</code></strong></dt>
+<dd>Name of the agent</dd>
+<dt><strong><code>status</code></strong></dt>
+<dd>Execution status (success, error, timeout)</dd>
+<dt><strong><code>output</code></strong></dt>
+<dd>Agent output content</dd>
+<dt><strong><code>model_used</code></strong></dt>
+<dd>Actual model used</dd>
+<dt><strong><code>tokens</code></strong></dt>
+<dd>Token usage statistics</dd>
+<dt><strong><code>duration_seconds</code></strong></dt>
+<dd>Execution duration</dd>
+<dt><strong><code>error</code></strong></dt>
+<dd>Error message if failed</dd>
+<dt><strong><code>metadata</code></strong></dt>
+<dd>Additional result metadata</dd>
+</dl></div>
+<h3>Instance variables</h3>
+<dl>
+<dt id="agents.agents.adk.base.ADKResult.agent_name"><code class="name">var <span class="ident">agent_name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKResult.duration_seconds"><code class="name">var <span class="ident">duration_seconds</span> : float | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKResult.error"><code class="name">var <span class="ident">error</span> : str | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKResult.is_success"><code class="name">prop <span class="ident">is_success</span> : bool</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def is_success(self) -&gt; bool:
+    return self.status == &#34;success&#34;</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKResult.metadata"><code class="name">var <span class="ident">metadata</span> : Dict[str, Any]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKResult.model_used"><code class="name">var <span class="ident">model_used</span> : str | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKResult.output"><code class="name">var <span class="ident">output</span> : str | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKResult.status"><code class="name">var <span class="ident">status</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.ADKResult.tokens"><code class="name">var <span class="ident">tokens</span> : Dict[str, int] | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.base.AgentPriority"><code class="flex name class">
+<span>class <span class="ident">AgentPriority</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AgentPriority(str, Enum):
+    &#34;&#34;&#34;Request priority levels for GPU queue.&#34;&#34;&#34;
+    HIGH = &#34;high&#34;
+    NORMAL = &#34;normal&#34;
+    LOW = &#34;low&#34;</code></pre>
+</details>
+<div class="desc"><p>Request priority levels for GPU queue.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="agents.agents.adk.base.AgentPriority.HIGH"><code class="name">var <span class="ident">HIGH</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.AgentPriority.LOW"><code class="name">var <span class="ident">LOW</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.base.AgentPriority.NORMAL"><code class="name">var <span class="ident">NORMAL</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="agents.agents.adk" href="index.html">agents.agents.adk</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="agents.agents.adk.base.ADKAgent" href="#agents.agents.adk.base.ADKAgent">ADKAgent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.base.ADKAgent.client" href="#agents.agents.adk.base.ADKAgent.client">client</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKAgent.execute" href="#agents.agents.adk.base.ADKAgent.execute">execute</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKAgent.execute_streaming" href="#agents.agents.adk.base.ADKAgent.execute_streaming">execute_streaming</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKAgent.get_agent_type" href="#agents.agents.adk.base.ADKAgent.get_agent_type">get_agent_type</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKAgent.get_system_prompt" href="#agents.agents.adk.base.ADKAgent.get_system_prompt">get_system_prompt</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.base.ADKConfig" href="#agents.agents.adk.base.ADKConfig">ADKConfig</a></code></h4>
+<ul class="two-column">
+<li><code><a title="agents.agents.adk.base.ADKConfig.litellm_api_key" href="#agents.agents.adk.base.ADKConfig.litellm_api_key">litellm_api_key</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKConfig.litellm_url" href="#agents.agents.adk.base.ADKConfig.litellm_url">litellm_url</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKConfig.max_tokens" href="#agents.agents.adk.base.ADKConfig.max_tokens">max_tokens</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKConfig.metadata" href="#agents.agents.adk.base.ADKConfig.metadata">metadata</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKConfig.model" href="#agents.agents.adk.base.ADKConfig.model">model</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKConfig.name" href="#agents.agents.adk.base.ADKConfig.name">name</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKConfig.priority" href="#agents.agents.adk.base.ADKConfig.priority">priority</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKConfig.retry_attempts" href="#agents.agents.adk.base.ADKConfig.retry_attempts">retry_attempts</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKConfig.retry_delay" href="#agents.agents.adk.base.ADKConfig.retry_delay">retry_delay</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKConfig.system_prompt" href="#agents.agents.adk.base.ADKConfig.system_prompt">system_prompt</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKConfig.temperature" href="#agents.agents.adk.base.ADKConfig.temperature">temperature</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKConfig.timeout" href="#agents.agents.adk.base.ADKConfig.timeout">timeout</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.base.ADKResult" href="#agents.agents.adk.base.ADKResult">ADKResult</a></code></h4>
+<ul class="two-column">
+<li><code><a title="agents.agents.adk.base.ADKResult.agent_name" href="#agents.agents.adk.base.ADKResult.agent_name">agent_name</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKResult.duration_seconds" href="#agents.agents.adk.base.ADKResult.duration_seconds">duration_seconds</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKResult.error" href="#agents.agents.adk.base.ADKResult.error">error</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKResult.is_success" href="#agents.agents.adk.base.ADKResult.is_success">is_success</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKResult.metadata" href="#agents.agents.adk.base.ADKResult.metadata">metadata</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKResult.model_used" href="#agents.agents.adk.base.ADKResult.model_used">model_used</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKResult.output" href="#agents.agents.adk.base.ADKResult.output">output</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKResult.status" href="#agents.agents.adk.base.ADKResult.status">status</a></code></li>
+<li><code><a title="agents.agents.adk.base.ADKResult.tokens" href="#agents.agents.adk.base.ADKResult.tokens">tokens</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.base.AgentPriority" href="#agents.agents.adk.base.AgentPriority">AgentPriority</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.base.AgentPriority.HIGH" href="#agents.agents.adk.base.AgentPriority.HIGH">HIGH</a></code></li>
+<li><code><a title="agents.agents.adk.base.AgentPriority.LOW" href="#agents.agents.adk.base.AgentPriority.LOW">LOW</a></code></li>
+<li><code><a title="agents.agents.adk.base.AgentPriority.NORMAL" href="#agents.agents.adk.base.AgentPriority.NORMAL">NORMAL</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

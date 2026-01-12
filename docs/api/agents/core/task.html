@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>agents.core.task API documentation</title>
+<meta name="description" content="Task management and execution.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>agents.core.task</code></h1>
+</header>
+<section id="section-intro">
+<p>Task management and execution.</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="agents.core.task.Task"><code class="flex name class">
+<span>class <span class="ident">Task</span></span>
+<span>(</span><span>config: <a title="agents.core.task.TaskConfig" href="#agents.core.task.TaskConfig">TaskConfig</a>,<br>payload: Dict[str, Any])</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Task:
+    &#34;&#34;&#34;Represents a task to be executed by agents.
+
+    Tasks encapsulate work items that can be assigned to one or more agents.
+    They support dependencies, priorities, and retry logic.
+    &#34;&#34;&#34;
+
+    def __init__(self, config: TaskConfig, payload: Dict[str, Any]):
+        &#34;&#34;&#34;Initialize task.
+
+        Args:
+            config: Task configuration
+            payload: Task payload/input data
+        &#34;&#34;&#34;
+        self.task_id = str(uuid.uuid4())
+        self.config = config
+        self.payload = payload
+        self.status = TaskStatus.PENDING
+        self.result: Optional[TaskResult] = None
+        self.logger = logging.getLogger(f&#34;{__name__}.{config.name}&#34;)
+
+    def can_execute(self, completed_tasks: List[str]) -&gt; bool:
+        &#34;&#34;&#34;Check if task dependencies are satisfied.
+
+        Args:
+            completed_tasks: List of completed task IDs
+
+        Returns:
+            True if all dependencies are satisfied
+        &#34;&#34;&#34;
+        if not self.config.dependencies:
+            return True
+        return all(dep_id in completed_tasks for dep_id in self.config.dependencies)
+
+    def mark_running(self) -&gt; None:
+        &#34;&#34;&#34;Mark task as running.&#34;&#34;&#34;
+        self.status = TaskStatus.RUNNING
+        self.logger.info(f&#34;Task {self.config.name} started&#34;)
+
+    def mark_completed(self, output: Any, agent_results: List[Any]) -&gt; TaskResult:
+        &#34;&#34;&#34;Mark task as completed.
+
+        Args:
+            output: Task output
+            agent_results: Results from agents
+
+        Returns:
+            TaskResult instance
+        &#34;&#34;&#34;
+        self.status = TaskStatus.COMPLETED
+        self.result = TaskResult(
+            task_id=self.task_id,
+            task_name=self.config.name,
+            status=TaskStatus.COMPLETED,
+            output=output,
+            agent_results=agent_results,
+        )
+        self.logger.info(f&#34;Task {self.config.name} completed successfully&#34;)
+        return self.result
+
+    def mark_failed(self, error: str, agent_results: Optional[List[Any]] = None) -&gt; TaskResult:
+        &#34;&#34;&#34;Mark task as failed.
+
+        Args:
+            error: Error message
+            agent_results: Optional agent results
+
+        Returns:
+            TaskResult instance
+        &#34;&#34;&#34;
+        self.status = TaskStatus.FAILED
+        self.result = TaskResult(
+            task_id=self.task_id,
+            task_name=self.config.name,
+            status=TaskStatus.FAILED,
+            error=error,
+            agent_results=agent_results or [],
+        )
+        self.logger.error(f&#34;Task {self.config.name} failed: {error}&#34;)
+        return self.result
+
+    def should_retry(self) -&gt; bool:
+        &#34;&#34;&#34;Check if task should be retried.
+
+        Returns:
+            True if task should be retried
+        &#34;&#34;&#34;
+        if not self.config.retry_on_failure:
+            return False
+        if not self.result:
+            return False
+        return self.result.retry_count &lt; self.config.max_retries</code></pre>
+</details>
+<div class="desc"><p>Represents a task to be executed by agents.</p>
+<p>Tasks encapsulate work items that can be assigned to one or more agents.
+They support dependencies, priorities, and retry logic.</p>
+<p>Initialize task.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Task configuration</dd>
+<dt><strong><code>payload</code></strong></dt>
+<dd>Task payload/input data</dd>
+</dl></div>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.core.task.Task.can_execute"><code class="name flex">
+<span>def <span class="ident">can_execute</span></span>(<span>self, completed_tasks: List[str]) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def can_execute(self, completed_tasks: List[str]) -&gt; bool:
+    &#34;&#34;&#34;Check if task dependencies are satisfied.
+
+    Args:
+        completed_tasks: List of completed task IDs
+
+    Returns:
+        True if all dependencies are satisfied
+    &#34;&#34;&#34;
+    if not self.config.dependencies:
+        return True
+    return all(dep_id in completed_tasks for dep_id in self.config.dependencies)</code></pre>
+</details>
+<div class="desc"><p>Check if task dependencies are satisfied.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>completed_tasks</code></strong></dt>
+<dd>List of completed task IDs</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>True if all dependencies are satisfied</p></div>
+</dd>
+<dt id="agents.core.task.Task.mark_completed"><code class="name flex">
+<span>def <span class="ident">mark_completed</span></span>(<span>self, output: Any, agent_results: List[Any]) ‑> <a title="agents.core.task.TaskResult" href="#agents.core.task.TaskResult">TaskResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mark_completed(self, output: Any, agent_results: List[Any]) -&gt; TaskResult:
+    &#34;&#34;&#34;Mark task as completed.
+
+    Args:
+        output: Task output
+        agent_results: Results from agents
+
+    Returns:
+        TaskResult instance
+    &#34;&#34;&#34;
+    self.status = TaskStatus.COMPLETED
+    self.result = TaskResult(
+        task_id=self.task_id,
+        task_name=self.config.name,
+        status=TaskStatus.COMPLETED,
+        output=output,
+        agent_results=agent_results,
+    )
+    self.logger.info(f&#34;Task {self.config.name} completed successfully&#34;)
+    return self.result</code></pre>
+</details>
+<div class="desc"><p>Mark task as completed.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>output</code></strong></dt>
+<dd>Task output</dd>
+<dt><strong><code>agent_results</code></strong></dt>
+<dd>Results from agents</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>TaskResult instance</p></div>
+</dd>
+<dt id="agents.core.task.Task.mark_failed"><code class="name flex">
+<span>def <span class="ident">mark_failed</span></span>(<span>self, error: str, agent_results: List[Any] | None = None) ‑> <a title="agents.core.task.TaskResult" href="#agents.core.task.TaskResult">TaskResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mark_failed(self, error: str, agent_results: Optional[List[Any]] = None) -&gt; TaskResult:
+    &#34;&#34;&#34;Mark task as failed.
+
+    Args:
+        error: Error message
+        agent_results: Optional agent results
+
+    Returns:
+        TaskResult instance
+    &#34;&#34;&#34;
+    self.status = TaskStatus.FAILED
+    self.result = TaskResult(
+        task_id=self.task_id,
+        task_name=self.config.name,
+        status=TaskStatus.FAILED,
+        error=error,
+        agent_results=agent_results or [],
+    )
+    self.logger.error(f&#34;Task {self.config.name} failed: {error}&#34;)
+    return self.result</code></pre>
+</details>
+<div class="desc"><p>Mark task as failed.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>error</code></strong></dt>
+<dd>Error message</dd>
+<dt><strong><code>agent_results</code></strong></dt>
+<dd>Optional agent results</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>TaskResult instance</p></div>
+</dd>
+<dt id="agents.core.task.Task.mark_running"><code class="name flex">
+<span>def <span class="ident">mark_running</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mark_running(self) -&gt; None:
+    &#34;&#34;&#34;Mark task as running.&#34;&#34;&#34;
+    self.status = TaskStatus.RUNNING
+    self.logger.info(f&#34;Task {self.config.name} started&#34;)</code></pre>
+</details>
+<div class="desc"><p>Mark task as running.</p></div>
+</dd>
+<dt id="agents.core.task.Task.should_retry"><code class="name flex">
+<span>def <span class="ident">should_retry</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def should_retry(self) -&gt; bool:
+    &#34;&#34;&#34;Check if task should be retried.
+
+    Returns:
+        True if task should be retried
+    &#34;&#34;&#34;
+    if not self.config.retry_on_failure:
+        return False
+    if not self.result:
+        return False
+    return self.result.retry_count &lt; self.config.max_retries</code></pre>
+</details>
+<div class="desc"><p>Check if task should be retried.</p>
+<h2 id="returns">Returns</h2>
+<p>True if task should be retried</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.core.task.TaskConfig"><code class="flex name class">
+<span>class <span class="ident">TaskConfig</span></span>
+<span>(</span><span>name: str,<br>description: str,<br>priority: <a title="agents.core.task.TaskPriority" href="#agents.core.task.TaskPriority">TaskPriority</a> = TaskPriority.NORMAL,<br>timeout_seconds: int = 300,<br>retry_on_failure: bool = True,<br>max_retries: int = 3,<br>required_agents: List[str] = &lt;factory&gt;,<br>dependencies: List[str] = &lt;factory&gt;,<br>metadata: Dict[str, Any] = &lt;factory&gt;)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class TaskConfig:
+    &#34;&#34;&#34;Configuration for a task.
+
+    Attributes:
+        name: Task name
+        description: Task description
+        priority: Task priority
+        timeout_seconds: Task timeout
+        retry_on_failure: Whether to retry on failure
+        max_retries: Maximum retry attempts
+        required_agents: List of required agent types
+        dependencies: List of task IDs this task depends on
+        metadata: Additional task metadata
+    &#34;&#34;&#34;
+
+    name: str
+    description: str
+    priority: TaskPriority = TaskPriority.NORMAL
+    timeout_seconds: int = 300
+    retry_on_failure: bool = True
+    max_retries: int = 3
+    required_agents: List[str] = field(default_factory=list)
+    dependencies: List[str] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)</code></pre>
+</details>
+<div class="desc"><p>Configuration for a task.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>Task name</dd>
+<dt><strong><code>description</code></strong></dt>
+<dd>Task description</dd>
+<dt><strong><code>priority</code></strong></dt>
+<dd>Task priority</dd>
+<dt><strong><code>timeout_seconds</code></strong></dt>
+<dd>Task timeout</dd>
+<dt><strong><code>retry_on_failure</code></strong></dt>
+<dd>Whether to retry on failure</dd>
+<dt><strong><code>max_retries</code></strong></dt>
+<dd>Maximum retry attempts</dd>
+<dt><strong><code>required_agents</code></strong></dt>
+<dd>List of required agent types</dd>
+<dt><strong><code>dependencies</code></strong></dt>
+<dd>List of task IDs this task depends on</dd>
+<dt><strong><code>metadata</code></strong></dt>
+<dd>Additional task metadata</dd>
+</dl></div>
+<h3>Instance variables</h3>
+<dl>
+<dt id="agents.core.task.TaskConfig.dependencies"><code class="name">var <span class="ident">dependencies</span> : List[str]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskConfig.description"><code class="name">var <span class="ident">description</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskConfig.max_retries"><code class="name">var <span class="ident">max_retries</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskConfig.metadata"><code class="name">var <span class="ident">metadata</span> : Dict[str, Any]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskConfig.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskConfig.priority"><code class="name">var <span class="ident">priority</span> : <a title="agents.core.task.TaskPriority" href="#agents.core.task.TaskPriority">TaskPriority</a></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskConfig.required_agents"><code class="name">var <span class="ident">required_agents</span> : List[str]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskConfig.retry_on_failure"><code class="name">var <span class="ident">retry_on_failure</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskConfig.timeout_seconds"><code class="name">var <span class="ident">timeout_seconds</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.core.task.TaskPriority"><code class="flex name class">
+<span>class <span class="ident">TaskPriority</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TaskPriority(str, Enum):
+    &#34;&#34;&#34;Task priority levels.&#34;&#34;&#34;
+
+    LOW = &#34;low&#34;
+    NORMAL = &#34;normal&#34;
+    HIGH = &#34;high&#34;
+    CRITICAL = &#34;critical&#34;</code></pre>
+</details>
+<div class="desc"><p>Task priority levels.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="agents.core.task.TaskPriority.CRITICAL"><code class="name">var <span class="ident">CRITICAL</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskPriority.HIGH"><code class="name">var <span class="ident">HIGH</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskPriority.LOW"><code class="name">var <span class="ident">LOW</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskPriority.NORMAL"><code class="name">var <span class="ident">NORMAL</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.core.task.TaskResult"><code class="flex name class">
+<span>class <span class="ident">TaskResult</span></span>
+<span>(</span><span>task_id: str,<br>task_name: str,<br>status: <a title="agents.core.task.TaskStatus" href="#agents.core.task.TaskStatus">TaskStatus</a>,<br>output: Any | None = None,<br>error: str | None = None,<br>agent_results: List[Any] = &lt;factory&gt;,<br>started_at: datetime.datetime | None = None,<br>completed_at: datetime.datetime | None = None,<br>duration_seconds: float | None = None,<br>retry_count: int = 0)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class TaskResult:
+    &#34;&#34;&#34;Result from task execution.
+
+    Attributes:
+        task_id: Unique task ID
+        task_name: Task name
+        status: Task status
+        output: Task output
+        error: Error message if failed
+        agent_results: Results from agents that executed this task
+        started_at: Start timestamp
+        completed_at: Completion timestamp
+        duration_seconds: Execution duration
+        retry_count: Number of retries
+    &#34;&#34;&#34;
+
+    task_id: str
+    task_name: str
+    status: TaskStatus
+    output: Optional[Any] = None
+    error: Optional[str] = None
+    agent_results: List[Any] = field(default_factory=list)
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    duration_seconds: Optional[float] = None
+    retry_count: int = 0
+
+    def is_success(self) -&gt; bool:
+        &#34;&#34;&#34;Check if task completed successfully.&#34;&#34;&#34;
+        return self.status == TaskStatus.COMPLETED
+
+    def is_failure(self) -&gt; bool:
+        &#34;&#34;&#34;Check if task failed.&#34;&#34;&#34;
+        return self.status == TaskStatus.FAILED</code></pre>
+</details>
+<div class="desc"><p>Result from task execution.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>task_id</code></strong></dt>
+<dd>Unique task ID</dd>
+<dt><strong><code>task_name</code></strong></dt>
+<dd>Task name</dd>
+<dt><strong><code>status</code></strong></dt>
+<dd>Task status</dd>
+<dt><strong><code>output</code></strong></dt>
+<dd>Task output</dd>
+<dt><strong><code>error</code></strong></dt>
+<dd>Error message if failed</dd>
+<dt><strong><code>agent_results</code></strong></dt>
+<dd>Results from agents that executed this task</dd>
+<dt><strong><code>started_at</code></strong></dt>
+<dd>Start timestamp</dd>
+<dt><strong><code>completed_at</code></strong></dt>
+<dd>Completion timestamp</dd>
+<dt><strong><code>duration_seconds</code></strong></dt>
+<dd>Execution duration</dd>
+<dt><strong><code>retry_count</code></strong></dt>
+<dd>Number of retries</dd>
+</dl></div>
+<h3>Instance variables</h3>
+<dl>
+<dt id="agents.core.task.TaskResult.agent_results"><code class="name">var <span class="ident">agent_results</span> : List[Any]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskResult.completed_at"><code class="name">var <span class="ident">completed_at</span> : datetime.datetime | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskResult.duration_seconds"><code class="name">var <span class="ident">duration_seconds</span> : float | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskResult.error"><code class="name">var <span class="ident">error</span> : str | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskResult.output"><code class="name">var <span class="ident">output</span> : Any | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskResult.retry_count"><code class="name">var <span class="ident">retry_count</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskResult.started_at"><code class="name">var <span class="ident">started_at</span> : datetime.datetime | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskResult.status"><code class="name">var <span class="ident">status</span> : <a title="agents.core.task.TaskStatus" href="#agents.core.task.TaskStatus">TaskStatus</a></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskResult.task_id"><code class="name">var <span class="ident">task_id</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskResult.task_name"><code class="name">var <span class="ident">task_name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.core.task.TaskResult.is_failure"><code class="name flex">
+<span>def <span class="ident">is_failure</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_failure(self) -&gt; bool:
+    &#34;&#34;&#34;Check if task failed.&#34;&#34;&#34;
+    return self.status == TaskStatus.FAILED</code></pre>
+</details>
+<div class="desc"><p>Check if task failed.</p></div>
+</dd>
+<dt id="agents.core.task.TaskResult.is_success"><code class="name flex">
+<span>def <span class="ident">is_success</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_success(self) -&gt; bool:
+    &#34;&#34;&#34;Check if task completed successfully.&#34;&#34;&#34;
+    return self.status == TaskStatus.COMPLETED</code></pre>
+</details>
+<div class="desc"><p>Check if task completed successfully.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.core.task.TaskStatus"><code class="flex name class">
+<span>class <span class="ident">TaskStatus</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TaskStatus(str, Enum):
+    &#34;&#34;&#34;Task execution status.&#34;&#34;&#34;
+
+    PENDING = &#34;pending&#34;
+    RUNNING = &#34;running&#34;
+    COMPLETED = &#34;completed&#34;
+    FAILED = &#34;failed&#34;
+    SKIPPED = &#34;skipped&#34;
+    CANCELLED = &#34;cancelled&#34;</code></pre>
+</details>
+<div class="desc"><p>Task execution status.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="agents.core.task.TaskStatus.CANCELLED"><code class="name">var <span class="ident">CANCELLED</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskStatus.COMPLETED"><code class="name">var <span class="ident">COMPLETED</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskStatus.FAILED"><code class="name">var <span class="ident">FAILED</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskStatus.PENDING"><code class="name">var <span class="ident">PENDING</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskStatus.RUNNING"><code class="name">var <span class="ident">RUNNING</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.task.TaskStatus.SKIPPED"><code class="name">var <span class="ident">SKIPPED</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="agents.core" href="index.html">agents.core</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="agents.core.task.Task" href="#agents.core.task.Task">Task</a></code></h4>
+<ul class="">
+<li><code><a title="agents.core.task.Task.can_execute" href="#agents.core.task.Task.can_execute">can_execute</a></code></li>
+<li><code><a title="agents.core.task.Task.mark_completed" href="#agents.core.task.Task.mark_completed">mark_completed</a></code></li>
+<li><code><a title="agents.core.task.Task.mark_failed" href="#agents.core.task.Task.mark_failed">mark_failed</a></code></li>
+<li><code><a title="agents.core.task.Task.mark_running" href="#agents.core.task.Task.mark_running">mark_running</a></code></li>
+<li><code><a title="agents.core.task.Task.should_retry" href="#agents.core.task.Task.should_retry">should_retry</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.core.task.TaskConfig" href="#agents.core.task.TaskConfig">TaskConfig</a></code></h4>
+<ul class="two-column">
+<li><code><a title="agents.core.task.TaskConfig.dependencies" href="#agents.core.task.TaskConfig.dependencies">dependencies</a></code></li>
+<li><code><a title="agents.core.task.TaskConfig.description" href="#agents.core.task.TaskConfig.description">description</a></code></li>
+<li><code><a title="agents.core.task.TaskConfig.max_retries" href="#agents.core.task.TaskConfig.max_retries">max_retries</a></code></li>
+<li><code><a title="agents.core.task.TaskConfig.metadata" href="#agents.core.task.TaskConfig.metadata">metadata</a></code></li>
+<li><code><a title="agents.core.task.TaskConfig.name" href="#agents.core.task.TaskConfig.name">name</a></code></li>
+<li><code><a title="agents.core.task.TaskConfig.priority" href="#agents.core.task.TaskConfig.priority">priority</a></code></li>
+<li><code><a title="agents.core.task.TaskConfig.required_agents" href="#agents.core.task.TaskConfig.required_agents">required_agents</a></code></li>
+<li><code><a title="agents.core.task.TaskConfig.retry_on_failure" href="#agents.core.task.TaskConfig.retry_on_failure">retry_on_failure</a></code></li>
+<li><code><a title="agents.core.task.TaskConfig.timeout_seconds" href="#agents.core.task.TaskConfig.timeout_seconds">timeout_seconds</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.core.task.TaskPriority" href="#agents.core.task.TaskPriority">TaskPriority</a></code></h4>
+<ul class="">
+<li><code><a title="agents.core.task.TaskPriority.CRITICAL" href="#agents.core.task.TaskPriority.CRITICAL">CRITICAL</a></code></li>
+<li><code><a title="agents.core.task.TaskPriority.HIGH" href="#agents.core.task.TaskPriority.HIGH">HIGH</a></code></li>
+<li><code><a title="agents.core.task.TaskPriority.LOW" href="#agents.core.task.TaskPriority.LOW">LOW</a></code></li>
+<li><code><a title="agents.core.task.TaskPriority.NORMAL" href="#agents.core.task.TaskPriority.NORMAL">NORMAL</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.core.task.TaskResult" href="#agents.core.task.TaskResult">TaskResult</a></code></h4>
+<ul class="two-column">
+<li><code><a title="agents.core.task.TaskResult.agent_results" href="#agents.core.task.TaskResult.agent_results">agent_results</a></code></li>
+<li><code><a title="agents.core.task.TaskResult.completed_at" href="#agents.core.task.TaskResult.completed_at">completed_at</a></code></li>
+<li><code><a title="agents.core.task.TaskResult.duration_seconds" href="#agents.core.task.TaskResult.duration_seconds">duration_seconds</a></code></li>
+<li><code><a title="agents.core.task.TaskResult.error" href="#agents.core.task.TaskResult.error">error</a></code></li>
+<li><code><a title="agents.core.task.TaskResult.is_failure" href="#agents.core.task.TaskResult.is_failure">is_failure</a></code></li>
+<li><code><a title="agents.core.task.TaskResult.is_success" href="#agents.core.task.TaskResult.is_success">is_success</a></code></li>
+<li><code><a title="agents.core.task.TaskResult.output" href="#agents.core.task.TaskResult.output">output</a></code></li>
+<li><code><a title="agents.core.task.TaskResult.retry_count" href="#agents.core.task.TaskResult.retry_count">retry_count</a></code></li>
+<li><code><a title="agents.core.task.TaskResult.started_at" href="#agents.core.task.TaskResult.started_at">started_at</a></code></li>
+<li><code><a title="agents.core.task.TaskResult.status" href="#agents.core.task.TaskResult.status">status</a></code></li>
+<li><code><a title="agents.core.task.TaskResult.task_id" href="#agents.core.task.TaskResult.task_id">task_id</a></code></li>
+<li><code><a title="agents.core.task.TaskResult.task_name" href="#agents.core.task.TaskResult.task_name">task_name</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.core.task.TaskStatus" href="#agents.core.task.TaskStatus">TaskStatus</a></code></h4>
+<ul class="two-column">
+<li><code><a title="agents.core.task.TaskStatus.CANCELLED" href="#agents.core.task.TaskStatus.CANCELLED">CANCELLED</a></code></li>
+<li><code><a title="agents.core.task.TaskStatus.COMPLETED" href="#agents.core.task.TaskStatus.COMPLETED">COMPLETED</a></code></li>
+<li><code><a title="agents.core.task.TaskStatus.FAILED" href="#agents.core.task.TaskStatus.FAILED">FAILED</a></code></li>
+<li><code><a title="agents.core.task.TaskStatus.PENDING" href="#agents.core.task.TaskStatus.PENDING">PENDING</a></code></li>
+<li><code><a title="agents.core.task.TaskStatus.RUNNING" href="#agents.core.task.TaskStatus.RUNNING">RUNNING</a></code></li>
+<li><code><a title="agents.core.task.TaskStatus.SKIPPED" href="#agents.core.task.TaskStatus.SKIPPED">SKIPPED</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

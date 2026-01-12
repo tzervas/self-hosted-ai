@@ -157,6 +157,46 @@ services:
       - full
       - api-gateway
 
+  # Automatic1111 Stable Diffusion WebUI - GPU-based image generation
+  # Alternative to ComfyUI with user-friendly interface and extensive extensions
+  automatic1111:
+    image: automatic1111/stable-diffusion-webui:latest
+    container_name: automatic1111-server
+    ports:
+      - "${AUTOMATIC1111_PORT:-7860}:7860"
+    volumes:
+      # Shared model storage (mount from host or shared volume)
+      - ${DATA_PATH:-/data}/models:/app/stable-diffusion-webui/models
+      # A1111-specific outputs and configurations
+      - ${DATA_PATH:-/data}/automatic1111/outputs:/app/stable-diffusion-webui/outputs
+      - ${DATA_PATH:-/data}/automatic1111/configs:/app/stable-diffusion-webui/configs
+      - ${DATA_PATH:-/data}/automatic1111/extensions:/app/stable-diffusion-webui/extensions
+    environment:
+      # A1111 server settings optimized for server deployment
+      - COMMANDLINE_ARGS=${A1111_CLI_ARGS:---listen --port 7860 --api --medvram --no-half-vae --xformers --enable-insecure-extension-access --skip-torch-cuda-test}
+      - WEBUI_RESTARTING_TIMEOUT=0
+      # Disable authentication for internal access
+      - WEBUI_AUTH=
+      # GPU optimization
+      - TORCH_COMMAND=cache
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 180s
+    restart: unless-stopped
+    profiles:
+      - full
+      - image-generation
+
   # PostgreSQL 16 for LiteLLM and metadata storage (current production)
   postgres:
     image: postgres:16-alpine

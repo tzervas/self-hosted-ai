@@ -1,0 +1,1070 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>agents.agents.specialized.multimodal API documentation</title>
+<meta name="description" content="Multi-modal agent for processing various content types.
+Handles text, images, audio, video, and combined modalities.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>agents.agents.specialized.multimodal</code></h1>
+</header>
+<section id="section-intro">
+<p>Multi-modal agent for processing various content types.
+Handles text, images, audio, video, and combined modalities.</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="agents.agents.specialized.multimodal.EmbeddingAgent"><code class="flex name class">
+<span>class <span class="ident">EmbeddingAgent</span></span>
+<span>(</span><span>config: <a title="agents.core.base.AgentConfig" href="../../core/base.html#agents.core.base.AgentConfig">AgentConfig</a>,<br>agent_id: str = 'embedding',<br>embedding_model: str = 'nomic-embed-text:latest',<br>qdrant_url: str | None = None,<br>ollama_url: str | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EmbeddingAgent(Agent):
+    &#34;&#34;&#34;Agent for generating and managing embeddings.
+    
+    Specialized agent for vector embedding generation and semantic search operations.
+    Integrates with Qdrant vector database for storage and retrieval of embeddings.
+    
+    Attributes:
+        embedding_model: Name of the embedding model (default: nomic-embed-text:latest)
+        qdrant_url: URL for Qdrant vector database
+        ollama_base_url: URL for Ollama API (embeddings endpoint)
+        
+    Supported Operations:
+        - generate: Create vector embeddings for text
+        - search: Perform semantic search in vector database
+    &#34;&#34;&#34;
+
+    def __init__(
+        self,
+        config: AgentConfig,
+        agent_id: str = &#34;embedding&#34;,
+        embedding_model: str = &#34;nomic-embed-text:latest&#34;,
+        qdrant_url: Optional[str] = None,
+        ollama_url: Optional[str] = None,
+    ):
+        &#34;&#34;&#34;Initialize Embedding Agent.
+        
+        Args:
+            config: Agent configuration with timeout settings
+            agent_id: Unique identifier for this agent
+            embedding_model: Model for generating embeddings (nomic-embed-text, mxbai-embed-large)
+            qdrant_url: Qdrant vector DB URL (default: from QDRANT_URL env or http://qdrant:6333)
+            ollama_url: Ollama API URL (default: from OLLAMA_BASE_URL env or http://ollama-cpu:11434)
+        &#34;&#34;&#34;
+        super().__init__(config, agent_id)
+        self.embedding_model = embedding_model
+        self.qdrant_url = qdrant_url or os.getenv(&#34;QDRANT_URL&#34;, &#34;http://qdrant:6333&#34;)
+        self.ollama_base_url = ollama_url or os.getenv(&#34;OLLAMA_BASE_URL&#34;, &#34;http://ollama-cpu:11434&#34;)
+
+    @property
+    def system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an embedding specialist. You generate high-quality vector
+embeddings for text, manage vector databases, and perform semantic search operations.&#34;&#34;&#34;
+
+    async def execute(self, input_data: str, **kwargs: Any) -&gt; AgentResult:
+        &#34;&#34;&#34;Generate embeddings or perform semantic search.
+        
+        Args:
+            input_data: Text to embed or search query
+            **kwargs: Additional parameters:
+                - operation: &#39;generate&#39; or &#39;search&#39; (default: &#39;generate&#39;)
+                - collection: Qdrant collection name for search (default: &#39;default&#39;)
+                - top_k: Number of results to return for search (default: 5)
+                
+        Returns:
+            AgentResult with embeddings vector or search results
+            
+        Example:
+            &gt;&gt;&gt; # Generate embeddings
+            &gt;&gt;&gt; result = await agent.execute(&#34;machine learning concepts&#34;)
+            &gt;&gt;&gt; embeddings = result.metadata[&#39;embeddings&#39;]
+            
+            &gt;&gt;&gt; # Semantic search
+            &gt;&gt;&gt; result = await agent.execute(
+            ...     &#34;python tutorial&#34;,
+            ...     operation=&#34;search&#34;,
+            ...     collection=&#34;docs&#34;,
+            ...     top_k=5
+            ... )
+        &#34;&#34;&#34;
+        if not self.validate_input(input_data):
+            return AgentResult(
+                status=AgentStatus.FAILED,
+                output=&#34;&#34;,
+                error=&#34;Invalid input data&#34;,
+            )
+
+        try:
+            operation = kwargs.get(&#34;operation&#34;, &#34;generate&#34;)
+
+            if operation == &#34;generate&#34;:
+                embeddings = await self._generate_embeddings(input_data)
+                return AgentResult(
+                    status=AgentStatus.COMPLETED,
+                    output=f&#34;Generated embeddings with dimension {len(embeddings)}&#34;,
+                    metadata={&#34;embeddings&#34;: embeddings, &#34;model&#34;: self.embedding_model},
+                )
+
+            elif operation == &#34;search&#34;:
+                query = input_data
+                collection = kwargs.get(&#34;collection&#34;, &#34;default&#34;)
+                top_k = kwargs.get(&#34;top_k&#34;, 5)
+                results = await self._semantic_search(query, collection, top_k)
+                return AgentResult(
+                    status=AgentStatus.COMPLETED,
+                    output=f&#34;Found {len(results)} similar items&#34;,
+                    metadata={&#34;results&#34;: results},
+                )
+
+            else:
+                return AgentResult(
+                    status=AgentStatus.FAILED,
+                    output=&#34;&#34;,
+                    error=f&#34;Unknown operation: {operation}&#34;,
+                )
+
+        except Exception as e:
+            return AgentResult(
+                status=AgentStatus.FAILED,
+                output=&#34;&#34;,
+                error=f&#34;Embedding operation failed: {str(e)}&#34;,
+            )
+
+    async def _generate_embeddings(self, text: str) -&gt; List[float]:
+        &#34;&#34;&#34;Generate embeddings using Ollama embedding model.&#34;&#34;&#34;
+        async with httpx.AsyncClient(timeout=self.config.timeout) as client:
+            response = await client.post(
+                f&#34;{self.ollama_base_url}/api/embeddings&#34;,
+                json={&#34;model&#34;: self.embedding_model, &#34;prompt&#34;: text},
+            )
+            result = response.json()
+            return result.get(&#34;embedding&#34;, [])
+
+    async def _semantic_search(
+        self, query: str, collection: str, top_k: int
+    ) -&gt; List[Dict[str, Any]]:
+        &#34;&#34;&#34;Perform semantic search in Qdrant vector database.&#34;&#34;&#34;
+        # Generate query embedding
+        query_embedding = await self._generate_embeddings(query)
+
+        # Search in Qdrant
+        async with httpx.AsyncClient(timeout=self.config.timeout) as client:
+            response = await client.post(
+                f&#34;{self.qdrant_url}/collections/{collection}/points/search&#34;,
+                json={&#34;vector&#34;: query_embedding, &#34;limit&#34;: top_k, &#34;with_payload&#34;: True},
+            )
+            result = response.json()
+            return result.get(&#34;result&#34;, [])</code></pre>
+</details>
+<div class="desc"><p>Agent for generating and managing embeddings.</p>
+<p>Specialized agent for vector embedding generation and semantic search operations.
+Integrates with Qdrant vector database for storage and retrieval of embeddings.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>embedding_model</code></strong></dt>
+<dd>Name of the embedding model (default: nomic-embed-text:latest)</dd>
+<dt><strong><code>qdrant_url</code></strong></dt>
+<dd>URL for Qdrant vector database</dd>
+<dt><strong><code>ollama_base_url</code></strong></dt>
+<dd>URL for Ollama API (embeddings endpoint)</dd>
+</dl>
+<p>Supported Operations:
+- generate: Create vector embeddings for text
+- search: Perform semantic search in vector database</p>
+<p>Initialize Embedding Agent.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration with timeout settings</dd>
+<dt><strong><code>agent_id</code></strong></dt>
+<dd>Unique identifier for this agent</dd>
+<dt><strong><code>embedding_model</code></strong></dt>
+<dd>Model for generating embeddings (nomic-embed-text, mxbai-embed-large)</dd>
+<dt><strong><code>qdrant_url</code></strong></dt>
+<dd>Qdrant vector DB URL (default: from QDRANT_URL env or <a href="http://qdrant:6333">http://qdrant:6333</a>)</dd>
+<dt><strong><code>ollama_url</code></strong></dt>
+<dd>Ollama API URL (default: from OLLAMA_BASE_URL env or <a href="http://ollama-cpu:11434">http://ollama-cpu:11434</a>)</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="agents.core.base.Agent" href="../../core/base.html#agents.core.base.Agent">Agent</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="agents.agents.specialized.multimodal.EmbeddingAgent.system_prompt"><code class="name">prop <span class="ident">system_prompt</span> : str</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    @property
+    def system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an embedding specialist. You generate high-quality vector
+embeddings for text, manage vector databases, and perform semantic search operations.&#34;&#34;&#34;</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.specialized.multimodal.EmbeddingAgent.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self, input_data: str, **kwargs: Any) ‑> <a title="agents.core.base.AgentResult" href="../../core/base.html#agents.core.base.AgentResult">AgentResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def execute(self, input_data: str, **kwargs: Any) -&gt; AgentResult:
+    &#34;&#34;&#34;Generate embeddings or perform semantic search.
+    
+    Args:
+        input_data: Text to embed or search query
+        **kwargs: Additional parameters:
+            - operation: &#39;generate&#39; or &#39;search&#39; (default: &#39;generate&#39;)
+            - collection: Qdrant collection name for search (default: &#39;default&#39;)
+            - top_k: Number of results to return for search (default: 5)
+            
+    Returns:
+        AgentResult with embeddings vector or search results
+        
+    Example:
+        &gt;&gt;&gt; # Generate embeddings
+        &gt;&gt;&gt; result = await agent.execute(&#34;machine learning concepts&#34;)
+        &gt;&gt;&gt; embeddings = result.metadata[&#39;embeddings&#39;]
+        
+        &gt;&gt;&gt; # Semantic search
+        &gt;&gt;&gt; result = await agent.execute(
+        ...     &#34;python tutorial&#34;,
+        ...     operation=&#34;search&#34;,
+        ...     collection=&#34;docs&#34;,
+        ...     top_k=5
+        ... )
+    &#34;&#34;&#34;
+    if not self.validate_input(input_data):
+        return AgentResult(
+            status=AgentStatus.FAILED,
+            output=&#34;&#34;,
+            error=&#34;Invalid input data&#34;,
+        )
+
+    try:
+        operation = kwargs.get(&#34;operation&#34;, &#34;generate&#34;)
+
+        if operation == &#34;generate&#34;:
+            embeddings = await self._generate_embeddings(input_data)
+            return AgentResult(
+                status=AgentStatus.COMPLETED,
+                output=f&#34;Generated embeddings with dimension {len(embeddings)}&#34;,
+                metadata={&#34;embeddings&#34;: embeddings, &#34;model&#34;: self.embedding_model},
+            )
+
+        elif operation == &#34;search&#34;:
+            query = input_data
+            collection = kwargs.get(&#34;collection&#34;, &#34;default&#34;)
+            top_k = kwargs.get(&#34;top_k&#34;, 5)
+            results = await self._semantic_search(query, collection, top_k)
+            return AgentResult(
+                status=AgentStatus.COMPLETED,
+                output=f&#34;Found {len(results)} similar items&#34;,
+                metadata={&#34;results&#34;: results},
+            )
+
+        else:
+            return AgentResult(
+                status=AgentStatus.FAILED,
+                output=&#34;&#34;,
+                error=f&#34;Unknown operation: {operation}&#34;,
+            )
+
+    except Exception as e:
+        return AgentResult(
+            status=AgentStatus.FAILED,
+            output=&#34;&#34;,
+            error=f&#34;Embedding operation failed: {str(e)}&#34;,
+        )</code></pre>
+</details>
+<div class="desc"><p>Generate embeddings or perform semantic search.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>input_data</code></strong></dt>
+<dd>Text to embed or search query</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Additional parameters:
+- operation: 'generate' or 'search' (default: 'generate')
+- collection: Qdrant collection name for search (default: 'default')
+- top_k: Number of results to return for search (default: 5)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>AgentResult with embeddings vector or search results</p>
+<h2 id="example">Example</h2>
+<pre><code class="language-python-repl">&gt;&gt;&gt; # Generate embeddings
+&gt;&gt;&gt; result = await agent.execute(&quot;machine learning concepts&quot;)
+&gt;&gt;&gt; embeddings = result.metadata['embeddings']
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; # Semantic search
+&gt;&gt;&gt; result = await agent.execute(
+...     &quot;python tutorial&quot;,
+...     operation=&quot;search&quot;,
+...     collection=&quot;docs&quot;,
+...     top_k=5
+... )
+</code></pre></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="agents.core.base.Agent" href="../../core/base.html#agents.core.base.Agent">Agent</a></b></code>:
+<ul class="hlist">
+<li><code><a title="agents.core.base.Agent.get_system_prompt" href="../../core/base.html#agents.core.base.Agent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.core.base.Agent.validate_input" href="../../core/base.html#agents.core.base.Agent.validate_input">validate_input</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="agents.agents.specialized.multimodal.FunctionCallingAgent"><code class="flex name class">
+<span>class <span class="ident">FunctionCallingAgent</span></span>
+<span>(</span><span>config: <a title="agents.core.base.AgentConfig" href="../../core/base.html#agents.core.base.AgentConfig">AgentConfig</a>,<br>agent_id: str = 'function_calling',<br>available_tools: List[Dict[str, Any]] | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FunctionCallingAgent(Agent):
+    &#34;&#34;&#34;Agent specialized in function calling and tool use.&#34;&#34;&#34;
+
+    def __init__(
+        self,
+        config: AgentConfig,
+        agent_id: str = &#34;function_calling&#34;,
+        available_tools: Optional[List[Dict[str, Any]]] = None,
+    ):
+        super().__init__(config, agent_id)
+        self.available_tools = available_tools or []
+
+    @property
+    def system_prompt(self) -&gt; str:
+        tools_desc = &#34;\n&#34;.join(
+            [
+                f&#34;- {tool[&#39;name&#39;]}: {tool.get(&#39;description&#39;, &#39;No description&#39;)}&#34;
+                for tool in self.available_tools
+            ]
+        )
+        return f&#34;&#34;&#34;You are a function calling specialist. You can call external tools
+and APIs to accomplish tasks.
+
+Available tools:
+{tools_desc}
+
+When calling functions, respond with valid JSON in this format:
+{{
+    &#34;function&#34;: &#34;function_name&#34;,
+    &#34;arguments&#34;: {{
+        &#34;param1&#34;: &#34;value1&#34;,
+        &#34;param2&#34;: &#34;value2&#34;
+    }}
+}}&#34;&#34;&#34;
+
+    async def execute(self, input_data: str, **kwargs: Any) -&gt; AgentResult:
+        &#34;&#34;&#34;Execute function calling workflow with LLM-driven tool selection.
+        
+        Processes user input to determine which external tools/functions to call,
+        executes the selected functions, and returns the results. Uses the LLM
+        to make intelligent decisions about tool usage based on available tools
+        and task requirements.
+        
+        Args:
+            input_data: User task or query requiring function calling
+            **kwargs: Additional execution parameters (currently unused)
+            
+        Returns:
+            AgentResult with function call execution status and output
+            
+        Raises:
+            AgentResult with FAILED status on validation errors or execution failures
+            
+        Example:
+            &gt;&gt;&gt; agent = FunctionCallingAgent(config, available_tools=[{&#34;name&#34;: &#34;search&#34;, &#34;description&#34;: &#34;Web search&#34;}])
+            &gt;&gt;&gt; result = await agent.execute(&#34;Find the latest news about AI&#34;)
+            &gt;&gt;&gt; print(result.status)  # AgentStatus.COMPLETED
+            &gt;&gt;&gt; print(result.metadata[&#34;function_call_attempted&#34;])  # True
+        &#34;&#34;&#34;
+        if not self.validate_input(input_data):
+            return AgentResult(
+                status=AgentStatus.FAILED,
+                output=&#34;&#34;,
+                error=&#34;Invalid input data&#34;,
+            )
+
+        try:
+            # Get function call decision from LLM
+            prompt = f&#34;{self.system_prompt}\n\nTask: {input_data}\n\nWhich function should be called and with what arguments?&#34;
+            response = await self._call_llm(prompt)
+
+            # Parse function call (simplified - would need proper JSON parsing)
+            # Execute function call
+            # Return results
+
+            return AgentResult(
+                status=AgentStatus.COMPLETED,
+                output=response,
+                metadata={&#34;function_call_attempted&#34;: True},
+            )
+
+        except Exception as e:
+            return AgentResult(
+                status=AgentStatus.FAILED,
+                output=&#34;&#34;,
+                error=f&#34;Function calling failed: {str(e)}&#34;,
+            )</code></pre>
+</details>
+<div class="desc"><p>Agent specialized in function calling and tool use.</p>
+<p>Initialize agent with configuration.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="agents.core.base.Agent" href="../../core/base.html#agents.core.base.Agent">Agent</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="agents.agents.specialized.multimodal.FunctionCallingAgent.system_prompt"><code class="name">prop <span class="ident">system_prompt</span> : str</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    @property
+    def system_prompt(self) -&gt; str:
+        tools_desc = &#34;\n&#34;.join(
+            [
+                f&#34;- {tool[&#39;name&#39;]}: {tool.get(&#39;description&#39;, &#39;No description&#39;)}&#34;
+                for tool in self.available_tools
+            ]
+        )
+        return f&#34;&#34;&#34;You are a function calling specialist. You can call external tools
+and APIs to accomplish tasks.
+
+Available tools:
+{tools_desc}
+
+When calling functions, respond with valid JSON in this format:
+{{
+    &#34;function&#34;: &#34;function_name&#34;,
+    &#34;arguments&#34;: {{
+        &#34;param1&#34;: &#34;value1&#34;,
+        &#34;param2&#34;: &#34;value2&#34;
+    }}
+}}&#34;&#34;&#34;</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.specialized.multimodal.FunctionCallingAgent.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self, input_data: str, **kwargs: Any) ‑> <a title="agents.core.base.AgentResult" href="../../core/base.html#agents.core.base.AgentResult">AgentResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def execute(self, input_data: str, **kwargs: Any) -&gt; AgentResult:
+    &#34;&#34;&#34;Execute function calling workflow with LLM-driven tool selection.
+    
+    Processes user input to determine which external tools/functions to call,
+    executes the selected functions, and returns the results. Uses the LLM
+    to make intelligent decisions about tool usage based on available tools
+    and task requirements.
+    
+    Args:
+        input_data: User task or query requiring function calling
+        **kwargs: Additional execution parameters (currently unused)
+        
+    Returns:
+        AgentResult with function call execution status and output
+        
+    Raises:
+        AgentResult with FAILED status on validation errors or execution failures
+        
+    Example:
+        &gt;&gt;&gt; agent = FunctionCallingAgent(config, available_tools=[{&#34;name&#34;: &#34;search&#34;, &#34;description&#34;: &#34;Web search&#34;}])
+        &gt;&gt;&gt; result = await agent.execute(&#34;Find the latest news about AI&#34;)
+        &gt;&gt;&gt; print(result.status)  # AgentStatus.COMPLETED
+        &gt;&gt;&gt; print(result.metadata[&#34;function_call_attempted&#34;])  # True
+    &#34;&#34;&#34;
+    if not self.validate_input(input_data):
+        return AgentResult(
+            status=AgentStatus.FAILED,
+            output=&#34;&#34;,
+            error=&#34;Invalid input data&#34;,
+        )
+
+    try:
+        # Get function call decision from LLM
+        prompt = f&#34;{self.system_prompt}\n\nTask: {input_data}\n\nWhich function should be called and with what arguments?&#34;
+        response = await self._call_llm(prompt)
+
+        # Parse function call (simplified - would need proper JSON parsing)
+        # Execute function call
+        # Return results
+
+        return AgentResult(
+            status=AgentStatus.COMPLETED,
+            output=response,
+            metadata={&#34;function_call_attempted&#34;: True},
+        )
+
+    except Exception as e:
+        return AgentResult(
+            status=AgentStatus.FAILED,
+            output=&#34;&#34;,
+            error=f&#34;Function calling failed: {str(e)}&#34;,
+        )</code></pre>
+</details>
+<div class="desc"><p>Execute function calling workflow with LLM-driven tool selection.</p>
+<p>Processes user input to determine which external tools/functions to call,
+executes the selected functions, and returns the results. Uses the LLM
+to make intelligent decisions about tool usage based on available tools
+and task requirements.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>input_data</code></strong></dt>
+<dd>User task or query requiring function calling</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Additional execution parameters (currently unused)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>AgentResult with function call execution status and output</p>
+<h2 id="raises">Raises</h2>
+<p>AgentResult with FAILED status on validation errors or execution failures</p>
+<h2 id="example">Example</h2>
+<pre><code class="language-python-repl">&gt;&gt;&gt; agent = FunctionCallingAgent(config, available_tools=[{&quot;name&quot;: &quot;search&quot;, &quot;description&quot;: &quot;Web search&quot;}])
+&gt;&gt;&gt; result = await agent.execute(&quot;Find the latest news about AI&quot;)
+&gt;&gt;&gt; print(result.status)  # AgentStatus.COMPLETED
+&gt;&gt;&gt; print(result.metadata[&quot;function_call_attempted&quot;])  # True
+</code></pre></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="agents.core.base.Agent" href="../../core/base.html#agents.core.base.Agent">Agent</a></b></code>:
+<ul class="hlist">
+<li><code><a title="agents.core.base.Agent.get_system_prompt" href="../../core/base.html#agents.core.base.Agent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.core.base.Agent.validate_input" href="../../core/base.html#agents.core.base.Agent.validate_input">validate_input</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="agents.agents.specialized.multimodal.MultiModalAgent"><code class="flex name class">
+<span>class <span class="ident">MultiModalAgent</span></span>
+<span>(</span><span>config: <a title="agents.core.base.AgentConfig" href="../../core/base.html#agents.core.base.AgentConfig">AgentConfig</a>,<br>agent_id: str = 'multimodal',<br>vision_model: str = 'llava:13b',<br>whisper_url: str | None = None,<br>tts_url: str | None = None,<br>ollama_url: str | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MultiModalAgent(Agent):
+    &#34;&#34;&#34;Agent for multi-modal content processing and generation.
+    
+    Processes various content types including images, audio, video, and text.
+    Integrates vision models (llava), speech-to-text (Whisper), and LLM reasoning
+    to provide comprehensive multi-modal analysis.
+    
+    Attributes:
+        vision_model: Name of the vision model to use (default: llava:13b)
+        whisper_url: URL for Whisper STT service
+        tts_url: URL for Text-to-Speech service
+        ollama_base_url: URL for Ollama API endpoint
+    &#34;&#34;&#34;
+
+    def __init__(
+        self,
+        config: AgentConfig,
+        agent_id: str = &#34;multimodal&#34;,
+        vision_model: str = &#34;llava:13b&#34;,
+        whisper_url: Optional[str] = None,
+        tts_url: Optional[str] = None,
+        ollama_url: Optional[str] = None,
+    ):
+        &#34;&#34;&#34;Initialize Multi-Modal Agent.
+        
+        Args:
+            config: Agent configuration with timeout and other settings
+            agent_id: Unique identifier for this agent instance
+            vision_model: Vision model name (e.g., &#39;llava:13b&#39;, &#39;bakllava:latest&#39;)
+            whisper_url: Whisper STT service URL (default: from WHISPER_URL env or http://whisper:9000)
+            tts_url: TTS service URL (default: from TTS_URL env or http://coqui-tts:5002)
+            ollama_url: Ollama API URL (default: from OLLAMA_BASE_URL env or http://ollama-gpu:11434)
+        &#34;&#34;&#34;
+        super().__init__(config, agent_id)
+        self.vision_model = vision_model
+        self.whisper_url = whisper_url or os.getenv(&#34;WHISPER_URL&#34;, &#34;http://whisper:9000&#34;)
+        self.tts_url = tts_url or os.getenv(&#34;TTS_URL&#34;, &#34;http://coqui-tts:5002&#34;)
+        self.ollama_base_url = ollama_url or os.getenv(&#34;OLLAMA_BASE_URL&#34;, &#34;http://ollama-gpu:11434&#34;)
+
+    @property
+    def system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are a multi-modal AI assistant capable of processing and understanding
+various types of content including text, images, audio, and video. You can:
+- Analyze images and describe their content
+- Transcribe audio to text
+- Generate descriptions for videos
+- Combine multiple modalities for comprehensive analysis
+- Provide structured outputs based on multi-modal inputs
+
+Always provide detailed, accurate analysis and maintain context across modalities.&#34;&#34;&#34;
+
+    async def execute(self, input_data: str, **kwargs: Any) -&gt; AgentResult:
+        &#34;&#34;&#34;
+        Execute multi-modal processing.
+
+        Args:
+            input_data: Task description or text input
+            **kwargs: Additional parameters:
+                - image_path: Path to image file
+                - audio_path: Path to audio file
+                - video_path: Path to video file
+                - modalities: List of modalities to process
+        &#34;&#34;&#34;
+        if not self.validate_input(input_data):
+            return AgentResult(
+                status=AgentStatus.FAILED,
+                output=&#34;&#34;,
+                error=&#34;Invalid input data&#34;,
+            )
+
+        try:
+            # Extract modality-specific paths
+            image_path = kwargs.get(&#34;image_path&#34;)
+            audio_path = kwargs.get(&#34;audio_path&#34;)
+            video_path = kwargs.get(&#34;video_path&#34;)
+            modalities = kwargs.get(&#34;modalities&#34;, [])
+
+            # Process each modality
+            results = {}
+
+            if image_path or &#34;image&#34; in modalities:
+                results[&#34;image&#34;] = await self._process_image(image_path)
+
+            if audio_path or &#34;audio&#34; in modalities:
+                results[&#34;audio&#34;] = await self._process_audio(audio_path)
+
+            if video_path or &#34;video&#34; in modalities:
+                results[&#34;video&#34;] = await self._process_video(video_path)
+
+            # Combine results with LLM reasoning
+            combined_prompt = self._build_combined_prompt(input_data, results)
+            response = await self._call_llm(combined_prompt)
+
+            return AgentResult(
+                status=AgentStatus.COMPLETED,
+                output=response,
+                metadata={
+                    &#34;modalities_processed&#34;: list(results.keys()),
+                    &#34;individual_results&#34;: results,
+                },
+            )
+
+        except Exception as e:
+            return AgentResult(
+                status=AgentStatus.FAILED,
+                output=&#34;&#34;,
+                error=f&#34;Multi-modal processing failed: {str(e)}&#34;,
+            )
+
+    async def _process_image(self, image_path: Optional[str]) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;Process image using vision model.
+        
+        Args:
+            image_path: Path to image file to process
+            
+        Returns:
+            Dict containing processing status and results
+        &#34;&#34;&#34;
+        if not image_path:
+            return {&#34;status&#34;: &#34;skipped&#34;, &#34;reason&#34;: &#34;no_image_path&#34;}
+
+        try:
+            # Security: validate file path and check file size
+            image_file = Path(image_path).resolve()
+            
+            # Prevent path traversal attacks
+            if not image_file.is_file():
+                return {&#34;status&#34;: &#34;error&#34;, &#34;error&#34;: &#34;Invalid file path&#34;}
+            
+            # Check file size (max 10MB for images)
+            max_size = 10 * 1024 * 1024  # 10MB
+            if image_file.stat().st_size &gt; max_size:
+                return {&#34;status&#34;: &#34;error&#34;, &#34;error&#34;: &#34;Image file too large (max 10MB)&#34;}
+
+            # Call vision model (llava) with image
+            async with httpx.AsyncClient(timeout=self.config.timeout) as client:
+                with open(image_file, &#34;rb&#34;) as f:
+                    image_data = f.read()
+
+                response = await client.post(
+                    f&#34;{self.ollama_base_url}/api/generate&#34;,
+                    json={
+                        &#34;model&#34;: self.vision_model,
+                        &#34;prompt&#34;: &#34;Describe this image in detail, including objects, people, actions, setting, colors, and mood.&#34;,
+                        &#34;images&#34;: [image_data.hex()],
+                        &#34;stream&#34;: False,
+                    },
+                )
+                result = response.json()
+
+                return {
+                    &#34;status&#34;: &#34;success&#34;,
+                    &#34;description&#34;: result.get(&#34;response&#34;, &#34;&#34;),
+                    &#34;model&#34;: self.vision_model,
+                }
+
+        except Exception as e:
+            return {&#34;status&#34;: &#34;error&#34;, &#34;error&#34;: str(e)}
+
+    async def _process_audio(self, audio_path: Optional[str]) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;Process audio using Whisper STT.
+        
+        Args:
+            audio_path: Path to audio file to transcribe
+            
+        Returns:
+            Dict containing transcription and metadata
+        &#34;&#34;&#34;
+        if not audio_path:
+            return {&#34;status&#34;: &#34;skipped&#34;, &#34;reason&#34;: &#34;no_audio_path&#34;}
+
+        try:
+            # Security: validate file path and check file size
+            audio_file = Path(audio_path).resolve()
+            
+            # Prevent path traversal attacks
+            if not audio_file.is_file():
+                return {&#34;status&#34;: &#34;error&#34;, &#34;error&#34;: &#34;Invalid file path&#34;}
+            
+            # Check file size (max 25MB for audio)
+            max_size = 25 * 1024 * 1024  # 25MB
+            if audio_file.stat().st_size &gt; max_size:
+                return {&#34;status&#34;: &#34;error&#34;, &#34;error&#34;: &#34;Audio file too large (max 25MB)&#34;}
+
+            async with httpx.AsyncClient(timeout=self.config.timeout) as client:
+                with open(audio_file, &#34;rb&#34;) as f:
+                    files = {&#34;audio_file&#34;: f}
+                    response = await client.post(
+                        f&#34;{self.whisper_url}/asr&#34;,
+                        files=files,
+                        data={&#34;task&#34;: &#34;transcribe&#34;, &#34;language&#34;: &#34;en&#34;},
+                    )
+                result = response.json()
+
+                return {
+                    &#34;status&#34;: &#34;success&#34;,
+                    &#34;transcription&#34;: result.get(&#34;text&#34;, &#34;&#34;),
+                    &#34;language&#34;: result.get(&#34;language&#34;, &#34;&#34;),
+                    &#34;duration&#34;: result.get(&#34;duration&#34;, 0),
+                }
+
+        except Exception as e:
+            return {&#34;status&#34;: &#34;error&#34;, &#34;error&#34;: str(e)}
+
+    async def _process_video(self, video_path: Optional[str]) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;Process video by extracting frames and analyzing.&#34;&#34;&#34;
+        if not video_path:
+            return {&#34;status&#34;: &#34;skipped&#34;, &#34;reason&#34;: &#34;no_video_path&#34;}
+
+        try:
+            # Extract key frames from video
+            # This would use ffmpeg to extract frames
+            # For now, return placeholder
+            return {
+                &#34;status&#34;: &#34;success&#34;,
+                &#34;summary&#34;: &#34;Video processing requires frame extraction (ffmpeg integration)&#34;,
+                &#34;frames_analyzed&#34;: 0,
+            }
+
+        except Exception as e:
+            return {&#34;status&#34;: &#34;error&#34;, &#34;error&#34;: str(e)}
+
+    def _build_combined_prompt(
+        self, task: str, results: Dict[str, Dict[str, Any]]
+    ) -&gt; str:
+        &#34;&#34;&#34;Build combined prompt from all modality results.
+        
+        Constructs a comprehensive prompt combining analysis from all processed
+        modalities (image, audio, video) for final LLM reasoning.
+        
+        Args:
+            task: Original task/question from user
+            results: Dict mapping modality names to their processing results
+                   Each result should have &#39;status&#39; and modality-specific data
+        
+        Returns:
+            Combined prompt string ready for LLM processing
+        &#34;&#34;&#34;
+        prompt_parts = [self.system_prompt, f&#34;\nTask: {task}\n&#34;]
+
+        if &#34;image&#34; in results and results[&#34;image&#34;].get(&#34;status&#34;) == &#34;success&#34;:
+            prompt_parts.append(
+                f&#34;\nImage Analysis:\n{results[&#39;image&#39;][&#39;description&#39;]}&#34;
+            )
+
+        if &#34;audio&#34; in results and results[&#34;audio&#34;].get(&#34;status&#34;) == &#34;success&#34;:
+            prompt_parts.append(
+                f&#34;\nAudio Transcription:\n{results[&#39;audio&#39;][&#39;transcription&#39;]}&#34;
+            )
+
+        if &#34;video&#34; in results and results[&#34;video&#34;].get(&#34;status&#34;) == &#34;success&#34;:
+            prompt_parts.append(f&#34;\nVideo Analysis:\n{results[&#39;video&#39;][&#39;summary&#39;]}&#34;)
+
+        prompt_parts.append(
+            &#34;\nBased on the above multi-modal information, provide a comprehensive analysis and response to the task.&#34;
+        )
+
+        return &#34;\n&#34;.join(prompt_parts)</code></pre>
+</details>
+<div class="desc"><p>Agent for multi-modal content processing and generation.</p>
+<p>Processes various content types including images, audio, video, and text.
+Integrates vision models (llava), speech-to-text (Whisper), and LLM reasoning
+to provide comprehensive multi-modal analysis.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>vision_model</code></strong></dt>
+<dd>Name of the vision model to use (default: llava:13b)</dd>
+<dt><strong><code>whisper_url</code></strong></dt>
+<dd>URL for Whisper STT service</dd>
+<dt><strong><code>tts_url</code></strong></dt>
+<dd>URL for Text-to-Speech service</dd>
+<dt><strong><code>ollama_base_url</code></strong></dt>
+<dd>URL for Ollama API endpoint</dd>
+</dl>
+<p>Initialize Multi-Modal Agent.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration with timeout and other settings</dd>
+<dt><strong><code>agent_id</code></strong></dt>
+<dd>Unique identifier for this agent instance</dd>
+<dt><strong><code>vision_model</code></strong></dt>
+<dd>Vision model name (e.g., 'llava:13b', 'bakllava:latest')</dd>
+<dt><strong><code>whisper_url</code></strong></dt>
+<dd>Whisper STT service URL (default: from WHISPER_URL env or <a href="http://whisper:9000">http://whisper:9000</a>)</dd>
+<dt><strong><code>tts_url</code></strong></dt>
+<dd>TTS service URL (default: from TTS_URL env or <a href="http://coqui-tts:5002">http://coqui-tts:5002</a>)</dd>
+<dt><strong><code>ollama_url</code></strong></dt>
+<dd>Ollama API URL (default: from OLLAMA_BASE_URL env or <a href="http://ollama-gpu:11434">http://ollama-gpu:11434</a>)</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="agents.core.base.Agent" href="../../core/base.html#agents.core.base.Agent">Agent</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="agents.agents.specialized.multimodal.MultiModalAgent.system_prompt"><code class="name">prop <span class="ident">system_prompt</span> : str</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    @property
+    def system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are a multi-modal AI assistant capable of processing and understanding
+various types of content including text, images, audio, and video. You can:
+- Analyze images and describe their content
+- Transcribe audio to text
+- Generate descriptions for videos
+- Combine multiple modalities for comprehensive analysis
+- Provide structured outputs based on multi-modal inputs
+
+Always provide detailed, accurate analysis and maintain context across modalities.&#34;&#34;&#34;</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.specialized.multimodal.MultiModalAgent.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self, input_data: str, **kwargs: Any) ‑> <a title="agents.core.base.AgentResult" href="../../core/base.html#agents.core.base.AgentResult">AgentResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def execute(self, input_data: str, **kwargs: Any) -&gt; AgentResult:
+    &#34;&#34;&#34;
+    Execute multi-modal processing.
+
+    Args:
+        input_data: Task description or text input
+        **kwargs: Additional parameters:
+            - image_path: Path to image file
+            - audio_path: Path to audio file
+            - video_path: Path to video file
+            - modalities: List of modalities to process
+    &#34;&#34;&#34;
+    if not self.validate_input(input_data):
+        return AgentResult(
+            status=AgentStatus.FAILED,
+            output=&#34;&#34;,
+            error=&#34;Invalid input data&#34;,
+        )
+
+    try:
+        # Extract modality-specific paths
+        image_path = kwargs.get(&#34;image_path&#34;)
+        audio_path = kwargs.get(&#34;audio_path&#34;)
+        video_path = kwargs.get(&#34;video_path&#34;)
+        modalities = kwargs.get(&#34;modalities&#34;, [])
+
+        # Process each modality
+        results = {}
+
+        if image_path or &#34;image&#34; in modalities:
+            results[&#34;image&#34;] = await self._process_image(image_path)
+
+        if audio_path or &#34;audio&#34; in modalities:
+            results[&#34;audio&#34;] = await self._process_audio(audio_path)
+
+        if video_path or &#34;video&#34; in modalities:
+            results[&#34;video&#34;] = await self._process_video(video_path)
+
+        # Combine results with LLM reasoning
+        combined_prompt = self._build_combined_prompt(input_data, results)
+        response = await self._call_llm(combined_prompt)
+
+        return AgentResult(
+            status=AgentStatus.COMPLETED,
+            output=response,
+            metadata={
+                &#34;modalities_processed&#34;: list(results.keys()),
+                &#34;individual_results&#34;: results,
+            },
+        )
+
+    except Exception as e:
+        return AgentResult(
+            status=AgentStatus.FAILED,
+            output=&#34;&#34;,
+            error=f&#34;Multi-modal processing failed: {str(e)}&#34;,
+        )</code></pre>
+</details>
+<div class="desc"><p>Execute multi-modal processing.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>input_data</code></strong></dt>
+<dd>Task description or text input</dd>
+<dt><strong><code>**kwargs</code></strong></dt>
+<dd>Additional parameters:
+- image_path: Path to image file
+- audio_path: Path to audio file
+- video_path: Path to video file
+- modalities: List of modalities to process</dd>
+</dl></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="agents.core.base.Agent" href="../../core/base.html#agents.core.base.Agent">Agent</a></b></code>:
+<ul class="hlist">
+<li><code><a title="agents.core.base.Agent.get_system_prompt" href="../../core/base.html#agents.core.base.Agent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.core.base.Agent.validate_input" href="../../core/base.html#agents.core.base.Agent.validate_input">validate_input</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="agents.agents.specialized" href="index.html">agents.agents.specialized</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="agents.agents.specialized.multimodal.EmbeddingAgent" href="#agents.agents.specialized.multimodal.EmbeddingAgent">EmbeddingAgent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.specialized.multimodal.EmbeddingAgent.execute" href="#agents.agents.specialized.multimodal.EmbeddingAgent.execute">execute</a></code></li>
+<li><code><a title="agents.agents.specialized.multimodal.EmbeddingAgent.system_prompt" href="#agents.agents.specialized.multimodal.EmbeddingAgent.system_prompt">system_prompt</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.specialized.multimodal.FunctionCallingAgent" href="#agents.agents.specialized.multimodal.FunctionCallingAgent">FunctionCallingAgent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.specialized.multimodal.FunctionCallingAgent.execute" href="#agents.agents.specialized.multimodal.FunctionCallingAgent.execute">execute</a></code></li>
+<li><code><a title="agents.agents.specialized.multimodal.FunctionCallingAgent.system_prompt" href="#agents.agents.specialized.multimodal.FunctionCallingAgent.system_prompt">system_prompt</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.specialized.multimodal.MultiModalAgent" href="#agents.agents.specialized.multimodal.MultiModalAgent">MultiModalAgent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.specialized.multimodal.MultiModalAgent.execute" href="#agents.agents.specialized.multimodal.MultiModalAgent.execute">execute</a></code></li>
+<li><code><a title="agents.agents.specialized.multimodal.MultiModalAgent.system_prompt" href="#agents.agents.specialized.multimodal.MultiModalAgent.system_prompt">system_prompt</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

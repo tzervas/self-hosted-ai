@@ -387,6 +387,12 @@ backup:
       port: "6333"
     openwebui:
       schedule: "0 4 * * *"  # Daily at 4 AM
+    models:
+      enabled: true
+      schedule: "0 2 * * *"  # Daily at 2 AM
+      remote:
+        enabled: false
+        url: ""
   
   # Backup verification
   verification:

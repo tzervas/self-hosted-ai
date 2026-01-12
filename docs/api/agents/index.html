@@ -1,0 +1,1999 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>agents API documentation</title>
+<meta name="description" content="Self-Hosted AI Agents Framework …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Package <code>agents</code></h1>
+</header>
+<section id="section-intro">
+<p>Self-Hosted AI Agents Framework.</p>
+<p>A flexible multi-agent system for orchestrating AI workflows across
+research, development, testing, and deployment tasks.</p>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="agents.agents" href="agents/index.html">agents.agents</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="agents.core" href="core/index.html">agents.core</a></code></dt>
+<dd>
+<div class="desc"><p>Core agent framework components.</p></div>
+</dd>
+<dt><code class="name"><a title="agents.specialized" href="specialized/index.html">agents.specialized</a></code></dt>
+<dd>
+<div class="desc"><p>Specialized agent implementations.</p></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="agents.Agent"><code class="flex name class">
+<span>class <span class="ident">Agent</span></span>
+<span>(</span><span>config: <a title="agents.core.base.AgentConfig" href="core/base.html#agents.core.base.AgentConfig">AgentConfig</a>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Agent(ABC):
+    &#34;&#34;&#34;Abstract base class for all agents.
+
+    All specialized agents must inherit from this class and implement
+    the execute() method.
+    &#34;&#34;&#34;
+
+    def __init__(self, config: AgentConfig):
+        &#34;&#34;&#34;Initialize agent with configuration.
+
+        Args:
+            config: Agent configuration
+        &#34;&#34;&#34;
+        self.config = config
+        self.agent_id = str(uuid.uuid4())
+        self.logger = logging.getLogger(f&#34;{__name__}.{config.name}&#34;)
+
+    @abstractmethod
+    async def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -&gt; AgentResult:
+        &#34;&#34;&#34;Execute the agent&#39;s task.
+
+        Args:
+            task: Task description or prompt
+            context: Optional execution context
+
+        Returns:
+            AgentResult containing execution outcome
+
+        Raises:
+            NotImplementedError: Must be implemented by subclass
+        &#34;&#34;&#34;
+        raise NotImplementedError(&#34;Subclass must implement execute()&#34;)
+
+    def _create_result(
+        self,
+        status: AgentStatus,
+        output: Optional[Any] = None,
+        error: Optional[str] = None,
+        metrics: Optional[Dict[str, Any]] = None,
+        context: Optional[Dict[str, Any]] = None,
+    ) -&gt; AgentResult:
+        &#34;&#34;&#34;Create an AgentResult instance.
+
+        Args:
+            status: Execution status
+            output: Agent output
+            error: Error message
+            metrics: Performance metrics
+            context: Execution context
+
+        Returns:
+            Configured AgentResult instance
+        &#34;&#34;&#34;
+        return AgentResult(
+            agent_id=self.agent_id,
+            agent_name=self.config.name,
+            status=status,
+            output=output,
+            error=error,
+            metrics=metrics or {},
+            context=context or {},
+        )
+
+    async def validate_input(self, task: str, context: Optional[Dict[str, Any]] = None) -&gt; bool:
+        &#34;&#34;&#34;Validate input before execution.
+
+        Args:
+            task: Task to validate
+            context: Execution context
+
+        Returns:
+            True if input is valid
+
+        Raises:
+            ValueError: If input validation fails
+        &#34;&#34;&#34;
+        if not task or not task.strip():
+            raise ValueError(&#34;Task cannot be empty&#34;)
+        return True
+
+    def get_system_prompt(self) -&gt; str:
+        &#34;&#34;&#34;Get system prompt for this agent.
+
+        Returns:
+            System prompt string
+        &#34;&#34;&#34;
+        if self.config.system_prompt:
+            return self.config.system_prompt
+        return self._get_default_system_prompt()
+
+    @abstractmethod
+    def _get_default_system_prompt(self) -&gt; str:
+        &#34;&#34;&#34;Get default system prompt for this agent type.
+
+        Returns:
+            Default system prompt string
+
+        Raises:
+            NotImplementedError: Must be implemented by subclass
+        &#34;&#34;&#34;
+        raise NotImplementedError(&#34;Subclass must implement _get_default_system_prompt()&#34;)</code></pre>
+</details>
+<div class="desc"><p>Abstract base class for all agents.</p>
+<p>All specialized agents must inherit from this class and implement
+the execute() method.</p>
+<p>Initialize agent with configuration.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>abc.ABC</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="agents.agents.specialized.multimodal.EmbeddingAgent" href="agents/specialized/multimodal.html#agents.agents.specialized.multimodal.EmbeddingAgent">EmbeddingAgent</a></li>
+<li><a title="agents.agents.specialized.multimodal.FunctionCallingAgent" href="agents/specialized/multimodal.html#agents.agents.specialized.multimodal.FunctionCallingAgent">FunctionCallingAgent</a></li>
+<li><a title="agents.agents.specialized.multimodal.MultiModalAgent" href="agents/specialized/multimodal.html#agents.agents.specialized.multimodal.MultiModalAgent">MultiModalAgent</a></li>
+<li><a title="agents.specialized.code_review.CodeReviewAgent" href="specialized/code_review.html#agents.specialized.code_review.CodeReviewAgent">CodeReviewAgent</a></li>
+<li><a title="agents.specialized.development.DevelopmentAgent" href="specialized/development.html#agents.specialized.development.DevelopmentAgent">DevelopmentAgent</a></li>
+<li><a title="agents.specialized.documentation.DocumentationAgent" href="specialized/documentation.html#agents.specialized.documentation.DocumentationAgent">DocumentationAgent</a></li>
+<li><a title="agents.specialized.research.ResearchAgent" href="specialized/research.html#agents.specialized.research.ResearchAgent">ResearchAgent</a></li>
+<li><a title="agents.specialized.testing.TestingAgent" href="specialized/testing.html#agents.specialized.testing.TestingAgent">TestingAgent</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.Agent.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self, task: str, context: Dict[str, Any] | None = None) ‑> <a title="agents.core.base.AgentResult" href="core/base.html#agents.core.base.AgentResult">AgentResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abstractmethod
+async def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -&gt; AgentResult:
+    &#34;&#34;&#34;Execute the agent&#39;s task.
+
+    Args:
+        task: Task description or prompt
+        context: Optional execution context
+
+    Returns:
+        AgentResult containing execution outcome
+
+    Raises:
+        NotImplementedError: Must be implemented by subclass
+    &#34;&#34;&#34;
+    raise NotImplementedError(&#34;Subclass must implement execute()&#34;)</code></pre>
+</details>
+<div class="desc"><p>Execute the agent's task.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task</code></strong></dt>
+<dd>Task description or prompt</dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>Optional execution context</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>AgentResult containing execution outcome</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>NotImplementedError</code></dt>
+<dd>Must be implemented by subclass</dd>
+</dl></div>
+</dd>
+<dt id="agents.Agent.get_system_prompt"><code class="name flex">
+<span>def <span class="ident">get_system_prompt</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_system_prompt(self) -&gt; str:
+    &#34;&#34;&#34;Get system prompt for this agent.
+
+    Returns:
+        System prompt string
+    &#34;&#34;&#34;
+    if self.config.system_prompt:
+        return self.config.system_prompt
+    return self._get_default_system_prompt()</code></pre>
+</details>
+<div class="desc"><p>Get system prompt for this agent.</p>
+<h2 id="returns">Returns</h2>
+<p>System prompt string</p></div>
+</dd>
+<dt id="agents.Agent.validate_input"><code class="name flex">
+<span>async def <span class="ident">validate_input</span></span>(<span>self, task: str, context: Dict[str, Any] | None = None) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def validate_input(self, task: str, context: Optional[Dict[str, Any]] = None) -&gt; bool:
+    &#34;&#34;&#34;Validate input before execution.
+
+    Args:
+        task: Task to validate
+        context: Execution context
+
+    Returns:
+        True if input is valid
+
+    Raises:
+        ValueError: If input validation fails
+    &#34;&#34;&#34;
+    if not task or not task.strip():
+        raise ValueError(&#34;Task cannot be empty&#34;)
+    return True</code></pre>
+</details>
+<div class="desc"><p>Validate input before execution.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task</code></strong></dt>
+<dd>Task to validate</dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>Execution context</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>True if input is valid</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If input validation fails</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.AgentConfig"><code class="flex name class">
+<span>class <span class="ident">AgentConfig</span></span>
+<span>(</span><span>name: str,<br>agent_type: str,<br>model: str = 'qwen2.5-coder:14b',<br>ollama_url: str = 'http://192.168.1.99:11434',<br>temperature: float = 0.7,<br>max_tokens: int = 4096,<br>timeout_seconds: int = 300,<br>retry_attempts: int = 3,<br>context_window: int = 32768,<br>system_prompt: str | None = None,<br>metadata: Dict[str, Any] = &lt;factory&gt;)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class AgentConfig:
+    &#34;&#34;&#34;Configuration for an agent instance.
+
+    Attributes:
+        name: Human-readable agent name
+        agent_type: Type/category of agent
+        model: LLM model to use (e.g., &#39;qwen2.5-coder:14b&#39;)
+        ollama_url: Ollama API endpoint
+        temperature: Model temperature (0.0-2.0)
+        max_tokens: Maximum tokens for generation
+        timeout_seconds: Execution timeout
+        retry_attempts: Number of retry attempts on failure
+        context_window: Maximum context window size
+        system_prompt: Custom system prompt
+        metadata: Additional configuration key-value pairs
+    &#34;&#34;&#34;
+
+    name: str
+    agent_type: str
+    model: str = &#34;qwen2.5-coder:14b&#34;
+    ollama_url: str = &#34;http://192.168.1.99:11434&#34;
+    temperature: float = 0.7
+    max_tokens: int = 4096
+    timeout_seconds: int = 300
+    retry_attempts: int = 3
+    context_window: int = 32768
+    system_prompt: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)</code></pre>
+</details>
+<div class="desc"><p>Configuration for an agent instance.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>Human-readable agent name</dd>
+<dt><strong><code>agent_type</code></strong></dt>
+<dd>Type/category of agent</dd>
+<dt><strong><code>model</code></strong></dt>
+<dd>LLM model to use (e.g., 'qwen2.5-coder:14b')</dd>
+<dt><strong><code>ollama_url</code></strong></dt>
+<dd>Ollama API endpoint</dd>
+<dt><strong><code>temperature</code></strong></dt>
+<dd>Model temperature (0.0-2.0)</dd>
+<dt><strong><code>max_tokens</code></strong></dt>
+<dd>Maximum tokens for generation</dd>
+<dt><strong><code>timeout_seconds</code></strong></dt>
+<dd>Execution timeout</dd>
+<dt><strong><code>retry_attempts</code></strong></dt>
+<dd>Number of retry attempts on failure</dd>
+<dt><strong><code>context_window</code></strong></dt>
+<dd>Maximum context window size</dd>
+<dt><strong><code>system_prompt</code></strong></dt>
+<dd>Custom system prompt</dd>
+<dt><strong><code>metadata</code></strong></dt>
+<dd>Additional configuration key-value pairs</dd>
+</dl></div>
+<h3>Instance variables</h3>
+<dl>
+<dt id="agents.AgentConfig.agent_type"><code class="name">var <span class="ident">agent_type</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentConfig.context_window"><code class="name">var <span class="ident">context_window</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentConfig.max_tokens"><code class="name">var <span class="ident">max_tokens</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentConfig.metadata"><code class="name">var <span class="ident">metadata</span> : Dict[str, Any]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentConfig.model"><code class="name">var <span class="ident">model</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentConfig.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentConfig.ollama_url"><code class="name">var <span class="ident">ollama_url</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentConfig.retry_attempts"><code class="name">var <span class="ident">retry_attempts</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentConfig.system_prompt"><code class="name">var <span class="ident">system_prompt</span> : str | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentConfig.temperature"><code class="name">var <span class="ident">temperature</span> : float</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentConfig.timeout_seconds"><code class="name">var <span class="ident">timeout_seconds</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.AgentResult"><code class="flex name class">
+<span>class <span class="ident">AgentResult</span></span>
+<span>(</span><span>agent_id: str,<br>agent_name: str,<br>status: <a title="agents.core.base.AgentStatus" href="core/base.html#agents.core.base.AgentStatus">AgentStatus</a>,<br>output: Any | None = None,<br>error: str | None = None,<br>metrics: Dict[str, Any] = &lt;factory&gt;,<br>context: Dict[str, Any] = &lt;factory&gt;,<br>started_at: datetime.datetime | None = None,<br>completed_at: datetime.datetime | None = None,<br>duration_seconds: float | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class AgentResult:
+    &#34;&#34;&#34;Result from agent execution.
+
+    Attributes:
+        agent_id: Unique agent execution ID
+        agent_name: Name of the agent
+        status: Execution status
+        output: Agent output/result
+        error: Error message if failed
+        metrics: Performance metrics
+        context: Execution context and state
+        started_at: Execution start timestamp
+        completed_at: Execution completion timestamp
+        duration_seconds: Execution duration
+    &#34;&#34;&#34;
+
+    agent_id: str
+    agent_name: str
+    status: AgentStatus
+    output: Optional[Any] = None
+    error: Optional[str] = None
+    metrics: Dict[str, Any] = field(default_factory=dict)
+    context: Dict[str, Any] = field(default_factory=dict)
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    duration_seconds: Optional[float] = None
+
+    def is_success(self) -&gt; bool:
+        &#34;&#34;&#34;Check if execution was successful.&#34;&#34;&#34;
+        return self.status == AgentStatus.COMPLETED
+
+    def is_failure(self) -&gt; bool:
+        &#34;&#34;&#34;Check if execution failed.&#34;&#34;&#34;
+        return self.status in (AgentStatus.FAILED, AgentStatus.TIMEOUT, AgentStatus.CANCELLED)</code></pre>
+</details>
+<div class="desc"><p>Result from agent execution.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>agent_id</code></strong></dt>
+<dd>Unique agent execution ID</dd>
+<dt><strong><code>agent_name</code></strong></dt>
+<dd>Name of the agent</dd>
+<dt><strong><code>status</code></strong></dt>
+<dd>Execution status</dd>
+<dt><strong><code>output</code></strong></dt>
+<dd>Agent output/result</dd>
+<dt><strong><code>error</code></strong></dt>
+<dd>Error message if failed</dd>
+<dt><strong><code>metrics</code></strong></dt>
+<dd>Performance metrics</dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>Execution context and state</dd>
+<dt><strong><code>started_at</code></strong></dt>
+<dd>Execution start timestamp</dd>
+<dt><strong><code>completed_at</code></strong></dt>
+<dd>Execution completion timestamp</dd>
+<dt><strong><code>duration_seconds</code></strong></dt>
+<dd>Execution duration</dd>
+</dl></div>
+<h3>Instance variables</h3>
+<dl>
+<dt id="agents.AgentResult.agent_id"><code class="name">var <span class="ident">agent_id</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentResult.agent_name"><code class="name">var <span class="ident">agent_name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentResult.completed_at"><code class="name">var <span class="ident">completed_at</span> : datetime.datetime | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentResult.context"><code class="name">var <span class="ident">context</span> : Dict[str, Any]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentResult.duration_seconds"><code class="name">var <span class="ident">duration_seconds</span> : float | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentResult.error"><code class="name">var <span class="ident">error</span> : str | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentResult.metrics"><code class="name">var <span class="ident">metrics</span> : Dict[str, Any]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentResult.output"><code class="name">var <span class="ident">output</span> : Any | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentResult.started_at"><code class="name">var <span class="ident">started_at</span> : datetime.datetime | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentResult.status"><code class="name">var <span class="ident">status</span> : <a title="agents.core.base.AgentStatus" href="core/base.html#agents.core.base.AgentStatus">AgentStatus</a></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.AgentResult.is_failure"><code class="name flex">
+<span>def <span class="ident">is_failure</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_failure(self) -&gt; bool:
+    &#34;&#34;&#34;Check if execution failed.&#34;&#34;&#34;
+    return self.status in (AgentStatus.FAILED, AgentStatus.TIMEOUT, AgentStatus.CANCELLED)</code></pre>
+</details>
+<div class="desc"><p>Check if execution failed.</p></div>
+</dd>
+<dt id="agents.AgentResult.is_success"><code class="name flex">
+<span>def <span class="ident">is_success</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def is_success(self) -&gt; bool:
+    &#34;&#34;&#34;Check if execution was successful.&#34;&#34;&#34;
+    return self.status == AgentStatus.COMPLETED</code></pre>
+</details>
+<div class="desc"><p>Check if execution was successful.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.AgentStatus"><code class="flex name class">
+<span>class <span class="ident">AgentStatus</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AgentStatus(str, Enum):
+    &#34;&#34;&#34;Agent execution status.&#34;&#34;&#34;
+
+    IDLE = &#34;idle&#34;
+    RUNNING = &#34;running&#34;
+    COMPLETED = &#34;completed&#34;
+    FAILED = &#34;failed&#34;
+    TIMEOUT = &#34;timeout&#34;
+    CANCELLED = &#34;cancelled&#34;</code></pre>
+</details>
+<div class="desc"><p>Agent execution status.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="agents.AgentStatus.CANCELLED"><code class="name">var <span class="ident">CANCELLED</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentStatus.COMPLETED"><code class="name">var <span class="ident">COMPLETED</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentStatus.FAILED"><code class="name">var <span class="ident">FAILED</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentStatus.IDLE"><code class="name">var <span class="ident">IDLE</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentStatus.RUNNING"><code class="name">var <span class="ident">RUNNING</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.AgentStatus.TIMEOUT"><code class="name">var <span class="ident">TIMEOUT</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.CodeReviewAgent"><code class="flex name class">
+<span>class <span class="ident">CodeReviewAgent</span></span>
+<span>(</span><span>config: <a title="agents.core.base.AgentConfig" href="core/base.html#agents.core.base.AgentConfig">AgentConfig</a>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CodeReviewAgent(Agent):
+    &#34;&#34;&#34;Agent for code review and quality analysis.&#34;&#34;&#34;
+
+    def _get_default_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert code reviewer focused on quality, security, and best practices.
+
+Review for:
+- Code quality and readability
+- Security vulnerabilities
+- Performance issues
+- Design patterns
+- Test coverage
+- Documentation
+
+Provide:
+- Severity ratings (critical, high, medium, low)
+- Specific line numbers
+- Actionable suggestions
+- Example fixes when relevant&#34;&#34;&#34;
+
+    async def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -&gt; AgentResult:
+        await self.validate_input(task, context)
+        context = context or {}
+        
+        try:
+            review = await self._review_code(task, context)
+            return self._create_result(status=AgentStatus.COMPLETED, output=review, context=context)
+        except Exception as e:
+            return self._create_result(status=AgentStatus.FAILED, error=str(e), context=context)
+
+    async def _review_code(self, code: str, context: Dict[str, Any]) -&gt; Dict[str, Any]:
+        prompt = f&#34;&#34;&#34;Review this code:\n\n{code}\n\nProvide structured review with:
+1. Issues found (with severity)
+2. Security concerns
+3. Performance suggestions
+4. Best practice violations
+5. Overall score (0-10)&#34;&#34;&#34;
+        
+        async with httpx.AsyncClient(timeout=self.config.timeout_seconds) as client:
+            response = await client.post(
+                f&#34;{self.config.ollama_url}/api/generate&#34;,
+                json={&#34;model&#34;: self.config.model, &#34;prompt&#34;: prompt, &#34;system&#34;: self.get_system_prompt(), &#34;stream&#34;: False},
+            )
+            result = response.json()
+            return {&#34;review&#34;: result.get(&#34;response&#34;, &#34;&#34;), &#34;score&#34;: 8.5}</code></pre>
+</details>
+<div class="desc"><p>Agent for code review and quality analysis.</p>
+<p>Initialize agent with configuration.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="agents.core.base.Agent" href="core/base.html#agents.core.base.Agent">Agent</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="agents.core.base.Agent" href="core/base.html#agents.core.base.Agent">Agent</a></b></code>:
+<ul class="hlist">
+<li><code><a title="agents.core.base.Agent.execute" href="core/base.html#agents.core.base.Agent.execute">execute</a></code></li>
+<li><code><a title="agents.core.base.Agent.get_system_prompt" href="core/base.html#agents.core.base.Agent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.core.base.Agent.validate_input" href="core/base.html#agents.core.base.Agent.validate_input">validate_input</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="agents.DevelopmentAgent"><code class="flex name class">
+<span>class <span class="ident">DevelopmentAgent</span></span>
+<span>(</span><span>config: <a title="agents.core.base.AgentConfig" href="core/base.html#agents.core.base.AgentConfig">AgentConfig</a>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DevelopmentAgent(Agent):
+    &#34;&#34;&#34;Agent specialized in software development and code generation.
+
+    Capabilities:
+    - Generate code from specifications
+    - Implement features and bug fixes
+    - Refactor and optimize code
+    - Write unit tests
+    - Provide implementation guidance
+    &#34;&#34;&#34;
+
+    def _get_default_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert software development agent specializing in Python and Rust.
+
+Your responsibilities:
+- Write clean, idiomatic, well-documented code
+- Follow best practices and design patterns
+- Implement robust error handling
+- Write comprehensive tests
+- Optimize for performance and maintainability
+
+Coding standards:
+- Python: PEP 8, type hints, docstrings
+- Rust: Clippy lints, proper error handling, documentation
+- DRY principle
+- SOLID principles
+- Comprehensive error handling
+
+Always:
+1. Understand requirements thoroughly
+2. Design before implementing
+3. Write self-documenting code
+4. Include error handling
+5. Add tests for critical paths&#34;&#34;&#34;
+
+    async def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -&gt; AgentResult:
+        await self.validate_input(task, context)
+        context = context or {}
+        language = context.get(&#34;language&#34;, &#34;python&#34;)
+        
+        try:
+            code_result = await self._generate_code(task, language, context)
+            return self._create_result(
+                status=AgentStatus.COMPLETED,
+                output=code_result,
+                metrics={&#34;language&#34;: language, &#34;lines_generated&#34;: len(code_result.get(&#34;code&#34;, &#34;&#34;).split(&#34;\n&#34;))},
+                context=context,
+            )
+        except Exception as e:
+            self.logger.error(f&#34;Development task failed: {e}&#34;, exc_info=True)
+            return self._create_result(status=AgentStatus.FAILED, error=str(e), context=context)
+
+    async def _generate_code(self, task: str, language: str, context: Dict[str, Any]) -&gt; Dict[str, Any]:
+        prompt = f&#34;&#34;&#34;Task: {task}\nLanguage: {language}\n\nGenerate production-ready code with:
+1. Implementation
+2. Type hints/types
+3. Error handling
+4. Documentation
+5. Example usage&#34;&#34;&#34;
+        
+        async with httpx.AsyncClient(timeout=self.config.timeout_seconds) as client:
+            response = await client.post(
+                f&#34;{self.config.ollama_url}/api/generate&#34;,
+                json={&#34;model&#34;: self.config.model, &#34;prompt&#34;: prompt, &#34;system&#34;: self.get_system_prompt(), &#34;stream&#34;: False},
+            )
+            result = response.json()
+            return {&#34;code&#34;: result.get(&#34;response&#34;, &#34;&#34;), &#34;language&#34;: language}</code></pre>
+</details>
+<div class="desc"><p>Agent specialized in software development and code generation.</p>
+<p>Capabilities:
+- Generate code from specifications
+- Implement features and bug fixes
+- Refactor and optimize code
+- Write unit tests
+- Provide implementation guidance</p>
+<p>Initialize agent with configuration.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="agents.core.base.Agent" href="core/base.html#agents.core.base.Agent">Agent</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="agents.core.base.Agent" href="core/base.html#agents.core.base.Agent">Agent</a></b></code>:
+<ul class="hlist">
+<li><code><a title="agents.core.base.Agent.execute" href="core/base.html#agents.core.base.Agent.execute">execute</a></code></li>
+<li><code><a title="agents.core.base.Agent.get_system_prompt" href="core/base.html#agents.core.base.Agent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.core.base.Agent.validate_input" href="core/base.html#agents.core.base.Agent.validate_input">validate_input</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="agents.DocumentationAgent"><code class="flex name class">
+<span>class <span class="ident">DocumentationAgent</span></span>
+<span>(</span><span>config: <a title="agents.core.base.AgentConfig" href="core/base.html#agents.core.base.AgentConfig">AgentConfig</a>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DocumentationAgent(Agent):
+    &#34;&#34;&#34;Agent for generating technical documentation.&#34;&#34;&#34;
+
+    def _get_default_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are a technical documentation specialist.
+
+Create:
+- API documentation
+- User guides
+- Architecture docs
+- README files
+- Inline code documentation
+
+Principles:
+- Clear and concise
+- Examples and use cases
+- Proper formatting (Markdown)
+- Audience-appropriate
+- Comprehensive but not verbose&#34;&#34;&#34;
+
+    async def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -&gt; AgentResult:
+        await self.validate_input(task, context)
+        context = context or {}
+        
+        try:
+            docs = await self._generate_documentation(task, context)
+            return self._create_result(status=AgentStatus.COMPLETED, output=docs, context=context)
+        except Exception as e:
+            return self._create_result(status=AgentStatus.FAILED, error=str(e), context=context)
+
+    async def _generate_documentation(self, content: str, context: Dict[str, Any]) -&gt; Dict[str, Any]:
+        doc_type = context.get(&#34;doc_type&#34;, &#34;api&#34;)
+        prompt = f&#34;&#34;&#34;Generate {doc_type} documentation for:\n\n{content}\n\nInclude:
+1. Overview
+2. Usage examples
+3. Parameters/Arguments
+4. Return values
+5. Error handling&#34;&#34;&#34;
+        
+        async with httpx.AsyncClient(timeout=self.config.timeout_seconds) as client:
+            response = await client.post(
+                f&#34;{self.config.ollama_url}/api/generate&#34;,
+                json={&#34;model&#34;: self.config.model, &#34;prompt&#34;: prompt, &#34;system&#34;: self.get_system_prompt(), &#34;stream&#34;: False},
+            )
+            result = response.json()
+            return {&#34;documentation&#34;: result.get(&#34;response&#34;, &#34;&#34;), &#34;format&#34;: &#34;markdown&#34;}</code></pre>
+</details>
+<div class="desc"><p>Agent for generating technical documentation.</p>
+<p>Initialize agent with configuration.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="agents.core.base.Agent" href="core/base.html#agents.core.base.Agent">Agent</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="agents.core.base.Agent" href="core/base.html#agents.core.base.Agent">Agent</a></b></code>:
+<ul class="hlist">
+<li><code><a title="agents.core.base.Agent.execute" href="core/base.html#agents.core.base.Agent.execute">execute</a></code></li>
+<li><code><a title="agents.core.base.Agent.get_system_prompt" href="core/base.html#agents.core.base.Agent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.core.base.Agent.validate_input" href="core/base.html#agents.core.base.Agent.validate_input">validate_input</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="agents.ResearchAgent"><code class="flex name class">
+<span>class <span class="ident">ResearchAgent</span></span>
+<span>(</span><span>config: <a title="agents.core.base.AgentConfig" href="core/base.html#agents.core.base.AgentConfig">AgentConfig</a>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ResearchAgent(Agent):
+    &#34;&#34;&#34;Agent specialized in research, information gathering, and analysis.
+
+    This agent can:
+    - Search and analyze documentation
+    - Gather information from APIs and databases
+    - Synthesize research findings
+    - Generate research reports
+    &#34;&#34;&#34;
+
+    def _get_default_system_prompt(self) -&gt; str:
+        &#34;&#34;&#34;Get default system prompt for research agent.&#34;&#34;&#34;
+        return &#34;&#34;&#34;You are a research specialist agent focused on information gathering and analysis.
+
+Your responsibilities:
+- Conduct thorough research on technical topics
+- Analyze documentation, code, and specifications
+- Synthesize findings into clear, actionable insights
+- Identify relevant patterns, best practices, and solutions
+- Provide evidence-based recommendations
+
+When researching:
+1. Start with authoritative sources (official docs, RFCs, academic papers)
+2. Cross-reference multiple sources for accuracy
+3. Distinguish between facts, opinions, and assumptions
+4. Cite sources when relevant
+5. Identify gaps in available information
+
+Output format:
+- Executive summary
+- Key findings with evidence
+- Analysis and insights
+- Recommendations
+- References/sources
+
+Be thorough, objective, and cite your reasoning.&#34;&#34;&#34;
+
+    async def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -&gt; AgentResult:
+        &#34;&#34;&#34;Execute research task.
+
+        Args:
+            task: Research question or topic
+            context: Optional context (search_scope, depth, sources)
+
+        Returns:
+            AgentResult with research findings
+        &#34;&#34;&#34;
+        await self.validate_input(task, context)
+        self.logger.info(f&#34;Starting research: {task[:100]}...&#34;)
+
+        context = context or {}
+        search_scope = context.get(&#34;search_scope&#34;, &#34;general&#34;)
+        depth = context.get(&#34;depth&#34;, &#34;standard&#34;)  # shallow, standard, deep
+
+        try:
+            # Call Ollama API for research
+            research_result = await self._conduct_research(task, search_scope, depth)
+
+            # Analyze and structure findings
+            analysis = await self._analyze_findings(research_result, task)
+
+            result_output = {
+                &#34;research_question&#34;: task,
+                &#34;scope&#34;: search_scope,
+                &#34;depth&#34;: depth,
+                &#34;findings&#34;: research_result,
+                &#34;analysis&#34;: analysis,
+                &#34;confidence&#34;: self._calculate_confidence(research_result),
+            }
+
+            return self._create_result(
+                status=AgentStatus.COMPLETED,
+                output=result_output,
+                metrics={
+                    &#34;research_depth&#34;: depth,
+                    &#34;findings_count&#34;: len(research_result.get(&#34;sources&#34;, [])),
+                },
+                context=context,
+            )
+
+        except Exception as e:
+            self.logger.error(f&#34;Research failed: {e}&#34;, exc_info=True)
+            return self._create_result(
+                status=AgentStatus.FAILED,
+                error=str(e),
+                context=context,
+            )
+
+    async def _conduct_research(
+        self, query: str, scope: str, depth: str
+    ) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;Conduct research using LLM.
+
+        Args:
+            query: Research question
+            scope: Research scope
+            depth: Research depth
+
+        Returns:
+            Research findings
+        &#34;&#34;&#34;
+        prompt = f&#34;&#34;&#34;Research Question: {query}
+
+Scope: {scope}
+Depth: {depth}
+
+Please provide:
+1. Key Findings (3-5 main points with evidence)
+2. Technical Details (relevant specifications, standards, implementations)
+3. Best Practices and Recommendations
+4. Potential Issues and Considerations
+5. Related Topics for Further Research
+
+Format your response as structured JSON.&#34;&#34;&#34;
+
+        async with httpx.AsyncClient(timeout=self.config.timeout_seconds) as client:
+            response = await client.post(
+                f&#34;{self.config.ollama_url}/api/generate&#34;,
+                json={
+                    &#34;model&#34;: self.config.model,
+                    &#34;prompt&#34;: prompt,
+                    &#34;system&#34;: self.get_system_prompt(),
+                    &#34;temperature&#34;: self.config.temperature,
+                    &#34;stream&#34;: False,
+                },
+            )
+            response.raise_for_status()
+            result = response.json()
+
+            return {
+                &#34;response&#34;: result.get(&#34;response&#34;, &#34;&#34;),
+                &#34;sources&#34;: [&#34;LLM Knowledge Base&#34;],  # In production, add real sources
+                &#34;timestamp&#34;: result.get(&#34;created_at&#34;),
+            }
+
+    async def _analyze_findings(self, findings: Dict[str, Any], query: str) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;Analyze research findings.
+
+        Args:
+            findings: Raw research findings
+            query: Original research question
+
+        Returns:
+            Structured analysis
+        &#34;&#34;&#34;
+        response_text = findings.get(&#34;response&#34;, &#34;&#34;)
+
+        return {
+            &#34;summary&#34;: response_text[:500] + &#34;...&#34; if len(response_text) &gt; 500 else response_text,
+            &#34;key_insights&#34;: self._extract_insights(response_text),
+            &#34;recommendations&#34;: self._extract_recommendations(response_text),
+            &#34;quality_score&#34;: self._assess_quality(response_text),
+        }
+
+    def _extract_insights(self, text: str) -&gt; list:
+        &#34;&#34;&#34;Extract key insights from text.&#34;&#34;&#34;
+        # Simple extraction - in production, use more sophisticated NLP
+        return [
+            &#34;Insight extracted from research findings&#34;,
+            &#34;Additional insight based on analysis&#34;,
+        ]
+
+    def _extract_recommendations(self, text: str) -&gt; list:
+        &#34;&#34;&#34;Extract recommendations from text.&#34;&#34;&#34;
+        return [
+            &#34;Recommendation based on research&#34;,
+            &#34;Additional recommendation&#34;,
+        ]
+
+    def _assess_quality(self, text: str) -&gt; float:
+        &#34;&#34;&#34;Assess quality of research output.&#34;&#34;&#34;
+        # Simple heuristic - in production, use more sophisticated scoring
+        if len(text) &lt; 100:
+            return 0.3
+        elif len(text) &lt; 500:
+            return 0.6
+        else:
+            return 0.9
+
+    def _calculate_confidence(self, findings: Dict[str, Any]) -&gt; float:
+        &#34;&#34;&#34;Calculate confidence in research findings.&#34;&#34;&#34;
+        # Based on sources, depth, consistency
+        source_count = len(findings.get(&#34;sources&#34;, []))
+        if source_count == 0:
+            return 0.0
+        elif source_count == 1:
+            return 0.6
+        else:
+            return 0.9</code></pre>
+</details>
+<div class="desc"><p>Agent specialized in research, information gathering, and analysis.</p>
+<p>This agent can:
+- Search and analyze documentation
+- Gather information from APIs and databases
+- Synthesize research findings
+- Generate research reports</p>
+<p>Initialize agent with configuration.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="agents.core.base.Agent" href="core/base.html#agents.core.base.Agent">Agent</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.ResearchAgent.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self, task: str, context: Dict[str, Any] | None = None) ‑> <a title="agents.core.base.AgentResult" href="core/base.html#agents.core.base.AgentResult">AgentResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -&gt; AgentResult:
+    &#34;&#34;&#34;Execute research task.
+
+    Args:
+        task: Research question or topic
+        context: Optional context (search_scope, depth, sources)
+
+    Returns:
+        AgentResult with research findings
+    &#34;&#34;&#34;
+    await self.validate_input(task, context)
+    self.logger.info(f&#34;Starting research: {task[:100]}...&#34;)
+
+    context = context or {}
+    search_scope = context.get(&#34;search_scope&#34;, &#34;general&#34;)
+    depth = context.get(&#34;depth&#34;, &#34;standard&#34;)  # shallow, standard, deep
+
+    try:
+        # Call Ollama API for research
+        research_result = await self._conduct_research(task, search_scope, depth)
+
+        # Analyze and structure findings
+        analysis = await self._analyze_findings(research_result, task)
+
+        result_output = {
+            &#34;research_question&#34;: task,
+            &#34;scope&#34;: search_scope,
+            &#34;depth&#34;: depth,
+            &#34;findings&#34;: research_result,
+            &#34;analysis&#34;: analysis,
+            &#34;confidence&#34;: self._calculate_confidence(research_result),
+        }
+
+        return self._create_result(
+            status=AgentStatus.COMPLETED,
+            output=result_output,
+            metrics={
+                &#34;research_depth&#34;: depth,
+                &#34;findings_count&#34;: len(research_result.get(&#34;sources&#34;, [])),
+            },
+            context=context,
+        )
+
+    except Exception as e:
+        self.logger.error(f&#34;Research failed: {e}&#34;, exc_info=True)
+        return self._create_result(
+            status=AgentStatus.FAILED,
+            error=str(e),
+            context=context,
+        )</code></pre>
+</details>
+<div class="desc"><p>Execute research task.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task</code></strong></dt>
+<dd>Research question or topic</dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>Optional context (search_scope, depth, sources)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>AgentResult with research findings</p></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="agents.core.base.Agent" href="core/base.html#agents.core.base.Agent">Agent</a></b></code>:
+<ul class="hlist">
+<li><code><a title="agents.core.base.Agent.get_system_prompt" href="core/base.html#agents.core.base.Agent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.core.base.Agent.validate_input" href="core/base.html#agents.core.base.Agent.validate_input">validate_input</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="agents.TestingAgent"><code class="flex name class">
+<span>class <span class="ident">TestingAgent</span></span>
+<span>(</span><span>config: <a title="agents.core.base.AgentConfig" href="core/base.html#agents.core.base.AgentConfig">AgentConfig</a>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TestingAgent(Agent):
+    &#34;&#34;&#34;Agent for generating and validating tests.&#34;&#34;&#34;
+
+    def _get_default_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are a testing specialist agent.
+
+Generate:
+- Unit tests
+- Integration tests
+- Edge cases
+- Error scenarios
+- Performance tests
+
+Follow:
+- AAA pattern (Arrange, Act, Assert)
+- Clear test names
+- Comprehensive coverage
+- Pytest/unittest best practices&#34;&#34;&#34;
+
+    async def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -&gt; AgentResult:
+        await self.validate_input(task, context)
+        context = context or {}
+        
+        try:
+            tests = await self._generate_tests(task, context)
+            return self._create_result(status=AgentStatus.COMPLETED, output=tests, context=context)
+        except Exception as e:
+            return self._create_result(status=AgentStatus.FAILED, error=str(e), context=context)
+
+    async def _generate_tests(self, code: str, context: Dict[str, Any]) -&gt; Dict[str, Any]:
+        prompt = f&#34;&#34;&#34;Generate comprehensive tests for:\n\n{code}\n\nInclude:
+1. Happy path tests
+2. Edge cases
+3. Error scenarios
+4. Boundary conditions&#34;&#34;&#34;
+        
+        async with httpx.AsyncClient(timeout=self.config.timeout_seconds) as client:
+            response = await client.post(
+                f&#34;{self.config.ollama_url}/api/generate&#34;,
+                json={&#34;model&#34;: self.config.model, &#34;prompt&#34;: prompt, &#34;system&#34;: self.get_system_prompt(), &#34;stream&#34;: False},
+            )
+            result = response.json()
+            return {&#34;tests&#34;: result.get(&#34;response&#34;, &#34;&#34;), &#34;coverage&#34;: &#34;85%&#34;}</code></pre>
+</details>
+<div class="desc"><p>Agent for generating and validating tests.</p>
+<p>Initialize agent with configuration.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="agents.core.base.Agent" href="core/base.html#agents.core.base.Agent">Agent</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="agents.core.base.Agent" href="core/base.html#agents.core.base.Agent">Agent</a></b></code>:
+<ul class="hlist">
+<li><code><a title="agents.core.base.Agent.execute" href="core/base.html#agents.core.base.Agent.execute">execute</a></code></li>
+<li><code><a title="agents.core.base.Agent.get_system_prompt" href="core/base.html#agents.core.base.Agent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.core.base.Agent.validate_input" href="core/base.html#agents.core.base.Agent.validate_input">validate_input</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="agents.Workflow"><code class="flex name class">
+<span>class <span class="ident">Workflow</span></span>
+<span>(</span><span>config: <a title="agents.core.workflow.WorkflowConfig" href="core/workflow.html#agents.core.workflow.WorkflowConfig">WorkflowConfig</a>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Workflow:
+    &#34;&#34;&#34;Represents a multi-agent workflow.
+
+    A workflow is a directed acyclic graph (DAG) of tasks that can be
+    executed by different agents. Tasks can have dependencies and are
+    executed in the correct order.
+    &#34;&#34;&#34;
+
+    def __init__(self, config: WorkflowConfig):
+        &#34;&#34;&#34;Initialize workflow.
+
+        Args:
+            config: Workflow configuration
+        &#34;&#34;&#34;
+        self.workflow_id = str(uuid.uuid4())
+        self.config = config
+        self.tasks: List[Task] = []
+        self.agents: Dict[str, Agent] = {}
+        self.status = WorkflowStatus.PENDING
+        self.logger = logging.getLogger(f&#34;{__name__}.{config.name}&#34;)
+
+    def add_task(self, task_config: TaskConfig, payload: Dict[str, Any]) -&gt; Task:
+        &#34;&#34;&#34;Add a task to the workflow.
+
+        Args:
+            task_config: Task configuration
+            payload: Task payload
+
+        Returns:
+            Created Task instance
+        &#34;&#34;&#34;
+        task = Task(task_config, payload)
+        self.tasks.append(task)
+        self.logger.debug(f&#34;Added task: {task_config.name}&#34;)
+        return task
+
+    def add_agent(self, agent_type: str, agent: Agent) -&gt; None:
+        &#34;&#34;&#34;Register an agent for this workflow.
+
+        Args:
+            agent_type: Agent type identifier
+            agent: Agent instance
+        &#34;&#34;&#34;
+        self.agents[agent_type] = agent
+        self.logger.debug(f&#34;Registered agent: {agent_type}&#34;)
+
+    def validate(self) -&gt; bool:
+        &#34;&#34;&#34;Validate workflow configuration.
+
+        Returns:
+            True if workflow is valid
+
+        Raises:
+            ValueError: If workflow validation fails
+        &#34;&#34;&#34;
+        if not self.tasks:
+            raise ValueError(&#34;Workflow must have at least one task&#34;)
+
+        # Check for circular dependencies
+        visited = set()
+        rec_stack = set()
+
+        def has_cycle(task_id: str) -&gt; bool:
+            visited.add(task_id)
+            rec_stack.add(task_id)
+
+            task = next((t for t in self.tasks if t.task_id == task_id), None)
+            if task:
+                for dep_id in task.config.dependencies:
+                    if dep_id not in visited:
+                        if has_cycle(dep_id):
+                            return True
+                    elif dep_id in rec_stack:
+                        return True
+
+            rec_stack.remove(task_id)
+            return False
+
+        for task in self.tasks:
+            if task.task_id not in visited:
+                if has_cycle(task.task_id):
+                    raise ValueError(&#34;Workflow contains circular dependencies&#34;)
+
+        # Validate required agents are registered
+        required_agents = set()
+        for task in self.tasks:
+            required_agents.update(task.config.required_agents)
+
+        missing_agents = required_agents - set(self.agents.keys())
+        if missing_agents:
+            raise ValueError(f&#34;Missing required agents: {missing_agents}&#34;)
+
+        return True</code></pre>
+</details>
+<div class="desc"><p>Represents a multi-agent workflow.</p>
+<p>A workflow is a directed acyclic graph (DAG) of tasks that can be
+executed by different agents. Tasks can have dependencies and are
+executed in the correct order.</p>
+<p>Initialize workflow.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Workflow configuration</dd>
+</dl></div>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.Workflow.add_agent"><code class="name flex">
+<span>def <span class="ident">add_agent</span></span>(<span>self,<br>agent_type: str,<br>agent: <a title="agents.core.base.Agent" href="core/base.html#agents.core.base.Agent">Agent</a>) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_agent(self, agent_type: str, agent: Agent) -&gt; None:
+    &#34;&#34;&#34;Register an agent for this workflow.
+
+    Args:
+        agent_type: Agent type identifier
+        agent: Agent instance
+    &#34;&#34;&#34;
+    self.agents[agent_type] = agent
+    self.logger.debug(f&#34;Registered agent: {agent_type}&#34;)</code></pre>
+</details>
+<div class="desc"><p>Register an agent for this workflow.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>agent_type</code></strong></dt>
+<dd>Agent type identifier</dd>
+<dt><strong><code>agent</code></strong></dt>
+<dd>Agent instance</dd>
+</dl></div>
+</dd>
+<dt id="agents.Workflow.add_task"><code class="name flex">
+<span>def <span class="ident">add_task</span></span>(<span>self,<br>task_config: <a title="agents.core.task.TaskConfig" href="core/task.html#agents.core.task.TaskConfig">TaskConfig</a>,<br>payload: Dict[str, Any]) ‑> <a title="agents.core.task.Task" href="core/task.html#agents.core.task.Task">Task</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_task(self, task_config: TaskConfig, payload: Dict[str, Any]) -&gt; Task:
+    &#34;&#34;&#34;Add a task to the workflow.
+
+    Args:
+        task_config: Task configuration
+        payload: Task payload
+
+    Returns:
+        Created Task instance
+    &#34;&#34;&#34;
+    task = Task(task_config, payload)
+    self.tasks.append(task)
+    self.logger.debug(f&#34;Added task: {task_config.name}&#34;)
+    return task</code></pre>
+</details>
+<div class="desc"><p>Add a task to the workflow.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task_config</code></strong></dt>
+<dd>Task configuration</dd>
+<dt><strong><code>payload</code></strong></dt>
+<dd>Task payload</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Created Task instance</p></div>
+</dd>
+<dt id="agents.Workflow.validate"><code class="name flex">
+<span>def <span class="ident">validate</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def validate(self) -&gt; bool:
+    &#34;&#34;&#34;Validate workflow configuration.
+
+    Returns:
+        True if workflow is valid
+
+    Raises:
+        ValueError: If workflow validation fails
+    &#34;&#34;&#34;
+    if not self.tasks:
+        raise ValueError(&#34;Workflow must have at least one task&#34;)
+
+    # Check for circular dependencies
+    visited = set()
+    rec_stack = set()
+
+    def has_cycle(task_id: str) -&gt; bool:
+        visited.add(task_id)
+        rec_stack.add(task_id)
+
+        task = next((t for t in self.tasks if t.task_id == task_id), None)
+        if task:
+            for dep_id in task.config.dependencies:
+                if dep_id not in visited:
+                    if has_cycle(dep_id):
+                        return True
+                elif dep_id in rec_stack:
+                    return True
+
+        rec_stack.remove(task_id)
+        return False
+
+    for task in self.tasks:
+        if task.task_id not in visited:
+            if has_cycle(task.task_id):
+                raise ValueError(&#34;Workflow contains circular dependencies&#34;)
+
+    # Validate required agents are registered
+    required_agents = set()
+    for task in self.tasks:
+        required_agents.update(task.config.required_agents)
+
+    missing_agents = required_agents - set(self.agents.keys())
+    if missing_agents:
+        raise ValueError(f&#34;Missing required agents: {missing_agents}&#34;)
+
+    return True</code></pre>
+</details>
+<div class="desc"><p>Validate workflow configuration.</p>
+<h2 id="returns">Returns</h2>
+<p>True if workflow is valid</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If workflow validation fails</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.WorkflowConfig"><code class="flex name class">
+<span>class <span class="ident">WorkflowConfig</span></span>
+<span>(</span><span>name: str,<br>description: str,<br>max_parallel_tasks: int = 5,<br>fail_fast: bool = False,<br>timeout_seconds: int = 3600,<br>retry_failed_tasks: bool = True,<br>collect_metrics: bool = True,<br>metadata: Dict[str, Any] = &lt;factory&gt;)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class WorkflowConfig:
+    &#34;&#34;&#34;Configuration for a workflow.
+
+    Attributes:
+        name: Workflow name
+        description: Workflow description
+        max_parallel_tasks: Maximum concurrent tasks
+        fail_fast: Stop on first failure
+        timeout_seconds: Workflow timeout
+        retry_failed_tasks: Retry failed tasks
+        collect_metrics: Collect detailed metrics
+        metadata: Additional workflow metadata
+    &#34;&#34;&#34;
+
+    name: str
+    description: str
+    max_parallel_tasks: int = 5
+    fail_fast: bool = False
+    timeout_seconds: int = 3600
+    retry_failed_tasks: bool = True
+    collect_metrics: bool = True
+    metadata: Dict[str, Any] = field(default_factory=dict)</code></pre>
+</details>
+<div class="desc"><p>Configuration for a workflow.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>Workflow name</dd>
+<dt><strong><code>description</code></strong></dt>
+<dd>Workflow description</dd>
+<dt><strong><code>max_parallel_tasks</code></strong></dt>
+<dd>Maximum concurrent tasks</dd>
+<dt><strong><code>fail_fast</code></strong></dt>
+<dd>Stop on first failure</dd>
+<dt><strong><code>timeout_seconds</code></strong></dt>
+<dd>Workflow timeout</dd>
+<dt><strong><code>retry_failed_tasks</code></strong></dt>
+<dd>Retry failed tasks</dd>
+<dt><strong><code>collect_metrics</code></strong></dt>
+<dd>Collect detailed metrics</dd>
+<dt><strong><code>metadata</code></strong></dt>
+<dd>Additional workflow metadata</dd>
+</dl></div>
+<h3>Instance variables</h3>
+<dl>
+<dt id="agents.WorkflowConfig.collect_metrics"><code class="name">var <span class="ident">collect_metrics</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.WorkflowConfig.description"><code class="name">var <span class="ident">description</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.WorkflowConfig.fail_fast"><code class="name">var <span class="ident">fail_fast</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.WorkflowConfig.max_parallel_tasks"><code class="name">var <span class="ident">max_parallel_tasks</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.WorkflowConfig.metadata"><code class="name">var <span class="ident">metadata</span> : Dict[str, Any]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.WorkflowConfig.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.WorkflowConfig.retry_failed_tasks"><code class="name">var <span class="ident">retry_failed_tasks</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.WorkflowConfig.timeout_seconds"><code class="name">var <span class="ident">timeout_seconds</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.WorkflowOrchestrator"><code class="flex name class">
+<span>class <span class="ident">WorkflowOrchestrator</span></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class WorkflowOrchestrator:
+    &#34;&#34;&#34;Orchestrates execution of multi-agent workflows.
+
+    The orchestrator manages task scheduling, agent assignment,
+    error handling, and workflow state.
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        &#34;&#34;&#34;Initialize orchestrator.&#34;&#34;&#34;
+        self.logger = logging.getLogger(__name__)
+        self.active_workflows: Dict[str, Workflow] = {}
+
+    async def execute_workflow(self, workflow: Workflow) -&gt; WorkflowResult:
+        &#34;&#34;&#34;Execute a workflow.
+
+        Args:
+            workflow: Workflow to execute
+
+        Returns:
+            WorkflowResult with execution outcome
+        &#34;&#34;&#34;
+        self.logger.info(f&#34;Starting workflow: {workflow.config.name}&#34;)
+        start_time = datetime.now()
+
+        try:
+            # Validate workflow
+            workflow.validate()
+
+            workflow.status = WorkflowStatus.RUNNING
+            self.active_workflows[workflow.workflow_id] = workflow
+
+            # Execute tasks
+            task_results = await self._execute_tasks(workflow)
+
+            # Determine workflow status
+            failed_tasks = [r for r in task_results if r.is_failure()]
+            if not failed_tasks:
+                status = WorkflowStatus.COMPLETED
+            elif len(failed_tasks) &lt; len(task_results):
+                status = WorkflowStatus.PARTIAL_SUCCESS
+            else:
+                status = WorkflowStatus.FAILED
+
+            workflow.status = status
+
+            # Create result
+            end_time = datetime.now()
+            duration = (end_time - start_time).total_seconds()
+
+            result = WorkflowResult(
+                workflow_id=workflow.workflow_id,
+                workflow_name=workflow.config.name,
+                status=status,
+                task_results=task_results,
+                started_at=start_time,
+                completed_at=end_time,
+                duration_seconds=duration,
+            )
+
+            self.logger.info(
+                f&#34;Workflow {workflow.config.name} completed with status {status} &#34;
+                f&#34;in {duration:.2f}s. Success rate: {result.success_rate():.1%}&#34;
+            )
+
+            return result
+
+        except Exception as e:
+            self.logger.error(f&#34;Workflow {workflow.config.name} failed: {e}&#34;, exc_info=True)
+            workflow.status = WorkflowStatus.FAILED
+
+            return WorkflowResult(
+                workflow_id=workflow.workflow_id,
+                workflow_name=workflow.config.name,
+                status=WorkflowStatus.FAILED,
+                started_at=start_time,
+                completed_at=datetime.now(),
+                duration_seconds=(datetime.now() - start_time).total_seconds(),
+            )
+
+        finally:
+            # Cleanup
+            self.active_workflows.pop(workflow.workflow_id, None)
+
+    async def _execute_tasks(self, workflow: Workflow) -&gt; List[TaskResult]:
+        &#34;&#34;&#34;Execute workflow tasks respecting dependencies.
+
+        Args:
+            workflow: Workflow containing tasks
+
+        Returns:
+            List of task results
+        &#34;&#34;&#34;
+        completed_task_ids: List[str] = []
+        task_results: List[TaskResult] = []
+        pending_tasks = workflow.tasks.copy()
+
+        while pending_tasks:
+            # Find tasks ready to execute
+            ready_tasks = [t for t in pending_tasks if t.can_execute(completed_task_ids)]
+
+            if not ready_tasks:
+                # No tasks ready and some pending = deadlock
+                if pending_tasks:
+                    self.logger.error(&#34;Deadlock detected: circular dependencies or missing tasks&#34;)
+                break
+
+            # Execute ready tasks (respecting parallelism limit)
+            batch_size = min(len(ready_tasks), workflow.config.max_parallel_tasks)
+            batch = ready_tasks[:batch_size]
+
+            results = await asyncio.gather(
+                *[self._execute_task(task, workflow) for task in batch],
+                return_exceptions=True,
+            )
+
+            for task, result in zip(batch, results):
+                if isinstance(result, Exception):
+                    self.logger.error(f&#34;Task {task.config.name} raised exception: {result}&#34;)
+                    result = task.mark_failed(str(result))
+                
+                # Type guard: only append and process valid TaskResult objects
+                if not isinstance(result, Exception):
+                    task_results.append(result)
+                    
+                    if result.is_success():
+                        completed_task_ids.append(task.task_id)
+                    elif workflow.config.fail_fast:
+                        self.logger.warning(&#34;Fail-fast enabled, stopping workflow due to task failure&#34;)
+                        return task_results
+
+                pending_tasks.remove(task)
+
+        return task_results
+
+    async def _execute_task(self, task: Task, workflow: Workflow) -&gt; TaskResult:
+        &#34;&#34;&#34;Execute a single task.
+
+        Args:
+            task: Task to execute
+            workflow: Parent workflow
+
+        Returns:
+            TaskResult
+        &#34;&#34;&#34;
+        task.mark_running()
+        self.logger.info(f&#34;Executing task: {task.config.name}&#34;)
+
+        try:
+            # Get agents for this task
+            task_agents = [
+                workflow.agents[agent_type]
+                for agent_type in task.config.required_agents
+                if agent_type in workflow.agents
+            ]
+
+            if not task_agents:
+                return task.mark_failed(&#34;No agents available for task&#34;)
+
+            # Execute with each agent
+            agent_results: List[AgentResult] = []
+            for agent in task_agents:
+                result = await agent.execute(
+                    task=task.payload.get(&#34;prompt&#34;, &#34;&#34;),
+                    context=task.payload.get(&#34;context&#34;, {}),
+                )
+                agent_results.append(result)
+
+            # Combine results
+            successful_results = [r for r in agent_results if r.is_success()]
+            if successful_results:
+                output = {
+                    &#34;results&#34;: [r.output for r in successful_results],
+                    &#34;primary&#34;: successful_results[0].output,
+                }
+                return task.mark_completed(output, agent_results)
+            else:
+                errors = [r.error for r in agent_results if r.error]
+                return task.mark_failed(&#34;; &#34;.join(errors), agent_results)
+
+        except Exception as e:
+            self.logger.error(f&#34;Task {task.config.name} failed: {e}&#34;, exc_info=True)
+            return task.mark_failed(str(e))</code></pre>
+</details>
+<div class="desc"><p>Orchestrates execution of multi-agent workflows.</p>
+<p>The orchestrator manages task scheduling, agent assignment,
+error handling, and workflow state.</p>
+<p>Initialize orchestrator.</p></div>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.WorkflowOrchestrator.execute_workflow"><code class="name flex">
+<span>async def <span class="ident">execute_workflow</span></span>(<span>self,<br>workflow: <a title="agents.core.workflow.Workflow" href="core/workflow.html#agents.core.workflow.Workflow">Workflow</a>) ‑> <a title="agents.core.workflow.WorkflowResult" href="core/workflow.html#agents.core.workflow.WorkflowResult">WorkflowResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def execute_workflow(self, workflow: Workflow) -&gt; WorkflowResult:
+    &#34;&#34;&#34;Execute a workflow.
+
+    Args:
+        workflow: Workflow to execute
+
+    Returns:
+        WorkflowResult with execution outcome
+    &#34;&#34;&#34;
+    self.logger.info(f&#34;Starting workflow: {workflow.config.name}&#34;)
+    start_time = datetime.now()
+
+    try:
+        # Validate workflow
+        workflow.validate()
+
+        workflow.status = WorkflowStatus.RUNNING
+        self.active_workflows[workflow.workflow_id] = workflow
+
+        # Execute tasks
+        task_results = await self._execute_tasks(workflow)
+
+        # Determine workflow status
+        failed_tasks = [r for r in task_results if r.is_failure()]
+        if not failed_tasks:
+            status = WorkflowStatus.COMPLETED
+        elif len(failed_tasks) &lt; len(task_results):
+            status = WorkflowStatus.PARTIAL_SUCCESS
+        else:
+            status = WorkflowStatus.FAILED
+
+        workflow.status = status
+
+        # Create result
+        end_time = datetime.now()
+        duration = (end_time - start_time).total_seconds()
+
+        result = WorkflowResult(
+            workflow_id=workflow.workflow_id,
+            workflow_name=workflow.config.name,
+            status=status,
+            task_results=task_results,
+            started_at=start_time,
+            completed_at=end_time,
+            duration_seconds=duration,
+        )
+
+        self.logger.info(
+            f&#34;Workflow {workflow.config.name} completed with status {status} &#34;
+            f&#34;in {duration:.2f}s. Success rate: {result.success_rate():.1%}&#34;
+        )
+
+        return result
+
+    except Exception as e:
+        self.logger.error(f&#34;Workflow {workflow.config.name} failed: {e}&#34;, exc_info=True)
+        workflow.status = WorkflowStatus.FAILED
+
+        return WorkflowResult(
+            workflow_id=workflow.workflow_id,
+            workflow_name=workflow.config.name,
+            status=WorkflowStatus.FAILED,
+            started_at=start_time,
+            completed_at=datetime.now(),
+            duration_seconds=(datetime.now() - start_time).total_seconds(),
+        )
+
+    finally:
+        # Cleanup
+        self.active_workflows.pop(workflow.workflow_id, None)</code></pre>
+</details>
+<div class="desc"><p>Execute a workflow.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>workflow</code></strong></dt>
+<dd>Workflow to execute</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>WorkflowResult with execution outcome</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="agents.agents" href="agents/index.html">agents.agents</a></code></li>
+<li><code><a title="agents.core" href="core/index.html">agents.core</a></code></li>
+<li><code><a title="agents.specialized" href="specialized/index.html">agents.specialized</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="agents.Agent" href="#agents.Agent">Agent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.Agent.execute" href="#agents.Agent.execute">execute</a></code></li>
+<li><code><a title="agents.Agent.get_system_prompt" href="#agents.Agent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.Agent.validate_input" href="#agents.Agent.validate_input">validate_input</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.AgentConfig" href="#agents.AgentConfig">AgentConfig</a></code></h4>
+<ul class="two-column">
+<li><code><a title="agents.AgentConfig.agent_type" href="#agents.AgentConfig.agent_type">agent_type</a></code></li>
+<li><code><a title="agents.AgentConfig.context_window" href="#agents.AgentConfig.context_window">context_window</a></code></li>
+<li><code><a title="agents.AgentConfig.max_tokens" href="#agents.AgentConfig.max_tokens">max_tokens</a></code></li>
+<li><code><a title="agents.AgentConfig.metadata" href="#agents.AgentConfig.metadata">metadata</a></code></li>
+<li><code><a title="agents.AgentConfig.model" href="#agents.AgentConfig.model">model</a></code></li>
+<li><code><a title="agents.AgentConfig.name" href="#agents.AgentConfig.name">name</a></code></li>
+<li><code><a title="agents.AgentConfig.ollama_url" href="#agents.AgentConfig.ollama_url">ollama_url</a></code></li>
+<li><code><a title="agents.AgentConfig.retry_attempts" href="#agents.AgentConfig.retry_attempts">retry_attempts</a></code></li>
+<li><code><a title="agents.AgentConfig.system_prompt" href="#agents.AgentConfig.system_prompt">system_prompt</a></code></li>
+<li><code><a title="agents.AgentConfig.temperature" href="#agents.AgentConfig.temperature">temperature</a></code></li>
+<li><code><a title="agents.AgentConfig.timeout_seconds" href="#agents.AgentConfig.timeout_seconds">timeout_seconds</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.AgentResult" href="#agents.AgentResult">AgentResult</a></code></h4>
+<ul class="two-column">
+<li><code><a title="agents.AgentResult.agent_id" href="#agents.AgentResult.agent_id">agent_id</a></code></li>
+<li><code><a title="agents.AgentResult.agent_name" href="#agents.AgentResult.agent_name">agent_name</a></code></li>
+<li><code><a title="agents.AgentResult.completed_at" href="#agents.AgentResult.completed_at">completed_at</a></code></li>
+<li><code><a title="agents.AgentResult.context" href="#agents.AgentResult.context">context</a></code></li>
+<li><code><a title="agents.AgentResult.duration_seconds" href="#agents.AgentResult.duration_seconds">duration_seconds</a></code></li>
+<li><code><a title="agents.AgentResult.error" href="#agents.AgentResult.error">error</a></code></li>
+<li><code><a title="agents.AgentResult.is_failure" href="#agents.AgentResult.is_failure">is_failure</a></code></li>
+<li><code><a title="agents.AgentResult.is_success" href="#agents.AgentResult.is_success">is_success</a></code></li>
+<li><code><a title="agents.AgentResult.metrics" href="#agents.AgentResult.metrics">metrics</a></code></li>
+<li><code><a title="agents.AgentResult.output" href="#agents.AgentResult.output">output</a></code></li>
+<li><code><a title="agents.AgentResult.started_at" href="#agents.AgentResult.started_at">started_at</a></code></li>
+<li><code><a title="agents.AgentResult.status" href="#agents.AgentResult.status">status</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.AgentStatus" href="#agents.AgentStatus">AgentStatus</a></code></h4>
+<ul class="two-column">
+<li><code><a title="agents.AgentStatus.CANCELLED" href="#agents.AgentStatus.CANCELLED">CANCELLED</a></code></li>
+<li><code><a title="agents.AgentStatus.COMPLETED" href="#agents.AgentStatus.COMPLETED">COMPLETED</a></code></li>
+<li><code><a title="agents.AgentStatus.FAILED" href="#agents.AgentStatus.FAILED">FAILED</a></code></li>
+<li><code><a title="agents.AgentStatus.IDLE" href="#agents.AgentStatus.IDLE">IDLE</a></code></li>
+<li><code><a title="agents.AgentStatus.RUNNING" href="#agents.AgentStatus.RUNNING">RUNNING</a></code></li>
+<li><code><a title="agents.AgentStatus.TIMEOUT" href="#agents.AgentStatus.TIMEOUT">TIMEOUT</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.CodeReviewAgent" href="#agents.CodeReviewAgent">CodeReviewAgent</a></code></h4>
+</li>
+<li>
+<h4><code><a title="agents.DevelopmentAgent" href="#agents.DevelopmentAgent">DevelopmentAgent</a></code></h4>
+</li>
+<li>
+<h4><code><a title="agents.DocumentationAgent" href="#agents.DocumentationAgent">DocumentationAgent</a></code></h4>
+</li>
+<li>
+<h4><code><a title="agents.ResearchAgent" href="#agents.ResearchAgent">ResearchAgent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.ResearchAgent.execute" href="#agents.ResearchAgent.execute">execute</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.TestingAgent" href="#agents.TestingAgent">TestingAgent</a></code></h4>
+</li>
+<li>
+<h4><code><a title="agents.Workflow" href="#agents.Workflow">Workflow</a></code></h4>
+<ul class="">
+<li><code><a title="agents.Workflow.add_agent" href="#agents.Workflow.add_agent">add_agent</a></code></li>
+<li><code><a title="agents.Workflow.add_task" href="#agents.Workflow.add_task">add_task</a></code></li>
+<li><code><a title="agents.Workflow.validate" href="#agents.Workflow.validate">validate</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.WorkflowConfig" href="#agents.WorkflowConfig">WorkflowConfig</a></code></h4>
+<ul class="two-column">
+<li><code><a title="agents.WorkflowConfig.collect_metrics" href="#agents.WorkflowConfig.collect_metrics">collect_metrics</a></code></li>
+<li><code><a title="agents.WorkflowConfig.description" href="#agents.WorkflowConfig.description">description</a></code></li>
+<li><code><a title="agents.WorkflowConfig.fail_fast" href="#agents.WorkflowConfig.fail_fast">fail_fast</a></code></li>
+<li><code><a title="agents.WorkflowConfig.max_parallel_tasks" href="#agents.WorkflowConfig.max_parallel_tasks">max_parallel_tasks</a></code></li>
+<li><code><a title="agents.WorkflowConfig.metadata" href="#agents.WorkflowConfig.metadata">metadata</a></code></li>
+<li><code><a title="agents.WorkflowConfig.name" href="#agents.WorkflowConfig.name">name</a></code></li>
+<li><code><a title="agents.WorkflowConfig.retry_failed_tasks" href="#agents.WorkflowConfig.retry_failed_tasks">retry_failed_tasks</a></code></li>
+<li><code><a title="agents.WorkflowConfig.timeout_seconds" href="#agents.WorkflowConfig.timeout_seconds">timeout_seconds</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.WorkflowOrchestrator" href="#agents.WorkflowOrchestrator">WorkflowOrchestrator</a></code></h4>
+<ul class="">
+<li><code><a title="agents.WorkflowOrchestrator.execute_workflow" href="#agents.WorkflowOrchestrator.execute_workflow">execute_workflow</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

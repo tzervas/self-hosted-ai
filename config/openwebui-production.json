@@ -442,8 +442,9 @@
   },
   "image_generation": {
     "enabled": true,
-    "engine": "comfyui",
+    "engine": "auto",
     "comfyui_url": "http://192.168.1.99:8188",
+    "automatic1111_url": "http://192.168.1.99:7860",
     "default_workflow": "text2img-sdxl",
     "default_params": {
       "width": 1024,

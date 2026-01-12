@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>agents.agents.adk.workflows API documentation</title>
+<meta name="description" content="ADK Workflow Execution …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>agents.agents.adk.workflows</code></h1>
+</header>
+<section id="section-intro">
+<p>ADK Workflow Execution</p>
+<p>Multi-agent workflow orchestration using Google ADK patterns.
+Supports parallel execution, dependencies, and data flow between agents.</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="agents.agents.adk.workflows.ADKWorkflow"><code class="flex name class">
+<span>class <span class="ident">ADKWorkflow</span></span>
+<span>(</span><span>name: str,<br>description: str = '',<br>tasks: List[<a title="agents.agents.adk.workflows.WorkflowTask" href="#agents.agents.adk.workflows.WorkflowTask">WorkflowTask</a>] | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ADKWorkflow:
+    &#34;&#34;&#34;Workflow definition and parser.&#34;&#34;&#34;
+    
+    def __init__(
+        self,
+        name: str,
+        description: str = &#34;&#34;,
+        tasks: Optional[List[WorkflowTask]] = None
+    ):
+        self.name = name
+        self.description = description
+        self.tasks = tasks or []
+        self.logger = logger.bind(workflow=name)
+    
+    @classmethod
+    def from_yaml(cls, path: Path) -&gt; &#34;ADKWorkflow&#34;:
+        &#34;&#34;&#34;Load workflow from YAML file.
+        
+        Args:
+            path: Path to YAML file
+            
+        Returns:
+            Parsed ADKWorkflow instance
+        &#34;&#34;&#34;
+        with open(path) as f:
+            data = yaml.safe_load(f)
+        
+        tasks = []
+        for task_data in data.get(&#34;tasks&#34;, []):
+            tasks.append(WorkflowTask(
+                id=task_data[&#34;id&#34;],
+                agent_type=task_data.get(&#34;agent_type&#34;, &#34;development&#34;),
+                prompt=task_data[&#34;prompt&#34;],
+                depends_on=task_data.get(&#34;depends_on&#34;, []),
+                model=task_data.get(&#34;model&#34;),
+                temperature=task_data.get(&#34;temperature&#34;),
+                timeout=task_data.get(&#34;timeout&#34;),
+                context=task_data.get(&#34;context&#34;, {})
+            ))
+        
+        return cls(
+            name=data.get(&#34;name&#34;, path.stem),
+            description=data.get(&#34;description&#34;, &#34;&#34;),
+            tasks=tasks
+        )
+    
+    def validate(self) -&gt; List[str]:
+        &#34;&#34;&#34;Validate workflow for issues.
+        
+        Returns:
+            List of validation errors (empty if valid)
+        &#34;&#34;&#34;
+        errors = []
+        task_ids = {t.id for t in self.tasks}
+        
+        for task in self.tasks:
+            for dep in task.depends_on:
+                if dep not in task_ids:
+                    errors.append(f&#34;Task &#39;{task.id}&#39; depends on unknown task &#39;{dep}&#39;&#34;)
+        
+        # Check for cycles
+        visited: Set[str] = set()
+        path: Set[str] = set()
+        
+        def has_cycle(task_id: str) -&gt; bool:
+            if task_id in path:
+                return True
+            if task_id in visited:
+                return False
+            
+            visited.add(task_id)
+            path.add(task_id)
+            
+            task = next((t for t in self.tasks if t.id == task_id), None)
+            if task:
+                for dep in task.depends_on:
+                    if has_cycle(dep):
+                        return True
+            
+            path.remove(task_id)
+            return False
+        
+        for task in self.tasks:
+            if has_cycle(task.id):
+                errors.append(f&#34;Circular dependency detected involving task &#39;{task.id}&#39;&#34;)
+                break
+        
+        return errors</code></pre>
+</details>
+<div class="desc"><p>Workflow definition and parser.</p></div>
+<h3>Static methods</h3>
+<dl>
+<dt id="agents.agents.adk.workflows.ADKWorkflow.from_yaml"><code class="name flex">
+<span>def <span class="ident">from_yaml</span></span>(<span>path: pathlib._local.Path) ‑> <a title="agents.agents.adk.workflows.ADKWorkflow" href="#agents.agents.adk.workflows.ADKWorkflow">ADKWorkflow</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Load workflow from YAML file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong></dt>
+<dd>Path to YAML file</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Parsed ADKWorkflow instance</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.adk.workflows.ADKWorkflow.validate"><code class="name flex">
+<span>def <span class="ident">validate</span></span>(<span>self) ‑> List[str]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def validate(self) -&gt; List[str]:
+    &#34;&#34;&#34;Validate workflow for issues.
+    
+    Returns:
+        List of validation errors (empty if valid)
+    &#34;&#34;&#34;
+    errors = []
+    task_ids = {t.id for t in self.tasks}
+    
+    for task in self.tasks:
+        for dep in task.depends_on:
+            if dep not in task_ids:
+                errors.append(f&#34;Task &#39;{task.id}&#39; depends on unknown task &#39;{dep}&#39;&#34;)
+    
+    # Check for cycles
+    visited: Set[str] = set()
+    path: Set[str] = set()
+    
+    def has_cycle(task_id: str) -&gt; bool:
+        if task_id in path:
+            return True
+        if task_id in visited:
+            return False
+        
+        visited.add(task_id)
+        path.add(task_id)
+        
+        task = next((t for t in self.tasks if t.id == task_id), None)
+        if task:
+            for dep in task.depends_on:
+                if has_cycle(dep):
+                    return True
+        
+        path.remove(task_id)
+        return False
+    
+    for task in self.tasks:
+        if has_cycle(task.id):
+            errors.append(f&#34;Circular dependency detected involving task &#39;{task.id}&#39;&#34;)
+            break
+    
+    return errors</code></pre>
+</details>
+<div class="desc"><p>Validate workflow for issues.</p>
+<h2 id="returns">Returns</h2>
+<p>List of validation errors (empty if valid)</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.workflows.WorkflowExecutor"><code class="flex name class">
+<span>class <span class="ident">WorkflowExecutor</span></span>
+<span>(</span><span>litellm_url: str,<br>litellm_api_key: str,<br>default_model: str = 'qwen2.5-coder:14b',<br>priority: agents.adk.base.AgentPriority = AgentPriority.NORMAL)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class WorkflowExecutor:
+    &#34;&#34;&#34;Executes ADK workflows with proper dependency handling.&#34;&#34;&#34;
+    
+    AGENT_CLASSES = {
+        &#34;development&#34;: DevelopmentADKAgent,
+        &#34;code_review&#34;: CodeReviewADKAgent,
+        &#34;testing&#34;: TestingADKAgent,
+        &#34;documentation&#34;: DocumentationADKAgent,
+        &#34;research&#34;: ResearchADKAgent,
+    }
+    
+    def __init__(
+        self,
+        litellm_url: str,
+        litellm_api_key: str,
+        default_model: str = &#34;qwen2.5-coder:14b&#34;,
+        priority: AgentPriority = AgentPriority.NORMAL
+    ):
+        &#34;&#34;&#34;Initialize workflow executor.
+        
+        Args:
+            litellm_url: LiteLLM proxy URL
+            litellm_api_key: API key
+            default_model: Default model to use
+            priority: Default queue priority
+        &#34;&#34;&#34;
+        self.litellm_url = litellm_url
+        self.litellm_api_key = litellm_api_key
+        self.default_model = default_model
+        self.priority = priority
+        self.logger = logger.bind(component=&#34;workflow_executor&#34;)
+    
+    def _create_agent(self, task: WorkflowTask, http_client) -&gt; ADKAgent:
+        &#34;&#34;&#34;Create agent for a task.
+        
+        Args:
+            task: Workflow task
+            http_client: HTTP client to use
+            
+        Returns:
+            Configured ADKAgent instance
+        &#34;&#34;&#34;
+        agent_class = self.AGENT_CLASSES.get(task.agent_type, DevelopmentADKAgent)
+        
+        config = ADKConfig(
+            name=f&#34;{task.agent_type}_{task.id}&#34;,
+            model=task.model or self.default_model,
+            litellm_url=self.litellm_url,
+            litellm_api_key=self.litellm_api_key,
+            temperature=task.temperature or 0.7,
+            timeout=task.timeout or 300,
+            priority=self.priority
+        )
+        
+        return agent_class(config, http_client)
+    
+    def _substitute_variables(
+        self,
+        prompt: str,
+        inputs: Dict[str, Any],
+        outputs: Dict[str, str]
+    ) -&gt; str:
+        &#34;&#34;&#34;Substitute variables in prompt.
+        
+        Args:
+            prompt: Original prompt with {{variables}}
+            inputs: Workflow inputs
+            outputs: Previous task outputs
+            
+        Returns:
+            Prompt with substitutions made
+        &#34;&#34;&#34;
+        result = prompt
+        
+        # Substitute inputs
+        for key, value in inputs.items():
+            result = result.replace(f&#34;{{{{ inputs.{key} }}}}&#34;, str(value))
+        
+        # Substitute outputs
+        for key, value in outputs.items():
+            result = result.replace(f&#34;{{{{ outputs.{key} }}}}&#34;, str(value))
+        
+        return result
+    
+    async def execute(
+        self,
+        workflow: ADKWorkflow,
+        inputs: Dict[str, Any] = None
+    ) -&gt; WorkflowResult:
+        &#34;&#34;&#34;Execute a workflow.
+        
+        Args:
+            workflow: Workflow to execute
+            inputs: Input parameters
+            
+        Returns:
+            WorkflowResult with all outputs
+        &#34;&#34;&#34;
+        import httpx
+        
+        inputs = inputs or {}
+        outputs: Dict[str, str] = {}
+        task_results: Dict[str, ADKResult] = {}
+        errors: List[str] = []
+        completed: Set[str] = set()
+        
+        start_time = time.time()
+        self.logger.info(f&#34;Starting workflow: {workflow.name}&#34;)
+        
+        # Validate workflow
+        validation_errors = workflow.validate()
+        if validation_errors:
+            return WorkflowResult(
+                workflow_name=workflow.name,
+                status=&#34;error&#34;,
+                outputs={},
+                duration_seconds=0,
+                task_results={},
+                errors=validation_errors
+            )
+        
+        async with httpx.AsyncClient(timeout=600) as http_client:
+            while len(completed) &lt; len(workflow.tasks):
+                # Find tasks ready to execute
+                ready_tasks = [
+                    task for task in workflow.tasks
+                    if task.id not in completed
+                    and all(dep in completed for dep in task.depends_on)
+                ]
+                
+                if not ready_tasks:
+                    errors.append(&#34;Workflow stalled - no tasks ready to execute&#34;)
+                    break
+                
+                # Execute ready tasks in parallel
+                async def execute_task(task: WorkflowTask) -&gt; tuple:
+                    agent = self._create_agent(task, http_client)
+                    prompt = self._substitute_variables(task.prompt, inputs, outputs)
+                    
+                    self.logger.info(f&#34;Executing task: {task.id}&#34;)
+                    result = await agent.execute(prompt, task.context)
+                    
+                    return task.id, result
+                
+                results = await asyncio.gather(
+                    *[execute_task(t) for t in ready_tasks],
+                    return_exceptions=True
+                )
+                
+                for result in results:
+                    if isinstance(result, Exception):
+                        errors.append(str(result))
+                        continue
+                    
+                    task_id, adk_result = result
+                    task_results[task_id] = adk_result
+                    
+                    if adk_result.is_success:
+                        outputs[task_id] = adk_result.output or &#34;&#34;
+                        completed.add(task_id)
+                        self.logger.info(f&#34;Task completed: {task_id}&#34;)
+                    else:
+                        errors.append(f&#34;Task {task_id} failed: {adk_result.error}&#34;)
+                        # Continue with other tasks that don&#39;t depend on this one
+                        completed.add(task_id)
+        
+        duration = time.time() - start_time
+        status = &#34;completed&#34; if not errors else &#34;completed_with_errors&#34; if outputs else &#34;failed&#34;
+        
+        self.logger.info(f&#34;Workflow {workflow.name} {status} in {duration:.2f}s&#34;)
+        
+        return WorkflowResult(
+            workflow_name=workflow.name,
+            status=status,
+            outputs=outputs,
+            duration_seconds=duration,
+            task_results=task_results,
+            errors=errors
+        )
+    
+    async def execute_from_file(
+        self,
+        workflow_path: Path,
+        inputs: Dict[str, Any] = None
+    ) -&gt; WorkflowResult:
+        &#34;&#34;&#34;Execute workflow from YAML file.
+        
+        Args:
+            workflow_path: Path to workflow YAML
+            inputs: Input parameters
+            
+        Returns:
+            WorkflowResult
+        &#34;&#34;&#34;
+        workflow = ADKWorkflow.from_yaml(workflow_path)
+        return await self.execute(workflow, inputs)</code></pre>
+</details>
+<div class="desc"><p>Executes ADK workflows with proper dependency handling.</p>
+<p>Initialize workflow executor.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>litellm_url</code></strong></dt>
+<dd>LiteLLM proxy URL</dd>
+<dt><strong><code>litellm_api_key</code></strong></dt>
+<dd>API key</dd>
+<dt><strong><code>default_model</code></strong></dt>
+<dd>Default model to use</dd>
+<dt><strong><code>priority</code></strong></dt>
+<dd>Default queue priority</dd>
+</dl></div>
+<h3>Class variables</h3>
+<dl>
+<dt id="agents.agents.adk.workflows.WorkflowExecutor.AGENT_CLASSES"><code class="name">var <span class="ident">AGENT_CLASSES</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.adk.workflows.WorkflowExecutor.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self,<br>workflow: <a title="agents.agents.adk.workflows.ADKWorkflow" href="#agents.agents.adk.workflows.ADKWorkflow">ADKWorkflow</a>,<br>inputs: Dict[str, Any] = None) ‑> <a title="agents.agents.adk.workflows.WorkflowResult" href="#agents.agents.adk.workflows.WorkflowResult">WorkflowResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def execute(
+    self,
+    workflow: ADKWorkflow,
+    inputs: Dict[str, Any] = None
+) -&gt; WorkflowResult:
+    &#34;&#34;&#34;Execute a workflow.
+    
+    Args:
+        workflow: Workflow to execute
+        inputs: Input parameters
+        
+    Returns:
+        WorkflowResult with all outputs
+    &#34;&#34;&#34;
+    import httpx
+    
+    inputs = inputs or {}
+    outputs: Dict[str, str] = {}
+    task_results: Dict[str, ADKResult] = {}
+    errors: List[str] = []
+    completed: Set[str] = set()
+    
+    start_time = time.time()
+    self.logger.info(f&#34;Starting workflow: {workflow.name}&#34;)
+    
+    # Validate workflow
+    validation_errors = workflow.validate()
+    if validation_errors:
+        return WorkflowResult(
+            workflow_name=workflow.name,
+            status=&#34;error&#34;,
+            outputs={},
+            duration_seconds=0,
+            task_results={},
+            errors=validation_errors
+        )
+    
+    async with httpx.AsyncClient(timeout=600) as http_client:
+        while len(completed) &lt; len(workflow.tasks):
+            # Find tasks ready to execute
+            ready_tasks = [
+                task for task in workflow.tasks
+                if task.id not in completed
+                and all(dep in completed for dep in task.depends_on)
+            ]
+            
+            if not ready_tasks:
+                errors.append(&#34;Workflow stalled - no tasks ready to execute&#34;)
+                break
+            
+            # Execute ready tasks in parallel
+            async def execute_task(task: WorkflowTask) -&gt; tuple:
+                agent = self._create_agent(task, http_client)
+                prompt = self._substitute_variables(task.prompt, inputs, outputs)
+                
+                self.logger.info(f&#34;Executing task: {task.id}&#34;)
+                result = await agent.execute(prompt, task.context)
+                
+                return task.id, result
+            
+            results = await asyncio.gather(
+                *[execute_task(t) for t in ready_tasks],
+                return_exceptions=True
+            )
+            
+            for result in results:
+                if isinstance(result, Exception):
+                    errors.append(str(result))
+                    continue
+                
+                task_id, adk_result = result
+                task_results[task_id] = adk_result
+                
+                if adk_result.is_success:
+                    outputs[task_id] = adk_result.output or &#34;&#34;
+                    completed.add(task_id)
+                    self.logger.info(f&#34;Task completed: {task_id}&#34;)
+                else:
+                    errors.append(f&#34;Task {task_id} failed: {adk_result.error}&#34;)
+                    # Continue with other tasks that don&#39;t depend on this one
+                    completed.add(task_id)
+    
+    duration = time.time() - start_time
+    status = &#34;completed&#34; if not errors else &#34;completed_with_errors&#34; if outputs else &#34;failed&#34;
+    
+    self.logger.info(f&#34;Workflow {workflow.name} {status} in {duration:.2f}s&#34;)
+    
+    return WorkflowResult(
+        workflow_name=workflow.name,
+        status=status,
+        outputs=outputs,
+        duration_seconds=duration,
+        task_results=task_results,
+        errors=errors
+    )</code></pre>
+</details>
+<div class="desc"><p>Execute a workflow.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>workflow</code></strong></dt>
+<dd>Workflow to execute</dd>
+<dt><strong><code>inputs</code></strong></dt>
+<dd>Input parameters</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>WorkflowResult with all outputs</p></div>
+</dd>
+<dt id="agents.agents.adk.workflows.WorkflowExecutor.execute_from_file"><code class="name flex">
+<span>async def <span class="ident">execute_from_file</span></span>(<span>self, workflow_path: pathlib._local.Path, inputs: Dict[str, Any] = None) ‑> <a title="agents.agents.adk.workflows.WorkflowResult" href="#agents.agents.adk.workflows.WorkflowResult">WorkflowResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def execute_from_file(
+    self,
+    workflow_path: Path,
+    inputs: Dict[str, Any] = None
+) -&gt; WorkflowResult:
+    &#34;&#34;&#34;Execute workflow from YAML file.
+    
+    Args:
+        workflow_path: Path to workflow YAML
+        inputs: Input parameters
+        
+    Returns:
+        WorkflowResult
+    &#34;&#34;&#34;
+    workflow = ADKWorkflow.from_yaml(workflow_path)
+    return await self.execute(workflow, inputs)</code></pre>
+</details>
+<div class="desc"><p>Execute workflow from YAML file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>workflow_path</code></strong></dt>
+<dd>Path to workflow YAML</dd>
+<dt><strong><code>inputs</code></strong></dt>
+<dd>Input parameters</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>WorkflowResult</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.workflows.WorkflowResult"><code class="flex name class">
+<span>class <span class="ident">WorkflowResult</span></span>
+<span>(</span><span>workflow_name: str,<br>status: str,<br>outputs: Dict[str, Any],<br>duration_seconds: float,<br>task_results: Dict[str, agents.adk.base.ADKResult],<br>errors: List[str] = &lt;factory&gt;)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass 
+class WorkflowResult:
+    &#34;&#34;&#34;Result of workflow execution.&#34;&#34;&#34;
+    workflow_name: str
+    status: str
+    outputs: Dict[str, Any]
+    duration_seconds: float
+    task_results: Dict[str, ADKResult]
+    errors: List[str] = field(default_factory=list)</code></pre>
+</details>
+<div class="desc"><p>Result of workflow execution.</p></div>
+<h3>Instance variables</h3>
+<dl>
+<dt id="agents.agents.adk.workflows.WorkflowResult.duration_seconds"><code class="name">var <span class="ident">duration_seconds</span> : float</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.workflows.WorkflowResult.errors"><code class="name">var <span class="ident">errors</span> : List[str]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.workflows.WorkflowResult.outputs"><code class="name">var <span class="ident">outputs</span> : Dict[str, Any]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.workflows.WorkflowResult.status"><code class="name">var <span class="ident">status</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.workflows.WorkflowResult.task_results"><code class="name">var <span class="ident">task_results</span> : Dict[str, agents.adk.base.ADKResult]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.workflows.WorkflowResult.workflow_name"><code class="name">var <span class="ident">workflow_name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.workflows.WorkflowTask"><code class="flex name class">
+<span>class <span class="ident">WorkflowTask</span></span>
+<span>(</span><span>id: str,<br>agent_type: str,<br>prompt: str,<br>depends_on: List[str] = &lt;factory&gt;,<br>model: str | None = None,<br>temperature: float | None = None,<br>timeout: int | None = None,<br>context: Dict[str, Any] = &lt;factory&gt;)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class WorkflowTask:
+    &#34;&#34;&#34;A task within a workflow.&#34;&#34;&#34;
+    id: str
+    agent_type: str
+    prompt: str
+    depends_on: List[str] = field(default_factory=list)
+    model: Optional[str] = None
+    temperature: Optional[float] = None
+    timeout: Optional[int] = None
+    context: Dict[str, Any] = field(default_factory=dict)</code></pre>
+</details>
+<div class="desc"><p>A task within a workflow.</p></div>
+<h3>Instance variables</h3>
+<dl>
+<dt id="agents.agents.adk.workflows.WorkflowTask.agent_type"><code class="name">var <span class="ident">agent_type</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.workflows.WorkflowTask.context"><code class="name">var <span class="ident">context</span> : Dict[str, Any]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.workflows.WorkflowTask.depends_on"><code class="name">var <span class="ident">depends_on</span> : List[str]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.workflows.WorkflowTask.id"><code class="name">var <span class="ident">id</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.workflows.WorkflowTask.model"><code class="name">var <span class="ident">model</span> : str | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.workflows.WorkflowTask.prompt"><code class="name">var <span class="ident">prompt</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.workflows.WorkflowTask.temperature"><code class="name">var <span class="ident">temperature</span> : float | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.workflows.WorkflowTask.timeout"><code class="name">var <span class="ident">timeout</span> : int | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="agents.agents.adk" href="index.html">agents.agents.adk</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="agents.agents.adk.workflows.ADKWorkflow" href="#agents.agents.adk.workflows.ADKWorkflow">ADKWorkflow</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.workflows.ADKWorkflow.from_yaml" href="#agents.agents.adk.workflows.ADKWorkflow.from_yaml">from_yaml</a></code></li>
+<li><code><a title="agents.agents.adk.workflows.ADKWorkflow.validate" href="#agents.agents.adk.workflows.ADKWorkflow.validate">validate</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.workflows.WorkflowExecutor" href="#agents.agents.adk.workflows.WorkflowExecutor">WorkflowExecutor</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.workflows.WorkflowExecutor.AGENT_CLASSES" href="#agents.agents.adk.workflows.WorkflowExecutor.AGENT_CLASSES">AGENT_CLASSES</a></code></li>
+<li><code><a title="agents.agents.adk.workflows.WorkflowExecutor.execute" href="#agents.agents.adk.workflows.WorkflowExecutor.execute">execute</a></code></li>
+<li><code><a title="agents.agents.adk.workflows.WorkflowExecutor.execute_from_file" href="#agents.agents.adk.workflows.WorkflowExecutor.execute_from_file">execute_from_file</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.workflows.WorkflowResult" href="#agents.agents.adk.workflows.WorkflowResult">WorkflowResult</a></code></h4>
+<ul class="two-column">
+<li><code><a title="agents.agents.adk.workflows.WorkflowResult.duration_seconds" href="#agents.agents.adk.workflows.WorkflowResult.duration_seconds">duration_seconds</a></code></li>
+<li><code><a title="agents.agents.adk.workflows.WorkflowResult.errors" href="#agents.agents.adk.workflows.WorkflowResult.errors">errors</a></code></li>
+<li><code><a title="agents.agents.adk.workflows.WorkflowResult.outputs" href="#agents.agents.adk.workflows.WorkflowResult.outputs">outputs</a></code></li>
+<li><code><a title="agents.agents.adk.workflows.WorkflowResult.status" href="#agents.agents.adk.workflows.WorkflowResult.status">status</a></code></li>
+<li><code><a title="agents.agents.adk.workflows.WorkflowResult.task_results" href="#agents.agents.adk.workflows.WorkflowResult.task_results">task_results</a></code></li>
+<li><code><a title="agents.agents.adk.workflows.WorkflowResult.workflow_name" href="#agents.agents.adk.workflows.WorkflowResult.workflow_name">workflow_name</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.workflows.WorkflowTask" href="#agents.agents.adk.workflows.WorkflowTask">WorkflowTask</a></code></h4>
+<ul class="two-column">
+<li><code><a title="agents.agents.adk.workflows.WorkflowTask.agent_type" href="#agents.agents.adk.workflows.WorkflowTask.agent_type">agent_type</a></code></li>
+<li><code><a title="agents.agents.adk.workflows.WorkflowTask.context" href="#agents.agents.adk.workflows.WorkflowTask.context">context</a></code></li>
+<li><code><a title="agents.agents.adk.workflows.WorkflowTask.depends_on" href="#agents.agents.adk.workflows.WorkflowTask.depends_on">depends_on</a></code></li>
+<li><code><a title="agents.agents.adk.workflows.WorkflowTask.id" href="#agents.agents.adk.workflows.WorkflowTask.id">id</a></code></li>
+<li><code><a title="agents.agents.adk.workflows.WorkflowTask.model" href="#agents.agents.adk.workflows.WorkflowTask.model">model</a></code></li>
+<li><code><a title="agents.agents.adk.workflows.WorkflowTask.prompt" href="#agents.agents.adk.workflows.WorkflowTask.prompt">prompt</a></code></li>
+<li><code><a title="agents.agents.adk.workflows.WorkflowTask.temperature" href="#agents.agents.adk.workflows.WorkflowTask.temperature">temperature</a></code></li>
+<li><code><a title="agents.agents.adk.workflows.WorkflowTask.timeout" href="#agents.agents.adk.workflows.WorkflowTask.timeout">timeout</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

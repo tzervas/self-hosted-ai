@@ -1,0 +1,3265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>agents.agents.adk API documentation</title>
+<meta name="description" content="Google ADK Integration Module …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>agents.agents.adk</code></h1>
+</header>
+<section id="section-intro">
+<p>Google ADK Integration Module</p>
+<p>Wraps existing specialized agents with Google ADK for:
+- Unified agent orchestration
+- Multi-agent workflows
+- Agent evaluation and testing
+- LiteLLM backend integration</p>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="agents.agents.adk.agents" href="agents.html">agents.agents.adk.agents</a></code></dt>
+<dd>
+<div class="desc"><p>Specialized ADK Agent Implementations …</p></div>
+</dd>
+<dt><code class="name"><a title="agents.agents.adk.base" href="base.html">agents.agents.adk.base</a></code></dt>
+<dd>
+<div class="desc"><p>Google ADK Base Agent Implementation …</p></div>
+</dd>
+<dt><code class="name"><a title="agents.agents.adk.evaluator" href="evaluator.html">agents.agents.adk.evaluator</a></code></dt>
+<dd>
+<div class="desc"><p>Agent Evaluator …</p></div>
+</dd>
+<dt><code class="name"><a title="agents.agents.adk.workflows" href="workflows.html">agents.agents.adk.workflows</a></code></dt>
+<dd>
+<div class="desc"><p>ADK Workflow Execution …</p></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="agents.agents.adk.ADKAgent"><code class="flex name class">
+<span>class <span class="ident">ADKAgent</span></span>
+<span>(</span><span>config: agents.adk.base.ADKConfig,<br>http_client: httpx.AsyncClient | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ADKAgent(ABC):
+    &#34;&#34;&#34;Base class for Google ADK-wrapped agents.
+    
+    This class provides the foundation for creating agents that:
+    - Use LiteLLM as the inference backend
+    - Support priority-based GPU queuing
+    - Integrate with Google ADK for orchestration
+    - Provide evaluation capabilities
+    &#34;&#34;&#34;
+    
+    def __init__(self, config: ADKConfig, http_client: Optional[httpx.AsyncClient] = None):
+        &#34;&#34;&#34;Initialize ADK agent.
+        
+        Args:
+            config: Agent configuration
+            http_client: Optional shared HTTP client
+        &#34;&#34;&#34;
+        self.config = config
+        self._client = http_client
+        self._owns_client = http_client is None
+        self.logger = logger.bind(agent=config.name)
+    
+    async def __aenter__(self):
+        if self._client is None:
+            self._client = httpx.AsyncClient(timeout=self.config.timeout)
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if self._owns_client and self._client:
+            await self._client.aclose()
+    
+    @property
+    def client(self) -&gt; httpx.AsyncClient:
+        if self._client is None:
+            raise RuntimeError(&#34;Agent not initialized. Use async context manager.&#34;)
+        return self._client
+    
+    @abstractmethod
+    def get_system_prompt(self) -&gt; str:
+        &#34;&#34;&#34;Get the system prompt for this agent type.
+        
+        Returns:
+            System prompt string
+        &#34;&#34;&#34;
+        raise NotImplementedError
+    
+    @abstractmethod
+    def get_agent_type(self) -&gt; str:
+        &#34;&#34;&#34;Get the agent type identifier.
+        
+        Returns:
+            Agent type string (e.g., &#39;development&#39;, &#39;code_review&#39;)
+        &#34;&#34;&#34;
+        raise NotImplementedError
+    
+    def _build_messages(
+        self,
+        task: str,
+        context: Optional[Dict[str, Any]] = None,
+        history: Optional[List[Dict[str, str]]] = None
+    ) -&gt; List[Dict[str, str]]:
+        &#34;&#34;&#34;Build message list for LLM call.
+        
+        Args:
+            task: Task description
+            context: Additional context
+            history: Conversation history
+            
+        Returns:
+            List of message dicts
+        &#34;&#34;&#34;
+        system_prompt = self.config.system_prompt or self.get_system_prompt()
+        messages = [{&#34;role&#34;: &#34;system&#34;, &#34;content&#34;: system_prompt}]
+        
+        # Add history if provided
+        if history:
+            messages.extend(history)
+        
+        # Build user message with context
+        if context:
+            context_str = &#34;\n&#34;.join(f&#34;- {k}: {v}&#34; for k, v in context.items())
+            user_content = f&#34;Context:\n{context_str}\n\nTask: {task}&#34;
+        else:
+            user_content = task
+        
+        messages.append({&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: user_content})
+        
+        return messages
+    
+    async def _call_litellm(
+        self,
+        messages: List[Dict[str, str]],
+        **kwargs
+    ) -&gt; Dict[str, Any]:
+        &#34;&#34;&#34;Make a call to LiteLLM API.
+        
+        Args:
+            messages: Message list
+            **kwargs: Additional parameters
+            
+        Returns:
+            API response dict
+        &#34;&#34;&#34;
+        headers = {
+            &#34;Authorization&#34;: f&#34;Bearer {self.config.litellm_api_key}&#34;,
+            &#34;Content-Type&#34;: &#34;application/json&#34;,
+            &#34;X-Priority&#34;: self.config.priority.value
+        }
+        
+        payload = {
+            &#34;model&#34;: self.config.model,
+            &#34;messages&#34;: messages,
+            &#34;temperature&#34;: self.config.temperature,
+            &#34;max_tokens&#34;: self.config.max_tokens,
+            &#34;stream&#34;: False,
+            **kwargs
+        }
+        
+        response = await self.client.post(
+            f&#34;{self.config.litellm_url}/v1/chat/completions&#34;,
+            json=payload,
+            headers=headers
+        )
+        
+        if response.status_code != 200:
+            raise Exception(f&#34;LiteLLM error: {response.status_code} - {response.text}&#34;)
+        
+        return response.json()
+    
+    async def execute(
+        self,
+        task: str,
+        context: Optional[Dict[str, Any]] = None,
+        history: Optional[List[Dict[str, str]]] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Execute the agent with the given task.
+        
+        Args:
+            task: Task description
+            context: Additional context
+            history: Conversation history
+            
+        Returns:
+            ADKResult with execution outcome
+        &#34;&#34;&#34;
+        start_time = time.time()
+        self.logger.info(f&#34;Executing task: {task[:100]}...&#34;)
+        
+        for attempt in range(self.config.retry_attempts):
+            try:
+                messages = self._build_messages(task, context, history)
+                response = await self._call_litellm(messages)
+                
+                duration = time.time() - start_time
+                output = response[&#34;choices&#34;][0][&#34;message&#34;][&#34;content&#34;]
+                usage = response.get(&#34;usage&#34;, {})
+                
+                self.logger.info(f&#34;Task completed in {duration:.2f}s&#34;)
+                
+                return ADKResult(
+                    agent_name=self.config.name,
+                    status=&#34;success&#34;,
+                    output=output,
+                    model_used=response.get(&#34;model&#34;, self.config.model),
+                    tokens={
+                        &#34;prompt&#34;: usage.get(&#34;prompt_tokens&#34;, 0),
+                        &#34;completion&#34;: usage.get(&#34;completion_tokens&#34;, 0),
+                        &#34;total&#34;: usage.get(&#34;total_tokens&#34;, 0)
+                    },
+                    duration_seconds=duration,
+                    metadata={&#34;attempt&#34;: attempt + 1}
+                )
+                
+            except asyncio.TimeoutError:
+                self.logger.warning(f&#34;Attempt {attempt + 1} timed out&#34;)
+                if attempt &lt; self.config.retry_attempts - 1:
+                    await asyncio.sleep(self.config.retry_delay * (attempt + 1))
+                else:
+                    return ADKResult(
+                        agent_name=self.config.name,
+                        status=&#34;timeout&#34;,
+                        error=&#34;Request timed out after all retries&#34;,
+                        duration_seconds=time.time() - start_time
+                    )
+                    
+            except Exception as e:
+                self.logger.error(f&#34;Attempt {attempt + 1} failed: {e}&#34;)
+                if attempt &lt; self.config.retry_attempts - 1:
+                    await asyncio.sleep(self.config.retry_delay * (attempt + 1))
+                else:
+                    return ADKResult(
+                        agent_name=self.config.name,
+                        status=&#34;error&#34;,
+                        error=str(e),
+                        duration_seconds=time.time() - start_time
+                    )
+        
+        # Should not reach here
+        return ADKResult(
+            agent_name=self.config.name,
+            status=&#34;error&#34;,
+            error=&#34;Unknown error&#34;,
+            duration_seconds=time.time() - start_time
+        )
+    
+    async def execute_streaming(
+        self,
+        task: str,
+        context: Optional[Dict[str, Any]] = None,
+        callback: Optional[Callable[[str], None]] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Execute with streaming response.
+        
+        Args:
+            task: Task description
+            context: Additional context
+            callback: Callback for each chunk
+            
+        Returns:
+            ADKResult with full output
+        &#34;&#34;&#34;
+        start_time = time.time()
+        messages = self._build_messages(task, context)
+        
+        headers = {
+            &#34;Authorization&#34;: f&#34;Bearer {self.config.litellm_api_key}&#34;,
+            &#34;Content-Type&#34;: &#34;application/json&#34;,
+            &#34;X-Priority&#34;: self.config.priority.value
+        }
+        
+        payload = {
+            &#34;model&#34;: self.config.model,
+            &#34;messages&#34;: messages,
+            &#34;temperature&#34;: self.config.temperature,
+            &#34;max_tokens&#34;: self.config.max_tokens,
+            &#34;stream&#34;: True
+        }
+        
+        full_output = []
+        
+        async with self.client.stream(
+            &#34;POST&#34;,
+            f&#34;{self.config.litellm_url}/v1/chat/completions&#34;,
+            json=payload,
+            headers=headers
+        ) as response:
+            async for line in response.aiter_lines():
+                if line.startswith(&#34;data: &#34;):
+                    data = line[6:]
+                    if data == &#34;[DONE]&#34;:
+                        break
+                    try:
+                        chunk = json.loads(data)
+                        content = chunk[&#34;choices&#34;][0].get(&#34;delta&#34;, {}).get(&#34;content&#34;, &#34;&#34;)
+                        if content:
+                            full_output.append(content)
+                            if callback:
+                                callback(content)
+                    except (json.JSONDecodeError, KeyError, IndexError):
+                        pass
+        
+        return ADKResult(
+            agent_name=self.config.name,
+            status=&#34;success&#34;,
+            output=&#34;&#34;.join(full_output),
+            model_used=self.config.model,
+            duration_seconds=time.time() - start_time
+        )</code></pre>
+</details>
+<div class="desc"><p>Base class for Google ADK-wrapped agents.</p>
+<p>This class provides the foundation for creating agents that:
+- Use LiteLLM as the inference backend
+- Support priority-based GPU queuing
+- Integrate with Google ADK for orchestration
+- Provide evaluation capabilities</p>
+<p>Initialize ADK agent.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+<dt><strong><code>http_client</code></strong></dt>
+<dd>Optional shared HTTP client</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>abc.ABC</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li>agents.adk.agents.CodeReviewADKAgent</li>
+<li>agents.adk.agents.DevelopmentADKAgent</li>
+<li>agents.adk.agents.DocumentationADKAgent</li>
+<li>agents.adk.agents.ResearchADKAgent</li>
+<li>agents.adk.agents.TestingADKAgent</li>
+<li><a title="agents.agents.adk.agents.CodeReviewADKAgent" href="agents.html#agents.agents.adk.agents.CodeReviewADKAgent">CodeReviewADKAgent</a></li>
+<li><a title="agents.agents.adk.agents.DevelopmentADKAgent" href="agents.html#agents.agents.adk.agents.DevelopmentADKAgent">DevelopmentADKAgent</a></li>
+<li><a title="agents.agents.adk.agents.DocumentationADKAgent" href="agents.html#agents.agents.adk.agents.DocumentationADKAgent">DocumentationADKAgent</a></li>
+<li><a title="agents.agents.adk.agents.ResearchADKAgent" href="agents.html#agents.agents.adk.agents.ResearchADKAgent">ResearchADKAgent</a></li>
+<li><a title="agents.agents.adk.agents.TestingADKAgent" href="agents.html#agents.agents.adk.agents.TestingADKAgent">TestingADKAgent</a></li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="agents.agents.adk.ADKAgent.client"><code class="name">prop <span class="ident">client</span> : httpx.AsyncClient</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def client(self) -&gt; httpx.AsyncClient:
+    if self._client is None:
+        raise RuntimeError(&#34;Agent not initialized. Use async context manager.&#34;)
+    return self._client</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.adk.ADKAgent.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self,<br>task: str,<br>context: Dict[str, Any] | None = None,<br>history: List[Dict[str, str]] | None = None) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def execute(
+    self,
+    task: str,
+    context: Optional[Dict[str, Any]] = None,
+    history: Optional[List[Dict[str, str]]] = None
+) -&gt; ADKResult:
+    &#34;&#34;&#34;Execute the agent with the given task.
+    
+    Args:
+        task: Task description
+        context: Additional context
+        history: Conversation history
+        
+    Returns:
+        ADKResult with execution outcome
+    &#34;&#34;&#34;
+    start_time = time.time()
+    self.logger.info(f&#34;Executing task: {task[:100]}...&#34;)
+    
+    for attempt in range(self.config.retry_attempts):
+        try:
+            messages = self._build_messages(task, context, history)
+            response = await self._call_litellm(messages)
+            
+            duration = time.time() - start_time
+            output = response[&#34;choices&#34;][0][&#34;message&#34;][&#34;content&#34;]
+            usage = response.get(&#34;usage&#34;, {})
+            
+            self.logger.info(f&#34;Task completed in {duration:.2f}s&#34;)
+            
+            return ADKResult(
+                agent_name=self.config.name,
+                status=&#34;success&#34;,
+                output=output,
+                model_used=response.get(&#34;model&#34;, self.config.model),
+                tokens={
+                    &#34;prompt&#34;: usage.get(&#34;prompt_tokens&#34;, 0),
+                    &#34;completion&#34;: usage.get(&#34;completion_tokens&#34;, 0),
+                    &#34;total&#34;: usage.get(&#34;total_tokens&#34;, 0)
+                },
+                duration_seconds=duration,
+                metadata={&#34;attempt&#34;: attempt + 1}
+            )
+            
+        except asyncio.TimeoutError:
+            self.logger.warning(f&#34;Attempt {attempt + 1} timed out&#34;)
+            if attempt &lt; self.config.retry_attempts - 1:
+                await asyncio.sleep(self.config.retry_delay * (attempt + 1))
+            else:
+                return ADKResult(
+                    agent_name=self.config.name,
+                    status=&#34;timeout&#34;,
+                    error=&#34;Request timed out after all retries&#34;,
+                    duration_seconds=time.time() - start_time
+                )
+                
+        except Exception as e:
+            self.logger.error(f&#34;Attempt {attempt + 1} failed: {e}&#34;)
+            if attempt &lt; self.config.retry_attempts - 1:
+                await asyncio.sleep(self.config.retry_delay * (attempt + 1))
+            else:
+                return ADKResult(
+                    agent_name=self.config.name,
+                    status=&#34;error&#34;,
+                    error=str(e),
+                    duration_seconds=time.time() - start_time
+                )
+    
+    # Should not reach here
+    return ADKResult(
+        agent_name=self.config.name,
+        status=&#34;error&#34;,
+        error=&#34;Unknown error&#34;,
+        duration_seconds=time.time() - start_time
+    )</code></pre>
+</details>
+<div class="desc"><p>Execute the agent with the given task.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task</code></strong></dt>
+<dd>Task description</dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>Additional context</dd>
+<dt><strong><code>history</code></strong></dt>
+<dd>Conversation history</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with execution outcome</p></div>
+</dd>
+<dt id="agents.agents.adk.ADKAgent.execute_streaming"><code class="name flex">
+<span>async def <span class="ident">execute_streaming</span></span>(<span>self,<br>task: str,<br>context: Dict[str, Any] | None = None,<br>callback: Callable[[str], None] | None = None) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def execute_streaming(
+    self,
+    task: str,
+    context: Optional[Dict[str, Any]] = None,
+    callback: Optional[Callable[[str], None]] = None
+) -&gt; ADKResult:
+    &#34;&#34;&#34;Execute with streaming response.
+    
+    Args:
+        task: Task description
+        context: Additional context
+        callback: Callback for each chunk
+        
+    Returns:
+        ADKResult with full output
+    &#34;&#34;&#34;
+    start_time = time.time()
+    messages = self._build_messages(task, context)
+    
+    headers = {
+        &#34;Authorization&#34;: f&#34;Bearer {self.config.litellm_api_key}&#34;,
+        &#34;Content-Type&#34;: &#34;application/json&#34;,
+        &#34;X-Priority&#34;: self.config.priority.value
+    }
+    
+    payload = {
+        &#34;model&#34;: self.config.model,
+        &#34;messages&#34;: messages,
+        &#34;temperature&#34;: self.config.temperature,
+        &#34;max_tokens&#34;: self.config.max_tokens,
+        &#34;stream&#34;: True
+    }
+    
+    full_output = []
+    
+    async with self.client.stream(
+        &#34;POST&#34;,
+        f&#34;{self.config.litellm_url}/v1/chat/completions&#34;,
+        json=payload,
+        headers=headers
+    ) as response:
+        async for line in response.aiter_lines():
+            if line.startswith(&#34;data: &#34;):
+                data = line[6:]
+                if data == &#34;[DONE]&#34;:
+                    break
+                try:
+                    chunk = json.loads(data)
+                    content = chunk[&#34;choices&#34;][0].get(&#34;delta&#34;, {}).get(&#34;content&#34;, &#34;&#34;)
+                    if content:
+                        full_output.append(content)
+                        if callback:
+                            callback(content)
+                except (json.JSONDecodeError, KeyError, IndexError):
+                    pass
+    
+    return ADKResult(
+        agent_name=self.config.name,
+        status=&#34;success&#34;,
+        output=&#34;&#34;.join(full_output),
+        model_used=self.config.model,
+        duration_seconds=time.time() - start_time
+    )</code></pre>
+</details>
+<div class="desc"><p>Execute with streaming response.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task</code></strong></dt>
+<dd>Task description</dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>Additional context</dd>
+<dt><strong><code>callback</code></strong></dt>
+<dd>Callback for each chunk</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with full output</p></div>
+</dd>
+<dt id="agents.agents.adk.ADKAgent.get_agent_type"><code class="name flex">
+<span>def <span class="ident">get_agent_type</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abstractmethod
+def get_agent_type(self) -&gt; str:
+    &#34;&#34;&#34;Get the agent type identifier.
+    
+    Returns:
+        Agent type string (e.g., &#39;development&#39;, &#39;code_review&#39;)
+    &#34;&#34;&#34;
+    raise NotImplementedError</code></pre>
+</details>
+<div class="desc"><p>Get the agent type identifier.</p>
+<h2 id="returns">Returns</h2>
+<p>Agent type string (e.g., 'development', 'code_review')</p></div>
+</dd>
+<dt id="agents.agents.adk.ADKAgent.get_system_prompt"><code class="name flex">
+<span>def <span class="ident">get_system_prompt</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abstractmethod
+def get_system_prompt(self) -&gt; str:
+    &#34;&#34;&#34;Get the system prompt for this agent type.
+    
+    Returns:
+        System prompt string
+    &#34;&#34;&#34;
+    raise NotImplementedError</code></pre>
+</details>
+<div class="desc"><p>Get the system prompt for this agent type.</p>
+<h2 id="returns">Returns</h2>
+<p>System prompt string</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.ADKConfig"><code class="flex name class">
+<span>class <span class="ident">ADKConfig</span></span>
+<span>(</span><span>name: str,<br>model: str = 'qwen2.5-coder:14b',<br>litellm_url: str = 'http://localhost:4000',<br>litellm_api_key: str = '',<br>temperature: float = 0.7,<br>max_tokens: int = 4096,<br>timeout: int = 300,<br>priority: agents.adk.base.AgentPriority = AgentPriority.NORMAL,<br>system_prompt: str | None = None,<br>retry_attempts: int = 3,<br>retry_delay: float = 1.0,<br>metadata: Dict[str, Any] = &lt;factory&gt;)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class ADKConfig:
+    &#34;&#34;&#34;Configuration for ADK agents.
+    
+    Attributes:
+        name: Agent name for identification
+        model: LLM model to use (routed via LiteLLM)
+        litellm_url: LiteLLM proxy URL
+        litellm_api_key: API key for LiteLLM
+        temperature: Sampling temperature (0-2)
+        max_tokens: Maximum tokens for generation
+        timeout: Request timeout in seconds
+        priority: Queue priority level
+        system_prompt: Custom system prompt override
+        retry_attempts: Number of retries on failure
+        retry_delay: Delay between retries in seconds
+    &#34;&#34;&#34;
+    name: str
+    model: str = &#34;qwen2.5-coder:14b&#34;
+    litellm_url: str = &#34;http://localhost:4000&#34;
+    litellm_api_key: str = &#34;&#34;
+    temperature: float = 0.7
+    max_tokens: int = 4096
+    timeout: int = 300
+    priority: AgentPriority = AgentPriority.NORMAL
+    system_prompt: Optional[str] = None
+    retry_attempts: int = 3
+    retry_delay: float = 1.0
+    metadata: Dict[str, Any] = field(default_factory=dict)</code></pre>
+</details>
+<div class="desc"><p>Configuration for ADK agents.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>Agent name for identification</dd>
+<dt><strong><code>model</code></strong></dt>
+<dd>LLM model to use (routed via LiteLLM)</dd>
+<dt><strong><code>litellm_url</code></strong></dt>
+<dd>LiteLLM proxy URL</dd>
+<dt><strong><code>litellm_api_key</code></strong></dt>
+<dd>API key for LiteLLM</dd>
+<dt><strong><code>temperature</code></strong></dt>
+<dd>Sampling temperature (0-2)</dd>
+<dt><strong><code>max_tokens</code></strong></dt>
+<dd>Maximum tokens for generation</dd>
+<dt><strong><code>timeout</code></strong></dt>
+<dd>Request timeout in seconds</dd>
+<dt><strong><code>priority</code></strong></dt>
+<dd>Queue priority level</dd>
+<dt><strong><code>system_prompt</code></strong></dt>
+<dd>Custom system prompt override</dd>
+<dt><strong><code>retry_attempts</code></strong></dt>
+<dd>Number of retries on failure</dd>
+<dt><strong><code>retry_delay</code></strong></dt>
+<dd>Delay between retries in seconds</dd>
+</dl></div>
+<h3>Instance variables</h3>
+<dl>
+<dt id="agents.agents.adk.ADKConfig.litellm_api_key"><code class="name">var <span class="ident">litellm_api_key</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.ADKConfig.litellm_url"><code class="name">var <span class="ident">litellm_url</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.ADKConfig.max_tokens"><code class="name">var <span class="ident">max_tokens</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.ADKConfig.metadata"><code class="name">var <span class="ident">metadata</span> : Dict[str, Any]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.ADKConfig.model"><code class="name">var <span class="ident">model</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.ADKConfig.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.ADKConfig.priority"><code class="name">var <span class="ident">priority</span> : agents.adk.base.AgentPriority</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.ADKConfig.retry_attempts"><code class="name">var <span class="ident">retry_attempts</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.ADKConfig.retry_delay"><code class="name">var <span class="ident">retry_delay</span> : float</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.ADKConfig.system_prompt"><code class="name">var <span class="ident">system_prompt</span> : str | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.ADKConfig.temperature"><code class="name">var <span class="ident">temperature</span> : float</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.agents.adk.ADKConfig.timeout"><code class="name">var <span class="ident">timeout</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.ADKWorkflow"><code class="flex name class">
+<span>class <span class="ident">ADKWorkflow</span></span>
+<span>(</span><span>name: str,<br>description: str = '',<br>tasks: List[agents.adk.workflows.WorkflowTask] | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ADKWorkflow:
+    &#34;&#34;&#34;Workflow definition and parser.&#34;&#34;&#34;
+    
+    def __init__(
+        self,
+        name: str,
+        description: str = &#34;&#34;,
+        tasks: Optional[List[WorkflowTask]] = None
+    ):
+        self.name = name
+        self.description = description
+        self.tasks = tasks or []
+        self.logger = logger.bind(workflow=name)
+    
+    @classmethod
+    def from_yaml(cls, path: Path) -&gt; &#34;ADKWorkflow&#34;:
+        &#34;&#34;&#34;Load workflow from YAML file.
+        
+        Args:
+            path: Path to YAML file
+            
+        Returns:
+            Parsed ADKWorkflow instance
+        &#34;&#34;&#34;
+        with open(path) as f:
+            data = yaml.safe_load(f)
+        
+        tasks = []
+        for task_data in data.get(&#34;tasks&#34;, []):
+            tasks.append(WorkflowTask(
+                id=task_data[&#34;id&#34;],
+                agent_type=task_data.get(&#34;agent_type&#34;, &#34;development&#34;),
+                prompt=task_data[&#34;prompt&#34;],
+                depends_on=task_data.get(&#34;depends_on&#34;, []),
+                model=task_data.get(&#34;model&#34;),
+                temperature=task_data.get(&#34;temperature&#34;),
+                timeout=task_data.get(&#34;timeout&#34;),
+                context=task_data.get(&#34;context&#34;, {})
+            ))
+        
+        return cls(
+            name=data.get(&#34;name&#34;, path.stem),
+            description=data.get(&#34;description&#34;, &#34;&#34;),
+            tasks=tasks
+        )
+    
+    def validate(self) -&gt; List[str]:
+        &#34;&#34;&#34;Validate workflow for issues.
+        
+        Returns:
+            List of validation errors (empty if valid)
+        &#34;&#34;&#34;
+        errors = []
+        task_ids = {t.id for t in self.tasks}
+        
+        for task in self.tasks:
+            for dep in task.depends_on:
+                if dep not in task_ids:
+                    errors.append(f&#34;Task &#39;{task.id}&#39; depends on unknown task &#39;{dep}&#39;&#34;)
+        
+        # Check for cycles
+        visited: Set[str] = set()
+        path: Set[str] = set()
+        
+        def has_cycle(task_id: str) -&gt; bool:
+            if task_id in path:
+                return True
+            if task_id in visited:
+                return False
+            
+            visited.add(task_id)
+            path.add(task_id)
+            
+            task = next((t for t in self.tasks if t.id == task_id), None)
+            if task:
+                for dep in task.depends_on:
+                    if has_cycle(dep):
+                        return True
+            
+            path.remove(task_id)
+            return False
+        
+        for task in self.tasks:
+            if has_cycle(task.id):
+                errors.append(f&#34;Circular dependency detected involving task &#39;{task.id}&#39;&#34;)
+                break
+        
+        return errors</code></pre>
+</details>
+<div class="desc"><p>Workflow definition and parser.</p></div>
+<h3>Static methods</h3>
+<dl>
+<dt id="agents.agents.adk.ADKWorkflow.from_yaml"><code class="name flex">
+<span>def <span class="ident">from_yaml</span></span>(<span>path: pathlib._local.Path) ‑> agents.adk.workflows.ADKWorkflow</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Load workflow from YAML file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong></dt>
+<dd>Path to YAML file</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Parsed ADKWorkflow instance</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.adk.ADKWorkflow.validate"><code class="name flex">
+<span>def <span class="ident">validate</span></span>(<span>self) ‑> List[str]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def validate(self) -&gt; List[str]:
+    &#34;&#34;&#34;Validate workflow for issues.
+    
+    Returns:
+        List of validation errors (empty if valid)
+    &#34;&#34;&#34;
+    errors = []
+    task_ids = {t.id for t in self.tasks}
+    
+    for task in self.tasks:
+        for dep in task.depends_on:
+            if dep not in task_ids:
+                errors.append(f&#34;Task &#39;{task.id}&#39; depends on unknown task &#39;{dep}&#39;&#34;)
+    
+    # Check for cycles
+    visited: Set[str] = set()
+    path: Set[str] = set()
+    
+    def has_cycle(task_id: str) -&gt; bool:
+        if task_id in path:
+            return True
+        if task_id in visited:
+            return False
+        
+        visited.add(task_id)
+        path.add(task_id)
+        
+        task = next((t for t in self.tasks if t.id == task_id), None)
+        if task:
+            for dep in task.depends_on:
+                if has_cycle(dep):
+                    return True
+        
+        path.remove(task_id)
+        return False
+    
+    for task in self.tasks:
+        if has_cycle(task.id):
+            errors.append(f&#34;Circular dependency detected involving task &#39;{task.id}&#39;&#34;)
+            break
+    
+    return errors</code></pre>
+</details>
+<div class="desc"><p>Validate workflow for issues.</p>
+<h2 id="returns">Returns</h2>
+<p>List of validation errors (empty if valid)</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.AgentEvaluator"><code class="flex name class">
+<span>class <span class="ident">AgentEvaluator</span></span>
+<span>(</span><span>agent: agents.adk.base.ADKAgent)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AgentEvaluator:
+    &#34;&#34;&#34;Evaluator for testing ADK agents.&#34;&#34;&#34;
+    
+    def __init__(self, agent: ADKAgent):
+        &#34;&#34;&#34;Initialize evaluator.
+        
+        Args:
+            agent: Agent to evaluate
+        &#34;&#34;&#34;
+        self.agent = agent
+        self.logger = logger.bind(evaluator=agent.config.name)
+    
+    def _evaluate_output(
+        self,
+        case: EvaluationCase,
+        actual: str
+    ) -&gt; tuple[bool, float, Dict[str, Any]]:
+        &#34;&#34;&#34;Evaluate output against expected criteria.
+        
+        Args:
+            case: Test case
+            actual: Actual output
+            
+        Returns:
+            Tuple of (passed, score, details)
+        &#34;&#34;&#34;
+        details = {}
+        score = 0.0
+        checks_passed = 0
+        total_checks = 0
+        
+        # Check exact match if expected_output provided
+        if case.expected_output is not None:
+            total_checks += 1
+            if case.expected_output.strip() == actual.strip():
+                checks_passed += 1
+                details[&#34;exact_match&#34;] = True
+            else:
+                details[&#34;exact_match&#34;] = False
+        
+        # Check contains
+        if case.expected_contains:
+            for expected in case.expected_contains:
+                total_checks += 1
+                if expected.lower() in actual.lower():
+                    checks_passed += 1
+                    details[f&#34;contains_{expected[:20]}&#34;] = True
+                else:
+                    details[f&#34;contains_{expected[:20]}&#34;] = False
+        
+        # Check not contains
+        if case.expected_not_contains:
+            for not_expected in case.expected_not_contains:
+                total_checks += 1
+                if not_expected.lower() not in actual.lower():
+                    checks_passed += 1
+                    details[f&#34;not_contains_{not_expected[:20]}&#34;] = True
+                else:
+                    details[f&#34;not_contains_{not_expected[:20]}&#34;] = False
+        
+        # Custom validator
+        if case.custom_validator:
+            total_checks += 1
+            try:
+                if case.custom_validator(actual):
+                    checks_passed += 1
+                    details[&#34;custom_validator&#34;] = True
+                else:
+                    details[&#34;custom_validator&#34;] = False
+            except Exception as e:
+                details[&#34;custom_validator&#34;] = f&#34;error: {e}&#34;
+        
+        # Calculate score
+        if total_checks &gt; 0:
+            score = checks_passed / total_checks
+        else:
+            # No specific checks - just verify we got output
+            score = 1.0 if actual.strip() else 0.0
+        
+        passed = score &gt;= 0.5  # Pass threshold
+        
+        return passed, score, details
+    
+    async def evaluate_case(self, case: EvaluationCase) -&gt; EvaluationResult:
+        &#34;&#34;&#34;Evaluate a single test case.
+        
+        Args:
+            case: Test case to evaluate
+            
+        Returns:
+            EvaluationResult
+        &#34;&#34;&#34;
+        start_time = time.time()
+        
+        try:
+            # Execute agent
+            result = await self.agent.execute(case.input_task, case.context)
+            duration = time.time() - start_time
+            
+            if not result.is_success:
+                return EvaluationResult(
+                    case_id=case.id,
+                    passed=False,
+                    score=0.0,
+                    actual_output=None,
+                    duration_seconds=duration,
+                    error=result.error
+                )
+            
+            # Evaluate output
+            passed, score, details = self._evaluate_output(case, result.output or &#34;&#34;)
+            
+            return EvaluationResult(
+                case_id=case.id,
+                passed=passed,
+                score=score,
+                actual_output=result.output,
+                duration_seconds=duration,
+                details=details
+            )
+            
+        except asyncio.TimeoutError:
+            return EvaluationResult(
+                case_id=case.id,
+                passed=False,
+                score=0.0,
+                actual_output=None,
+                duration_seconds=case.timeout,
+                error=&#34;Timeout&#34;
+            )
+        except Exception as e:
+            return EvaluationResult(
+                case_id=case.id,
+                passed=False,
+                score=0.0,
+                actual_output=None,
+                duration_seconds=time.time() - start_time,
+                error=str(e)
+            )
+    
+    async def evaluate_all(
+        self,
+        cases: List[EvaluationCase],
+        parallel: bool = False,
+        max_parallel: int = 5
+    ) -&gt; EvaluationReport:
+        &#34;&#34;&#34;Evaluate all test cases.
+        
+        Args:
+            cases: List of test cases
+            parallel: Run in parallel
+            max_parallel: Max parallel evaluations
+            
+        Returns:
+            EvaluationReport
+        &#34;&#34;&#34;
+        start_time = time.time()
+        results: List[EvaluationResult] = []
+        
+        self.logger.info(f&#34;Starting evaluation of {len(cases)} cases&#34;)
+        
+        if parallel:
+            semaphore = asyncio.Semaphore(max_parallel)
+            
+            async def limited_evaluate(case):
+                async with semaphore:
+                    return await self.evaluate_case(case)
+            
+            results = await asyncio.gather(*[limited_evaluate(c) for c in cases])
+        else:
+            for case in cases:
+                self.logger.info(f&#34;Evaluating case: {case.id}&#34;)
+                result = await self.evaluate_case(case)
+                results.append(result)
+        
+        # Calculate summary
+        passed = sum(1 for r in results if r.passed)
+        failed = len(results) - passed
+        avg_score = sum(r.score for r in results) / len(results) if results else 0.0
+        
+        report = EvaluationReport(
+            agent_name=self.agent.config.name,
+            total_cases=len(cases),
+            passed_cases=passed,
+            failed_cases=failed,
+            average_score=avg_score,
+            total_duration_seconds=time.time() - start_time,
+            results=results
+        )
+        
+        self.logger.info(
+            f&#34;Evaluation complete: {passed}/{len(cases)} passed, &#34;
+            f&#34;avg score: {avg_score:.2f}&#34;
+        )
+        
+        return report
+    
+    @classmethod
+    def load_cases_from_json(cls, path: Path) -&gt; List[EvaluationCase]:
+        &#34;&#34;&#34;Load test cases from JSON file.
+        
+        Args:
+            path: Path to JSON file
+            
+        Returns:
+            List of EvaluationCase
+        &#34;&#34;&#34;
+        with open(path) as f:
+            data = json.load(f)
+        
+        cases = []
+        for item in data.get(&#34;cases&#34;, []):
+            cases.append(EvaluationCase(
+                id=item[&#34;id&#34;],
+                input_task=item[&#34;input_task&#34;],
+                expected_output=item.get(&#34;expected_output&#34;),
+                expected_contains=item.get(&#34;expected_contains&#34;),
+                expected_not_contains=item.get(&#34;expected_not_contains&#34;),
+                context=item.get(&#34;context&#34;, {}),
+                timeout=item.get(&#34;timeout&#34;, 300)
+            ))
+        
+        return cases
+    
+    def save_report(self, report: EvaluationReport, path: Path):
+        &#34;&#34;&#34;Save evaluation report to JSON.
+        
+        Args:
+            report: Report to save
+            path: Output path
+        &#34;&#34;&#34;
+        data = {
+            &#34;agent_name&#34;: report.agent_name,
+            &#34;summary&#34;: {
+                &#34;total_cases&#34;: report.total_cases,
+                &#34;passed_cases&#34;: report.passed_cases,
+                &#34;failed_cases&#34;: report.failed_cases,
+                &#34;pass_rate&#34;: report.pass_rate,
+                &#34;average_score&#34;: report.average_score,
+                &#34;total_duration_seconds&#34;: report.total_duration_seconds
+            },
+            &#34;results&#34;: [
+                {
+                    &#34;case_id&#34;: r.case_id,
+                    &#34;passed&#34;: r.passed,
+                    &#34;score&#34;: r.score,
+                    &#34;duration_seconds&#34;: r.duration_seconds,
+                    &#34;details&#34;: r.details,
+                    &#34;error&#34;: r.error
+                }
+                for r in report.results
+            ]
+        }
+        
+        with open(path, &#34;w&#34;) as f:
+            json.dump(data, f, indent=2)</code></pre>
+</details>
+<div class="desc"><p>Evaluator for testing ADK agents.</p>
+<p>Initialize evaluator.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>agent</code></strong></dt>
+<dd>Agent to evaluate</dd>
+</dl></div>
+<h3>Static methods</h3>
+<dl>
+<dt id="agents.agents.adk.AgentEvaluator.load_cases_from_json"><code class="name flex">
+<span>def <span class="ident">load_cases_from_json</span></span>(<span>path: pathlib._local.Path) ‑> List[agents.adk.evaluator.EvaluationCase]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Load test cases from JSON file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>path</code></strong></dt>
+<dd>Path to JSON file</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>List of EvaluationCase</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.adk.AgentEvaluator.evaluate_all"><code class="name flex">
+<span>async def <span class="ident">evaluate_all</span></span>(<span>self,<br>cases: List[agents.adk.evaluator.EvaluationCase],<br>parallel: bool = False,<br>max_parallel: int = 5) ‑> agents.adk.evaluator.EvaluationReport</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def evaluate_all(
+    self,
+    cases: List[EvaluationCase],
+    parallel: bool = False,
+    max_parallel: int = 5
+) -&gt; EvaluationReport:
+    &#34;&#34;&#34;Evaluate all test cases.
+    
+    Args:
+        cases: List of test cases
+        parallel: Run in parallel
+        max_parallel: Max parallel evaluations
+        
+    Returns:
+        EvaluationReport
+    &#34;&#34;&#34;
+    start_time = time.time()
+    results: List[EvaluationResult] = []
+    
+    self.logger.info(f&#34;Starting evaluation of {len(cases)} cases&#34;)
+    
+    if parallel:
+        semaphore = asyncio.Semaphore(max_parallel)
+        
+        async def limited_evaluate(case):
+            async with semaphore:
+                return await self.evaluate_case(case)
+        
+        results = await asyncio.gather(*[limited_evaluate(c) for c in cases])
+    else:
+        for case in cases:
+            self.logger.info(f&#34;Evaluating case: {case.id}&#34;)
+            result = await self.evaluate_case(case)
+            results.append(result)
+    
+    # Calculate summary
+    passed = sum(1 for r in results if r.passed)
+    failed = len(results) - passed
+    avg_score = sum(r.score for r in results) / len(results) if results else 0.0
+    
+    report = EvaluationReport(
+        agent_name=self.agent.config.name,
+        total_cases=len(cases),
+        passed_cases=passed,
+        failed_cases=failed,
+        average_score=avg_score,
+        total_duration_seconds=time.time() - start_time,
+        results=results
+    )
+    
+    self.logger.info(
+        f&#34;Evaluation complete: {passed}/{len(cases)} passed, &#34;
+        f&#34;avg score: {avg_score:.2f}&#34;
+    )
+    
+    return report</code></pre>
+</details>
+<div class="desc"><p>Evaluate all test cases.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>cases</code></strong></dt>
+<dd>List of test cases</dd>
+<dt><strong><code>parallel</code></strong></dt>
+<dd>Run in parallel</dd>
+<dt><strong><code>max_parallel</code></strong></dt>
+<dd>Max parallel evaluations</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>EvaluationReport</p></div>
+</dd>
+<dt id="agents.agents.adk.AgentEvaluator.evaluate_case"><code class="name flex">
+<span>async def <span class="ident">evaluate_case</span></span>(<span>self, case: agents.adk.evaluator.EvaluationCase) ‑> agents.adk.evaluator.EvaluationResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def evaluate_case(self, case: EvaluationCase) -&gt; EvaluationResult:
+    &#34;&#34;&#34;Evaluate a single test case.
+    
+    Args:
+        case: Test case to evaluate
+        
+    Returns:
+        EvaluationResult
+    &#34;&#34;&#34;
+    start_time = time.time()
+    
+    try:
+        # Execute agent
+        result = await self.agent.execute(case.input_task, case.context)
+        duration = time.time() - start_time
+        
+        if not result.is_success:
+            return EvaluationResult(
+                case_id=case.id,
+                passed=False,
+                score=0.0,
+                actual_output=None,
+                duration_seconds=duration,
+                error=result.error
+            )
+        
+        # Evaluate output
+        passed, score, details = self._evaluate_output(case, result.output or &#34;&#34;)
+        
+        return EvaluationResult(
+            case_id=case.id,
+            passed=passed,
+            score=score,
+            actual_output=result.output,
+            duration_seconds=duration,
+            details=details
+        )
+        
+    except asyncio.TimeoutError:
+        return EvaluationResult(
+            case_id=case.id,
+            passed=False,
+            score=0.0,
+            actual_output=None,
+            duration_seconds=case.timeout,
+            error=&#34;Timeout&#34;
+        )
+    except Exception as e:
+        return EvaluationResult(
+            case_id=case.id,
+            passed=False,
+            score=0.0,
+            actual_output=None,
+            duration_seconds=time.time() - start_time,
+            error=str(e)
+        )</code></pre>
+</details>
+<div class="desc"><p>Evaluate a single test case.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>case</code></strong></dt>
+<dd>Test case to evaluate</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>EvaluationResult</p></div>
+</dd>
+<dt id="agents.agents.adk.AgentEvaluator.save_report"><code class="name flex">
+<span>def <span class="ident">save_report</span></span>(<span>self, report: agents.adk.evaluator.EvaluationReport, path: pathlib._local.Path)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_report(self, report: EvaluationReport, path: Path):
+    &#34;&#34;&#34;Save evaluation report to JSON.
+    
+    Args:
+        report: Report to save
+        path: Output path
+    &#34;&#34;&#34;
+    data = {
+        &#34;agent_name&#34;: report.agent_name,
+        &#34;summary&#34;: {
+            &#34;total_cases&#34;: report.total_cases,
+            &#34;passed_cases&#34;: report.passed_cases,
+            &#34;failed_cases&#34;: report.failed_cases,
+            &#34;pass_rate&#34;: report.pass_rate,
+            &#34;average_score&#34;: report.average_score,
+            &#34;total_duration_seconds&#34;: report.total_duration_seconds
+        },
+        &#34;results&#34;: [
+            {
+                &#34;case_id&#34;: r.case_id,
+                &#34;passed&#34;: r.passed,
+                &#34;score&#34;: r.score,
+                &#34;duration_seconds&#34;: r.duration_seconds,
+                &#34;details&#34;: r.details,
+                &#34;error&#34;: r.error
+            }
+            for r in report.results
+        ]
+    }
+    
+    with open(path, &#34;w&#34;) as f:
+        json.dump(data, f, indent=2)</code></pre>
+</details>
+<div class="desc"><p>Save evaluation report to JSON.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>report</code></strong></dt>
+<dd>Report to save</dd>
+<dt><strong><code>path</code></strong></dt>
+<dd>Output path</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.CodeReviewADKAgent"><code class="flex name class">
+<span>class <span class="ident">CodeReviewADKAgent</span></span>
+<span>(</span><span>config: agents.adk.base.ADKConfig,<br>http_client: httpx.AsyncClient | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CodeReviewADKAgent(ADKAgent):
+    &#34;&#34;&#34;Agent specialized in code review and analysis.&#34;&#34;&#34;
+    
+    def get_agent_type(self) -&gt; str:
+        return &#34;code_review&#34;
+    
+    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert code reviewer with extensive experience in software quality and security.
+
+Your review should cover:
+1. **Code Quality**: Readability, maintainability, complexity
+2. **Best Practices**: Language conventions, design patterns
+3. **Bugs &amp; Issues**: Logic errors, edge cases, potential crashes
+4. **Security**: Vulnerabilities, input validation, data handling
+5. **Performance**: Inefficiencies, resource usage, scalability
+6. **Testing**: Test coverage, edge case handling
+
+Review Format:
+- Start with a brief summary
+- List issues by severity (Critical, High, Medium, Low)
+- Provide specific line references when possible
+- Suggest concrete improvements with code examples
+- End with an overall quality score (1-10)
+
+Be constructive and specific. Focus on issues that matter most.&#34;&#34;&#34;
+
+    async def review_code(
+        self,
+        code: str,
+        language: str,
+        focus_areas: Optional[List[str]] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Review code for quality and issues.
+        
+        Args:
+            code: Code to review
+            language: Programming language
+            focus_areas: Specific areas to focus on
+            
+        Returns:
+            ADKResult with review feedback
+        &#34;&#34;&#34;
+        task = f&#34;Review the following {language} code:\n\n```{language}\n{code}\n```&#34;
+        
+        context = {&#34;language&#34;: language}
+        if focus_areas:
+            context[&#34;focus_areas&#34;] = &#34;, &#34;.join(focus_areas)
+            task += f&#34;\n\nFocus especially on: {&#39;, &#39;.join(focus_areas)}&#34;
+        
+        return await self.execute(task, context)
+    
+    async def security_audit(
+        self,
+        code: str,
+        language: str
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Perform security-focused code audit.
+        
+        Args:
+            code: Code to audit
+            language: Programming language
+            
+        Returns:
+            ADKResult with security findings
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Perform a security audit of the following {language} code.
+
+Look for:
+- Injection vulnerabilities (SQL, command, XSS)
+- Authentication/authorization issues
+- Sensitive data exposure
+- Insecure cryptography
+- Input validation problems
+- Security misconfigurations
+
+Code:
+```{language}
+{code}
+```
+
+Provide findings with severity levels and remediation steps.&#34;&#34;&#34;
+        
+        return await self.execute(task, {&#34;language&#34;: language, &#34;focus&#34;: &#34;security&#34;})</code></pre>
+</details>
+<div class="desc"><p>Agent specialized in code review and analysis.</p>
+<p>Initialize ADK agent.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+<dt><strong><code>http_client</code></strong></dt>
+<dd>Optional shared HTTP client</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>agents.adk.base.ADKAgent</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.adk.CodeReviewADKAgent.get_agent_type"><code class="name flex">
+<span>def <span class="ident">get_agent_type</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_agent_type(self) -&gt; str:
+    return &#34;code_review&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the agent type identifier.</p>
+<h2 id="returns">Returns</h2>
+<p>Agent type string (e.g., 'development', 'code_review')</p></div>
+</dd>
+<dt id="agents.agents.adk.CodeReviewADKAgent.get_system_prompt"><code class="name flex">
+<span>def <span class="ident">get_system_prompt</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert code reviewer with extensive experience in software quality and security.
+
+Your review should cover:
+1. **Code Quality**: Readability, maintainability, complexity
+2. **Best Practices**: Language conventions, design patterns
+3. **Bugs &amp; Issues**: Logic errors, edge cases, potential crashes
+4. **Security**: Vulnerabilities, input validation, data handling
+5. **Performance**: Inefficiencies, resource usage, scalability
+6. **Testing**: Test coverage, edge case handling
+
+Review Format:
+- Start with a brief summary
+- List issues by severity (Critical, High, Medium, Low)
+- Provide specific line references when possible
+- Suggest concrete improvements with code examples
+- End with an overall quality score (1-10)
+
+Be constructive and specific. Focus on issues that matter most.&#34;&#34;&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the system prompt for this agent type.</p>
+<h2 id="returns">Returns</h2>
+<p>System prompt string</p></div>
+</dd>
+<dt id="agents.agents.adk.CodeReviewADKAgent.review_code"><code class="name flex">
+<span>async def <span class="ident">review_code</span></span>(<span>self, code: str, language: str, focus_areas: List[str] | None = None) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def review_code(
+    self,
+    code: str,
+    language: str,
+    focus_areas: Optional[List[str]] = None
+) -&gt; ADKResult:
+    &#34;&#34;&#34;Review code for quality and issues.
+    
+    Args:
+        code: Code to review
+        language: Programming language
+        focus_areas: Specific areas to focus on
+        
+    Returns:
+        ADKResult with review feedback
+    &#34;&#34;&#34;
+    task = f&#34;Review the following {language} code:\n\n```{language}\n{code}\n```&#34;
+    
+    context = {&#34;language&#34;: language}
+    if focus_areas:
+        context[&#34;focus_areas&#34;] = &#34;, &#34;.join(focus_areas)
+        task += f&#34;\n\nFocus especially on: {&#39;, &#39;.join(focus_areas)}&#34;
+    
+    return await self.execute(task, context)</code></pre>
+</details>
+<div class="desc"><p>Review code for quality and issues.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>code</code></strong></dt>
+<dd>Code to review</dd>
+<dt><strong><code>language</code></strong></dt>
+<dd>Programming language</dd>
+<dt><strong><code>focus_areas</code></strong></dt>
+<dd>Specific areas to focus on</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with review feedback</p></div>
+</dd>
+<dt id="agents.agents.adk.CodeReviewADKAgent.security_audit"><code class="name flex">
+<span>async def <span class="ident">security_audit</span></span>(<span>self, code: str, language: str) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    async def security_audit(
+        self,
+        code: str,
+        language: str
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Perform security-focused code audit.
+        
+        Args:
+            code: Code to audit
+            language: Programming language
+            
+        Returns:
+            ADKResult with security findings
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Perform a security audit of the following {language} code.
+
+Look for:
+- Injection vulnerabilities (SQL, command, XSS)
+- Authentication/authorization issues
+- Sensitive data exposure
+- Insecure cryptography
+- Input validation problems
+- Security misconfigurations
+
+Code:
+```{language}
+{code}
+```
+
+Provide findings with severity levels and remediation steps.&#34;&#34;&#34;
+        
+        return await self.execute(task, {&#34;language&#34;: language, &#34;focus&#34;: &#34;security&#34;})</code></pre>
+</details>
+<div class="desc"><p>Perform security-focused code audit.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>code</code></strong></dt>
+<dd>Code to audit</dd>
+<dt><strong><code>language</code></strong></dt>
+<dd>Programming language</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with security findings</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.DevelopmentADKAgent"><code class="flex name class">
+<span>class <span class="ident">DevelopmentADKAgent</span></span>
+<span>(</span><span>config: agents.adk.base.ADKConfig,<br>http_client: httpx.AsyncClient | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DevelopmentADKAgent(ADKAgent):
+    &#34;&#34;&#34;Agent specialized in code development and generation.&#34;&#34;&#34;
+    
+    def get_agent_type(self) -&gt; str:
+        return &#34;development&#34;
+    
+    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert software developer with deep expertise across multiple programming languages and frameworks.
+
+Your responsibilities:
+1. Write clean, efficient, and well-documented code
+2. Follow best practices and design patterns
+3. Implement proper error handling and input validation
+4. Write code that is testable and maintainable
+5. Consider edge cases and potential issues
+
+Guidelines:
+- Use descriptive variable and function names
+- Add comments for complex logic
+- Follow the language&#39;s conventions and style guides
+- Optimize for readability first, then performance
+- Include type hints/annotations where applicable
+
+When generating code:
+- Provide complete, working implementations
+- Include necessary imports
+- Add docstrings and inline comments
+- Consider security implications
+- Handle errors gracefully&#34;&#34;&#34;
+
+    async def generate_code(
+        self,
+        description: str,
+        language: str,
+        framework: Optional[str] = None,
+        context: Optional[Dict[str, Any]] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Generate code based on description.
+        
+        Args:
+            description: What to implement
+            language: Programming language
+            framework: Optional framework
+            context: Additional context
+            
+        Returns:
+            ADKResult with generated code
+        &#34;&#34;&#34;
+        ctx = context or {}
+        ctx[&#34;language&#34;] = language
+        if framework:
+            ctx[&#34;framework&#34;] = framework
+        
+        task = f&#34;Implement the following in {language}&#34;
+        if framework:
+            task += f&#34; using {framework}&#34;
+        task += f&#34;:\n\n{description}&#34;
+        
+        return await self.execute(task, ctx)
+    
+    async def refactor_code(
+        self,
+        code: str,
+        instructions: str,
+        language: str
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Refactor existing code.
+        
+        Args:
+            code: Code to refactor
+            instructions: Refactoring instructions
+            language: Programming language
+            
+        Returns:
+            ADKResult with refactored code
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Refactor the following {language} code according to these instructions:
+
+Instructions: {instructions}
+
+Code:
+```{language}
+{code}
+```
+
+Provide the refactored code with explanations of changes made.&#34;&#34;&#34;
+        
+        return await self.execute(task)</code></pre>
+</details>
+<div class="desc"><p>Agent specialized in code development and generation.</p>
+<p>Initialize ADK agent.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+<dt><strong><code>http_client</code></strong></dt>
+<dd>Optional shared HTTP client</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>agents.adk.base.ADKAgent</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.adk.DevelopmentADKAgent.generate_code"><code class="name flex">
+<span>async def <span class="ident">generate_code</span></span>(<span>self,<br>description: str,<br>language: str,<br>framework: str | None = None,<br>context: Dict[str, Any] | None = None) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def generate_code(
+    self,
+    description: str,
+    language: str,
+    framework: Optional[str] = None,
+    context: Optional[Dict[str, Any]] = None
+) -&gt; ADKResult:
+    &#34;&#34;&#34;Generate code based on description.
+    
+    Args:
+        description: What to implement
+        language: Programming language
+        framework: Optional framework
+        context: Additional context
+        
+    Returns:
+        ADKResult with generated code
+    &#34;&#34;&#34;
+    ctx = context or {}
+    ctx[&#34;language&#34;] = language
+    if framework:
+        ctx[&#34;framework&#34;] = framework
+    
+    task = f&#34;Implement the following in {language}&#34;
+    if framework:
+        task += f&#34; using {framework}&#34;
+    task += f&#34;:\n\n{description}&#34;
+    
+    return await self.execute(task, ctx)</code></pre>
+</details>
+<div class="desc"><p>Generate code based on description.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>description</code></strong></dt>
+<dd>What to implement</dd>
+<dt><strong><code>language</code></strong></dt>
+<dd>Programming language</dd>
+<dt><strong><code>framework</code></strong></dt>
+<dd>Optional framework</dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>Additional context</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with generated code</p></div>
+</dd>
+<dt id="agents.agents.adk.DevelopmentADKAgent.get_agent_type"><code class="name flex">
+<span>def <span class="ident">get_agent_type</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_agent_type(self) -&gt; str:
+    return &#34;development&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the agent type identifier.</p>
+<h2 id="returns">Returns</h2>
+<p>Agent type string (e.g., 'development', 'code_review')</p></div>
+</dd>
+<dt id="agents.agents.adk.DevelopmentADKAgent.get_system_prompt"><code class="name flex">
+<span>def <span class="ident">get_system_prompt</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert software developer with deep expertise across multiple programming languages and frameworks.
+
+Your responsibilities:
+1. Write clean, efficient, and well-documented code
+2. Follow best practices and design patterns
+3. Implement proper error handling and input validation
+4. Write code that is testable and maintainable
+5. Consider edge cases and potential issues
+
+Guidelines:
+- Use descriptive variable and function names
+- Add comments for complex logic
+- Follow the language&#39;s conventions and style guides
+- Optimize for readability first, then performance
+- Include type hints/annotations where applicable
+
+When generating code:
+- Provide complete, working implementations
+- Include necessary imports
+- Add docstrings and inline comments
+- Consider security implications
+- Handle errors gracefully&#34;&#34;&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the system prompt for this agent type.</p>
+<h2 id="returns">Returns</h2>
+<p>System prompt string</p></div>
+</dd>
+<dt id="agents.agents.adk.DevelopmentADKAgent.refactor_code"><code class="name flex">
+<span>async def <span class="ident">refactor_code</span></span>(<span>self, code: str, instructions: str, language: str) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    async def refactor_code(
+        self,
+        code: str,
+        instructions: str,
+        language: str
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Refactor existing code.
+        
+        Args:
+            code: Code to refactor
+            instructions: Refactoring instructions
+            language: Programming language
+            
+        Returns:
+            ADKResult with refactored code
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Refactor the following {language} code according to these instructions:
+
+Instructions: {instructions}
+
+Code:
+```{language}
+{code}
+```
+
+Provide the refactored code with explanations of changes made.&#34;&#34;&#34;
+        
+        return await self.execute(task)</code></pre>
+</details>
+<div class="desc"><p>Refactor existing code.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>code</code></strong></dt>
+<dd>Code to refactor</dd>
+<dt><strong><code>instructions</code></strong></dt>
+<dd>Refactoring instructions</dd>
+<dt><strong><code>language</code></strong></dt>
+<dd>Programming language</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with refactored code</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.DocumentationADKAgent"><code class="flex name class">
+<span>class <span class="ident">DocumentationADKAgent</span></span>
+<span>(</span><span>config: agents.adk.base.ADKConfig,<br>http_client: httpx.AsyncClient | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DocumentationADKAgent(ADKAgent):
+    &#34;&#34;&#34;Agent specialized in documentation generation.&#34;&#34;&#34;
+    
+    def get_agent_type(self) -&gt; str:
+        return &#34;documentation&#34;
+    
+    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert technical writer creating clear, comprehensive documentation.
+
+Documentation standards:
+1. **Clarity**: Write for your audience, explain jargon
+2. **Completeness**: Cover all necessary topics
+3. **Examples**: Include practical code examples
+4. **Structure**: Use clear headings and organization
+5. **Accuracy**: Ensure technical correctness
+
+Documentation types you create:
+- API documentation with endpoints, parameters, responses
+- README files with setup, usage, and examples
+- Code comments and docstrings
+- User guides and tutorials
+- Architecture documentation
+
+Format guidelines:
+- Use proper Markdown formatting
+- Include code blocks with syntax highlighting
+- Add tables for structured information
+- Use bullet points for lists
+- Include diagrams descriptions where helpful&#34;&#34;&#34;
+
+    async def generate_api_docs(
+        self,
+        code: str,
+        language: str,
+        format: str = &#34;markdown&#34;
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Generate API documentation.
+        
+        Args:
+            code: Code to document
+            language: Programming language
+            format: Output format
+            
+        Returns:
+            ADKResult with API documentation
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Generate {format} API documentation for this {language} code:
+
+```{language}
+{code}
+```
+
+Include:
+- Function/method signatures
+- Parameter descriptions with types
+- Return value descriptions
+- Usage examples
+- Error conditions&#34;&#34;&#34;
+        
+        return await self.execute(task, {&#34;language&#34;: language, &#34;format&#34;: format})
+    
+    async def generate_readme(
+        self,
+        project_info: Dict[str, Any]
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Generate README file.
+        
+        Args:
+            project_info: Project information dict
+            
+        Returns:
+            ADKResult with README content
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Generate a comprehensive README.md for this project:
+
+Project Name: {project_info.get(&#39;name&#39;, &#39;Unknown&#39;)}
+Description: {project_info.get(&#39;description&#39;, &#39;No description&#39;)}
+Language: {project_info.get(&#39;language&#39;, &#39;Unknown&#39;)}
+Features: {&#39;, &#39;.join(project_info.get(&#39;features&#39;, []))}
+
+Include sections:
+- Project title and badges
+- Description
+- Features
+- Installation
+- Quick start
+- Usage examples
+- Configuration
+- Contributing
+- License&#34;&#34;&#34;
+        
+        return await self.execute(task, project_info)</code></pre>
+</details>
+<div class="desc"><p>Agent specialized in documentation generation.</p>
+<p>Initialize ADK agent.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+<dt><strong><code>http_client</code></strong></dt>
+<dd>Optional shared HTTP client</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>agents.adk.base.ADKAgent</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.adk.DocumentationADKAgent.generate_api_docs"><code class="name flex">
+<span>async def <span class="ident">generate_api_docs</span></span>(<span>self, code: str, language: str, format: str = 'markdown') ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    async def generate_api_docs(
+        self,
+        code: str,
+        language: str,
+        format: str = &#34;markdown&#34;
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Generate API documentation.
+        
+        Args:
+            code: Code to document
+            language: Programming language
+            format: Output format
+            
+        Returns:
+            ADKResult with API documentation
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Generate {format} API documentation for this {language} code:
+
+```{language}
+{code}
+```
+
+Include:
+- Function/method signatures
+- Parameter descriptions with types
+- Return value descriptions
+- Usage examples
+- Error conditions&#34;&#34;&#34;
+        
+        return await self.execute(task, {&#34;language&#34;: language, &#34;format&#34;: format})</code></pre>
+</details>
+<div class="desc"><p>Generate API documentation.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>code</code></strong></dt>
+<dd>Code to document</dd>
+<dt><strong><code>language</code></strong></dt>
+<dd>Programming language</dd>
+<dt><strong><code>format</code></strong></dt>
+<dd>Output format</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with API documentation</p></div>
+</dd>
+<dt id="agents.agents.adk.DocumentationADKAgent.generate_readme"><code class="name flex">
+<span>async def <span class="ident">generate_readme</span></span>(<span>self, project_info: Dict[str, Any]) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    async def generate_readme(
+        self,
+        project_info: Dict[str, Any]
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Generate README file.
+        
+        Args:
+            project_info: Project information dict
+            
+        Returns:
+            ADKResult with README content
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Generate a comprehensive README.md for this project:
+
+Project Name: {project_info.get(&#39;name&#39;, &#39;Unknown&#39;)}
+Description: {project_info.get(&#39;description&#39;, &#39;No description&#39;)}
+Language: {project_info.get(&#39;language&#39;, &#39;Unknown&#39;)}
+Features: {&#39;, &#39;.join(project_info.get(&#39;features&#39;, []))}
+
+Include sections:
+- Project title and badges
+- Description
+- Features
+- Installation
+- Quick start
+- Usage examples
+- Configuration
+- Contributing
+- License&#34;&#34;&#34;
+        
+        return await self.execute(task, project_info)</code></pre>
+</details>
+<div class="desc"><p>Generate README file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>project_info</code></strong></dt>
+<dd>Project information dict</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with README content</p></div>
+</dd>
+<dt id="agents.agents.adk.DocumentationADKAgent.get_agent_type"><code class="name flex">
+<span>def <span class="ident">get_agent_type</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_agent_type(self) -&gt; str:
+    return &#34;documentation&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the agent type identifier.</p>
+<h2 id="returns">Returns</h2>
+<p>Agent type string (e.g., 'development', 'code_review')</p></div>
+</dd>
+<dt id="agents.agents.adk.DocumentationADKAgent.get_system_prompt"><code class="name flex">
+<span>def <span class="ident">get_system_prompt</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert technical writer creating clear, comprehensive documentation.
+
+Documentation standards:
+1. **Clarity**: Write for your audience, explain jargon
+2. **Completeness**: Cover all necessary topics
+3. **Examples**: Include practical code examples
+4. **Structure**: Use clear headings and organization
+5. **Accuracy**: Ensure technical correctness
+
+Documentation types you create:
+- API documentation with endpoints, parameters, responses
+- README files with setup, usage, and examples
+- Code comments and docstrings
+- User guides and tutorials
+- Architecture documentation
+
+Format guidelines:
+- Use proper Markdown formatting
+- Include code blocks with syntax highlighting
+- Add tables for structured information
+- Use bullet points for lists
+- Include diagrams descriptions where helpful&#34;&#34;&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the system prompt for this agent type.</p>
+<h2 id="returns">Returns</h2>
+<p>System prompt string</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.ResearchADKAgent"><code class="flex name class">
+<span>class <span class="ident">ResearchADKAgent</span></span>
+<span>(</span><span>config: agents.adk.base.ADKConfig,<br>http_client: httpx.AsyncClient | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ResearchADKAgent(ADKAgent):
+    &#34;&#34;&#34;Agent specialized in research and information synthesis.&#34;&#34;&#34;
+    
+    def get_agent_type(self) -&gt; str:
+        return &#34;research&#34;
+    
+    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert researcher skilled at gathering, analyzing, and synthesizing information.
+
+Research approach:
+1. **Comprehensive**: Cover all relevant aspects
+2. **Objective**: Present multiple viewpoints
+3. **Evidence-based**: Support claims with reasoning
+4. **Structured**: Organize findings clearly
+5. **Actionable**: Provide practical recommendations
+
+Research output format:
+- Executive summary
+- Key findings with supporting details
+- Analysis and comparison
+- Recommendations
+- Limitations and caveats
+
+Be thorough but concise. Distinguish between facts and opinions.
+Acknowledge uncertainty where it exists.&#34;&#34;&#34;
+
+    async def research_topic(
+        self,
+        topic: str,
+        depth: str = &#34;comprehensive&#34;,
+        aspects: Optional[List[str]] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Research a topic.
+        
+        Args:
+            topic: Topic to research
+            depth: Research depth (brief, comprehensive, exhaustive)
+            aspects: Specific aspects to cover
+            
+        Returns:
+            ADKResult with research findings
+        &#34;&#34;&#34;
+        task = f&#34;Research the following topic ({depth} analysis): {topic}&#34;
+        
+        if aspects:
+            task += f&#34;\n\nFocus on these aspects: {&#39;, &#39;.join(aspects)}&#34;
+        
+        task += &#34;&#34;&#34;
+
+Provide:
+1. Overview and background
+2. Key findings
+3. Different perspectives
+4. Best practices or recommendations
+5. Potential challenges or considerations&#34;&#34;&#34;
+        
+        return await self.execute(task, {&#34;topic&#34;: topic, &#34;depth&#34;: depth})
+    
+    async def compare_options(
+        self,
+        options: List[str],
+        criteria: List[str],
+        context: Optional[str] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Compare multiple options.
+        
+        Args:
+            options: Options to compare
+            criteria: Comparison criteria
+            context: Additional context
+            
+        Returns:
+            ADKResult with comparison analysis
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Compare these options: {&#39;, &#39;.join(options)}
+
+Criteria for comparison:
+{chr(10).join(f&#39;- {c}&#39; for c in criteria)}&#34;&#34;&#34;
+        
+        if context:
+            task += f&#34;\n\nContext: {context}&#34;
+        
+        task += &#34;&#34;&#34;
+
+Provide:
+1. Brief overview of each option
+2. Comparison table/matrix
+3. Pros and cons of each
+4. Recommendation with reasoning&#34;&#34;&#34;
+        
+        return await self.execute(task)</code></pre>
+</details>
+<div class="desc"><p>Agent specialized in research and information synthesis.</p>
+<p>Initialize ADK agent.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+<dt><strong><code>http_client</code></strong></dt>
+<dd>Optional shared HTTP client</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>agents.adk.base.ADKAgent</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.adk.ResearchADKAgent.compare_options"><code class="name flex">
+<span>async def <span class="ident">compare_options</span></span>(<span>self, options: List[str], criteria: List[str], context: str | None = None) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    async def compare_options(
+        self,
+        options: List[str],
+        criteria: List[str],
+        context: Optional[str] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Compare multiple options.
+        
+        Args:
+            options: Options to compare
+            criteria: Comparison criteria
+            context: Additional context
+            
+        Returns:
+            ADKResult with comparison analysis
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Compare these options: {&#39;, &#39;.join(options)}
+
+Criteria for comparison:
+{chr(10).join(f&#39;- {c}&#39; for c in criteria)}&#34;&#34;&#34;
+        
+        if context:
+            task += f&#34;\n\nContext: {context}&#34;
+        
+        task += &#34;&#34;&#34;
+
+Provide:
+1. Brief overview of each option
+2. Comparison table/matrix
+3. Pros and cons of each
+4. Recommendation with reasoning&#34;&#34;&#34;
+        
+        return await self.execute(task)</code></pre>
+</details>
+<div class="desc"><p>Compare multiple options.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>options</code></strong></dt>
+<dd>Options to compare</dd>
+<dt><strong><code>criteria</code></strong></dt>
+<dd>Comparison criteria</dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>Additional context</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with comparison analysis</p></div>
+</dd>
+<dt id="agents.agents.adk.ResearchADKAgent.get_agent_type"><code class="name flex">
+<span>def <span class="ident">get_agent_type</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_agent_type(self) -&gt; str:
+    return &#34;research&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the agent type identifier.</p>
+<h2 id="returns">Returns</h2>
+<p>Agent type string (e.g., 'development', 'code_review')</p></div>
+</dd>
+<dt id="agents.agents.adk.ResearchADKAgent.get_system_prompt"><code class="name flex">
+<span>def <span class="ident">get_system_prompt</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert researcher skilled at gathering, analyzing, and synthesizing information.
+
+Research approach:
+1. **Comprehensive**: Cover all relevant aspects
+2. **Objective**: Present multiple viewpoints
+3. **Evidence-based**: Support claims with reasoning
+4. **Structured**: Organize findings clearly
+5. **Actionable**: Provide practical recommendations
+
+Research output format:
+- Executive summary
+- Key findings with supporting details
+- Analysis and comparison
+- Recommendations
+- Limitations and caveats
+
+Be thorough but concise. Distinguish between facts and opinions.
+Acknowledge uncertainty where it exists.&#34;&#34;&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the system prompt for this agent type.</p>
+<h2 id="returns">Returns</h2>
+<p>System prompt string</p></div>
+</dd>
+<dt id="agents.agents.adk.ResearchADKAgent.research_topic"><code class="name flex">
+<span>async def <span class="ident">research_topic</span></span>(<span>self, topic: str, depth: str = 'comprehensive', aspects: List[str] | None = None) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    async def research_topic(
+        self,
+        topic: str,
+        depth: str = &#34;comprehensive&#34;,
+        aspects: Optional[List[str]] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Research a topic.
+        
+        Args:
+            topic: Topic to research
+            depth: Research depth (brief, comprehensive, exhaustive)
+            aspects: Specific aspects to cover
+            
+        Returns:
+            ADKResult with research findings
+        &#34;&#34;&#34;
+        task = f&#34;Research the following topic ({depth} analysis): {topic}&#34;
+        
+        if aspects:
+            task += f&#34;\n\nFocus on these aspects: {&#39;, &#39;.join(aspects)}&#34;
+        
+        task += &#34;&#34;&#34;
+
+Provide:
+1. Overview and background
+2. Key findings
+3. Different perspectives
+4. Best practices or recommendations
+5. Potential challenges or considerations&#34;&#34;&#34;
+        
+        return await self.execute(task, {&#34;topic&#34;: topic, &#34;depth&#34;: depth})</code></pre>
+</details>
+<div class="desc"><p>Research a topic.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>topic</code></strong></dt>
+<dd>Topic to research</dd>
+<dt><strong><code>depth</code></strong></dt>
+<dd>Research depth (brief, comprehensive, exhaustive)</dd>
+<dt><strong><code>aspects</code></strong></dt>
+<dd>Specific aspects to cover</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with research findings</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.TestingADKAgent"><code class="flex name class">
+<span>class <span class="ident">TestingADKAgent</span></span>
+<span>(</span><span>config: agents.adk.base.ADKConfig,<br>http_client: httpx.AsyncClient | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TestingADKAgent(ADKAgent):
+    &#34;&#34;&#34;Agent specialized in test generation and quality assurance.&#34;&#34;&#34;
+    
+    def get_agent_type(self) -&gt; str:
+        return &#34;testing&#34;
+    
+    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert software tester specializing in comprehensive test coverage.
+
+Your testing approach:
+1. **Unit Tests**: Individual function/method testing
+2. **Edge Cases**: Boundary conditions, null values, empty inputs
+3. **Error Handling**: Exception cases, invalid inputs
+4. **Integration**: Component interactions
+5. **Performance**: Load and stress considerations
+
+Test quality guidelines:
+- Use descriptive test names that explain what&#39;s being tested
+- Follow Arrange-Act-Assert (AAA) pattern
+- Keep tests independent and isolated
+- Mock external dependencies appropriately
+- Aim for high code coverage but prioritize critical paths
+- Include both positive and negative test cases
+
+Use appropriate testing frameworks for the language (pytest, Jest, JUnit, etc.).&#34;&#34;&#34;
+
+    async def generate_tests(
+        self,
+        code: str,
+        language: str,
+        framework: Optional[str] = None,
+        test_types: Optional[List[str]] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Generate tests for code.
+        
+        Args:
+            code: Code to test
+            language: Programming language
+            framework: Testing framework
+            test_types: Types of tests to generate
+            
+        Returns:
+            ADKResult with generated tests
+        &#34;&#34;&#34;
+        task = f&#34;Generate comprehensive tests for the following {language} code&#34;
+        
+        if framework:
+            task += f&#34; using {framework}&#34;
+        
+        if test_types:
+            task += f&#34;\n\nInclude these test types: {&#39;, &#39;.join(test_types)}&#34;
+        
+        task += f&#34;\n\nCode:\n```{language}\n{code}\n```&#34;
+        
+        context = {&#34;language&#34;: language}
+        if framework:
+            context[&#34;framework&#34;] = framework
+        
+        return await self.execute(task, context)
+    
+    async def suggest_edge_cases(
+        self,
+        function_signature: str,
+        description: str
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Suggest edge cases for testing.
+        
+        Args:
+            function_signature: Function to analyze
+            description: What the function does
+            
+        Returns:
+            ADKResult with edge case suggestions
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Analyze this function and suggest edge cases for testing:
+
+Function: {function_signature}
+Description: {description}
+
+List potential edge cases including:
+- Boundary values
+- Null/undefined inputs
+- Empty collections
+- Invalid types
+- Concurrent access scenarios
+- Resource exhaustion
+- Error conditions&#34;&#34;&#34;
+        
+        return await self.execute(task)</code></pre>
+</details>
+<div class="desc"><p>Agent specialized in test generation and quality assurance.</p>
+<p>Initialize ADK agent.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+<dt><strong><code>http_client</code></strong></dt>
+<dd>Optional shared HTTP client</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>agents.adk.base.ADKAgent</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.adk.TestingADKAgent.generate_tests"><code class="name flex">
+<span>async def <span class="ident">generate_tests</span></span>(<span>self,<br>code: str,<br>language: str,<br>framework: str | None = None,<br>test_types: List[str] | None = None) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def generate_tests(
+    self,
+    code: str,
+    language: str,
+    framework: Optional[str] = None,
+    test_types: Optional[List[str]] = None
+) -&gt; ADKResult:
+    &#34;&#34;&#34;Generate tests for code.
+    
+    Args:
+        code: Code to test
+        language: Programming language
+        framework: Testing framework
+        test_types: Types of tests to generate
+        
+    Returns:
+        ADKResult with generated tests
+    &#34;&#34;&#34;
+    task = f&#34;Generate comprehensive tests for the following {language} code&#34;
+    
+    if framework:
+        task += f&#34; using {framework}&#34;
+    
+    if test_types:
+        task += f&#34;\n\nInclude these test types: {&#39;, &#39;.join(test_types)}&#34;
+    
+    task += f&#34;\n\nCode:\n```{language}\n{code}\n```&#34;
+    
+    context = {&#34;language&#34;: language}
+    if framework:
+        context[&#34;framework&#34;] = framework
+    
+    return await self.execute(task, context)</code></pre>
+</details>
+<div class="desc"><p>Generate tests for code.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>code</code></strong></dt>
+<dd>Code to test</dd>
+<dt><strong><code>language</code></strong></dt>
+<dd>Programming language</dd>
+<dt><strong><code>framework</code></strong></dt>
+<dd>Testing framework</dd>
+<dt><strong><code>test_types</code></strong></dt>
+<dd>Types of tests to generate</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with generated tests</p></div>
+</dd>
+<dt id="agents.agents.adk.TestingADKAgent.get_agent_type"><code class="name flex">
+<span>def <span class="ident">get_agent_type</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_agent_type(self) -&gt; str:
+    return &#34;testing&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the agent type identifier.</p>
+<h2 id="returns">Returns</h2>
+<p>Agent type string (e.g., 'development', 'code_review')</p></div>
+</dd>
+<dt id="agents.agents.adk.TestingADKAgent.get_system_prompt"><code class="name flex">
+<span>def <span class="ident">get_system_prompt</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert software tester specializing in comprehensive test coverage.
+
+Your testing approach:
+1. **Unit Tests**: Individual function/method testing
+2. **Edge Cases**: Boundary conditions, null values, empty inputs
+3. **Error Handling**: Exception cases, invalid inputs
+4. **Integration**: Component interactions
+5. **Performance**: Load and stress considerations
+
+Test quality guidelines:
+- Use descriptive test names that explain what&#39;s being tested
+- Follow Arrange-Act-Assert (AAA) pattern
+- Keep tests independent and isolated
+- Mock external dependencies appropriately
+- Aim for high code coverage but prioritize critical paths
+- Include both positive and negative test cases
+
+Use appropriate testing frameworks for the language (pytest, Jest, JUnit, etc.).&#34;&#34;&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the system prompt for this agent type.</p>
+<h2 id="returns">Returns</h2>
+<p>System prompt string</p></div>
+</dd>
+<dt id="agents.agents.adk.TestingADKAgent.suggest_edge_cases"><code class="name flex">
+<span>async def <span class="ident">suggest_edge_cases</span></span>(<span>self, function_signature: str, description: str) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    async def suggest_edge_cases(
+        self,
+        function_signature: str,
+        description: str
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Suggest edge cases for testing.
+        
+        Args:
+            function_signature: Function to analyze
+            description: What the function does
+            
+        Returns:
+            ADKResult with edge case suggestions
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Analyze this function and suggest edge cases for testing:
+
+Function: {function_signature}
+Description: {description}
+
+List potential edge cases including:
+- Boundary values
+- Null/undefined inputs
+- Empty collections
+- Invalid types
+- Concurrent access scenarios
+- Resource exhaustion
+- Error conditions&#34;&#34;&#34;
+        
+        return await self.execute(task)</code></pre>
+</details>
+<div class="desc"><p>Suggest edge cases for testing.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>function_signature</code></strong></dt>
+<dd>Function to analyze</dd>
+<dt><strong><code>description</code></strong></dt>
+<dd>What the function does</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with edge case suggestions</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.WorkflowExecutor"><code class="flex name class">
+<span>class <span class="ident">WorkflowExecutor</span></span>
+<span>(</span><span>litellm_url: str,<br>litellm_api_key: str,<br>default_model: str = 'qwen2.5-coder:14b',<br>priority: agents.adk.base.AgentPriority = AgentPriority.NORMAL)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class WorkflowExecutor:
+    &#34;&#34;&#34;Executes ADK workflows with proper dependency handling.&#34;&#34;&#34;
+    
+    AGENT_CLASSES = {
+        &#34;development&#34;: DevelopmentADKAgent,
+        &#34;code_review&#34;: CodeReviewADKAgent,
+        &#34;testing&#34;: TestingADKAgent,
+        &#34;documentation&#34;: DocumentationADKAgent,
+        &#34;research&#34;: ResearchADKAgent,
+    }
+    
+    def __init__(
+        self,
+        litellm_url: str,
+        litellm_api_key: str,
+        default_model: str = &#34;qwen2.5-coder:14b&#34;,
+        priority: AgentPriority = AgentPriority.NORMAL
+    ):
+        &#34;&#34;&#34;Initialize workflow executor.
+        
+        Args:
+            litellm_url: LiteLLM proxy URL
+            litellm_api_key: API key
+            default_model: Default model to use
+            priority: Default queue priority
+        &#34;&#34;&#34;
+        self.litellm_url = litellm_url
+        self.litellm_api_key = litellm_api_key
+        self.default_model = default_model
+        self.priority = priority
+        self.logger = logger.bind(component=&#34;workflow_executor&#34;)
+    
+    def _create_agent(self, task: WorkflowTask, http_client) -&gt; ADKAgent:
+        &#34;&#34;&#34;Create agent for a task.
+        
+        Args:
+            task: Workflow task
+            http_client: HTTP client to use
+            
+        Returns:
+            Configured ADKAgent instance
+        &#34;&#34;&#34;
+        agent_class = self.AGENT_CLASSES.get(task.agent_type, DevelopmentADKAgent)
+        
+        config = ADKConfig(
+            name=f&#34;{task.agent_type}_{task.id}&#34;,
+            model=task.model or self.default_model,
+            litellm_url=self.litellm_url,
+            litellm_api_key=self.litellm_api_key,
+            temperature=task.temperature or 0.7,
+            timeout=task.timeout or 300,
+            priority=self.priority
+        )
+        
+        return agent_class(config, http_client)
+    
+    def _substitute_variables(
+        self,
+        prompt: str,
+        inputs: Dict[str, Any],
+        outputs: Dict[str, str]
+    ) -&gt; str:
+        &#34;&#34;&#34;Substitute variables in prompt.
+        
+        Args:
+            prompt: Original prompt with {{variables}}
+            inputs: Workflow inputs
+            outputs: Previous task outputs
+            
+        Returns:
+            Prompt with substitutions made
+        &#34;&#34;&#34;
+        result = prompt
+        
+        # Substitute inputs
+        for key, value in inputs.items():
+            result = result.replace(f&#34;{{{{ inputs.{key} }}}}&#34;, str(value))
+        
+        # Substitute outputs
+        for key, value in outputs.items():
+            result = result.replace(f&#34;{{{{ outputs.{key} }}}}&#34;, str(value))
+        
+        return result
+    
+    async def execute(
+        self,
+        workflow: ADKWorkflow,
+        inputs: Dict[str, Any] = None
+    ) -&gt; WorkflowResult:
+        &#34;&#34;&#34;Execute a workflow.
+        
+        Args:
+            workflow: Workflow to execute
+            inputs: Input parameters
+            
+        Returns:
+            WorkflowResult with all outputs
+        &#34;&#34;&#34;
+        import httpx
+        
+        inputs = inputs or {}
+        outputs: Dict[str, str] = {}
+        task_results: Dict[str, ADKResult] = {}
+        errors: List[str] = []
+        completed: Set[str] = set()
+        
+        start_time = time.time()
+        self.logger.info(f&#34;Starting workflow: {workflow.name}&#34;)
+        
+        # Validate workflow
+        validation_errors = workflow.validate()
+        if validation_errors:
+            return WorkflowResult(
+                workflow_name=workflow.name,
+                status=&#34;error&#34;,
+                outputs={},
+                duration_seconds=0,
+                task_results={},
+                errors=validation_errors
+            )
+        
+        async with httpx.AsyncClient(timeout=600) as http_client:
+            while len(completed) &lt; len(workflow.tasks):
+                # Find tasks ready to execute
+                ready_tasks = [
+                    task for task in workflow.tasks
+                    if task.id not in completed
+                    and all(dep in completed for dep in task.depends_on)
+                ]
+                
+                if not ready_tasks:
+                    errors.append(&#34;Workflow stalled - no tasks ready to execute&#34;)
+                    break
+                
+                # Execute ready tasks in parallel
+                async def execute_task(task: WorkflowTask) -&gt; tuple:
+                    agent = self._create_agent(task, http_client)
+                    prompt = self._substitute_variables(task.prompt, inputs, outputs)
+                    
+                    self.logger.info(f&#34;Executing task: {task.id}&#34;)
+                    result = await agent.execute(prompt, task.context)
+                    
+                    return task.id, result
+                
+                results = await asyncio.gather(
+                    *[execute_task(t) for t in ready_tasks],
+                    return_exceptions=True
+                )
+                
+                for result in results:
+                    if isinstance(result, Exception):
+                        errors.append(str(result))
+                        continue
+                    
+                    task_id, adk_result = result
+                    task_results[task_id] = adk_result
+                    
+                    if adk_result.is_success:
+                        outputs[task_id] = adk_result.output or &#34;&#34;
+                        completed.add(task_id)
+                        self.logger.info(f&#34;Task completed: {task_id}&#34;)
+                    else:
+                        errors.append(f&#34;Task {task_id} failed: {adk_result.error}&#34;)
+                        # Continue with other tasks that don&#39;t depend on this one
+                        completed.add(task_id)
+        
+        duration = time.time() - start_time
+        status = &#34;completed&#34; if not errors else &#34;completed_with_errors&#34; if outputs else &#34;failed&#34;
+        
+        self.logger.info(f&#34;Workflow {workflow.name} {status} in {duration:.2f}s&#34;)
+        
+        return WorkflowResult(
+            workflow_name=workflow.name,
+            status=status,
+            outputs=outputs,
+            duration_seconds=duration,
+            task_results=task_results,
+            errors=errors
+        )
+    
+    async def execute_from_file(
+        self,
+        workflow_path: Path,
+        inputs: Dict[str, Any] = None
+    ) -&gt; WorkflowResult:
+        &#34;&#34;&#34;Execute workflow from YAML file.
+        
+        Args:
+            workflow_path: Path to workflow YAML
+            inputs: Input parameters
+            
+        Returns:
+            WorkflowResult
+        &#34;&#34;&#34;
+        workflow = ADKWorkflow.from_yaml(workflow_path)
+        return await self.execute(workflow, inputs)</code></pre>
+</details>
+<div class="desc"><p>Executes ADK workflows with proper dependency handling.</p>
+<p>Initialize workflow executor.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>litellm_url</code></strong></dt>
+<dd>LiteLLM proxy URL</dd>
+<dt><strong><code>litellm_api_key</code></strong></dt>
+<dd>API key</dd>
+<dt><strong><code>default_model</code></strong></dt>
+<dd>Default model to use</dd>
+<dt><strong><code>priority</code></strong></dt>
+<dd>Default queue priority</dd>
+</dl></div>
+<h3>Class variables</h3>
+<dl>
+<dt id="agents.agents.adk.WorkflowExecutor.AGENT_CLASSES"><code class="name">var <span class="ident">AGENT_CLASSES</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.adk.WorkflowExecutor.execute"><code class="name flex">
+<span>async def <span class="ident">execute</span></span>(<span>self, workflow: agents.adk.workflows.ADKWorkflow, inputs: Dict[str, Any] = None) ‑> agents.adk.workflows.WorkflowResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def execute(
+    self,
+    workflow: ADKWorkflow,
+    inputs: Dict[str, Any] = None
+) -&gt; WorkflowResult:
+    &#34;&#34;&#34;Execute a workflow.
+    
+    Args:
+        workflow: Workflow to execute
+        inputs: Input parameters
+        
+    Returns:
+        WorkflowResult with all outputs
+    &#34;&#34;&#34;
+    import httpx
+    
+    inputs = inputs or {}
+    outputs: Dict[str, str] = {}
+    task_results: Dict[str, ADKResult] = {}
+    errors: List[str] = []
+    completed: Set[str] = set()
+    
+    start_time = time.time()
+    self.logger.info(f&#34;Starting workflow: {workflow.name}&#34;)
+    
+    # Validate workflow
+    validation_errors = workflow.validate()
+    if validation_errors:
+        return WorkflowResult(
+            workflow_name=workflow.name,
+            status=&#34;error&#34;,
+            outputs={},
+            duration_seconds=0,
+            task_results={},
+            errors=validation_errors
+        )
+    
+    async with httpx.AsyncClient(timeout=600) as http_client:
+        while len(completed) &lt; len(workflow.tasks):
+            # Find tasks ready to execute
+            ready_tasks = [
+                task for task in workflow.tasks
+                if task.id not in completed
+                and all(dep in completed for dep in task.depends_on)
+            ]
+            
+            if not ready_tasks:
+                errors.append(&#34;Workflow stalled - no tasks ready to execute&#34;)
+                break
+            
+            # Execute ready tasks in parallel
+            async def execute_task(task: WorkflowTask) -&gt; tuple:
+                agent = self._create_agent(task, http_client)
+                prompt = self._substitute_variables(task.prompt, inputs, outputs)
+                
+                self.logger.info(f&#34;Executing task: {task.id}&#34;)
+                result = await agent.execute(prompt, task.context)
+                
+                return task.id, result
+            
+            results = await asyncio.gather(
+                *[execute_task(t) for t in ready_tasks],
+                return_exceptions=True
+            )
+            
+            for result in results:
+                if isinstance(result, Exception):
+                    errors.append(str(result))
+                    continue
+                
+                task_id, adk_result = result
+                task_results[task_id] = adk_result
+                
+                if adk_result.is_success:
+                    outputs[task_id] = adk_result.output or &#34;&#34;
+                    completed.add(task_id)
+                    self.logger.info(f&#34;Task completed: {task_id}&#34;)
+                else:
+                    errors.append(f&#34;Task {task_id} failed: {adk_result.error}&#34;)
+                    # Continue with other tasks that don&#39;t depend on this one
+                    completed.add(task_id)
+    
+    duration = time.time() - start_time
+    status = &#34;completed&#34; if not errors else &#34;completed_with_errors&#34; if outputs else &#34;failed&#34;
+    
+    self.logger.info(f&#34;Workflow {workflow.name} {status} in {duration:.2f}s&#34;)
+    
+    return WorkflowResult(
+        workflow_name=workflow.name,
+        status=status,
+        outputs=outputs,
+        duration_seconds=duration,
+        task_results=task_results,
+        errors=errors
+    )</code></pre>
+</details>
+<div class="desc"><p>Execute a workflow.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>workflow</code></strong></dt>
+<dd>Workflow to execute</dd>
+<dt><strong><code>inputs</code></strong></dt>
+<dd>Input parameters</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>WorkflowResult with all outputs</p></div>
+</dd>
+<dt id="agents.agents.adk.WorkflowExecutor.execute_from_file"><code class="name flex">
+<span>async def <span class="ident">execute_from_file</span></span>(<span>self, workflow_path: pathlib._local.Path, inputs: Dict[str, Any] = None) ‑> agents.adk.workflows.WorkflowResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def execute_from_file(
+    self,
+    workflow_path: Path,
+    inputs: Dict[str, Any] = None
+) -&gt; WorkflowResult:
+    &#34;&#34;&#34;Execute workflow from YAML file.
+    
+    Args:
+        workflow_path: Path to workflow YAML
+        inputs: Input parameters
+        
+    Returns:
+        WorkflowResult
+    &#34;&#34;&#34;
+    workflow = ADKWorkflow.from_yaml(workflow_path)
+    return await self.execute(workflow, inputs)</code></pre>
+</details>
+<div class="desc"><p>Execute workflow from YAML file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>workflow_path</code></strong></dt>
+<dd>Path to workflow YAML</dd>
+<dt><strong><code>inputs</code></strong></dt>
+<dd>Input parameters</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>WorkflowResult</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="agents.agents" href="../index.html">agents.agents</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="agents.agents.adk.agents" href="agents.html">agents.agents.adk.agents</a></code></li>
+<li><code><a title="agents.agents.adk.base" href="base.html">agents.agents.adk.base</a></code></li>
+<li><code><a title="agents.agents.adk.evaluator" href="evaluator.html">agents.agents.adk.evaluator</a></code></li>
+<li><code><a title="agents.agents.adk.workflows" href="workflows.html">agents.agents.adk.workflows</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="agents.agents.adk.ADKAgent" href="#agents.agents.adk.ADKAgent">ADKAgent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.ADKAgent.client" href="#agents.agents.adk.ADKAgent.client">client</a></code></li>
+<li><code><a title="agents.agents.adk.ADKAgent.execute" href="#agents.agents.adk.ADKAgent.execute">execute</a></code></li>
+<li><code><a title="agents.agents.adk.ADKAgent.execute_streaming" href="#agents.agents.adk.ADKAgent.execute_streaming">execute_streaming</a></code></li>
+<li><code><a title="agents.agents.adk.ADKAgent.get_agent_type" href="#agents.agents.adk.ADKAgent.get_agent_type">get_agent_type</a></code></li>
+<li><code><a title="agents.agents.adk.ADKAgent.get_system_prompt" href="#agents.agents.adk.ADKAgent.get_system_prompt">get_system_prompt</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.ADKConfig" href="#agents.agents.adk.ADKConfig">ADKConfig</a></code></h4>
+<ul class="two-column">
+<li><code><a title="agents.agents.adk.ADKConfig.litellm_api_key" href="#agents.agents.adk.ADKConfig.litellm_api_key">litellm_api_key</a></code></li>
+<li><code><a title="agents.agents.adk.ADKConfig.litellm_url" href="#agents.agents.adk.ADKConfig.litellm_url">litellm_url</a></code></li>
+<li><code><a title="agents.agents.adk.ADKConfig.max_tokens" href="#agents.agents.adk.ADKConfig.max_tokens">max_tokens</a></code></li>
+<li><code><a title="agents.agents.adk.ADKConfig.metadata" href="#agents.agents.adk.ADKConfig.metadata">metadata</a></code></li>
+<li><code><a title="agents.agents.adk.ADKConfig.model" href="#agents.agents.adk.ADKConfig.model">model</a></code></li>
+<li><code><a title="agents.agents.adk.ADKConfig.name" href="#agents.agents.adk.ADKConfig.name">name</a></code></li>
+<li><code><a title="agents.agents.adk.ADKConfig.priority" href="#agents.agents.adk.ADKConfig.priority">priority</a></code></li>
+<li><code><a title="agents.agents.adk.ADKConfig.retry_attempts" href="#agents.agents.adk.ADKConfig.retry_attempts">retry_attempts</a></code></li>
+<li><code><a title="agents.agents.adk.ADKConfig.retry_delay" href="#agents.agents.adk.ADKConfig.retry_delay">retry_delay</a></code></li>
+<li><code><a title="agents.agents.adk.ADKConfig.system_prompt" href="#agents.agents.adk.ADKConfig.system_prompt">system_prompt</a></code></li>
+<li><code><a title="agents.agents.adk.ADKConfig.temperature" href="#agents.agents.adk.ADKConfig.temperature">temperature</a></code></li>
+<li><code><a title="agents.agents.adk.ADKConfig.timeout" href="#agents.agents.adk.ADKConfig.timeout">timeout</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.ADKWorkflow" href="#agents.agents.adk.ADKWorkflow">ADKWorkflow</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.ADKWorkflow.from_yaml" href="#agents.agents.adk.ADKWorkflow.from_yaml">from_yaml</a></code></li>
+<li><code><a title="agents.agents.adk.ADKWorkflow.validate" href="#agents.agents.adk.ADKWorkflow.validate">validate</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.AgentEvaluator" href="#agents.agents.adk.AgentEvaluator">AgentEvaluator</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.AgentEvaluator.evaluate_all" href="#agents.agents.adk.AgentEvaluator.evaluate_all">evaluate_all</a></code></li>
+<li><code><a title="agents.agents.adk.AgentEvaluator.evaluate_case" href="#agents.agents.adk.AgentEvaluator.evaluate_case">evaluate_case</a></code></li>
+<li><code><a title="agents.agents.adk.AgentEvaluator.load_cases_from_json" href="#agents.agents.adk.AgentEvaluator.load_cases_from_json">load_cases_from_json</a></code></li>
+<li><code><a title="agents.agents.adk.AgentEvaluator.save_report" href="#agents.agents.adk.AgentEvaluator.save_report">save_report</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.CodeReviewADKAgent" href="#agents.agents.adk.CodeReviewADKAgent">CodeReviewADKAgent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.CodeReviewADKAgent.get_agent_type" href="#agents.agents.adk.CodeReviewADKAgent.get_agent_type">get_agent_type</a></code></li>
+<li><code><a title="agents.agents.adk.CodeReviewADKAgent.get_system_prompt" href="#agents.agents.adk.CodeReviewADKAgent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.agents.adk.CodeReviewADKAgent.review_code" href="#agents.agents.adk.CodeReviewADKAgent.review_code">review_code</a></code></li>
+<li><code><a title="agents.agents.adk.CodeReviewADKAgent.security_audit" href="#agents.agents.adk.CodeReviewADKAgent.security_audit">security_audit</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.DevelopmentADKAgent" href="#agents.agents.adk.DevelopmentADKAgent">DevelopmentADKAgent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.DevelopmentADKAgent.generate_code" href="#agents.agents.adk.DevelopmentADKAgent.generate_code">generate_code</a></code></li>
+<li><code><a title="agents.agents.adk.DevelopmentADKAgent.get_agent_type" href="#agents.agents.adk.DevelopmentADKAgent.get_agent_type">get_agent_type</a></code></li>
+<li><code><a title="agents.agents.adk.DevelopmentADKAgent.get_system_prompt" href="#agents.agents.adk.DevelopmentADKAgent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.agents.adk.DevelopmentADKAgent.refactor_code" href="#agents.agents.adk.DevelopmentADKAgent.refactor_code">refactor_code</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.DocumentationADKAgent" href="#agents.agents.adk.DocumentationADKAgent">DocumentationADKAgent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.DocumentationADKAgent.generate_api_docs" href="#agents.agents.adk.DocumentationADKAgent.generate_api_docs">generate_api_docs</a></code></li>
+<li><code><a title="agents.agents.adk.DocumentationADKAgent.generate_readme" href="#agents.agents.adk.DocumentationADKAgent.generate_readme">generate_readme</a></code></li>
+<li><code><a title="agents.agents.adk.DocumentationADKAgent.get_agent_type" href="#agents.agents.adk.DocumentationADKAgent.get_agent_type">get_agent_type</a></code></li>
+<li><code><a title="agents.agents.adk.DocumentationADKAgent.get_system_prompt" href="#agents.agents.adk.DocumentationADKAgent.get_system_prompt">get_system_prompt</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.ResearchADKAgent" href="#agents.agents.adk.ResearchADKAgent">ResearchADKAgent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.ResearchADKAgent.compare_options" href="#agents.agents.adk.ResearchADKAgent.compare_options">compare_options</a></code></li>
+<li><code><a title="agents.agents.adk.ResearchADKAgent.get_agent_type" href="#agents.agents.adk.ResearchADKAgent.get_agent_type">get_agent_type</a></code></li>
+<li><code><a title="agents.agents.adk.ResearchADKAgent.get_system_prompt" href="#agents.agents.adk.ResearchADKAgent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.agents.adk.ResearchADKAgent.research_topic" href="#agents.agents.adk.ResearchADKAgent.research_topic">research_topic</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.TestingADKAgent" href="#agents.agents.adk.TestingADKAgent">TestingADKAgent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.TestingADKAgent.generate_tests" href="#agents.agents.adk.TestingADKAgent.generate_tests">generate_tests</a></code></li>
+<li><code><a title="agents.agents.adk.TestingADKAgent.get_agent_type" href="#agents.agents.adk.TestingADKAgent.get_agent_type">get_agent_type</a></code></li>
+<li><code><a title="agents.agents.adk.TestingADKAgent.get_system_prompt" href="#agents.agents.adk.TestingADKAgent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.agents.adk.TestingADKAgent.suggest_edge_cases" href="#agents.agents.adk.TestingADKAgent.suggest_edge_cases">suggest_edge_cases</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.WorkflowExecutor" href="#agents.agents.adk.WorkflowExecutor">WorkflowExecutor</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.WorkflowExecutor.AGENT_CLASSES" href="#agents.agents.adk.WorkflowExecutor.AGENT_CLASSES">AGENT_CLASSES</a></code></li>
+<li><code><a title="agents.agents.adk.WorkflowExecutor.execute" href="#agents.agents.adk.WorkflowExecutor.execute">execute</a></code></li>
+<li><code><a title="agents.agents.adk.WorkflowExecutor.execute_from_file" href="#agents.agents.adk.WorkflowExecutor.execute_from_file">execute_from_file</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

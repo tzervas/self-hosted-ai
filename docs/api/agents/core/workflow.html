@@ -1,0 +1,952 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>agents.core.workflow API documentation</title>
+<meta name="description" content="Workflow orchestration for multi-agent collaboration.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>agents.core.workflow</code></h1>
+</header>
+<section id="section-intro">
+<p>Workflow orchestration for multi-agent collaboration.</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="agents.core.workflow.Workflow"><code class="flex name class">
+<span>class <span class="ident">Workflow</span></span>
+<span>(</span><span>config: <a title="agents.core.workflow.WorkflowConfig" href="#agents.core.workflow.WorkflowConfig">WorkflowConfig</a>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Workflow:
+    &#34;&#34;&#34;Represents a multi-agent workflow.
+
+    A workflow is a directed acyclic graph (DAG) of tasks that can be
+    executed by different agents. Tasks can have dependencies and are
+    executed in the correct order.
+    &#34;&#34;&#34;
+
+    def __init__(self, config: WorkflowConfig):
+        &#34;&#34;&#34;Initialize workflow.
+
+        Args:
+            config: Workflow configuration
+        &#34;&#34;&#34;
+        self.workflow_id = str(uuid.uuid4())
+        self.config = config
+        self.tasks: List[Task] = []
+        self.agents: Dict[str, Agent] = {}
+        self.status = WorkflowStatus.PENDING
+        self.logger = logging.getLogger(f&#34;{__name__}.{config.name}&#34;)
+
+    def add_task(self, task_config: TaskConfig, payload: Dict[str, Any]) -&gt; Task:
+        &#34;&#34;&#34;Add a task to the workflow.
+
+        Args:
+            task_config: Task configuration
+            payload: Task payload
+
+        Returns:
+            Created Task instance
+        &#34;&#34;&#34;
+        task = Task(task_config, payload)
+        self.tasks.append(task)
+        self.logger.debug(f&#34;Added task: {task_config.name}&#34;)
+        return task
+
+    def add_agent(self, agent_type: str, agent: Agent) -&gt; None:
+        &#34;&#34;&#34;Register an agent for this workflow.
+
+        Args:
+            agent_type: Agent type identifier
+            agent: Agent instance
+        &#34;&#34;&#34;
+        self.agents[agent_type] = agent
+        self.logger.debug(f&#34;Registered agent: {agent_type}&#34;)
+
+    def validate(self) -&gt; bool:
+        &#34;&#34;&#34;Validate workflow configuration.
+
+        Returns:
+            True if workflow is valid
+
+        Raises:
+            ValueError: If workflow validation fails
+        &#34;&#34;&#34;
+        if not self.tasks:
+            raise ValueError(&#34;Workflow must have at least one task&#34;)
+
+        # Check for circular dependencies
+        visited = set()
+        rec_stack = set()
+
+        def has_cycle(task_id: str) -&gt; bool:
+            visited.add(task_id)
+            rec_stack.add(task_id)
+
+            task = next((t for t in self.tasks if t.task_id == task_id), None)
+            if task:
+                for dep_id in task.config.dependencies:
+                    if dep_id not in visited:
+                        if has_cycle(dep_id):
+                            return True
+                    elif dep_id in rec_stack:
+                        return True
+
+            rec_stack.remove(task_id)
+            return False
+
+        for task in self.tasks:
+            if task.task_id not in visited:
+                if has_cycle(task.task_id):
+                    raise ValueError(&#34;Workflow contains circular dependencies&#34;)
+
+        # Validate required agents are registered
+        required_agents = set()
+        for task in self.tasks:
+            required_agents.update(task.config.required_agents)
+
+        missing_agents = required_agents - set(self.agents.keys())
+        if missing_agents:
+            raise ValueError(f&#34;Missing required agents: {missing_agents}&#34;)
+
+        return True</code></pre>
+</details>
+<div class="desc"><p>Represents a multi-agent workflow.</p>
+<p>A workflow is a directed acyclic graph (DAG) of tasks that can be
+executed by different agents. Tasks can have dependencies and are
+executed in the correct order.</p>
+<p>Initialize workflow.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Workflow configuration</dd>
+</dl></div>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.core.workflow.Workflow.add_agent"><code class="name flex">
+<span>def <span class="ident">add_agent</span></span>(<span>self,<br>agent_type: str,<br>agent: <a title="agents.core.base.Agent" href="base.html#agents.core.base.Agent">Agent</a>) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_agent(self, agent_type: str, agent: Agent) -&gt; None:
+    &#34;&#34;&#34;Register an agent for this workflow.
+
+    Args:
+        agent_type: Agent type identifier
+        agent: Agent instance
+    &#34;&#34;&#34;
+    self.agents[agent_type] = agent
+    self.logger.debug(f&#34;Registered agent: {agent_type}&#34;)</code></pre>
+</details>
+<div class="desc"><p>Register an agent for this workflow.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>agent_type</code></strong></dt>
+<dd>Agent type identifier</dd>
+<dt><strong><code>agent</code></strong></dt>
+<dd>Agent instance</dd>
+</dl></div>
+</dd>
+<dt id="agents.core.workflow.Workflow.add_task"><code class="name flex">
+<span>def <span class="ident">add_task</span></span>(<span>self,<br>task_config: <a title="agents.core.task.TaskConfig" href="task.html#agents.core.task.TaskConfig">TaskConfig</a>,<br>payload: Dict[str, Any]) ‑> <a title="agents.core.task.Task" href="task.html#agents.core.task.Task">Task</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_task(self, task_config: TaskConfig, payload: Dict[str, Any]) -&gt; Task:
+    &#34;&#34;&#34;Add a task to the workflow.
+
+    Args:
+        task_config: Task configuration
+        payload: Task payload
+
+    Returns:
+        Created Task instance
+    &#34;&#34;&#34;
+    task = Task(task_config, payload)
+    self.tasks.append(task)
+    self.logger.debug(f&#34;Added task: {task_config.name}&#34;)
+    return task</code></pre>
+</details>
+<div class="desc"><p>Add a task to the workflow.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>task_config</code></strong></dt>
+<dd>Task configuration</dd>
+<dt><strong><code>payload</code></strong></dt>
+<dd>Task payload</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Created Task instance</p></div>
+</dd>
+<dt id="agents.core.workflow.Workflow.validate"><code class="name flex">
+<span>def <span class="ident">validate</span></span>(<span>self) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def validate(self) -&gt; bool:
+    &#34;&#34;&#34;Validate workflow configuration.
+
+    Returns:
+        True if workflow is valid
+
+    Raises:
+        ValueError: If workflow validation fails
+    &#34;&#34;&#34;
+    if not self.tasks:
+        raise ValueError(&#34;Workflow must have at least one task&#34;)
+
+    # Check for circular dependencies
+    visited = set()
+    rec_stack = set()
+
+    def has_cycle(task_id: str) -&gt; bool:
+        visited.add(task_id)
+        rec_stack.add(task_id)
+
+        task = next((t for t in self.tasks if t.task_id == task_id), None)
+        if task:
+            for dep_id in task.config.dependencies:
+                if dep_id not in visited:
+                    if has_cycle(dep_id):
+                        return True
+                elif dep_id in rec_stack:
+                    return True
+
+        rec_stack.remove(task_id)
+        return False
+
+    for task in self.tasks:
+        if task.task_id not in visited:
+            if has_cycle(task.task_id):
+                raise ValueError(&#34;Workflow contains circular dependencies&#34;)
+
+    # Validate required agents are registered
+    required_agents = set()
+    for task in self.tasks:
+        required_agents.update(task.config.required_agents)
+
+    missing_agents = required_agents - set(self.agents.keys())
+    if missing_agents:
+        raise ValueError(f&#34;Missing required agents: {missing_agents}&#34;)
+
+    return True</code></pre>
+</details>
+<div class="desc"><p>Validate workflow configuration.</p>
+<h2 id="returns">Returns</h2>
+<p>True if workflow is valid</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If workflow validation fails</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.core.workflow.WorkflowConfig"><code class="flex name class">
+<span>class <span class="ident">WorkflowConfig</span></span>
+<span>(</span><span>name: str,<br>description: str,<br>max_parallel_tasks: int = 5,<br>fail_fast: bool = False,<br>timeout_seconds: int = 3600,<br>retry_failed_tasks: bool = True,<br>collect_metrics: bool = True,<br>metadata: Dict[str, Any] = &lt;factory&gt;)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class WorkflowConfig:
+    &#34;&#34;&#34;Configuration for a workflow.
+
+    Attributes:
+        name: Workflow name
+        description: Workflow description
+        max_parallel_tasks: Maximum concurrent tasks
+        fail_fast: Stop on first failure
+        timeout_seconds: Workflow timeout
+        retry_failed_tasks: Retry failed tasks
+        collect_metrics: Collect detailed metrics
+        metadata: Additional workflow metadata
+    &#34;&#34;&#34;
+
+    name: str
+    description: str
+    max_parallel_tasks: int = 5
+    fail_fast: bool = False
+    timeout_seconds: int = 3600
+    retry_failed_tasks: bool = True
+    collect_metrics: bool = True
+    metadata: Dict[str, Any] = field(default_factory=dict)</code></pre>
+</details>
+<div class="desc"><p>Configuration for a workflow.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>Workflow name</dd>
+<dt><strong><code>description</code></strong></dt>
+<dd>Workflow description</dd>
+<dt><strong><code>max_parallel_tasks</code></strong></dt>
+<dd>Maximum concurrent tasks</dd>
+<dt><strong><code>fail_fast</code></strong></dt>
+<dd>Stop on first failure</dd>
+<dt><strong><code>timeout_seconds</code></strong></dt>
+<dd>Workflow timeout</dd>
+<dt><strong><code>retry_failed_tasks</code></strong></dt>
+<dd>Retry failed tasks</dd>
+<dt><strong><code>collect_metrics</code></strong></dt>
+<dd>Collect detailed metrics</dd>
+<dt><strong><code>metadata</code></strong></dt>
+<dd>Additional workflow metadata</dd>
+</dl></div>
+<h3>Instance variables</h3>
+<dl>
+<dt id="agents.core.workflow.WorkflowConfig.collect_metrics"><code class="name">var <span class="ident">collect_metrics</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowConfig.description"><code class="name">var <span class="ident">description</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowConfig.fail_fast"><code class="name">var <span class="ident">fail_fast</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowConfig.max_parallel_tasks"><code class="name">var <span class="ident">max_parallel_tasks</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowConfig.metadata"><code class="name">var <span class="ident">metadata</span> : Dict[str, Any]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowConfig.name"><code class="name">var <span class="ident">name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowConfig.retry_failed_tasks"><code class="name">var <span class="ident">retry_failed_tasks</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowConfig.timeout_seconds"><code class="name">var <span class="ident">timeout_seconds</span> : int</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.core.workflow.WorkflowOrchestrator"><code class="flex name class">
+<span>class <span class="ident">WorkflowOrchestrator</span></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class WorkflowOrchestrator:
+    &#34;&#34;&#34;Orchestrates execution of multi-agent workflows.
+
+    The orchestrator manages task scheduling, agent assignment,
+    error handling, and workflow state.
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        &#34;&#34;&#34;Initialize orchestrator.&#34;&#34;&#34;
+        self.logger = logging.getLogger(__name__)
+        self.active_workflows: Dict[str, Workflow] = {}
+
+    async def execute_workflow(self, workflow: Workflow) -&gt; WorkflowResult:
+        &#34;&#34;&#34;Execute a workflow.
+
+        Args:
+            workflow: Workflow to execute
+
+        Returns:
+            WorkflowResult with execution outcome
+        &#34;&#34;&#34;
+        self.logger.info(f&#34;Starting workflow: {workflow.config.name}&#34;)
+        start_time = datetime.now()
+
+        try:
+            # Validate workflow
+            workflow.validate()
+
+            workflow.status = WorkflowStatus.RUNNING
+            self.active_workflows[workflow.workflow_id] = workflow
+
+            # Execute tasks
+            task_results = await self._execute_tasks(workflow)
+
+            # Determine workflow status
+            failed_tasks = [r for r in task_results if r.is_failure()]
+            if not failed_tasks:
+                status = WorkflowStatus.COMPLETED
+            elif len(failed_tasks) &lt; len(task_results):
+                status = WorkflowStatus.PARTIAL_SUCCESS
+            else:
+                status = WorkflowStatus.FAILED
+
+            workflow.status = status
+
+            # Create result
+            end_time = datetime.now()
+            duration = (end_time - start_time).total_seconds()
+
+            result = WorkflowResult(
+                workflow_id=workflow.workflow_id,
+                workflow_name=workflow.config.name,
+                status=status,
+                task_results=task_results,
+                started_at=start_time,
+                completed_at=end_time,
+                duration_seconds=duration,
+            )
+
+            self.logger.info(
+                f&#34;Workflow {workflow.config.name} completed with status {status} &#34;
+                f&#34;in {duration:.2f}s. Success rate: {result.success_rate():.1%}&#34;
+            )
+
+            return result
+
+        except Exception as e:
+            self.logger.error(f&#34;Workflow {workflow.config.name} failed: {e}&#34;, exc_info=True)
+            workflow.status = WorkflowStatus.FAILED
+
+            return WorkflowResult(
+                workflow_id=workflow.workflow_id,
+                workflow_name=workflow.config.name,
+                status=WorkflowStatus.FAILED,
+                started_at=start_time,
+                completed_at=datetime.now(),
+                duration_seconds=(datetime.now() - start_time).total_seconds(),
+            )
+
+        finally:
+            # Cleanup
+            self.active_workflows.pop(workflow.workflow_id, None)
+
+    async def _execute_tasks(self, workflow: Workflow) -&gt; List[TaskResult]:
+        &#34;&#34;&#34;Execute workflow tasks respecting dependencies.
+
+        Args:
+            workflow: Workflow containing tasks
+
+        Returns:
+            List of task results
+        &#34;&#34;&#34;
+        completed_task_ids: List[str] = []
+        task_results: List[TaskResult] = []
+        pending_tasks = workflow.tasks.copy()
+
+        while pending_tasks:
+            # Find tasks ready to execute
+            ready_tasks = [t for t in pending_tasks if t.can_execute(completed_task_ids)]
+
+            if not ready_tasks:
+                # No tasks ready and some pending = deadlock
+                if pending_tasks:
+                    self.logger.error(&#34;Deadlock detected: circular dependencies or missing tasks&#34;)
+                break
+
+            # Execute ready tasks (respecting parallelism limit)
+            batch_size = min(len(ready_tasks), workflow.config.max_parallel_tasks)
+            batch = ready_tasks[:batch_size]
+
+            results = await asyncio.gather(
+                *[self._execute_task(task, workflow) for task in batch],
+                return_exceptions=True,
+            )
+
+            for task, result in zip(batch, results):
+                if isinstance(result, Exception):
+                    self.logger.error(f&#34;Task {task.config.name} raised exception: {result}&#34;)
+                    result = task.mark_failed(str(result))
+                
+                # Type guard: only append and process valid TaskResult objects
+                if not isinstance(result, Exception):
+                    task_results.append(result)
+                    
+                    if result.is_success():
+                        completed_task_ids.append(task.task_id)
+                    elif workflow.config.fail_fast:
+                        self.logger.warning(&#34;Fail-fast enabled, stopping workflow due to task failure&#34;)
+                        return task_results
+
+                pending_tasks.remove(task)
+
+        return task_results
+
+    async def _execute_task(self, task: Task, workflow: Workflow) -&gt; TaskResult:
+        &#34;&#34;&#34;Execute a single task.
+
+        Args:
+            task: Task to execute
+            workflow: Parent workflow
+
+        Returns:
+            TaskResult
+        &#34;&#34;&#34;
+        task.mark_running()
+        self.logger.info(f&#34;Executing task: {task.config.name}&#34;)
+
+        try:
+            # Get agents for this task
+            task_agents = [
+                workflow.agents[agent_type]
+                for agent_type in task.config.required_agents
+                if agent_type in workflow.agents
+            ]
+
+            if not task_agents:
+                return task.mark_failed(&#34;No agents available for task&#34;)
+
+            # Execute with each agent
+            agent_results: List[AgentResult] = []
+            for agent in task_agents:
+                result = await agent.execute(
+                    task=task.payload.get(&#34;prompt&#34;, &#34;&#34;),
+                    context=task.payload.get(&#34;context&#34;, {}),
+                )
+                agent_results.append(result)
+
+            # Combine results
+            successful_results = [r for r in agent_results if r.is_success()]
+            if successful_results:
+                output = {
+                    &#34;results&#34;: [r.output for r in successful_results],
+                    &#34;primary&#34;: successful_results[0].output,
+                }
+                return task.mark_completed(output, agent_results)
+            else:
+                errors = [r.error for r in agent_results if r.error]
+                return task.mark_failed(&#34;; &#34;.join(errors), agent_results)
+
+        except Exception as e:
+            self.logger.error(f&#34;Task {task.config.name} failed: {e}&#34;, exc_info=True)
+            return task.mark_failed(str(e))</code></pre>
+</details>
+<div class="desc"><p>Orchestrates execution of multi-agent workflows.</p>
+<p>The orchestrator manages task scheduling, agent assignment,
+error handling, and workflow state.</p>
+<p>Initialize orchestrator.</p></div>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.core.workflow.WorkflowOrchestrator.execute_workflow"><code class="name flex">
+<span>async def <span class="ident">execute_workflow</span></span>(<span>self,<br>workflow: <a title="agents.core.workflow.Workflow" href="#agents.core.workflow.Workflow">Workflow</a>) ‑> <a title="agents.core.workflow.WorkflowResult" href="#agents.core.workflow.WorkflowResult">WorkflowResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def execute_workflow(self, workflow: Workflow) -&gt; WorkflowResult:
+    &#34;&#34;&#34;Execute a workflow.
+
+    Args:
+        workflow: Workflow to execute
+
+    Returns:
+        WorkflowResult with execution outcome
+    &#34;&#34;&#34;
+    self.logger.info(f&#34;Starting workflow: {workflow.config.name}&#34;)
+    start_time = datetime.now()
+
+    try:
+        # Validate workflow
+        workflow.validate()
+
+        workflow.status = WorkflowStatus.RUNNING
+        self.active_workflows[workflow.workflow_id] = workflow
+
+        # Execute tasks
+        task_results = await self._execute_tasks(workflow)
+
+        # Determine workflow status
+        failed_tasks = [r for r in task_results if r.is_failure()]
+        if not failed_tasks:
+            status = WorkflowStatus.COMPLETED
+        elif len(failed_tasks) &lt; len(task_results):
+            status = WorkflowStatus.PARTIAL_SUCCESS
+        else:
+            status = WorkflowStatus.FAILED
+
+        workflow.status = status
+
+        # Create result
+        end_time = datetime.now()
+        duration = (end_time - start_time).total_seconds()
+
+        result = WorkflowResult(
+            workflow_id=workflow.workflow_id,
+            workflow_name=workflow.config.name,
+            status=status,
+            task_results=task_results,
+            started_at=start_time,
+            completed_at=end_time,
+            duration_seconds=duration,
+        )
+
+        self.logger.info(
+            f&#34;Workflow {workflow.config.name} completed with status {status} &#34;
+            f&#34;in {duration:.2f}s. Success rate: {result.success_rate():.1%}&#34;
+        )
+
+        return result
+
+    except Exception as e:
+        self.logger.error(f&#34;Workflow {workflow.config.name} failed: {e}&#34;, exc_info=True)
+        workflow.status = WorkflowStatus.FAILED
+
+        return WorkflowResult(
+            workflow_id=workflow.workflow_id,
+            workflow_name=workflow.config.name,
+            status=WorkflowStatus.FAILED,
+            started_at=start_time,
+            completed_at=datetime.now(),
+            duration_seconds=(datetime.now() - start_time).total_seconds(),
+        )
+
+    finally:
+        # Cleanup
+        self.active_workflows.pop(workflow.workflow_id, None)</code></pre>
+</details>
+<div class="desc"><p>Execute a workflow.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>workflow</code></strong></dt>
+<dd>Workflow to execute</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>WorkflowResult with execution outcome</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.core.workflow.WorkflowResult"><code class="flex name class">
+<span>class <span class="ident">WorkflowResult</span></span>
+<span>(</span><span>workflow_id: str,<br>workflow_name: str,<br>status: <a title="agents.core.workflow.WorkflowStatus" href="#agents.core.workflow.WorkflowStatus">WorkflowStatus</a>,<br>task_results: List[<a title="agents.core.task.TaskResult" href="task.html#agents.core.task.TaskResult">TaskResult</a>] = &lt;factory&gt;,<br>metrics: Dict[str, Any] = &lt;factory&gt;,<br>started_at: datetime.datetime | None = None,<br>completed_at: datetime.datetime | None = None,<br>duration_seconds: float | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class WorkflowResult:
+    &#34;&#34;&#34;Result from workflow execution.
+
+    Attributes:
+        workflow_id: Unique workflow ID
+        workflow_name: Workflow name
+        status: Workflow status
+        task_results: Results from all tasks
+        metrics: Workflow metrics
+        started_at: Start timestamp
+        completed_at: Completion timestamp
+        duration_seconds: Execution duration
+    &#34;&#34;&#34;
+
+    workflow_id: str
+    workflow_name: str
+    status: WorkflowStatus
+    task_results: List[TaskResult] = field(default_factory=list)
+    metrics: Dict[str, Any] = field(default_factory=dict)
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    duration_seconds: Optional[float] = None
+
+    def get_successful_tasks(self) -&gt; List[TaskResult]:
+        &#34;&#34;&#34;Get all successful task results.&#34;&#34;&#34;
+        return [r for r in self.task_results if r.is_success()]
+
+    def get_failed_tasks(self) -&gt; List[TaskResult]:
+        &#34;&#34;&#34;Get all failed task results.&#34;&#34;&#34;
+        return [r for r in self.task_results if r.is_failure()]
+
+    def success_rate(self) -&gt; float:
+        &#34;&#34;&#34;Calculate success rate.&#34;&#34;&#34;
+        if not self.task_results:
+            return 0.0
+        successful = len(self.get_successful_tasks())
+        return successful / len(self.task_results)</code></pre>
+</details>
+<div class="desc"><p>Result from workflow execution.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>workflow_id</code></strong></dt>
+<dd>Unique workflow ID</dd>
+<dt><strong><code>workflow_name</code></strong></dt>
+<dd>Workflow name</dd>
+<dt><strong><code>status</code></strong></dt>
+<dd>Workflow status</dd>
+<dt><strong><code>task_results</code></strong></dt>
+<dd>Results from all tasks</dd>
+<dt><strong><code>metrics</code></strong></dt>
+<dd>Workflow metrics</dd>
+<dt><strong><code>started_at</code></strong></dt>
+<dd>Start timestamp</dd>
+<dt><strong><code>completed_at</code></strong></dt>
+<dd>Completion timestamp</dd>
+<dt><strong><code>duration_seconds</code></strong></dt>
+<dd>Execution duration</dd>
+</dl></div>
+<h3>Instance variables</h3>
+<dl>
+<dt id="agents.core.workflow.WorkflowResult.completed_at"><code class="name">var <span class="ident">completed_at</span> : datetime.datetime | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowResult.duration_seconds"><code class="name">var <span class="ident">duration_seconds</span> : float | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowResult.metrics"><code class="name">var <span class="ident">metrics</span> : Dict[str, Any]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowResult.started_at"><code class="name">var <span class="ident">started_at</span> : datetime.datetime | None</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowResult.status"><code class="name">var <span class="ident">status</span> : <a title="agents.core.workflow.WorkflowStatus" href="#agents.core.workflow.WorkflowStatus">WorkflowStatus</a></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowResult.task_results"><code class="name">var <span class="ident">task_results</span> : List[<a title="agents.core.task.TaskResult" href="task.html#agents.core.task.TaskResult">TaskResult</a>]</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowResult.workflow_id"><code class="name">var <span class="ident">workflow_id</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowResult.workflow_name"><code class="name">var <span class="ident">workflow_name</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.core.workflow.WorkflowResult.get_failed_tasks"><code class="name flex">
+<span>def <span class="ident">get_failed_tasks</span></span>(<span>self) ‑> List[<a title="agents.core.task.TaskResult" href="task.html#agents.core.task.TaskResult">TaskResult</a>]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_failed_tasks(self) -&gt; List[TaskResult]:
+    &#34;&#34;&#34;Get all failed task results.&#34;&#34;&#34;
+    return [r for r in self.task_results if r.is_failure()]</code></pre>
+</details>
+<div class="desc"><p>Get all failed task results.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowResult.get_successful_tasks"><code class="name flex">
+<span>def <span class="ident">get_successful_tasks</span></span>(<span>self) ‑> List[<a title="agents.core.task.TaskResult" href="task.html#agents.core.task.TaskResult">TaskResult</a>]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_successful_tasks(self) -&gt; List[TaskResult]:
+    &#34;&#34;&#34;Get all successful task results.&#34;&#34;&#34;
+    return [r for r in self.task_results if r.is_success()]</code></pre>
+</details>
+<div class="desc"><p>Get all successful task results.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowResult.success_rate"><code class="name flex">
+<span>def <span class="ident">success_rate</span></span>(<span>self) ‑> float</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def success_rate(self) -&gt; float:
+    &#34;&#34;&#34;Calculate success rate.&#34;&#34;&#34;
+    if not self.task_results:
+        return 0.0
+    successful = len(self.get_successful_tasks())
+    return successful / len(self.task_results)</code></pre>
+</details>
+<div class="desc"><p>Calculate success rate.</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.core.workflow.WorkflowStatus"><code class="flex name class">
+<span>class <span class="ident">WorkflowStatus</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class WorkflowStatus(str, Enum):
+    &#34;&#34;&#34;Workflow execution status.&#34;&#34;&#34;
+
+    PENDING = &#34;pending&#34;
+    RUNNING = &#34;running&#34;
+    COMPLETED = &#34;completed&#34;
+    FAILED = &#34;failed&#34;
+    CANCELLED = &#34;cancelled&#34;
+    PARTIAL_SUCCESS = &#34;partial_success&#34;</code></pre>
+</details>
+<div class="desc"><p>Workflow execution status.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="agents.core.workflow.WorkflowStatus.CANCELLED"><code class="name">var <span class="ident">CANCELLED</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowStatus.COMPLETED"><code class="name">var <span class="ident">COMPLETED</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowStatus.FAILED"><code class="name">var <span class="ident">FAILED</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowStatus.PARTIAL_SUCCESS"><code class="name">var <span class="ident">PARTIAL_SUCCESS</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowStatus.PENDING"><code class="name">var <span class="ident">PENDING</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+<dt id="agents.core.workflow.WorkflowStatus.RUNNING"><code class="name">var <span class="ident">RUNNING</span></code></dt>
+<dd>
+<div class="desc"><p>The type of the None singleton.</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="agents.core" href="index.html">agents.core</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="agents.core.workflow.Workflow" href="#agents.core.workflow.Workflow">Workflow</a></code></h4>
+<ul class="">
+<li><code><a title="agents.core.workflow.Workflow.add_agent" href="#agents.core.workflow.Workflow.add_agent">add_agent</a></code></li>
+<li><code><a title="agents.core.workflow.Workflow.add_task" href="#agents.core.workflow.Workflow.add_task">add_task</a></code></li>
+<li><code><a title="agents.core.workflow.Workflow.validate" href="#agents.core.workflow.Workflow.validate">validate</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.core.workflow.WorkflowConfig" href="#agents.core.workflow.WorkflowConfig">WorkflowConfig</a></code></h4>
+<ul class="two-column">
+<li><code><a title="agents.core.workflow.WorkflowConfig.collect_metrics" href="#agents.core.workflow.WorkflowConfig.collect_metrics">collect_metrics</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowConfig.description" href="#agents.core.workflow.WorkflowConfig.description">description</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowConfig.fail_fast" href="#agents.core.workflow.WorkflowConfig.fail_fast">fail_fast</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowConfig.max_parallel_tasks" href="#agents.core.workflow.WorkflowConfig.max_parallel_tasks">max_parallel_tasks</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowConfig.metadata" href="#agents.core.workflow.WorkflowConfig.metadata">metadata</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowConfig.name" href="#agents.core.workflow.WorkflowConfig.name">name</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowConfig.retry_failed_tasks" href="#agents.core.workflow.WorkflowConfig.retry_failed_tasks">retry_failed_tasks</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowConfig.timeout_seconds" href="#agents.core.workflow.WorkflowConfig.timeout_seconds">timeout_seconds</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.core.workflow.WorkflowOrchestrator" href="#agents.core.workflow.WorkflowOrchestrator">WorkflowOrchestrator</a></code></h4>
+<ul class="">
+<li><code><a title="agents.core.workflow.WorkflowOrchestrator.execute_workflow" href="#agents.core.workflow.WorkflowOrchestrator.execute_workflow">execute_workflow</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.core.workflow.WorkflowResult" href="#agents.core.workflow.WorkflowResult">WorkflowResult</a></code></h4>
+<ul class="">
+<li><code><a title="agents.core.workflow.WorkflowResult.completed_at" href="#agents.core.workflow.WorkflowResult.completed_at">completed_at</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowResult.duration_seconds" href="#agents.core.workflow.WorkflowResult.duration_seconds">duration_seconds</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowResult.get_failed_tasks" href="#agents.core.workflow.WorkflowResult.get_failed_tasks">get_failed_tasks</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowResult.get_successful_tasks" href="#agents.core.workflow.WorkflowResult.get_successful_tasks">get_successful_tasks</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowResult.metrics" href="#agents.core.workflow.WorkflowResult.metrics">metrics</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowResult.started_at" href="#agents.core.workflow.WorkflowResult.started_at">started_at</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowResult.status" href="#agents.core.workflow.WorkflowResult.status">status</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowResult.success_rate" href="#agents.core.workflow.WorkflowResult.success_rate">success_rate</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowResult.task_results" href="#agents.core.workflow.WorkflowResult.task_results">task_results</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowResult.workflow_id" href="#agents.core.workflow.WorkflowResult.workflow_id">workflow_id</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowResult.workflow_name" href="#agents.core.workflow.WorkflowResult.workflow_name">workflow_name</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.core.workflow.WorkflowStatus" href="#agents.core.workflow.WorkflowStatus">WorkflowStatus</a></code></h4>
+<ul class="two-column">
+<li><code><a title="agents.core.workflow.WorkflowStatus.CANCELLED" href="#agents.core.workflow.WorkflowStatus.CANCELLED">CANCELLED</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowStatus.COMPLETED" href="#agents.core.workflow.WorkflowStatus.COMPLETED">COMPLETED</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowStatus.FAILED" href="#agents.core.workflow.WorkflowStatus.FAILED">FAILED</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowStatus.PARTIAL_SUCCESS" href="#agents.core.workflow.WorkflowStatus.PARTIAL_SUCCESS">PARTIAL_SUCCESS</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowStatus.PENDING" href="#agents.core.workflow.WorkflowStatus.PENDING">PENDING</a></code></li>
+<li><code><a title="agents.core.workflow.WorkflowStatus.RUNNING" href="#agents.core.workflow.WorkflowStatus.RUNNING">RUNNING</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

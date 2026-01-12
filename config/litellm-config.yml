@@ -163,6 +163,34 @@ model_list:
     model_info:
       mode: embedding
 
+  # === Image Generation Models ===
+  - model_name: stable-diffusion-xl
+    litellm_params:
+      model: openai/image  # Custom image generation provider
+      api_base: http://image-router:8000  # Custom router service
+      api_key: "dummy"
+    model_info:
+      mode: image_generation
+      supports_image_generation: true
+
+  - model_name: comfyui-text2img
+    litellm_params:
+      model: openai/image
+      api_base: http://192.168.1.99:8188  # ComfyUI direct
+      api_key: "dummy"
+    model_info:
+      mode: image_generation
+      supports_image_generation: true
+
+  - model_name: automatic1111-text2img
+    litellm_params:
+      model: openai/image
+      api_base: http://192.168.1.99:7860  # A1111 direct
+      api_key: "dummy"
+    model_info:
+      mode: image_generation
+      supports_image_generation: true
+
 # =============================================================================
 # Router Settings (Load Balancing & Fallbacks)
 # =============================================================================

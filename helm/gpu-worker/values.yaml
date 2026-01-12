@@ -82,3 +82,42 @@ comfyui:
       nvidia.com/gpu: 1
       memory: "16Gi"
       cpu: "4000m"
+
+# Automatic1111 Stable Diffusion WebUI configuration
+automatic1111:
+  enabled: true
+  image:
+    repository: automatic1111/stable-diffusion-webui
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 7860
+    annotations: {}
+  env:
+    - name: CLI_ARGS
+      value: "--listen --port 7860 --api --medvram --no-half-vae --xformers"
+    - name: COMMANDLINE_ARGS
+      value: "--listen --port 7860 --api --medvram --no-half-vae --xformers"
+  persistence:
+    enabled: true
+    size: 100Gi
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    annotations: {}
+  nodeSelector:
+    gpu: "true"
+  tolerations:
+    - key: "nvidia.com/gpu"
+      operator: "Exists"
+      effect: "NoSchedule"
+  resources:
+    requests:
+      nvidia.com/gpu: 1
+      memory: "8Gi"
+      cpu: "2000m"
+    limits:
+      nvidia.com/gpu: 1
+      memory: "24Gi"
+      cpu: "6000m"

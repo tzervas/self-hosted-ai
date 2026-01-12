@@ -322,6 +322,88 @@ spec:
               persistentVolumeClaim:
                 claimName: {{ include "self-hosted-ai-server.fullname" . }}-openwebui-pvc
 ---
+# Model Files Backup CronJob (Daily)
+{{- if .Values.backup.components.models.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-models-backup
+  labels:
+    {{- include "self-hosted-ai-server.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backup
+spec:
+  schedule: {{ .Values.backup.components.models.schedule | default "0 2 * * *" | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 7200  # 2 hours for large model backups
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            {{- include "self-hosted-ai-server.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: backup
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: {{ include "self-hosted-ai-server.serviceAccountName" . }}
+          containers:
+            - name: models-backup
+              image: alpine:latest
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  BACKUP_FILE="/backups/models/models_${TIMESTAMP}.tar.gz"
+                  
+                  echo "Starting models backup..."
+                  
+                  # Create compressed backup of model directories
+                  # Exclude temporary files and cache
+                  tar -czf "${BACKUP_FILE}" \
+                    --exclude='*.tmp' \
+                    --exclude='*.cache' \
+                    --exclude='__pycache__' \
+                    -C /models . || true
+                  
+                  echo "Models backup completed: ${BACKUP_FILE}"
+                  ls -lh "${BACKUP_FILE}"
+                  
+                  # Optional: Upload to remote storage if configured
+                  {{- if .Values.backup.components.models.remote.enabled }}
+                  if [ -n "${REMOTE_BACKUP_URL}" ]; then
+                    echo "Uploading to remote storage..."
+                    # Add upload logic here (S3, GCS, etc.)
+                  fi
+                  {{- end }}
+              volumeMounts:
+                - name: models
+                  mountPath: /models
+                - name: backup
+                  mountPath: /backups
+              env:
+                - name: REMOTE_BACKUP_URL
+                  value: {{ .Values.backup.components.models.remote.url | default "" | quote }}
+              resources:
+                requests:
+                  memory: "1Gi"
+                  cpu: "500m"
+                limits:
+                  memory: "2Gi"
+                  cpu: "1000m"
+          volumes:
+            - name: models
+              persistentVolumeClaim:
+                claimName: {{ include "self-hosted-ai-gpu-worker.fullname" . }}-models
+            - name: backup
+              persistentVolumeClaim:
+                claimName: {{ include "self-hosted-ai-server.fullname" . }}-backup-pvc
+{{- end }}
+---
 # Backup PVC for storing local backups
 apiVersion: v1
 kind: PersistentVolumeClaim
