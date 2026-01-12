@@ -167,7 +167,7 @@ model_list:
   - model_name: stable-diffusion-xl
     litellm_params:
       model: openai/image  # Custom image generation provider
-      api_base: http://image-router:8000  # Custom router service
+      api_base: http://image-router:8000  # Image router service
       api_key: "dummy"
     model_info:
       mode: image_generation

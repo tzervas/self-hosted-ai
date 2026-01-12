@@ -345,6 +345,30 @@ litellm:
       memory: "2Gi"
       cpu: "1000m"
 
+# Image Generation Router
+imageRouter:
+  enabled: true
+  image:
+    repository: image-router  # Will be built from source
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8000
+    annotations: {}
+  env:
+    - name: COMFYUI_URL
+      value: "http://gpu-worker-comfyui:8188"
+    - name: AUTOMATIC1111_URL
+      value: "http://gpu-worker-automatic1111:7860"
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
 # Backup configuration
 backup:
   # Velero cluster-wide backups

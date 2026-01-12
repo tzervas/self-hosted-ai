@@ -197,6 +197,32 @@ services:
       - full
       - image-generation
 
+  # Image Generation Router - Routes requests between ComfyUI and A1111
+  # Provides intelligent load balancing and backend selection
+  image-router:
+    build:
+      context: ../image-router
+      dockerfile: Dockerfile
+    container_name: image-router
+    ports:
+      - "${IMAGE_ROUTER_PORT:-8000}:8000"
+    environment:
+      # Backend URLs (will be updated when deployed)
+      - COMFYUI_URL=http://comfyui:8188
+      - AUTOMATIC1111_URL=http://automatic1111:7860
+    depends_on:
+      - automatic1111
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    profiles:
+      - full
+      - image-generation
+
   # PostgreSQL 16 for LiteLLM and metadata storage (current production)
   postgres:
     image: postgres:16-alpine
