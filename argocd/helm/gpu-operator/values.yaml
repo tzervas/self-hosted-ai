@@ -1,0 +1,40 @@
+# NVIDIA GPU Operator for RTX 5080 with Time-Slicing
+# Chart: nvidia/gpu-operator
+# Version: 25.10.x
+
+driver:
+  enabled: false  # Use pre-installed host drivers
+
+toolkit:
+  enabled: true
+  env:
+    - name: CONTAINERD_CONFIG
+      value: /var/lib/rancher/k3s/agent/etc/containerd/config.toml
+    - name: CONTAINERD_SOCKET
+      value: /run/k3s/containerd/containerd.sock
+
+devicePlugin:
+  enabled: true
+
+dcgmExporter:
+  enabled: true
+
+gfd:
+  enabled: true
+
+migManager:
+  enabled: false  # Not supported on RTX 5080
+
+validator:
+  enabled: true
+  env:
+    - name: WITH_WORKLOAD
+      value: "true"
+
+cdi:
+  enabled: true
+  default: true
+
+# Time-slicing configuration for 4 virtual GPUs
+operator:
+  defaultRuntime: containerd

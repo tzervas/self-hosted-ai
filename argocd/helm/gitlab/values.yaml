@@ -1,0 +1,235 @@
+# GitLab Helm Values - Homelab Configuration
+# Chart: gitlab/gitlab
+# Repository: https://charts.gitlab.io/
+# Version: 8.x.x
+
+global:
+  edition: ce
+  hosts:
+    domain: homelab.local
+    https: true
+    externalIP: ""
+    gitlab:
+      name: gitlab.homelab.local
+    registry:
+      name: registry.homelab.local
+    minio:
+      name: minio.homelab.local
+    smartcard:
+      name: smartcard.homelab.local
+  ingress:
+    configureCertmanager: false
+    class: traefik
+    tls:
+      enabled: true
+      secretName: gitlab-tls
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+
+# GitLab Rails (main application)
+gitlab:
+  webservice:
+    minReplicas: 1
+    maxReplicas: 3
+    resources:
+      requests:
+        cpu: 500m
+        memory: 2Gi
+      limits:
+        cpu: 2
+        memory: 4Gi
+    hpa:
+      targetAverageUtilization: 70
+
+  sidekiq:
+    minReplicas: 1
+    maxReplicas: 2
+    resources:
+      requests:
+        cpu: 200m
+        memory: 1Gi
+      limits:
+        cpu: 1
+        memory: 2Gi
+
+# PostgreSQL
+postgresql:
+  image:
+    registry: registry1.dso.mil
+    repository: ironbank/opensource/postgres/postgresql15
+    tag: "15.6"
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClass: longhorn
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 1
+      memory: 2Gi
+
+# Redis
+redis:
+  image:
+    registry: registry1.dso.mil
+    repository: ironbank/opensource/redis/redis7
+    tag: "7.2.4"
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: longhorn
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Gitaly (Git repository storage)
+gitaly:
+  persistence:
+    enabled: true
+    size: 100Gi
+    storageClass: longhorn
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 1
+      memory: 2Gi
+
+# MinIO (Object storage)
+minio:
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClass: longhorn
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+# Registry (Docker registry)
+registry:
+  storage:
+    secret: gitlab-registry-storage
+    key: config
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClass: longhorn
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+# GitLab Runner
+gitlab-runner:
+  install: true
+  runners:
+    privileged: true
+    cache:
+      cacheType: s3
+      s3ServerAddress: minio.homelab.local:9000
+      s3BucketName: gitlab-runner-cache
+      s3CacheInsecure: true
+    builds:
+      cpuLimit: "2"
+      memoryLimit: "4Gi"
+      cpuRequests: "500m"
+      memoryRequests: "1Gi"
+    helpers:
+      cpuLimit: "500m"
+      memoryLimit: "512Mi"
+      cpuRequests: "100m"
+      memoryRequests: "128Mi"
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Shared secrets
+sharedSecrets:
+  enabled: true
+
+# Service accounts
+serviceAccount:
+  enabled: true
+  create: true
+
+# Network policies
+networkPolicy:
+  enabled: true
+
+# Prometheus monitoring
+prometheus:
+  install: false  # Using external Prometheus
+
+# Grafana monitoring
+grafana:
+  install: false  # Using external Grafana
+
+# Initial root password (will be overridden by sealed secrets)
+initialRootPassword:
+  secret: gitlab-initial-root-password
+
+# SMTP configuration (optional)
+smtp:
+  enabled: false
+
+# LDAP configuration (optional)
+ldap:
+  enabled: false
+
+# OAuth configuration (optional)
+oauth:
+  enabled: false
+
+# Backup configuration
+backup:
+  cron:
+    enabled: true
+    schedule: "0 2 * * *"
+    concurrencyPolicy: Replace
+    failedJobsHistoryLimit: 1
+    successfulJobsHistoryLimit: 3
+    job:
+      annotations:
+        backup.velero.io/backup-volumes: ""
+  persistence:
+    enabled: true
+    size: 100Gi
+    storageClass: longhorn
+
+# Resource limits
+resources:
+  requests:
+    cpu: 2
+    memory: 8Gi
+  limits:
+    cpu: 4
+    memory: 16Gi
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}

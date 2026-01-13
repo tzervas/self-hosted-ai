@@ -1,0 +1,169 @@
+# Ollama Helm Values - CORRECTED for RTX 5080 (16GB VRAM)
+# Chart: otwld/ollama
+# Repository: https://helm.otwld.com (NOT otwld.github.io - migrated)
+# Version: 0.24.x
+
+replicaCount: 1
+
+image:
+  repository: ollama/ollama
+  pullPolicy: IfNotPresent
+
+# GPU Configuration
+ollama:
+  gpu:
+    enabled: true
+    type: 'nvidia'
+    number: 1  # Requests 1 time-sliced GPU replica (4 available from RTX 5080)
+
+  # Model Preloading - VERIFIED to fit in 16GB VRAM
+  models:
+    pull:
+      - llama3.2:8b
+      - codellama:13b
+      - qwen2.5-coder:7b-instruct
+      - nomic-embed-text
+      
+    run:
+      - llama3.2:8b
+      
+    create:
+      # Primary spec-driven coding assistant
+      - name: coding-assistant
+        template: |
+          FROM llama3.2:8b
+          PARAMETER num_ctx 32768
+          PARAMETER temperature 0.3
+          PARAMETER repeat_penalty 1.1
+          PARAMETER top_p 0.9
+          SYSTEM """
+          You are a rigorous, spec-driven software engineer. Your responses must:
+          
+          1. ALWAYS reference specifications before writing code
+          2. Generate comprehensive tests BEFORE implementation
+          3. Cite knowledge base sources using [N] notation for any external patterns
+          4. Structure output as: Reasoning → Tests → Code → Self-check
+          5. Score confidence 1-10; if <8, suggest improvements
+          6. Use structured JSON for deliverables when requested
+          
+          Languages: Python (PEP8, Black formatting), Rust (idiomatic), Go, TypeScript
+          Principles: SOLID, DRY, KISS, YAGNI, composition over inheritance
+          Testing: pytest, cargo test, comprehensive coverage
+          """
+          
+      # DevOps/Infrastructure specialist
+      - name: devops-specialist
+        template: |
+          FROM llama3.2:8b
+          PARAMETER num_ctx 16384
+          PARAMETER temperature 0.4
+          SYSTEM """
+          You are a senior DevOps engineer and Kubernetes specialist.
+          
+          Core expertise:
+          - Kubernetes architecture, Helm charts, ArgoCD GitOps
+          - GitLab CI/CD pipelines, multi-architecture builds
+          - Infrastructure as Code (Terraform, Pulumi)
+          - Container security and hardening
+          - Observability (Prometheus, Grafana, Loki)
+          
+          When generating Kubernetes manifests:
+          - Include resource limits and requests
+          - Use pod security contexts (runAsNonRoot, drop ALL capabilities)
+          - Add health checks (liveness, readiness probes)
+          - Include appropriate labels and annotations
+          - Consider network policies for isolation
+          - Follow GitOps principles (declarative, version controlled)
+          """
+
+# Persistent storage for models
+persistentVolume:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 200Gi
+  storageClass: longhorn
+
+# Resource allocation
+resources:
+  requests:
+    memory: "8Gi"
+    cpu: "2"
+    nvidia.com/gpu: "1"
+  limits:
+    memory: "14Gi"
+    cpu: "4"
+    nvidia.com/gpu: "1"
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 11434
+
+# Ingress for external access
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+  hosts:
+    - host: ollama.homelab.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: ollama-tls
+      hosts:
+        - ollama.homelab.local
+
+# Health checks
+livenessProbe:
+  enabled: true
+  path: /
+  initialDelaySeconds: 120
+  periodSeconds: 15
+  timeoutSeconds: 10
+  failureThreshold: 6
+
+readinessProbe:
+  enabled: true
+  path: /api/tags
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# NVIDIA runtime class
+runtimeClassName: nvidia
+
+# Node selection
+nodeSelector:
+  nvidia.com/gpu: "present"
+
+# Tolerations for GPU taint
+tolerations:
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule
+
+# Performance tuning
+extraEnv:
+  - name: OLLAMA_HOST
+    value: "0.0.0.0:11434"
+  - name: OLLAMA_NUM_PARALLEL
+    value: "2"
+  - name: OLLAMA_MAX_LOADED_MODELS
+    value: "2"
+  - name: OLLAMA_KEEP_ALIVE
+    value: "24h"
+  - name: OLLAMA_DEBUG
+    value: "false"
+  - name: CUDA_VISIBLE_DEVICES
+    value: "0"
+
+# Monitoring
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "11434"
+  prometheus.io/path: "/metrics"

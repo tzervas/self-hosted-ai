@@ -1,0 +1,257 @@
+# Dify Helm Values - AI Agent Workflow Platform
+# Chart: dify/dify
+# Repository: https://github.com/langgenius/dify-helm
+# Version: 0.6.x
+
+# Global configuration
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: "longhorn"
+
+# API service
+api:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: langgenius/dify-api
+    tag: "0.6.12"
+    pullPolicy: IfNotPresent
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2
+      memory: 4Gi
+  env:
+    - name: MODE
+      value: "api"
+    - name: LOG_LEVEL
+      value: "INFO"
+    - name: SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: dify-secrets
+          key: secret-key
+    - name: OLLAMA_BASE_URL
+      value: "http://ollama.gitlab.svc.cluster.local:11434"
+    - name: OLLAMA_MODEL
+      value: "coding-assistant"
+    - name: DATABASE_URL
+      valueFrom:
+        secretKeyRef:
+          name: dify-secrets
+          key: database-url
+    - name: REDIS_URL
+      valueFrom:
+        secretKeyRef:
+          name: dify-secrets
+          key: redis-url
+    - name: STORAGE_TYPE
+      value: "local"
+    - name: STORAGE_LOCAL_PATH
+      value: "/app/storage"
+    - name: VECTOR_STORE
+      value: "weaviate"
+    - name: WEAVIATE_ENDPOINT
+      value: "http://weaviate.dify.svc.cluster.local:8080"
+    - name: EMBEDDING_MODEL
+      value: "nomic-embed-text"
+    - name: OLLAMA_EMBEDDING_MODEL
+      value: "nomic-embed-text"
+
+# Web service
+web:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: langgenius/dify-web
+    tag: "0.6.12"
+    pullPolicy: IfNotPresent
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+  env:
+    - name: MODE
+      value: "web"
+    - name: LOG_LEVEL
+      value: "INFO"
+    - name: API_URL
+      value: "https://dify.homelab.local"
+
+# Worker service
+worker:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: langgenius/dify-api
+    tag: "0.6.12"
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2
+      memory: 4Gi
+  env:
+    - name: MODE
+      value: "worker"
+    - name: LOG_LEVEL
+      value: "INFO"
+    - name: SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: dify-secrets
+          key: secret-key
+    - name: OLLAMA_BASE_URL
+      value: "http://ollama.gitlab.svc.cluster.local:11434"
+    - name: DATABASE_URL
+      valueFrom:
+        secretKeyRef:
+          name: dify-secrets
+          key: database-url
+    - name: REDIS_URL
+      valueFrom:
+        secretKeyRef:
+          name: dify-secrets
+          key: redis-url
+    - name: STORAGE_TYPE
+      value: "local"
+    - name: STORAGE_LOCAL_PATH
+      value: "/app/storage"
+    - name: VECTOR_STORE
+      value: "weaviate"
+    - name: WEAVIATE_ENDPOINT
+      value: "http://weaviate.dify.svc.cluster.local:8080"
+
+# PostgreSQL database
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "dify-postgres-password"
+    username: "dify"
+    password: "dify-password"
+    database: "dify"
+  architecture: standalone
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClass: longhorn
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 1
+      memory: 2Gi
+
+# Redis cache
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    password: "dify-redis-password"
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: longhorn
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Weaviate vector database
+weaviate:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: semitechnologies/weaviate
+    tag: "1.23.7"
+    pullPolicy: IfNotPresent
+  persistence:
+    enabled: true
+    size: 50Gi
+    storageClass: longhorn
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 1
+      memory: 2Gi
+  env:
+    - name: QUERY_DEFAULTS_LIMIT
+      value: "25"
+    - name: AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED
+      value: "true"
+    - name: PERSISTENCE_DATA_PATH
+      value: "/var/lib/weaviate"
+    - name: DEFAULT_VECTORIZER_MODULE
+      value: "none"
+    - name: CLUSTER_HOSTNAME
+      value: "weaviate"
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: dify.homelab.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: dify-tls
+      hosts:
+        - dify.homelab.local
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 80
+
+# Persistence for file storage
+persistence:
+  enabled: true
+  size: 100Gi
+  storageClass: longhorn
+  accessModes:
+    - ReadWriteOnce
+
+# Monitoring
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8000"
+  prometheus.io/path: "/metrics"
+
+# Security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
