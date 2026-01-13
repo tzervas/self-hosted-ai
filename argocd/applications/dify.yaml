@@ -12,7 +12,7 @@ spec:
   source:
     chart: dify
     repoURL: https://langgenius.github.io/dify-helm
-    targetRevision: 0.6.12
+    targetRevision: 3.7.3
     helm:
       valueFiles:
         - values.yaml

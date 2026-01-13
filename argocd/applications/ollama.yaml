@@ -10,7 +10,7 @@ spec:
   source:
     chart: ollama
     repoURL: https://otwld.github.io/helm-charts
-    targetRevision: 0.24.1
+    targetRevision: 1.37.0
     helm:
       valueFiles:
         - values.yaml
