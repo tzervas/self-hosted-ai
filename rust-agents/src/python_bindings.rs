@@ -200,7 +200,7 @@ fn get_metrics(results: Vec<PyAgentResult>) -> PyExecutionMetrics {
 
 /// Python module definition
 #[pymodule]
-fn agent_runtime_py(py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn agent_runtime_py(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(execute_agents_parallel, m)?)?;
     m.add_function(wrap_pyfunction!(execute_agent, m)?)?;
     m.add_function(wrap_pyfunction!(execute_agents_batch, m)?)?;
