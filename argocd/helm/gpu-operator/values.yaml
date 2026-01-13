@@ -3,7 +3,7 @@
 # Version: 25.10.x
 
 driver:
-  enabled: false  # Use pre-installed host drivers
+  enabled: true  # Enable driver installation for RTX 5080
 
 toolkit:
   enabled: true
