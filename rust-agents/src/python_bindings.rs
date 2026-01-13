@@ -1,8 +1,7 @@
 use pyo3::prelude::*;
-use pyo3_asyncio;
-use std::collections::HashMap;
+use pyo3_async_runtimes;
 
-mod agent_runtime;
+use crate::agent_runtime;
 use agent_runtime::{execute_parallel, AgentConfig, RustAgent};
 
 /// Python-facing agent result
@@ -14,7 +13,7 @@ pub struct PyAgentResult {
     #[pyo3(get)]
     pub status: String,
     #[pyo3(get)]
-    pub output: String,
+    pub output: Option<String>,
     #[pyo3(get)]
     pub error: Option<String>,
     #[pyo3(get)]
@@ -26,24 +25,27 @@ pub struct PyAgentResult {
 #[derive(Clone)]
 pub struct PyAgentConfig {
     #[pyo3(get, set)]
+    pub name: String,
+    #[pyo3(get, set)]
     pub model: String,
     #[pyo3(get, set)]
-    pub temperature: f64,
+    pub ollama_url: String,
     #[pyo3(get, set)]
-    pub timeout: u64,
+    pub temperature: f32,
     #[pyo3(get, set)]
-    pub max_tokens: Option<usize>,
+    pub timeout_seconds: u64,
 }
 
 #[pymethods]
 impl PyAgentConfig {
     #[new]
-    fn new(model: String, temperature: f64, timeout: u64, max_tokens: Option<usize>) -> Self {
+    fn new(name: String, model: String, ollama_url: String, temperature: f32, timeout_seconds: u64) -> Self {
         PyAgentConfig {
+            name,
             model,
+            ollama_url,
             temperature,
-            timeout,
-            max_tokens,
+            timeout_seconds,
         }
     }
 }
@@ -51,10 +53,11 @@ impl PyAgentConfig {
 impl From<PyAgentConfig> for AgentConfig {
     fn from(py_config: PyAgentConfig) -> Self {
         AgentConfig {
+            name: py_config.name,
             model: py_config.model,
+            ollama_url: py_config.ollama_url,
             temperature: py_config.temperature,
-            timeout: py_config.timeout,
-            max_tokens: py_config.max_tokens,
+            timeout_seconds: py_config.timeout_seconds,
         }
     }
 }
@@ -66,7 +69,7 @@ impl From<agent_runtime::AgentResult> for PyAgentResult {
             status: result.status,
             output: result.output,
             error: result.error,
-            execution_time: result.execution_time,
+            execution_time: result.duration_ms as f64,
         }
     }
 }
@@ -74,17 +77,22 @@ impl From<agent_runtime::AgentResult> for PyAgentResult {
 /// Execute multiple agents in parallel from Python
 #[pyfunction]
 fn execute_agents_parallel(
-    py: Python,
+    py: Python<'_>,
     agents: Vec<(String, PyAgentConfig)>,
     input_data: String,
-) -> PyResult<&PyAny> {
+) -> PyResult<Bound<'_, PyAny>> {
     let rust_agents: Vec<RustAgent> = agents
         .into_iter()
-        .map(|(id, config)| RustAgent::new(id, config.into()))
+        .map(|(id, mut config)| {
+            config.name = id;
+            RustAgent::new(config.into()).unwrap()
+        })
         .collect();
 
-    pyo3_asyncio::tokio::future_into_py(py, async move {
-        let results = execute_parallel(rust_agents, &input_data).await;
+    pyo3_async_runtimes::tokio::future_into_py(py, async move {
+        let tasks = vec![input_data; rust_agents.len()];
+        let results = execute_parallel(rust_agents, tasks).await
+            .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string()))?;
         let py_results: Vec<PyAgentResult> =
             results.into_iter().map(PyAgentResult::from).collect();
         Ok(py_results)
@@ -93,11 +101,13 @@ fn execute_agents_parallel(
 
 /// Execute a single agent from Python
 #[pyfunction]
-fn execute_agent(py: Python, agent_id: String, config: PyAgentConfig, input_data: String) -> PyResult<&PyAny> {
-    let agent = RustAgent::new(agent_id, config.into());
+fn execute_agent(py: Python<'_>, agent_id: String, mut config: PyAgentConfig, input_data: String) -> PyResult<Bound<'_, PyAny>> {
+    config.name = agent_id;
+    let agent = RustAgent::new(config.into()).unwrap();
     
-    pyo3_asyncio::tokio::future_into_py(py, async move {
-        let result = agent.execute(&input_data).await;
+    pyo3_async_runtimes::tokio::future_into_py(py, async move {
+        let result = agent.execute(&input_data).await
+            .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string()))?;
         Ok(PyAgentResult::from(result))
     })
 }
@@ -105,20 +115,26 @@ fn execute_agent(py: Python, agent_id: String, config: PyAgentConfig, input_data
 /// Batch execute agents with different inputs
 #[pyfunction]
 fn execute_agents_batch(
-    py: Python,
+    py: Python<'_>,
     agent_configs: Vec<(String, PyAgentConfig)>,
     inputs: Vec<String>,
-) -> PyResult<&PyAny> {
-    pyo3_asyncio::tokio::future_into_py(py, async move {
+) -> PyResult<Bound<'_, PyAny>> {
+    pyo3_async_runtimes::tokio::future_into_py(py, async move {
         let mut all_results = Vec::new();
 
         for input in inputs {
             let rust_agents: Vec<RustAgent> = agent_configs
                 .iter()
-                .map(|(id, config)| RustAgent::new(id.clone(), config.clone().into()))
+                .map(|(id, config)| {
+                    let mut config = config.clone();
+                    config.name = id.clone();
+                    RustAgent::new(config.into()).unwrap()
+                })
                 .collect();
 
-            let results = execute_parallel(rust_agents, &input).await;
+            let tasks = vec![input; rust_agents.len()];
+            let results = execute_parallel(rust_agents, tasks).await
+                .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string()))?;
             all_results.extend(results.into_iter().map(PyAgentResult::from));
         }
 
@@ -166,11 +182,11 @@ fn get_metrics(results: Vec<PyAgentResult>) -> PyExecutionMetrics {
 
 /// Python module definition
 #[pymodule]
-fn agent_runtime_py(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(execute_agents_parallel, m)?)?;
-    m.add_function(wrap_pyfunction!(execute_agent, m)?)?;
-    m.add_function(wrap_pyfunction!(execute_agents_batch, m)?)?;
-    m.add_function(wrap_pyfunction!(get_metrics, m)?)?;
+fn agent_runtime_py(py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(execute_agents_parallel, py)?)?;
+    m.add_function(wrap_pyfunction!(execute_agent, py)?)?;
+    m.add_function(wrap_pyfunction!(execute_agents_batch, py)?)?;
+    m.add_function(wrap_pyfunction!(get_metrics, py)?)?;
     m.add_class::<PyAgentConfig>()?;
     m.add_class::<PyAgentResult>()?;
     m.add_class::<PyExecutionMetrics>()?;
