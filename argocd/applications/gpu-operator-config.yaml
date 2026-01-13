@@ -1,24 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: prometheus
+  name: gpu-operator-config
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "-1"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    chart: prometheus
-    repoURL: https://prometheus-community.github.io/helm-charts
-    targetRevision: 25.8.0
-    helm:
-      valueFiles:
-        - values.yaml
+    repoURL: https://github.com/tzervas/self-hosted-ai
+    targetRevision: HEAD
+    path: argocd/helm/gpu-operator
   destination:
     server: https://kubernetes.default.svc
-    namespace: monitoring
+    namespace: gpu-operator
   syncPolicy:
     automated:
       prune: true

@@ -10,9 +10,12 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/kang/self-hosted-ai
-    targetRevision: HEAD
-    path: argocd/helm/dify
+    chart: dify
+    repoURL: https://langgenius.github.io/dify-helm
+    targetRevision: 0.6.12
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: dify

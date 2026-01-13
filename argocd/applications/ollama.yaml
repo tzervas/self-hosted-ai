@@ -8,9 +8,12 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/tzervas/self-hosted-ai
-    targetRevision: HEAD
-    path: argocd/helm/ollama
+    chart: ollama
+    repoURL: https://otwld.github.io/helm-charts
+    targetRevision: 0.24.1
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: ollama

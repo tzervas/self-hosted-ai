@@ -10,9 +10,12 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/kang/self-hosted-ai
-    targetRevision: HEAD
-    path: argocd/helm/gitlab
+    chart: gitlab
+    repoURL: https://charts.gitlab.io
+    targetRevision: 8.6.0
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: gitlab
