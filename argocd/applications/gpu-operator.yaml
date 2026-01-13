@@ -12,8 +12,9 @@ spec:
     repoURL: https://helm.ngc.nvidia.com/nvidia
     targetRevision: v25.10.1
     helm:
-      valueFiles:
-        - values.yaml
+      values: |
+        # Inline Helm values for the gpu-operator chart.
+        # Add any custom configuration here instead of referencing a local values.yaml file.
   destination:
     server: https://kubernetes.default.svc
     namespace: gpu-operator
