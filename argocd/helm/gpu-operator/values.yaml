@@ -38,3 +38,19 @@ cdi:
 # Time-slicing configuration for 4 virtual GPUs
 operator:
   defaultRuntime: containerd
+
+# Time-slicing ConfigMap
+timeSlicing:
+  enabled: true
+  config:
+    rtx-5080: |-
+      version: v1
+      flags:
+        migStrategy: none  # MIG not supported on RTX 5080
+      sharing:
+        timeSlicing:
+          renameByDefault: false
+          failRequestsGreaterThanOne: false
+          resources:
+            - name: nvidia.com/gpu
+              replicas: 4  # Creates 4 virtual GPUs from single RTX 5080
