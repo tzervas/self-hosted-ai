@@ -1,0 +1,253 @@
+{
+  "version": "0.1.0",
+  "kind": "workflow",
+  "metadata": {
+    "name": "spec-driven-code-review",
+    "description": "Comprehensive code review with spec validation, security analysis, and scoring",
+    "version": "2.0.0",
+    "author": "coding-agent",
+    "tags": ["code-review", "spec-driven", "security", "quality"]
+  },
+  "graph": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "position": {"x": 50, "y": 200},
+        "data": {
+          "title": "Input Collection",
+          "variables": [
+            {
+              "variable": "code_diff",
+              "type": "paragraph",
+              "required": true,
+              "label": "Code Diff",
+              "description": "Git diff output from merge request"
+            },
+            {
+              "variable": "spec_content",
+              "type": "paragraph",
+              "required": true,
+              "label": "Specification YAML",
+              "description": "Contents of SPECS/*.yaml file for this change"
+            },
+            {
+              "variable": "file_paths",
+              "type": "paragraph",
+              "required": false,
+              "label": "Changed Files",
+              "description": "Comma-separated list of changed file paths"
+            },
+            {
+              "variable": "target_branch",
+              "type": "text-input",
+              "required": false,
+              "label": "Target Branch",
+              "default": "main"
+            }
+          ]
+        }
+      },
+      {
+        "id": "parse_spec",
+        "type": "code",
+        "position": {"x": 250, "y": 100},
+        "data": {
+          "title": "Parse Specification",
+          "language": "python3",
+          "code": "import yaml\nimport json\n\ndef main(spec_content: str) -> dict:\n    \"\"\"Parse YAML spec and extract key validation criteria.\"\"\"\n    try:\n        spec = yaml.safe_load(spec_content)\n        return {\n            'parsed_spec': json.dumps(spec, indent=2),\n            'requirements': spec.get('spec', {}).get('requirements', {}),\n            'success_criteria': spec.get('spec', {}).get('success_criteria', []),\n            'deliverables': spec.get('spec', {}).get('deliverables', []),\n            'attribution': spec.get('spec', {}).get('attribution', {}),\n            'spec_name': spec.get('metadata', {}).get('name', 'unknown'),\n            'spec_valid': True,\n            'parse_error': None\n        }\n    except yaml.YAMLError as e:\n        return {\n            'parsed_spec': spec_content,\n            'requirements': {},\n            'success_criteria': [],\n            'deliverables': [],\n            'attribution': {},\n            'spec_name': 'parse_error',\n            'spec_valid': False,\n            'parse_error': str(e)\n        }"
+        }
+      },
+      {
+        "id": "spec_validation_check",
+        "type": "if-else",
+        "position": {"x": 450, "y": 100},
+        "data": {
+          "title": "Spec Valid?",
+          "conditions": [
+            {
+              "id": "valid",
+              "expression": "{{#parse_spec.spec_valid#}} == true"
+            }
+          ]
+        }
+      },
+      {
+        "id": "security_review",
+        "type": "llm",
+        "position": {"x": 650, "y": 50},
+        "data": {
+          "title": "Security Analysis",
+          "model": {
+            "provider": "ollama",
+            "name": "codellama:13b",
+            "mode": "chat",
+            "completion_params": {
+              "temperature": 0.2,
+              "max_tokens": 2000
+            }
+          },
+          "context": {
+            "enabled": false
+          },
+          "prompt_template": [
+            {
+              "role": "system",
+              "text": "You are a security-focused code reviewer. Analyze code for:\n1. Injection vulnerabilities (SQL, command, template)\n2. Authentication/authorization flaws\n3. Secrets exposure (hardcoded credentials, API keys)\n4. Unsafe deserialization\n5. Path traversal risks\n6. Input validation gaps\n7. Cryptographic weaknesses\n\nRespond with structured JSON only."
+            },
+            {
+              "role": "user",
+              "text": "Analyze this code diff for security issues:\n\n```diff\n{{#code_diff#}}\n```\n\nRespond with JSON:\n{\n  \"vulnerabilities\": [{\"severity\": \"critical|high|medium|low\", \"type\": \"type\", \"line\": N, \"description\": \"desc\", \"fix\": \"suggestion\"}],\n  \"security_score\": N,\n  \"summary\": \"brief summary\"\n}"
+            }
+          ]
+        }
+      },
+      {
+        "id": "spec_alignment_review",
+        "type": "llm",
+        "position": {"x": 650, "y": 200},
+        "data": {
+          "title": "Spec Alignment Check",
+          "model": {
+            "provider": "ollama",
+            "name": "llama3.2:8b",
+            "mode": "chat",
+            "completion_params": {
+              "temperature": 0.3,
+              "max_tokens": 2500
+            }
+          },
+          "context": {
+            "enabled": true,
+            "variable_selector": ["start", "spec_content"]
+          },
+          "prompt_template": [
+            {
+              "role": "system",
+              "text": "You are a spec-driven code reviewer. Your task is to verify code changes align with the specification.\n\nEvaluation criteria:\n1. All functional requirements addressed\n2. Non-functional requirements met (performance, memory, etc.)\n3. Success criteria achievable\n4. Deliverables complete\n5. Attribution/citations present for external patterns\n\nBe rigorous. Score 1-10 where:\n- 10: Perfect alignment, all criteria met\n- 8-9: Minor gaps, easily addressed\n- 6-7: Significant gaps requiring revision\n- <6: Major misalignment, rejection recommended"
+            },
+            {
+              "role": "user",
+              "text": "Compare this code diff against the specification.\n\nSPECIFICATION:\n```yaml\n{{#spec_content#}}\n```\n\nCODE DIFF:\n```diff\n{{#code_diff#}}\n```\n\nProvide JSON response:\n{\n  \"alignment_score\": N,\n  \"requirements_check\": [{\"req_id\": \"REQ-XXX\", \"status\": \"met|partial|missing\", \"evidence\": \"code reference\"}],\n  \"success_criteria_check\": [{\"sc_id\": \"SC-XXX\", \"achievable\": true/false, \"reasoning\": \"why\"}],\n  \"deliverables_check\": [{\"del_id\": \"DEL-XXX\", \"present\": true/false}],\n  \"citation_check\": {\"external_patterns_found\": [\"list\"], \"properly_cited\": true/false},\n  \"gaps\": [\"list of gaps\"],\n  \"recommendations\": [\"list of improvements\"]\n}"
+            }
+          ]
+        }
+      },
+      {
+        "id": "code_quality_review",
+        "type": "llm",
+        "position": {"x": 650, "y": 350},
+        "data": {
+          "title": "Code Quality Review",
+          "model": {
+            "provider": "ollama",
+            "name": "codellama:13b",
+            "mode": "chat",
+            "completion_params": {
+              "temperature": 0.3,
+              "max_tokens": 2500
+            }
+          },
+          "prompt_template": [
+            {
+              "role": "system",
+              "text": "You are an expert code reviewer focusing on quality, maintainability, and best practices.\n\nReview for:\n1. SOLID principles adherence\n2. DRY violations\n3. KISS violations (unnecessary complexity)\n4. Error handling completeness\n5. Test coverage implications\n6. Documentation quality\n7. Naming conventions\n8. Code organization\n9. Performance considerations\n10. Rust/Python specific idioms\n\nScore 1-10 for overall quality."
+            },
+            {
+              "role": "user",
+              "text": "Review this code diff for quality:\n\n```diff\n{{#code_diff#}}\n```\n\nRespond with JSON:\n{\n  \"quality_score\": N,\n  \"solid_violations\": [{\"principle\": \"SRP|OCP|LSP|ISP|DIP\", \"location\": \"where\", \"issue\": \"description\"}],\n  \"dry_violations\": [\"list of duplications\"],\n  \"complexity_issues\": [\"list of overly complex sections\"],\n  \"error_handling\": {\"score\": N, \"gaps\": [\"list\"]},\n  \"test_implications\": [\"what tests are needed\"],\n  \"positive_aspects\": [\"what's done well\"],\n  \"improvements\": [{\"priority\": \"high|medium|low\", \"suggestion\": \"what to fix\", \"location\": \"where\"}]\n}"
+            }
+          ]
+        }
+      },
+      {
+        "id": "aggregate_results",
+        "type": "code",
+        "position": {"x": 900, "y": 200},
+        "data": {
+          "title": "Aggregate Review Results",
+          "language": "python3",
+          "code": "import json\n\ndef main(security_review: str, spec_alignment_review: str, code_quality_review: str, spec_name: str) -> dict:\n    \"\"\"Aggregate all review results and calculate final score.\"\"\"\n    \n    def safe_parse(text):\n        try:\n            # Try to extract JSON from response\n            if '```json' in text:\n                text = text.split('```json')[1].split('```')[0]\n            elif '```' in text:\n                text = text.split('```')[1].split('```')[0]\n            return json.loads(text.strip())\n        except:\n            return {'error': 'Failed to parse review', 'raw': text[:500]}\n    \n    security = safe_parse(security_review)\n    alignment = safe_parse(spec_alignment_review)\n    quality = safe_parse(code_quality_review)\n    \n    # Extract scores with defaults\n    security_score = security.get('security_score', 5)\n    alignment_score = alignment.get('alignment_score', 5)\n    quality_score = quality.get('quality_score', 5)\n    \n    # Weighted final score (security critical, alignment important, quality valuable)\n    weights = {'security': 0.35, 'alignment': 0.40, 'quality': 0.25}\n    final_score = round(\n        security_score * weights['security'] +\n        alignment_score * weights['alignment'] +\n        quality_score * weights['quality'],\n        1\n    )\n    \n    # Determine approval status\n    approved = (\n        final_score >= 8.0 and\n        security_score >= 7 and\n        alignment_score >= 7 and\n        quality_score >= 6\n    )\n    \n    # Collect all critical issues\n    critical_issues = []\n    if security.get('vulnerabilities'):\n        critical_issues.extend([v for v in security['vulnerabilities'] if v.get('severity') in ['critical', 'high']])\n    if alignment.get('gaps'):\n        critical_issues.extend([{'type': 'spec_gap', 'description': g} for g in alignment['gaps'][:3]])\n    \n    return {\n        'spec_name': spec_name,\n        'scores': {\n            'security': security_score,\n            'alignment': alignment_score,\n            'quality': quality_score,\n            'final': final_score,\n            'weights': weights\n        },\n        'approved': approved,\n        'critical_issues': critical_issues,\n        'security_summary': security.get('summary', 'No summary'),\n        'alignment_gaps': alignment.get('gaps', []),\n        'quality_improvements': quality.get('improvements', []),\n        'positive_aspects': quality.get('positive_aspects', []),\n        'detailed_results': {\n            'security': security,\n            'alignment': alignment,\n            'quality': quality\n        }\n    }"
+        }
+      },
+      {
+        "id": "format_report",
+        "type": "template",
+        "position": {"x": 1100, "y": 200},
+        "data": {
+          "title": "Format Review Report",
+          "template": "# Code Review Report: {{ aggregate_results.spec_name }}\n\n## Summary\n\n| Category | Score | Weight | Weighted |\n|----------|-------|--------|----------|\n| 🔒 Security | {{ aggregate_results.scores.security }}/10 | 35% | {{ aggregate_results.scores.security | times: 0.35 | round: 1 }} |\n| 📋 Spec Alignment | {{ aggregate_results.scores.alignment }}/10 | 40% | {{ aggregate_results.scores.alignment | times: 0.40 | round: 1 }} |\n| ✨ Code Quality | {{ aggregate_results.scores.quality }}/10 | 25% | {{ aggregate_results.scores.quality | times: 0.25 | round: 1 }} |\n| **Final Score** | **{{ aggregate_results.scores.final }}/10** | | |\n\n## Decision: {{ aggregate_results.approved | ternary: '✅ APPROVED', '❌ CHANGES REQUESTED' }}\n\n{% if aggregate_results.approved %}\nThis merge request meets all quality gates and is approved for merge.\n{% else %}\nThis merge request requires revisions before merging. See issues below.\n{% endif %}\n\n{% if aggregate_results.critical_issues.size > 0 %}\n## 🚨 Critical Issues\n\n{% for issue in aggregate_results.critical_issues %}\n- **{{ issue.severity | default: 'spec_gap' | upcase }}**: {{ issue.description | default: issue }}\n  {% if issue.fix %}- Fix: {{ issue.fix }}{% endif %}\n{% endfor %}\n{% endif %}\n\n{% if aggregate_results.alignment_gaps.size > 0 %}\n## 📋 Specification Gaps\n\n{% for gap in aggregate_results.alignment_gaps %}\n- {{ gap }}\n{% endfor %}\n{% endif %}\n\n{% if aggregate_results.quality_improvements.size > 0 %}\n## 💡 Recommended Improvements\n\n{% for imp in aggregate_results.quality_improvements %}\n- **[{{ imp.priority | default: 'medium' | upcase }}]** {{ imp.suggestion }}\n  {% if imp.location %}_Location: {{ imp.location }}_{% endif %}\n{% endfor %}\n{% endif %}\n\n{% if aggregate_results.positive_aspects.size > 0 %}\n## 👍 Positive Aspects\n\n{% for aspect in aggregate_results.positive_aspects %}\n- {{ aspect }}\n{% endfor %}\n{% endif %}\n\n---\n\n_Generated by Spec-Driven Code Review Agent v2.0_\n_Models: codellama:13b (security, quality), llama3.2:8b (alignment)_"
+        }
+      },
+      {
+        "id": "spec_invalid_response",
+        "type": "template",
+        "position": {"x": 650, "y": 450},
+        "data": {
+          "title": "Spec Invalid Error",
+          "template": "# ❌ Code Review Failed: Invalid Specification\n\n## Error\n\nThe provided specification could not be parsed.\n\n**Parse Error**: {{ parse_spec.parse_error }}\n\n## Action Required\n\n1. Verify the SPECS/*.yaml file exists and is valid YAML\n2. Ensure the spec follows the required schema (apiVersion: specs.platform/v1)\n3. Fix any YAML syntax errors\n4. Re-run the review after corrections\n\n## Spec Content Received\n\n```yaml\n{{ parse_spec.parsed_spec }}\n```\n\n---\n\n_Review blocked until specification is valid._"
+        }
+      },
+      {
+        "id": "end_success",
+        "type": "end",
+        "position": {"x": 1300, "y": 200},
+        "data": {
+          "outputs": [
+            {
+              "variable": "review_report",
+              "value_selector": ["format_report", "output"]
+            },
+            {
+              "variable": "approved",
+              "value_selector": ["aggregate_results", "approved"]
+            },
+            {
+              "variable": "final_score",
+              "value_selector": ["aggregate_results", "scores", "final"]
+            },
+            {
+              "variable": "detailed_results",
+              "value_selector": ["aggregate_results", "detailed_results"]
+            }
+          ]
+        }
+      },
+      {
+        "id": "end_error",
+        "type": "end",
+        "position": {"x": 850, "y": 450},
+        "data": {
+          "outputs": [
+            {
+              "variable": "review_report",
+              "value_selector": ["spec_invalid_response", "output"]
+            },
+            {
+              "variable": "approved",
+              "value_selector": ["", "false"]
+            },
+            {
+              "variable": "error",
+              "value_selector": ["parse_spec", "parse_error"]
+            }
+          ]
+        }
+      }
+    ],
+    "edges": [
+      {"id": "e1", "source": "start", "target": "parse_spec"},
+      {"id": "e2", "source": "parse_spec", "target": "spec_validation_check"},
+      {"id": "e3", "source": "spec_validation_check", "sourceHandle": "valid", "target": "security_review"},
+      {"id": "e4", "source": "spec_validation_check", "sourceHandle": "valid", "target": "spec_alignment_review"},
+      {"id": "e5", "source": "spec_validation_check", "sourceHandle": "valid", "target": "code_quality_review"},
+      {"id": "e6", "source": "spec_validation_check", "sourceHandle": "default", "target": "spec_invalid_response"},
+      {"id": "e7", "source": "security_review", "target": "aggregate_results"},
+      {"id": "e8", "source": "spec_alignment_review", "target": "aggregate_results"},
+      {"id": "e9", "source": "code_quality_review", "target": "aggregate_results"},
+      {"id": "e10", "source": "aggregate_results", "target": "format_report"},
+      {"id": "e11", "source": "format_report", "target": "end_success"},
+      {"id": "e12", "source": "spec_invalid_response", "target": "end_error"}
+    ]
+  }
+}
