@@ -58,7 +58,10 @@ impl RustAgent {
         Ok(AgentResult {
             agent_id: uuid::Uuid::new_v4().to_string(),
             status: "completed".to_string(),
-            output: result.get("response").and_then(|v| v.as_str()).map(String::from),
+            output: result
+                .get("response")
+                .and_then(|v| v.as_str())
+                .map(String::from),
             error: None,
             duration_ms: duration,
         })

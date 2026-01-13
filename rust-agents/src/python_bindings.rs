@@ -39,7 +39,13 @@ pub struct PyAgentConfig {
 #[pymethods]
 impl PyAgentConfig {
     #[new]
-    fn new(name: String, model: String, ollama_url: String, temperature: f32, timeout_seconds: u64) -> Self {
+    fn new(
+        name: String,
+        model: String,
+        ollama_url: String,
+        temperature: f32,
+        timeout_seconds: u64,
+    ) -> Self {
         PyAgentConfig {
             name,
             model,
@@ -92,23 +98,30 @@ fn execute_agents_parallel(
 
     pyo3_async_runtimes::tokio::future_into_py(py, async move {
         let tasks = vec![input_data; rust_agents.len()];
-        let results = execute_parallel(rust_agents, tasks).await
+        let results = execute_parallel(rust_agents, tasks)
+            .await
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string()))?;
-        let py_results: Vec<PyAgentResult> =
-            results.into_iter().map(PyAgentResult::from).collect();
+        let py_results: Vec<PyAgentResult> = results.into_iter().map(PyAgentResult::from).collect();
         Ok(py_results)
     })
 }
 
 /// Execute a single agent from Python
 #[pyfunction]
-fn execute_agent(py: Python<'_>, agent_id: String, mut config: PyAgentConfig, input_data: String) -> PyResult<Bound<'_, PyAny>> {
+fn execute_agent(
+    py: Python<'_>,
+    agent_id: String,
+    mut config: PyAgentConfig,
+    input_data: String,
+) -> PyResult<Bound<'_, PyAny>> {
     config.name = agent_id;
     let agent = RustAgent::new(config.into())
         .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string()))?;
-    
+
     pyo3_async_runtimes::tokio::future_into_py(py, async move {
-        let result = agent.execute(&input_data).await
+        let result = agent
+            .execute(&input_data)
+            .await
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string()))?;
         Ok(PyAgentResult::from(result))
     })
@@ -130,13 +143,15 @@ fn execute_agents_batch(
                 .map(|(id, config)| {
                     let mut config = config.clone();
                     config.name = id.clone();
-                    RustAgent::new(config.into())
-                        .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string()))
+                    RustAgent::new(config.into()).map_err(|e| {
+                        PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string())
+                    })
                 })
                 .collect::<PyResult<Vec<RustAgent>>>()?;
 
             let tasks = vec![input; rust_agents.len()];
-            let results = execute_parallel(rust_agents, tasks).await
+            let results = execute_parallel(rust_agents, tasks)
+                .await
                 .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string()))?;
             all_results.extend(results.into_iter().map(PyAgentResult::from));
         }
