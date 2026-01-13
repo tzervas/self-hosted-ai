@@ -1010,7 +1010,7 @@ variables:
   extends: .docker_setup
   before_script:
     - !reference [.docker_setup, before_script]
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    - docker run --rm --privileged multiarch/qemu-user-static:7.0.0-125 --reset -p yes
     - docker buildx create --name multiarch-builder --driver docker-container --bootstrap --use
 
 .build_matrix:
@@ -1038,8 +1038,8 @@ setup:qemu:
   stage: setup
   extends: .docker_setup
   script:
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    - docker run --rm --privileged tonistiigi/binfmt --install all
+    - docker run --rm --privileged multiarch/qemu-user-static:7.0.0-125 --reset -p yes
+    - docker run --rm --privileged tonistiigi/binfmt:master --install all
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -1223,7 +1223,7 @@ package:wheels:
     CIBW_ARCHS_LINUX: "x86_64 aarch64"
     CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
   before_script:
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    - docker run --rm --privileged multiarch/qemu-user-static:7.0.0-125 --reset -p yes
     - pip install cibuildwheel
   script:
     - cibuildwheel --output-dir wheelhouse

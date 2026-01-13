@@ -208,7 +208,8 @@ podAnnotations:
 
 # Security context
 podSecurityContext:
-  runAsNonRoot: false  # Ollama needs root for GPU access currently
+  runAsNonRoot: true  # Run as non-root user for security
+  runAsUser: 1000     # Use standard ollama user
   fsGroup: 1000
 
 # Init container to verify GPU access
