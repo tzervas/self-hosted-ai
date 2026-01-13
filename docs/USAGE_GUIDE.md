@@ -1,431 +1,766 @@
 # Self-Hosted AI Stack - Complete Usage Guide
 
-**Version:** 2.0.0 | **Last Updated:** January 11, 2026
+**Version:** 2.1.0 | **Last Updated:** January 13, 2026  
+**Deployment Status:** ✅ Fully Operational with Multi-Modal Capabilities
 
 ---
 
-## Table of Contents
+## 🚀 Quick Access
 
-1. [Chat & Conversation](#chat--conversation)
-2. [Web Search Integration](#web-search-integration)
-3. [Image Generation](#image-generation)
-4. [Video Generation](#video-generation)
-5. [Audio Transcription](#audio-transcription)
-6. [Document Processing](#document-processing)
-7. [Research Workflows](#research-workflows)
-8. [Model Management](#model-management)
-9. [GPU Resource Management](#gpu-resource-management)
-10. [Monitoring & Observability](#monitoring--observability)
+### Service Dashboard
+
+| Service | URL | Purpose | Status |
+|---------|-----|---------|--------|
+| **Open WebUI** | http://192.168.1.170:3001 | Main AI interface | ✅ |
+| **LiteLLM API** | http://192.168.1.170:4000 | API gateway | ✅ |
+| **N8N** | http://192.168.1.170:5678 | Automation | ✅ |
+| **SearXNG** | http://192.168.1.170:8082 | Search | ⚠️ |
+| **Ollama CPU** | http://192.168.1.170:11434 | CPU inference | ✅ |
+| **Ollama GPU** | http://192.168.1.99:11435 | GPU inference | ✅ |
+| **ComfyUI** | http://192.168.1.99:8188 | Image gen | ✅ |
+| **Whisper ASR** | http://192.168.1.99:9000 | Audio | ✅ |
+| **Grafana** | http://192.168.1.170:3000 | Monitoring | ✅ |
 
 ---
 
-## Chat & Conversation
+## 💬 Chat Interface (Open WebUI)
 
-### Basic Chat
+### Getting Started
 
-1. Navigate to **Open WebUI** at http://192.168.1.170:3000
-2. Create an account (first signup becomes admin)
+1. Navigate to http://192.168.1.170:3001
+2. Create an account (first signup = admin)
 3. Select a model from the dropdown
 4. Start chatting!
 
-### Model Selection
+### Available Models (16 total)
 
-**CPU Models (Fast, lower quality):**
-- `llama3.2:3b` - Quick responses
-- `mistral:7b` - Good for coding
+**Vision Models** 🎨 (Image Understanding):
+- `llava:13b` - Full multimodal vision
+- `bakllava:latest` - Optimized variant
 
-**GPU Models (Higher quality):**
-- `llama3.2:latest` - Balanced
-- `llama3.2:70b` - Best quality (requires 48GB+ VRAM)
-- `codellama:34b` - Code generation
+**Coding Models** 💻:
+- `qwen2.5-coder:14b` - Best for Python/Web dev
+- `deepseek-coder-v2:16b` - Strong reasoning
+- `codellama:13b` - Multi-language support
 
-### Advanced Features
+**General Chat** 🗣️:
+- `llama3.1:8b` - Fast & capable
+- `phi4:latest` - Small but powerful  
+- `mistral:latest` - Efficient 7B
+- `gemma2:2b` - Ultra-fast responses
 
-**System Prompts:**
-Click the gear icon to set custom system prompts:
+**Embeddings** 📊 (RAG/Search):
+- `nomic-embed-text` - Text embeddings
+- `mxbai-embed-large` - Multilingual
+
+### Usage Examples
+
+#### Basic Chat
 ```
-You are a senior software engineer specializing in Python and Rust.
-Always explain your reasoning step by step.
+User: Write a Python function to validate email addresses
+Assistant: [Uses qwen2.5-coder:14b to generate code]
 ```
 
-**Context Length:**
-- Default: 4096 tokens
-- Increase for longer conversations: Settings → Models → Context Length
-
-**Multi-Model Chat:**
-Use `@model` to switch mid-conversation:
+#### Image Analysis
 ```
-@llama3.2:70b Analyze this code...
-@codellama:34b Now refactor it...
+User: [Upload image] What's in this photo?
+Assistant: [Uses llava:13b to analyze]
+```
+
+#### Document Q&A
+```
+User: [Upload PDF] Summarize the key points
+Assistant: [Processes via ingest service, uses RAG]
 ```
 
 ---
 
-## Web Search Integration
+## 🔌 LiteLLM API (OpenAI Compatible)
 
-### Using SearXNG in Chat
+### Base URL
+```
+http://192.168.1.170:4000
+```
 
-Enable web search for up-to-date information:
+### Python Example
 
-1. In Open WebUI, click the **globe icon** before sending
-2. Or use the command: `/search your query here`
+```python
+from openai import OpenAI
 
-### Direct SearXNG Access
+client = OpenAI(
+    base_url="http://192.168.1.170:4000/v1",
+    api_key="dummy"  # No auth required (change for production)
+)
 
-Access SearXNG directly at http://192.168.1.170:8080
+# Chat completion
+response = client.chat.completions.create(
+    model="ollama/qwen2.5-coder:14b",
+    messages=[
+        {"role": "system", "content": "You are an expert programmer"},
+        {"role": "user", "content": "Write a FastAPI hello world app"}
+    ]
+)
 
-**Search Shortcuts:**
-- `!gh term` - Search GitHub
-- `!so term` - Search Stack Overflow
-- `!wp term` - Search Wikipedia
-- `!hf term` - Search HuggingFace
-- `!ax term` - Search arXiv
+print(response.choices[0].message.content)
+```
 
-### API Usage
+### cURL Example
+
+```bash
+curl http://192.168.1.170:4000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "ollama/llama3.1:8b",
+    "messages": [{"role": "user", "content": "Hello!"}],
+    "stream": false
+  }'
+```
+
+### Streaming
+
+```python
+stream = client.chat.completions.create(
+    model="ollama/phi4:latest",
+    messages=[{"role": "user", "content": "Tell me a story"}],
+    stream=True
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="")
+```
+
+### List Available Models
+
+```bash
+curl http://192.168.1.170:4000/v1/models
+```
+
+---
+
+## 🎨 Image Generation (ComfyUI)
+
+### Access
+http://192.168.1.99:8188
+
+### Quick Start
+
+1. Open ComfyUI in browser
+2. Load a workflow (File → Load)
+3. Modify the prompt
+4. Click "Queue Prompt"
+
+### Workflow Library
+
+Pre-configured workflows in `/home/kang/self-hosted-ai/config/comfyui-workflows/`:
+
+| Workflow | Purpose | VRAM Required |
+|----------|---------|---------------|
+| basic-txt2img | Simple text→image | 4GB |
+| sdxl-high-quality | SDXL quality | 8GB |
+| img2img | Transform images | 6GB |
+| upscale-2x | Enhance resolution | 4GB |
+
+### Example: Generate Image
+
+```bash
+# Via API (requires workflow JSON)
+curl -X POST http://192.168.1.99:8188/prompt \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": {
+      "3": {
+        "inputs": {
+          "seed": 42,
+          "steps": 20,
+          "cfg": 8,
+          "sampler_name": "euler",
+          "scheduler": "normal",
+          "denoise": 1,
+          "text": "A beautiful sunset over mountains, 4k, detailed"
+        }
+      }
+    }
+  }'
+```
+
+### Tips
+
+- **Prompt quality matters**: Be descriptive!
+- **Steps**: 20-30 for most cases
+- **CFG Scale**: 7-9 for balanced results
+- **Negative prompts**: "blurry, low quality, distorted"
+
+---
+
+## 🎙️ Audio Transcription (Whisper)
+
+### Access
+http://192.168.1.99:9000
+
+### Transcribe Audio
+
+```bash
+curl -X POST http://192.168.1.99:9000/asr?task=transcribe \
+  -F "audio_file=@your_recording.mp3" \
+  -F "language=en"
+```
+
+### Python Example
+
+```python
+import requests
+
+files = {'audio_file': open('meeting.wav', 'rb')}
+params = {'task': 'transcribe', 'language': 'en'}
+
+response = requests.post(
+    'http://192.168.1.99:9000/asr',
+    files=files,
+    params=params
+)
+
+print(response.json()['text'])
+```
+
+### Supported Formats
+- MP3, WAV, M4A, FLAC, OGG
+- Max size: 25MB
+
+### Current Model
+- **Model**: `base` (low VRAM usage ~2GB)
+- **Accuracy**: Good for most use cases
+- **Speed**: Fast on GPU
+
+---
+
+## 🔄 Workflow Automation (N8N)
+
+### Access
+http://192.168.1.170:5678
+
+### Default Credentials
+- **Username**: admin
+- **Password**: admin (⚠️ Change this!)
+
+### Example Workflows
+
+#### 1. Document Processing Pipeline
+```
+Webhook → Download File → Ollama Summarize → Store in Qdrant
+```
+
+#### 2. Scheduled Image Generation
+```
+Cron → ComfyUI Generate → Upload to Storage → Notify
+```
+
+#### 3. Audio Transcription Flow
+```
+File Upload → Whisper ASR → Ollama Analyze → Save Results
+```
+
+### Connecting to Services
+
+Use internal Docker network names:
+- Ollama: `http://ollama-cpu-server:11434`
+- ComfyUI: `http://192.168.1.99:8188`
+- Whisper: `http://192.168.1.99:9000`
+- Qdrant: `http://qdrant-vector-db:6333`
+
+---
+
+## 🔍 Private Search (SearXNG)
+
+### Access
+http://192.168.1.170:8082
+
+### Features
+- No tracking
+- Aggregates multiple search engines
+- Can be integrated into chat responses
+
+### Search Shortcuts
+- `!gh python asyncio` - GitHub
+- `!so javascript promise` - Stack Overflow
+- `!wp machine learning` - Wikipedia
+- `!hf llama` - HuggingFace
+
+### API Search
 
 ```python
 import httpx
 
 response = httpx.get(
-    "http://192.168.1.170:8080/search",
+    "http://192.168.1.170:8082/search",
     params={
-        "q": "latest llama model",
-        "format": "json",
-        "engines": "google,duckduckgo,github"
+        "q": "latest AI models 2026",
+        "format": "json"
     }
 )
+
 results = response.json()
+for result in results['results']:
+    print(f"{result['title']}: {result['url']}")
 ```
 
 ---
 
-## Image Generation
+## 📊 Monitoring (Grafana)
 
-### Using ComfyUI (Node-Based)
+### Access
+http://192.168.1.170:3000
 
-**Best for:** Complex workflows, pipelines, fine control
+### Default Credentials
+- **Username**: admin
+- **Password**: admin
 
-1. Access at http://192.168.1.99:8188
-2. Load a workflow from the sidebar
-3. Modify prompts and settings
-4. Click "Queue Prompt"
+### Available Dashboards
+- **System Overview**: CPU, RAM, disk usage
+- **GPU Metrics**: VRAM, utilization, temperature
+- **Service Health**: All containers status
+- **API Metrics**: Request rates, latency
 
-**Available Workflows:**
-| Workflow | Description | VRAM |
-|----------|-------------|------|
-| txt2img-sdxl | High-quality text to image | 8GB |
-| txt2img-flux-schnell | Fast FLUX generation | 12GB |
-| img2img-sdxl | Transform existing images | 8GB |
-| upscale-2x | Upscale with Real-ESRGAN | 4GB |
-| pipeline-full-agentic | Full gen→refine→upscale | 14GB |
-
-### Using A1111 WebUI (User-Friendly)
-
-**Best for:** Quick generation, beginners, extensions
-
-1. Access at http://192.168.1.99:7860
-2. Enter your prompt
-3. Adjust settings (steps, CFG, sampler)
-4. Click "Generate"
-
-**Recommended Settings:**
-```
-Steps: 25-35
-CFG Scale: 7-9
-Sampler: DPM++ 2M Karras
-Size: 1024x1024 (SDXL) / 512x768 (SD 1.5)
-```
-
-### Via Open WebUI
-
-Generate images directly in chat:
-
-1. Click the **image icon** or type `/image`
-2. Describe what you want
-3. Select engine (ComfyUI/A1111/Auto)
-
-**Example prompts:**
-```
-/image A futuristic cityscape at sunset, cyberpunk style, neon lights
-/image Portrait of a wise wizard, detailed, fantasy art, 4k
-```
-
----
-
-## Video Generation
-
-### Text-to-Video with WAN
-
-1. Open ComfyUI at http://192.168.1.99:8188
-2. Load `text2video-wan.json` workflow
-3. Enter prompt in the positive text box
-4. Set frame count (24 = 1 second)
-5. Queue and wait (~2-5 minutes)
-
-**Tips:**
-- Start with simple prompts
-- Use motion keywords: "walking", "flying", "flowing"
-- Keep videos short (1-3 seconds)
-
-### Image-to-Video with SVD
-
-1. Load `text2video-svd.json`
-2. Upload a source image
-3. The model will animate it
-
----
-
-## Audio Transcription
-
-### Via API
-
-```python
-import httpx
-
-with open("audio.mp3", "rb") as f:
-    response = httpx.post(
-        "http://192.168.1.99:9000/asr",
-        files={"audio_file": f},
-        params={"output": "json"}
-    )
-    
-transcription = response.json()
-print(transcription["text"])
-```
-
-### In Workflows
-
-Use the `audio2img.json` workflow to:
-1. Transcribe audio
-2. Generate image from transcription
-
----
-
-## Document Processing
-
-### Automatic Ingestion
-
-Drop files into watch directories:
-- `/data/ingest/` - Auto-processed
-- `/data/documents/` - Auto-processed
-
-**Supported formats:**
-- Documents: PDF, DOCX, TXT, MD, HTML
-- Code: PY, JS, TS, JSON, YAML
-- Images: PNG, JPG (with OCR)
-- Audio: MP3, WAV (with transcription)
-
-### Manual Ingestion
+### Quick Health Check
 
 ```bash
-curl -X POST http://192.168.1.170:8200/ingest \
-  -H "Content-Type: application/json" \
-  -d '{"filepath": "/data/documents/report.pdf", "collection": "reports"}'
-```
+# Check all services
+docker ps --format "table {{.Names}}\t{{.Status}}"
 
-### Upload via API
-
-```python
-import httpx
-
-with open("document.pdf", "rb") as f:
-    response = httpx.post(
-        "http://192.168.1.170:8200/ingest/upload",
-        files={"file": f},
-        data={"collection": "my-docs"}
-    )
+# Check specific service logs
+docker logs -f open-webui-server
+docker logs -f litellm-proxy
+docker logs -f n8n-server
 ```
 
 ---
 
-## Research Workflows
+## 🛠️ Model Management
 
-### Automated Research
-
-Trigger via API:
+### List Models
 
 ```bash
-curl -X POST http://192.168.1.170:8300/api/research \
-  -H "Content-Type: application/json" \
-  -d '{
-    "topic": "Latest developments in AI safety",
-    "depth": "comprehensive",
-    "generate_visuals": true
-  }'
+# CPU models
+curl http://192.168.1.170:11434/api/tags | jq '.models[].name'
+
+# GPU models
+curl http://192.168.1.99:11435/api/tags | jq '.models[].name'
 ```
-
-### Research in Chat
-
-Use the `/research` command:
-```
-/research quantum computing applications in drug discovery
-```
-
-This will:
-1. Expand your query into multiple searches
-2. Search across academic and general sources
-3. Synthesize findings
-4. Generate a comprehensive report
-
----
-
-## Model Management
 
 ### Pull New Models
 
-**Via CLI (on respective node):**
 ```bash
-# GPU worker (for large models)
-docker exec ollama-gpu-worker ollama pull llama3.2:70b
-
-# Server (for CPU models)
+# On CPU server
 docker exec ollama-cpu-server ollama pull mistral:7b
+
+# On GPU worker
+docker exec ollama-gpu-worker ollama pull llama3.1:70b
 ```
 
-**Via Open WebUI:**
-Settings → Models → Pull a model
+### Remove Models
 
-### Sync Local Models
-
-From your development machine:
 ```bash
-# Sync all models to GPU worker
-./scripts/sync-models.sh sync
-
-# Sync specific type
-./scripts/sync-models.sh sync checkpoints
-
-# Check what would sync
-./scripts/sync-models.sh --dry-run sync
+docker exec ollama-cpu-server ollama rm mistral:7b
 ```
 
-### Model Locations
+### Sync Models Between Nodes
 
-| Type | Path on GPU Worker |
-|------|-------------------|
-| Ollama | /data/ollama-gpu/ |
-| ComfyUI Checkpoints | /data/comfyui/models/checkpoints/ |
-| ComfyUI LoRAs | /data/comfyui/models/loras/ |
-| ComfyUI VAE | /data/comfyui/models/vae/ |
-| A1111 | /data/models/ |
-| Whisper | /data/whisper/ |
+```bash
+# Use the sync script
+/home/kang/self-hosted-ai/scripts/sync-models-from-akula.sh
+```
+
+### Model Storage Locations
+
+| Node | Path |
+|------|------|
+| CPU Server | `/data/ollama-cpu/models/` |
+| GPU Worker | `/data/ollama-gpu/models/` |
 
 ---
 
-## GPU Resource Management
+## 🎯 Common Use Cases
 
-### How It Works
-
-The GPU Manager automatically:
-- Allocates full GPU when only one service is active
-- Splits resources fairly when multiple services run
-- Prioritizes based on task type (inference > generation)
-
-### Check Status
-
-```bash
-curl http://192.168.1.99:8100/status
-```
-
-Response:
-```json
-{
-  "gpus": [{
-    "index": 0,
-    "name": "NVIDIA RTX 4090",
-    "total_memory_mb": 24576,
-    "used_memory_mb": 8192,
-    "free_memory_mb": 16384,
-    "utilization_percent": 45
-  }],
-  "allocations": {...}
-}
-```
-
-### Manual Allocation (Advanced)
+### 1. Code Assistant
 
 ```python
-import httpx
+from openai import OpenAI
 
-# Request GPU allocation
-response = httpx.post(
-    "http://192.168.1.99:8100/allocate",
-    json={
-        "service": "comfyui",
-        "priority": "high",
-        "estimated_vram_mb": 10000,
-        "estimated_duration_s": 60
-    }
+client = OpenAI(
+    base_url="http://192.168.1.170:4000/v1",
+    api_key="dummy"
 )
-allocation = response.json()
 
-# ... do work ...
-
-# Release allocation
-httpx.post(
-    "http://192.168.1.99:8100/release",
-    json={"allocation_id": allocation["allocation_id"]}
+response = client.chat.completions.create(
+    model="ollama/qwen2.5-coder:14b",
+    messages=[
+        {"role": "system", "content": "You are a senior Python developer"},
+        {"role": "user", "content": "Write a async function to fetch URLs in parallel"}
+    ]
 )
+
+print(response.choices[0].message.content)
 ```
 
----
+### 2. Image Analysis
 
-## Monitoring & Observability
-
-### Grafana Dashboards
-
-Access at http://192.168.1.170:3001
-
-**Pre-configured dashboards:**
-- System Overview
-- GPU Metrics
-- Request Latency
-- Model Performance
-
-### Prometheus Metrics
-
-Access at http://192.168.1.170:9090
-
-**Key metrics:**
-- `ollama_requests_total` - Request count
-- `gpu_memory_used_mb` - GPU memory usage
-- `comfyui_queue_length` - Generation queue
-- `ingest_documents_processed` - Documents processed
-
-### Health Checks
-
-All services expose `/health` endpoints:
 ```bash
-# Quick health check script
-for svc in "192.168.1.170:3000" "192.168.1.170:8080" "192.168.1.99:11434" "192.168.1.99:8188"; do
-  echo -n "$svc: "
-  curl -s -o /dev/null -w "%{http_code}" "http://$svc/health" || echo "FAIL"
-  echo
-done
+# Encode image
+IMAGE_B64=$(base64 -w 0 photo.jpg)
+
+# Analyze with vision model
+curl http://192.168.1.99:11435/api/generate \
+  -d "{
+    \"model\": \"llava:13b\",
+    \"prompt\": \"Describe this image in detail\",
+    \"images\": [\"$IMAGE_B64\"],
+    \"stream\": false
+  }"
+```
+
+### 3. Document Summarization
+
+1. Upload document to ingest service:
+```bash
+curl -X POST http://192.168.1.170:8200/upload \
+  -F "file=@report.pdf"
+```
+
+2. Wait for processing (~5-10 seconds)
+
+3. Query via chat or API:
+```python
+response = client.chat.completions.create(
+    model="ollama/llama3.1:8b",
+    messages=[{"role": "user", "content": "Summarize the uploaded report"}]
+)
+```
+
+### 4. Batch Image Generation
+
+```python
+import requests
+import json
+
+workflow = json.load(open('workflow.json'))
+
+for i, prompt in enumerate(prompts):
+    workflow['3']['inputs']['text'] = prompt
+    workflow['3']['inputs']['seed'] = i
+    
+    requests.post(
+        'http://192.168.1.99:8188/prompt',
+        json={'prompt': workflow}
+    )
+    print(f"Queued: {prompt[:50]}...")
 ```
 
 ---
 
-## Tips & Best Practices
+## 🔐 Security Recommendations
 
-### Performance
+### 1. Change Default Passwords
 
-1. **Keep models loaded**: Set `OLLAMA_KEEP_ALIVE=30m` to avoid reload delays
-2. **Use appropriate models**: Don't use 70B for simple tasks
-3. **Batch operations**: Queue multiple images at once
+```bash
+# N8N
+docker exec -it n8n-server n8n user-management:reset --email=admin
 
-### Quality
+# Grafana
+docker exec -it grafana grafana-cli admin reset-admin-password newpassword
+```
 
-1. **Good prompts**: Be specific, descriptive
-2. **Negative prompts**: Exclude unwanted elements
-3. **Iterative refinement**: Start simple, add detail
+### 2. Enable LiteLLM Authentication
 
-### Cost/Resources
+Edit `/home/kang/self-hosted-ai/config/litellm-config.yml`:
+```yaml
+general_settings:
+  master_key: "your-secure-random-key-here"
+```
 
-1. **Monitor GPU usage**: Watch Grafana for bottlenecks
-2. **Schedule heavy tasks**: Run batch jobs during low-usage periods
-3. **Clean up outputs**: Periodically clean generated images/videos
+Then use in requests:
+```bash
+curl http://192.168.1.170:4000/v1/chat/completions \
+  -H "Authorization: Bearer your-secure-random-key-here" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "ollama/llama3.1:8b", "messages": [...]}'
+```
+
+### 3. Setup Traefik TLS (Optional)
+
+```bash
+# Generate certificates
+/home/kang/self-hosted-ai/scripts/setup-traefik-tls.sh generate
+
+# Then access via HTTPS:
+# https://ai.yourdomain.com
+# https://api.yourdomain.com
+```
 
 ---
 
-*For more detailed guides, see the [Workflow Guides](WORKFLOW_GUIDES.md) and [How to Build](HOW_TO_BUILD.md).*
+## 🐛 Troubleshooting
+
+### Service Won't Start
+
+```bash
+# Check logs
+docker logs <service-name>
+
+# Check resources
+docker stats
+
+# Restart service
+docker restart <service-name>
+```
+
+### Out of Memory
+
+```bash
+# Check system memory
+free -h
+
+# Check container limits
+docker stats
+
+# Solution: Use smaller models or increase swap
+```
+
+### Slow Inference
+
+- **Check GPU**: `curl http://192.168.1.99:8100/gpu/stats`
+- **Use smaller models**: phi4 instead of llama3.1:70b
+- **Reduce context length**: Set max_tokens lower
+
+### ComfyUI Out of VRAM
+
+Edit `gpu-worker/docker-compose.yml`:
+```yaml
+comfyui-gpu:
+  environment:
+    - CLI_ARGS=--lowvram  # For <8GB VRAM
+```
+
+### Ingest Service Not Watching Files
+
+```bash
+# Check inotify limits
+cat /proc/sys/fs/inotify/max_user_watches
+
+# Increase if needed
+sudo /home/kang/self-hosted-ai/scripts/configure-host-system.sh
+```
+
+### SearXNG Restarting
+
+Known issue with Python 3.14 threading. Service is functional but may restart periodically. Workaround being investigated.
+
+---
+
+## 🔄 Maintenance
+
+### Update Services
+
+```bash
+# Pull latest images
+docker compose --profile full pull
+
+# Restart with new images
+docker compose --profile full up -d
+
+# Check GPU worker
+cd gpu-worker && docker compose --profile full pull && docker compose --profile full up -d
+```
+
+### Backup Data
+
+```bash
+# Run backup script
+/home/kang/self-hosted-ai/scripts/backup-components.sh
+
+# Backups saved to: /data/backups/
+```
+
+### Clean Up
+
+```bash
+# Remove unused images/containers
+docker system prune -a
+
+# Check disk space
+df -h /data
+```
+
+### Database Maintenance
+
+```bash
+# PostgreSQL vacuum
+docker exec postgres-server psql -U litellm -d litellm -c "VACUUM ANALYZE;"
+
+# Check database size
+docker exec postgres-server psql -U postgres -c "\l+"
+```
+
+---
+
+## 📚 Advanced Topics
+
+### Custom RAG Pipeline
+
+```python
+from qdrant_client import QdrantClient
+import ollama
+
+# Initialize
+qdrant = QdrantClient(url="http://192.168.1.170:6333")
+ollama_client = ollama.Client(host="http://192.168.1.170:11434")
+
+# Embed query
+query = "How does async/await work?"
+embedding = ollama_client.embeddings(
+    model="nomic-embed-text",
+    prompt=query
+)
+
+# Search vectors
+results = qdrant.search(
+    collection_name="documents",
+    query_vector=embedding['embedding'],
+    limit=5
+)
+
+# Generate with context
+context = "\n".join([r.payload['text'] for r in results])
+response = ollama_client.generate(
+    model="qwen2.5-coder:14b",
+    prompt=f"Context:\n{context}\n\nQuestion: {query}\n\nAnswer:"
+)
+
+print(response['response'])
+```
+
+### Distributed Inference
+
+Route large models to GPU worker via LiteLLM config:
+```yaml
+model_list:
+  - model_name: llama-gpu
+    litellm_params:
+      model: ollama/llama3.1:70b
+      api_base: http://192.168.1.99:11435
+```
+
+### ComfyUI Custom Nodes
+
+```bash
+# SSH into GPU worker
+ssh akula-prime
+
+# Navigate to custom nodes
+cd /data/comfyui/custom_nodes
+
+# Clone node repository
+git clone https://github.com/author/custom-node
+
+# Restart ComfyUI
+docker restart comfyui-gpu
+```
+
+---
+
+## 📞 Support & Resources
+
+### Documentation
+- [Quick Start](QUICKSTART.md)
+- [Deployment Guide](DEPLOYMENT.md)
+- [Gap Remediation](GAP_REMEDIATION_GUIDE.md)
+
+### Health Endpoints
+
+| Service | Endpoint |
+|---------|----------|
+| LiteLLM | http://192.168.1.170:4000/health |
+| Open WebUI | http://192.168.1.170:3001/health |
+| Ollama CPU | http://192.168.1.170:11434/api/tags |
+| Ollama GPU | http://192.168.1.99:11435/api/tags |
+| Qdrant | http://192.168.1.170:6333/health |
+
+### Logs
+
+```bash
+# View all service logs
+docker compose logs -f
+
+# Specific service
+docker logs -f open-webui-server
+
+# Last 100 lines
+docker logs --tail 100 litellm-proxy
+```
+
+---
+
+## 🎓 Quick Recipes
+
+### Recipe 1: Chat with Code Review
+
+```bash
+curl http://192.168.1.170:4000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "ollama/qwen2.5-coder:14b",
+    "messages": [
+      {"role": "system", "content": "You are a code reviewer. Be thorough and constructive."},
+      {"role": "user", "content": "Review this code:\n\n```python\ndef process(data):\n    return [x*2 for x in data]\n```"}
+    ]
+  }'
+```
+
+### Recipe 2: Generate & Analyze Image
+
+```bash
+# 1. Generate image via ComfyUI
+curl -X POST http://192.168.1.99:8188/prompt -d @workflow.json
+
+# 2. Wait for completion
+sleep 30
+
+# 3. Analyze with vision model
+IMAGE_B64=$(base64 -w 0 /data/comfyui/output/image.png)
+curl http://192.168.1.99:11435/api/generate \
+  -d "{\"model\": \"llava:13b\", \"prompt\": \"Describe this\", \"images\": [\"$IMAGE_B64\"]}"
+```
+
+### Recipe 3: Transcribe → Summarize
+
+```python
+import requests
+
+# Transcribe
+files = {'audio_file': open('meeting.mp3', 'rb')}
+transcription = requests.post(
+    'http://192.168.1.99:9000/asr',
+    files=files
+).json()['text']
+
+# Summarize
+from openai import OpenAI
+client = OpenAI(base_url="http://192.168.1.170:4000/v1", api_key="dummy")
+
+summary = client.chat.completions.create(
+    model="ollama/llama3.1:8b",
+    messages=[
+        {"role": "system", "content": "Summarize meeting transcripts concisely"},
+        {"role": "user", "content": transcription}
+    ]
+).choices[0].message.content
+
+print(summary)
+```
+
+---
+
+**Current Stack Status**: ✅ All core services operational  
+**Model Count**: 16 models across CPU and GPU nodes  
+**Multi-Modal**: Text, Image, Audio capabilities active  
+**Last Updated**: January 13, 2026
+

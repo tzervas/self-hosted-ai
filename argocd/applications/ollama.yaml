@@ -7,15 +7,16 @@ metadata:
     argocd.argoproj.io/sync-wave: "5"  # Deploy after GPU operator (wave 3)
 spec:
   project: default
-  source:
-    # Repository: https://otwld.github.io/helm-charts (migrated from helm.otwld.com)
-    # Version: 1.37.0 (latest with GPU support and security improvements)
-    chart: ollama
-    repoURL: https://otwld.github.io/helm-charts
-    targetRevision: 1.37.0
-    helm:
-      valueFiles:
-        - values.yaml
+  sources:
+    - chart: ollama
+      repoURL: https://otwld.github.io/helm-charts
+      targetRevision: 1.37.0
+      helm:
+        valueFiles:
+          - values.yaml
+    - repoURL: https://github.com/tzervas/self-hosted-ai
+      targetRevision: main
+      path: argocd/helm/ollama
   destination:
     server: https://kubernetes.default.svc
     namespace: ollama

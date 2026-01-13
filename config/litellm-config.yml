@@ -229,16 +229,15 @@ router_settings:
 
 general_settings:
   master_key: ${LITELLM_MASTER_KEY}
-  database_url: ${DATABASE_URL:-postgresql://litellm:litellm@postgres:5432/litellm}
+  # Database URL passed via environment variable DATABASE_URL
+  # Connection pool settings (helps prevent connection exhaustion)
+  database_connection_pool_limit: 20
+  database_connection_timeout: 30
   
-  # Request queue settings
-  max_parallel_requests: 100
-  request_timeout: 600
-  
-  # Alert settings
-  alerting:
-    - slack
-    - webhook
+  # Alert settings - disabled (requires SLACK_WEBHOOK_URL)
+  # alerting:
+  #   - slack
+  #   - webhook
   alerting_threshold: 300  # Alert if request takes > 5 minutes
   
   # Logging
@@ -280,18 +279,17 @@ litellm_settings:
   # Request callbacks for metrics
   success_callback:
     - prometheus
-    - langfuse
   failure_callback:
     - prometheus
-    - langfuse
   
-  # Caching
-  cache: true
-  cache_params:
-    type: redis
-    host: ${REDIS_HOST:-redis}
-    port: ${REDIS_PORT:-6379}
-    namespace: litellm_cache
+  # Caching - disabled due to issues with env var expansion
+  # Enable manually after verifying Redis connectivity
+  cache: false
+  # cache_params:
+  #   type: redis
+  #   host: redis
+  #   port: 6379
+  #   namespace: litellm_cache
 
 # =============================================================================
 # API Key Configuration (Managed via manage-keys.sh)
@@ -311,21 +309,15 @@ litellm_settings:
 # - tier-3 (batch): 20 RPM, priority: low
 
 # =============================================================================
-# Guardrails & Safety
+# Guardrails & Safety - Disabled (requires proper config)
 # =============================================================================
 
-guardrails:
-  # Input validation
-  max_input_tokens: 128000
-  max_output_tokens: 32000
-  
-  # Content filtering (optional)
-  # enable_moderation: true
-  # moderation_model: openai/text-moderation-latest
-  
-  # PII detection (optional)
-  # enable_pii_detection: true
-  # pii_detection_method: presidio
+# guardrails:
+#   - guardrail_id: input_validation
+#     guardrail_name: input_validator
+#     litellm_params:
+#       max_input_tokens: 128000
+#       max_output_tokens: 32000
 
 # =============================================================================
 # Prometheus Metrics
@@ -360,8 +352,9 @@ prometheus:
 # Langfuse Integration (Optional - for tracing)
 # =============================================================================
 
-langfuse:
-  enabled: ${LANGFUSE_ENABLED:-false}
-  public_key: ${LANGFUSE_PUBLIC_KEY:-}
-  secret_key: ${LANGFUSE_SECRET_KEY:-}
-  host: ${LANGFUSE_HOST:-https://cloud.langfuse.com}
+# Langfuse Integration (Optional - disabled until configured)
+# langfuse:
+#   enabled: false
+#   public_key: ""
+#   secret_key: ""
+#   host: https://cloud.langfuse.com

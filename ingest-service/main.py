@@ -36,6 +36,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import httpx
 from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
 
 # Configure logging
@@ -467,7 +468,34 @@ config = IngestConfig(
 
 processor = DocumentProcessor(config)
 watcher = DirectoryWatcher(processor, config.supported_extensions)
-observer = Observer()
+
+# Use PollingObserver as fallback when inotify limits are exceeded
+# Set USE_POLLING=true env var or it will auto-fallback on inotify errors
+USE_POLLING = os.environ.get("USE_POLLING", "false").lower() == "true"
+
+def create_observer():
+    """Create file system observer with automatic fallback to polling."""
+    if USE_POLLING:
+        logger.info("Using PollingObserver (explicit configuration)")
+        return PollingObserver(timeout=5)
+    try:
+        obs = Observer()
+        # Test if inotify works by checking watch limit
+        import subprocess
+        result = subprocess.run(
+            ["cat", "/proc/sys/fs/inotify/max_user_watches"],
+            capture_output=True, text=True
+        )
+        max_watches = int(result.stdout.strip()) if result.returncode == 0 else 0
+        if max_watches < 8192:
+            logger.warning(f"Low inotify limit ({max_watches}), using PollingObserver")
+            return PollingObserver(timeout=5)
+        return obs
+    except Exception as e:
+        logger.warning(f"inotify check failed ({e}), using PollingObserver")
+        return PollingObserver(timeout=5)
+
+observer = create_observer()
 
 
 @asynccontextmanager

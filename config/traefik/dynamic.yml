@@ -1,0 +1,144 @@
+# Traefik Dynamic Configuration
+# Place in ${DATA_PATH}/traefik/config/dynamic.yml
+
+http:
+  # =============================================================================
+  # Routers
+  # =============================================================================
+  routers:
+    # Open WebUI - Main interface
+    openwebui:
+      rule: "Host(`ai.{{ env \"DOMAIN\" }}`)"
+      entryPoints:
+        - websecure
+      service: openwebui
+      tls: {}
+
+    # LiteLLM API Gateway
+    litellm:
+      rule: "Host(`api.{{ env \"DOMAIN\" }}`)"
+      entryPoints:
+        - websecure
+      service: litellm
+      tls: {}
+
+    # N8N Workflow Automation
+    n8n:
+      rule: "Host(`n8n.{{ env \"DOMAIN\" }}`)"
+      entryPoints:
+        - websecure
+      service: n8n
+      tls: {}
+
+    # SearXNG Search
+    searxng:
+      rule: "Host(`search.{{ env \"DOMAIN\" }}`)"
+      entryPoints:
+        - websecure
+      service: searxng
+      tls: {}
+
+    # Grafana Monitoring
+    grafana:
+      rule: "Host(`grafana.{{ env \"DOMAIN\" }}`)"
+      entryPoints:
+        - websecure
+      service: grafana
+      tls: {}
+
+    # ComfyUI (GPU Worker) - Image Generation
+    comfyui:
+      rule: "Host(`comfyui.{{ env \"DOMAIN\" }}`)"
+      entryPoints:
+        - websecure
+      service: comfyui
+      tls: {}
+
+    # Whisper (GPU Worker) - Audio Transcription
+    whisper:
+      rule: "Host(`whisper.{{ env \"DOMAIN\" }}`)"
+      entryPoints:
+        - websecure
+      service: whisper
+      tls: {}
+
+  # =============================================================================
+  # Services
+  # =============================================================================
+  services:
+    openwebui:
+      loadBalancer:
+        servers:
+          - url: "http://open-webui:8080"
+        healthCheck:
+          path: /health
+          interval: "30s"
+          timeout: "5s"
+
+    litellm:
+      loadBalancer:
+        servers:
+          - url: "http://litellm:4000"
+        healthCheck:
+          path: /health
+          interval: "30s"
+          timeout: "5s"
+
+    n8n:
+      loadBalancer:
+        servers:
+          - url: "http://n8n:5678"
+
+    searxng:
+      loadBalancer:
+        servers:
+          - url: "http://searxng:8080"
+        healthCheck:
+          path: /healthz
+          interval: "30s"
+          timeout: "5s"
+
+    grafana:
+      loadBalancer:
+        servers:
+          - url: "http://grafana:3000"
+
+    # GPU Worker services (external to this compose)
+    comfyui:
+      loadBalancer:
+        servers:
+          - url: "http://{{ env \"GPU_WORKER_HOST\" }}:8188"
+        healthCheck:
+          path: /system_stats
+          interval: "60s"
+          timeout: "10s"
+
+    whisper:
+      loadBalancer:
+        servers:
+          - url: "http://{{ env \"GPU_WORKER_HOST\" }}:9000"
+        healthCheck:
+          path: /health
+          interval: "60s"
+          timeout: "10s"
+
+# =============================================================================
+# TLS Configuration
+# =============================================================================
+tls:
+  # Default certificate (self-signed or custom)
+  certificates:
+    - certFile: /certs/cert.pem
+      keyFile: /certs/key.pem
+
+  # TLS options
+  options:
+    default:
+      minVersion: VersionTLS12
+      cipherSuites:
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+        - TLS_AES_128_GCM_SHA256
+        - TLS_AES_256_GCM_SHA384
+        - TLS_CHACHA20_POLY1305_SHA256

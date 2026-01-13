@@ -7,7 +7,7 @@ services:
     volumes:
       - ${DATA_PATH:-/data}/open-webui:/app/backend/data
     environment:
-      - OLLAMA_BASE_URLS=http://ollama-cpu:11434;http://${GPU_WORKER_HOST:-192.168.1.99}:11434
+      - OLLAMA_BASE_URLS=http://ollama-cpu:11434;http://${GPU_WORKER_HOST:-192.168.1.99}:${GPU_WORKER_PORT:-11434}
       - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY}
       - WEBUI_NAME=${WEBUI_NAME:-Self-Hosted AI Server}
       - ENABLE_SIGNUP=${ENABLE_SIGNUP:-true}
@@ -67,6 +67,8 @@ services:
     environment:
       - SEARXNG_BASE_URL=http://${SERVER_HOST:-192.168.1.170}:${SEARXNG_PORT:-8082}
       - SEARXNG_SECRET_KEY=${SEARXNG_SECRET_KEY:-change-me-secure-key}
+    depends_on:
+      - searxng-redis
     cap_drop:
       - ALL
     cap_add:
@@ -190,3 +192,164 @@ services:
     restart: unless-stopped
     profiles:
       - monitoring
+
+  # =============================================================================
+  # N8N - Workflow Automation
+  # =============================================================================
+  n8n:
+    image: n8nio/n8n:1.73.1
+    container_name: n8n-server
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    volumes:
+      - ${DATA_PATH:-/data}/n8n:/home/node/.n8n
+    environment:
+      - N8N_HOST=${N8N_HOST:-0.0.0.0}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
+      - WEBHOOK_URL=${N8N_WEBHOOK_URL:-http://localhost:5678}
+      - GENERIC_TIMEZONE=${TZ:-America/New_York}
+      # Security
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_USER:-admin}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD:-changeme}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-}
+      # Execution settings
+      - EXECUTIONS_PROCESS=main
+      - EXECUTIONS_DATA_PRUNE=true
+      - EXECUTIONS_DATA_MAX_AGE=168
+    user: "1000:1000"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:5678/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+    profiles:
+      - full
+      - automation
+
+  # Redis for SearXNG (separate instance to avoid conflicts)
+  searxng-redis:
+    image: redis:8.4.0-alpine
+    container_name: searxng-redis
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - ${DATA_PATH:-/data}/searxng-redis:/data
+    restart: unless-stopped
+    profiles:
+      - basic
+      - full
+      - monitoring
+      - search
+
+  # =============================================================================
+  # Traefik - Reverse Proxy with TLS
+  # =============================================================================
+  traefik:
+    image: traefik:v3.3
+    container_name: traefik-server
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Dashboard (disable in production)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${DATA_PATH:-/data}/traefik/certs:/certs
+      - ${DATA_PATH:-/data}/traefik/config:/config
+    command:
+      # API and Dashboard
+      - "--api.dashboard=true"
+      - "--api.insecure=true"  # Remove in production
+      # Providers
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=self-hosted-ai"
+      - "--providers.file.directory=/config"
+      - "--providers.file.watch=true"
+      # Entrypoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # HTTP to HTTPS redirect
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      # TLS configuration
+      - "--entrypoints.websecure.http.tls=true"
+      # Logging
+      - "--log.level=INFO"
+      - "--accesslog=true"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+    restart: unless-stopped
+    profiles:
+      - secure
+      - production
+
+  # =============================================================================
+  # LiteLLM - Unified API Gateway
+  # =============================================================================
+  litellm:
+    image: ghcr.io/berriai/litellm:v1.80.11-stable
+    container_name: litellm-proxy
+    ports:
+      - "${LITELLM_PORT:-4000}:4000"
+      - "${LITELLM_METRICS_PORT:-9091}:9090"
+    environment:
+      # Database URL - password special chars must be URL-encoded
+      - "DATABASE_URL=postgresql://${POSTGRES_USER:-litellm}:${POSTGRES_PASSWORD:-litellm}@postgres:5432/${POSTGRES_DB:-litellm}"
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-litellm-master-key-changeme}
+      - OLLAMA_CPU_URL=http://ollama-cpu:11434
+      - OLLAMA_GPU_URL=http://${GPU_WORKER_HOST:-192.168.1.99}:${GPU_WORKER_PORT:-11434}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - ../config/litellm-config.yml:/app/config.yaml:ro
+    command: --config /app/config.yaml --port 4000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4000/health/readiness')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+    profiles:
+      - full
+      - api-gateway
+
+  # =============================================================================
+  # PostgreSQL - Database for LiteLLM
+  # =============================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-server
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-litellm}
+      - POSTGRES_USER=${POSTGRES_USER:-litellm}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-litellm}
+    volumes:
+      - ${DATA_PATH:-/data}/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-litellm} -d ${POSTGRES_DB:-litellm}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    profiles:
+      - full
+      - api-gateway
+
+networks:
+  default:
+    name: self-hosted-ai
+    driver: bridge

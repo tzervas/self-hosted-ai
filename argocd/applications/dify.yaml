@@ -9,16 +9,16 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  source:
-    # Migrated from Git-based deployment to upstream Helm chart
-    # Repository: https://langgenius.github.io/dify-helm (official Dify Helm repo)
-    # Version: 3.7.3 (latest stable with AI agent workflow improvements)
-    chart: dify
-    repoURL: https://langgenius.github.io/dify-helm
-    targetRevision: 3.7.3
-    helm:
-      valueFiles:
-        - values.yaml
+  sources:
+    - chart: dify
+      repoURL: https://langgenius.github.io/dify-helm
+      targetRevision: 3.7.3
+      helm:
+        valueFiles:
+          - values.yaml
+    - repoURL: https://github.com/tzervas/self-hosted-ai
+      targetRevision: main
+      path: argocd/helm/dify
   destination:
     server: https://kubernetes.default.svc
     namespace: dify

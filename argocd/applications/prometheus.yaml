@@ -9,15 +9,16 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  source:
-    # Repository: https://prometheus-community.github.io/helm-charts (official Prometheus)
-    # Version: 80.13.3 (latest kube-prometheus-stack with monitoring capabilities)
-    chart: kube-prometheus-stack
-    repoURL: https://prometheus-community.github.io/helm-charts
-    targetRevision: 80.13.3
-    helm:
-      valueFiles:
-        - values.yaml
+  sources:
+    - chart: kube-prometheus-stack
+      repoURL: https://prometheus-community.github.io/helm-charts
+      targetRevision: 80.13.3
+      helm:
+        valueFiles:
+          - values.yaml
+    - repoURL: https://github.com/tzervas/self-hosted-ai
+      targetRevision: main
+      path: argocd/helm/prometheus
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
