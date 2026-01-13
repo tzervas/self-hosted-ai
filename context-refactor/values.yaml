@@ -4,6 +4,7 @@
 # Chart: otwld/ollama
 # Repository: https://helm.otwld.com (NOT otwld.github.io - migrated)
 # Version: 0.24.x
+# Security: runAsNonRoot with UID 1000 for container security
 # =============================================================================
 # CRITICAL: Original plan referenced non-existent models:
 # - qwen2.5-coder:72b-instruct-q4_k_m → DOES NOT EXIST (max is 32B)
@@ -17,6 +18,13 @@ image:
   repository: ollama/ollama
   pullPolicy: IfNotPresent
   # tag: latest  # Use default, includes CUDA support
+
+# Security Context - Non-root execution for security hardening
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000  # Non-privileged user
+  runAsGroup: 1000
+  fsGroup: 1000
 
 # GPU Configuration
 ollama:
@@ -39,11 +47,11 @@ ollama:
       - qwen2.5-coder:7b-instruct
       # Embeddings - tiny footprint (~274MB)
       - nomic-embed-text
-      
+
     # Model to run immediately on startup (keeps warm)
     run:
       - llama3.2:8b
-      
+
     # Custom Modelfiles - create specialized variants
     create:
       # Primary spec-driven coding assistant

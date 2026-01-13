@@ -13,3 +13,5 @@ The `helm/LICENSE` file contains the Apache License 2.0 under which the Helm bin
 - **Source**: https://github.com/helm/helm
 
 The Helm binary is redistributed here for convenience in deployment scripts and CI/CD pipelines.
+
+**Rationale**: Helm is bundled to ensure consistent versions across development and CI environments, avoiding version conflicts and ensuring reproducible deployments. The Apache 2.0 license permits redistribution with attribution.
