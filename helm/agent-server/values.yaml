@@ -1,0 +1,150 @@
+# Agent Server Helm Chart Values
+
+replicaCount: 1
+
+image:
+  repository: self-hosted-ai/agent-server
+  tag: latest
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 8000
+  metricsPort: 9090
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: agents.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Environment configuration
+config:
+  # Database
+  databaseUrl: "postgresql+asyncpg://agent:agent@postgres:5432/agent_server"
+  redisUrl: "redis://redis:6379/1"
+  
+  # LiteLLM Backend
+  litellmUrl: "http://litellm:4000"
+  
+  # Ollama Direct (fallback)
+  ollamaGpuUrl: "http://gpu-worker-ollama:11434"
+  ollamaCpuUrl: "http://ollama-cpu:11434"
+  
+  # Agent Defaults
+  defaultModel: "qwen2.5-coder:14b"
+  defaultTemperature: "0.7"
+  defaultTimeout: "300"
+  maxConcurrentAgents: "10"
+  
+  # API Key Rotation
+  apiKeyRotationDays: "90"
+  apiKeyWarningDays: "80"
+  
+  # Logging
+  logLevel: "INFO"
+  auditLogEnabled: "true"
+  
+  # Environment
+  environment: "production"
+
+# Secrets (reference external secrets)
+secrets:
+  name: agent-server-secrets
+  # Keys expected in secret:
+  # - api-secret-key
+  # - litellm-api-key
+  # - postgres-password
+
+# PostgreSQL dependency
+postgresql:
+  enabled: true
+  auth:
+    database: agent_server
+    username: agent
+    existingSecret: agent-server-secrets
+    secretKeys:
+      adminPasswordKey: postgres-password
+      userPasswordKey: postgres-password
+  primary:
+    persistence:
+      enabled: true
+      size: 10Gi
+
+# Redis dependency
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: true
+      size: 1Gi
+
+# Resources
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "250m"
+  limits:
+    memory: "4Gi"
+    cpu: "2000m"
+
+# Auto-scaling
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+
+# Health probes
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health/readiness
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Key rotation CronJob
+keyRotation:
+  enabled: true
+  schedule: "0 0 * * *"  # Daily at midnight
+  
+# Prometheus metrics
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false
+    namespace: ""
+    interval: 30s
+    scrapeTimeout: 10s
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

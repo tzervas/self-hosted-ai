@@ -1,0 +1,367 @@
+# LiteLLM Proxy Configuration
+# GPU Inference Queue with Ollama Backend
+# Supports priority queues, rate limiting, and load balancing
+
+# =============================================================================
+# Model Routing Configuration
+# =============================================================================
+
+model_list:
+  # === GPU Worker Models (High Priority) ===
+  - model_name: qwen2.5-coder:14b
+    litellm_params:
+      model: ollama/qwen2.5-coder:14b
+      api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
+      timeout: 300
+      stream: true
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      supports_vision: false
+
+  - model_name: deepseek-coder-v2:16b
+    litellm_params:
+      model: ollama/deepseek-coder-v2:16b
+      api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
+      timeout: 300
+      stream: true
+    model_info:
+      mode: chat
+      supports_function_calling: true
+
+  - model_name: codellama:13b
+    litellm_params:
+      model: ollama/codellama:13b
+      api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
+      timeout: 300
+      stream: true
+    model_info:
+      mode: chat
+      supports_function_calling: false
+
+  - model_name: phi4:latest
+    litellm_params:
+      model: ollama/phi4:latest
+      api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
+      timeout: 300
+      stream: true
+    model_info:
+      mode: chat
+      supports_function_calling: true
+
+  - model_name: llama3.1:8b
+    litellm_params:
+      model: ollama/llama3.1:8b
+      api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
+      timeout: 300
+      stream: true
+    model_info:
+      mode: chat
+      supports_function_calling: true
+
+  - model_name: llama3.1:70b-instruct-q4_0
+    litellm_params:
+      model: ollama/llama3.1:70b-instruct-q4_0
+      api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
+      timeout: 600
+      stream: true
+    model_info:
+      mode: chat
+      supports_function_calling: true
+
+  # Vision models
+  - model_name: llava:13b
+    litellm_params:
+      model: ollama/llava:13b
+      api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
+      timeout: 300
+      stream: true
+    model_info:
+      mode: chat
+      supports_vision: true
+
+  - model_name: bakllava:latest
+    litellm_params:
+      model: ollama/bakllava:latest
+      api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
+      timeout: 300
+      stream: true
+    model_info:
+      mode: chat
+      supports_vision: true
+
+  - model_name: mistral:7b-instruct-v0.3
+    litellm_params:
+      model: ollama/mistral:7b-instruct-v0.3
+      api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
+      timeout: 300
+      stream: true
+    model_info:
+      mode: chat
+      supports_function_calling: true
+
+  # === CPU Server Models (Fallback) ===
+  - model_name: mistral:7b
+    litellm_params:
+      model: ollama/mistral:7b
+      api_base: ${OLLAMA_CPU_URL:-http://localhost:11434}
+      timeout: 300
+      stream: true
+    model_info:
+      mode: chat
+
+  - model_name: phi3:latest
+    litellm_params:
+      model: ollama/phi3:latest
+      api_base: ${OLLAMA_CPU_URL:-http://localhost:11434}
+      timeout: 300
+      stream: true
+    model_info:
+      mode: chat
+
+  - model_name: gemma2:2b
+    litellm_params:
+      model: ollama/gemma2:2b
+      api_base: ${OLLAMA_CPU_URL:-http://localhost:11434}
+      timeout: 300
+      stream: true
+    model_info:
+      mode: chat
+
+  - model_name: sqlcoder:15b
+    litellm_params:
+      model: ollama/sqlcoder:15b
+      api_base: ${OLLAMA_CPU_URL:-http://localhost:11434}
+      timeout: 300
+      stream: true
+    model_info:
+      mode: chat
+
+  - model_name: deepseek-math:7b
+    litellm_params:
+      model: ollama/deepseek-math:7b
+      api_base: ${OLLAMA_CPU_URL:-http://localhost:11434}
+      timeout: 300
+      stream: true
+    model_info:
+      mode: chat
+
+  # === Embedding Models ===
+  - model_name: nomic-embed-text
+    litellm_params:
+      model: ollama/nomic-embed-text
+      api_base: ${OLLAMA_CPU_URL:-http://localhost:11434}
+      timeout: 60
+    model_info:
+      mode: embedding
+
+  - model_name: mxbai-embed-large
+    litellm_params:
+      model: ollama/mxbai-embed-large
+      api_base: ${OLLAMA_CPU_URL:-http://localhost:11434}
+      timeout: 60
+    model_info:
+      mode: embedding
+
+  # === Image Generation Models ===
+  - model_name: stable-diffusion-xl
+    litellm_params:
+      model: openai/image  # Custom image generation provider
+      api_base: http://image-router:8000  # Image router service
+      api_key: "dummy"
+    model_info:
+      mode: image_generation
+      supports_image_generation: true
+
+  - model_name: comfyui-text2img
+    litellm_params:
+      model: openai/image
+      api_base: http://192.168.1.99:8188  # ComfyUI direct
+      api_key: "dummy"
+    model_info:
+      mode: image_generation
+      supports_image_generation: true
+
+  - model_name: automatic1111-text2img
+    litellm_params:
+      model: openai/image
+      api_base: http://192.168.1.99:7860  # A1111 direct
+      api_key: "dummy"
+    model_info:
+      mode: image_generation
+      supports_image_generation: true
+
+# =============================================================================
+# Router Settings (Load Balancing & Fallbacks)
+# =============================================================================
+
+router_settings:
+  # Load balancing strategy
+  routing_strategy: least-busy  # Options: simple-shuffle, least-busy, latency-based-routing
+  
+  # Fallback configuration
+  enable_fallbacks: true
+  fallbacks:
+    - qwen2.5-coder:14b: [codellama:13b, mistral:7b]
+    - llama3.1:70b-instruct-q4_0: [llama3.1:8b, phi4:latest]
+    - llava:13b: [bakllava:latest]
+  
+  # Retry configuration
+  num_retries: 3
+  retry_after: 5
+  timeout: 300
+  
+  # Cooldown on failures
+  allowed_fails: 3
+  cooldown_time: 60
+  
+  # Cache settings
+  cache: true
+  cache_params:
+    type: redis
+    host: ${REDIS_HOST:-redis}
+    port: ${REDIS_PORT:-6379}
+    ttl: 3600
+
+# =============================================================================
+# Rate Limiting & Quotas
+# =============================================================================
+
+general_settings:
+  master_key: ${LITELLM_MASTER_KEY}
+  database_url: ${DATABASE_URL:-postgresql://litellm:litellm@postgres:5432/litellm}
+  
+  # Request queue settings
+  max_parallel_requests: 100
+  request_timeout: 600
+  
+  # Alert settings
+  alerting:
+    - slack
+    - webhook
+  alerting_threshold: 300  # Alert if request takes > 5 minutes
+  
+  # Logging
+  json_logs: true
+  detailed_debug: false
+  
+  # Health check
+  health_check_interval: 30
+
+# Rate limits by tier (requests per minute)
+litellm_settings:
+  # Enable request prioritization
+  enable_request_priority: true
+  
+  # Priority queue configuration
+  priority_queue:
+    enabled: true
+    redis_host: ${REDIS_HOST:-redis}
+    redis_port: ${REDIS_PORT:-6379}
+    
+    # Priority levels (lower number = higher priority)
+    levels:
+      high: 1      # Agent server, critical workflows
+      normal: 5    # Regular user requests
+      low: 10      # Batch processing, background tasks
+    
+    # Max queue size per priority
+    max_queue_size:
+      high: 50
+      normal: 200
+      low: 500
+    
+    # Queue timeout (seconds)
+    queue_timeout:
+      high: 30
+      normal: 120
+      low: 600
+  
+  # Request callbacks for metrics
+  success_callback:
+    - prometheus
+    - langfuse
+  failure_callback:
+    - prometheus
+    - langfuse
+  
+  # Caching
+  cache: true
+  cache_params:
+    type: redis
+    host: ${REDIS_HOST:-redis}
+    port: ${REDIS_PORT:-6379}
+    namespace: litellm_cache
+
+# =============================================================================
+# API Key Configuration (Managed via manage-keys.sh)
+# =============================================================================
+
+# Keys are stored in PostgreSQL and managed via CLI
+# See: scripts/manage-keys.sh
+
+# Default key scopes:
+# - agent-invoke: Can invoke agents and use models
+# - admin: Full access including key management
+# - read-only: Can only list models and check status
+
+# Rate limits per key tier:
+# - tier-1 (agent-server): 1000 RPM, priority: high
+# - tier-2 (user): 100 RPM, priority: normal
+# - tier-3 (batch): 20 RPM, priority: low
+
+# =============================================================================
+# Guardrails & Safety
+# =============================================================================
+
+guardrails:
+  # Input validation
+  max_input_tokens: 128000
+  max_output_tokens: 32000
+  
+  # Content filtering (optional)
+  # enable_moderation: true
+  # moderation_model: openai/text-moderation-latest
+  
+  # PII detection (optional)
+  # enable_pii_detection: true
+  # pii_detection_method: presidio
+
+# =============================================================================
+# Prometheus Metrics
+# =============================================================================
+
+prometheus:
+  enabled: true
+  port: 9090
+  path: /metrics
+  
+  # Custom metrics
+  custom_metrics:
+    - name: litellm_request_queue_size
+      description: Current size of the request queue by priority
+      type: gauge
+      labels:
+        - priority
+    - name: litellm_request_latency_seconds
+      description: Request latency in seconds
+      type: histogram
+      labels:
+        - model
+        - status
+    - name: litellm_token_usage_total
+      description: Total tokens used
+      type: counter
+      labels:
+        - model
+        - type  # prompt or completion
+
+# =============================================================================
+# Langfuse Integration (Optional - for tracing)
+# =============================================================================
+
+langfuse:
+  enabled: ${LANGFUSE_ENABLED:-false}
+  public_key: ${LANGFUSE_PUBLIC_KEY:-}
+  secret_key: ${LANGFUSE_SECRET_KEY:-}
+  host: ${LANGFUSE_HOST:-https://cloud.langfuse.com}

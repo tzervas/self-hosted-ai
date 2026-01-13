@@ -1,0 +1,71 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-prometheus
+  labels:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: prometheus
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/component: prometheus
+    spec:
+      containers:
+        - name: prometheus
+          image: "{{ .Values.monitoring.prometheus.image.repository }}:{{ .Values.monitoring.prometheus.image.tag }}"
+          imagePullPolicy: {{ .Values.monitoring.prometheus.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 9090
+              protocol: TCP
+          args:
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.path=/prometheus
+            - --web.console.libraries=/etc/prometheus/console_libraries
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus
+            - name: data
+              mountPath: /prometheus
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "self-hosted-ai-server.fullname" . }}-prometheus
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "self-hosted-ai-server.fullname" . }}-prometheus
+{{- end }}

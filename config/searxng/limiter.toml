@@ -1,0 +1,17 @@
+# SearXNG rate limiter configuration
+[botdetection.ip_limit]
+# Number of requests allowed per IP per time window
+link_token = true
+# Request limit per IP
+request_limit = 100
+# Time window in seconds  
+time_window = 60
+
+[botdetection.ip_lists]
+# Pass-through IPs (internal network)
+pass_ip = [
+    "192.168.1.0/24",
+    "10.0.0.0/8",
+    "172.16.0.0/12",
+    "127.0.0.1"
+]

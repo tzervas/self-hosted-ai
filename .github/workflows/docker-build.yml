@@ -1,0 +1,70 @@
+name: Docker Image Build
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'server/**'
+      - 'gpu-worker/**'
+      - '.github/workflows/docker-build.yml'
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - 'server/**'
+      - 'gpu-worker/**'
+
+jobs:
+  validate-compose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate server docker-compose
+        run: |
+          cd server
+          docker compose config --quiet
+
+      - name: Validate GPU worker docker-compose
+        run: |
+          cd gpu-worker
+          docker compose config --quiet
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  test-deployment:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Test bootstrap script
+        run: |
+          chmod +x scripts/bootstrap.sh
+          # Dry run to check syntax
+          bash -n scripts/bootstrap.sh
+
+      - name: Test deployment scripts
+        run: |
+          chmod +x scripts/deploy-*.sh
+          bash -n scripts/deploy-server.sh
+          bash -n scripts/deploy-gpu-worker.sh

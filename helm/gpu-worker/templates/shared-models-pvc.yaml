@@ -1,0 +1,24 @@
+{{- if or (and .Values.comfyui.enabled .Values.comfyui.persistence.enabled) (and .Values.automatic1111.enabled .Values.automatic1111.persistence.enabled) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "self-hosted-ai-gpu-worker.fullname" . }}-models
+  labels:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-gpu-worker.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: shared-models
+  annotations:
+    # Ensure this PVC is not deleted when components are disabled
+    "helm.sh/resource-policy": keep
+spec:
+  accessModes:
+    - ReadWriteOnce  # Single node access for GPU workloads
+  resources:
+    requests:
+      storage: 500Gi  # Large storage for models
+  {{- if .Values.global.storageClass }}
+  storageClassName: {{ .Values.global.storageClass }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,25 @@
+# Development environment values
+global:
+  storageClass: "local-path"
+
+openwebui:
+  image:
+    tag: "latest"  # Use latest for dev
+  env:
+    - name: WEBUI_SECRET_KEY
+      value: "dev-secret-key-change-in-prod"
+    - name: ENABLE_SIGNUP
+      value: "true"
+
+ollama:
+  cpu:
+    image:
+      tag: "latest"
+    env:
+      - name: OLLAMA_NUM_PARALLEL
+        value: "2"  # Lower for dev
+
+monitoring:
+  enabled: true
+  grafana:
+    adminPassword: "admin"

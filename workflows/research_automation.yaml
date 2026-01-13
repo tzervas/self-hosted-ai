@@ -1,0 +1,194 @@
+# Research Workflow Configuration
+# Automates research tasks using SearXNG, LLM analysis, and document generation
+
+name: "Automated Research Workflow"
+version: "1.0.0"
+description: |
+  Complete research automation pipeline:
+  1. Accept research query/topic
+  2. Search multiple sources via SearXNG
+  3. Analyze and synthesize results with LLM
+  4. Generate comprehensive report
+  5. Optionally create visual summaries
+
+triggers:
+  - type: api
+    endpoint: /api/research
+  - type: webhook
+    path: /webhooks/research
+  - type: chat_command
+    pattern: "/research {topic}"
+
+stages:
+  # Stage 1: Query Expansion
+  query_expansion:
+    description: "Expand research topic into comprehensive search queries"
+    agent: ollama
+    model: llama3.2:latest
+    prompt_template: |
+      You are a research assistant. Given the following research topic, generate 5-7 specific 
+      search queries that would help gather comprehensive information. Include:
+      - Primary topic searches
+      - Related concept searches
+      - Recent developments searches
+      - Academic/technical searches
+      
+      Topic: {topic}
+      
+      Output as JSON array of search queries.
+    output_format: json
+    max_tokens: 500
+
+  # Stage 2: Multi-Source Search
+  web_search:
+    description: "Execute searches across multiple sources"
+    service: searxng
+    endpoint: http://searxng-server:8080/search
+    parallel: true
+    config:
+      format: json
+      engines:
+        general: [google, duckduckgo, bing]
+        academic: [google_scholar, arxiv, semantic_scholar]
+        technical: [github, stackoverflow]
+        news: [google_news, hackernews]
+      results_per_engine: 10
+      safe_search: 0
+      time_range: year
+    input: "{query_expansion.output}"
+    retry:
+      max_attempts: 3
+      delay_seconds: 2
+
+  # Stage 3: Content Extraction
+  content_extraction:
+    description: "Extract and clean content from search results"
+    service: internal
+    function: extract_webpage_content
+    config:
+      max_pages: 20
+      timeout_seconds: 30
+      extract_images: true
+      clean_html: true
+      preserve_structure: true
+    input: "{web_search.results}"
+    
+  # Stage 4: Analysis & Synthesis
+  analysis:
+    description: "Analyze extracted content with LLM"
+    agent: ollama
+    model: llama3.2:70b  # Use larger model for analysis
+    fallback_model: llama3.2:latest
+    prompt_template: |
+      You are a research analyst. Analyze the following sources about "{topic}":
+      
+      Sources:
+      {content_extraction.output}
+      
+      Provide a comprehensive analysis including:
+      1. **Executive Summary** (2-3 paragraphs)
+      2. **Key Findings** (bullet points)
+      3. **Technical Details** (if applicable)
+      4. **Recent Developments** (timeline)
+      5. **Different Perspectives** (if controversial)
+      6. **Gaps in Research** (what's missing)
+      7. **Recommendations** (next steps)
+      8. **Source Quality Assessment**
+      
+      Use markdown formatting for readability.
+    max_tokens: 4000
+    temperature: 0.3
+
+  # Stage 5: Report Generation
+  report_generation:
+    description: "Generate final research report"
+    service: internal
+    function: generate_report
+    config:
+      formats:
+        - markdown
+        - pdf
+        - html
+      include_citations: true
+      include_images: true
+      style: academic
+    templates:
+      markdown: research_report.md.j2
+      pdf: research_report_pdf.j2
+    input:
+      topic: "{topic}"
+      analysis: "{analysis.output}"
+      sources: "{web_search.results}"
+    output_path: "/data/research/{timestamp}_{topic_slug}/"
+
+  # Stage 6: Visual Summary (Optional)
+  visual_summary:
+    description: "Generate visual summary using image generation"
+    enabled: "{config.generate_visuals}"
+    service: comfyui
+    workflow: txt2img-sdxl
+    config:
+      prompt_template: "Infographic style visualization of: {analysis.summary}"
+      negative_prompt: "text, words, letters, watermark, low quality"
+      width: 1024
+      height: 1024
+    input: "{analysis.output.summary}"
+
+  # Stage 7: Knowledge Base Update
+  knowledge_base:
+    description: "Add research to knowledge base for RAG"
+    service: internal
+    function: update_knowledge_base
+    config:
+      embedding_model: nomic-embed-text
+      chunk_size: 512
+      chunk_overlap: 50
+      collection: research
+      metadata:
+        topic: "{topic}"
+        timestamp: "{timestamp}"
+        sources_count: "{web_search.results.length}"
+    input:
+      content: "{analysis.output}"
+      sources: "{content_extraction.output}"
+
+# Output configuration
+outputs:
+  report:
+    type: file
+    formats: [markdown, pdf]
+    path: "/data/research/reports/"
+  
+  summary:
+    type: notification
+    channels:
+      - type: webhook
+        url: "{config.notification_webhook}"
+      - type: email
+        to: "{config.notification_email}"
+
+  knowledge_base:
+    type: embedding
+    collection: research
+
+# Resource configuration
+resources:
+  gpu:
+    visual_summary:
+      vram_mb: 8000
+      priority: low
+  cpu:
+    content_extraction:
+      threads: 4
+    report_generation:
+      threads: 2
+
+# Monitoring
+monitoring:
+  metrics:
+    - stage_duration_seconds
+    - sources_processed
+    - report_quality_score
+  logs:
+    level: info
+    include_prompts: false  # Don't log full prompts

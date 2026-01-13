@@ -1,0 +1,101 @@
+{{- if .Values.litellm.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-litellm-config
+  labels:
+    {{- include "self-hosted-ai-server.labels" . | nindent 4 }}
+    app.kubernetes.io/component: litellm
+data:
+  config.yaml: |
+    # LiteLLM Proxy Configuration
+    # GPU Inference Queue with Ollama Backend
+    
+    model_list:
+      {{- range .Values.litellm.models }}
+      - model_name: {{ .name }}
+        litellm_params:
+          model: {{ .litellm_model }}
+          api_base: {{ .api_base | default "${OLLAMA_GPU_URL}" }}
+          timeout: {{ .timeout | default 300 }}
+          stream: {{ .stream | default true }}
+        {{- if .model_info }}
+        model_info:
+          {{- toYaml .model_info | nindent 10 }}
+        {{- end }}
+      {{- end }}
+    
+    router_settings:
+      routing_strategy: {{ .Values.litellm.router.strategy | default "least-busy" }}
+      enable_fallbacks: {{ .Values.litellm.router.enableFallbacks | default true }}
+      {{- if .Values.litellm.router.fallbacks }}
+      fallbacks:
+        {{- toYaml .Values.litellm.router.fallbacks | nindent 8 }}
+      {{- end }}
+      num_retries: {{ .Values.litellm.router.numRetries | default 3 }}
+      retry_after: {{ .Values.litellm.router.retryAfter | default 5 }}
+      timeout: {{ .Values.litellm.router.timeout | default 300 }}
+      allowed_fails: {{ .Values.litellm.router.allowedFails | default 3 }}
+      cooldown_time: {{ .Values.litellm.router.cooldownTime | default 60 }}
+      cache: {{ .Values.litellm.router.cache | default true }}
+      {{- if .Values.litellm.router.cache }}
+      cache_params:
+        type: redis
+        host: ${REDIS_HOST}
+        port: ${REDIS_PORT}
+        ttl: {{ .Values.litellm.router.cacheTtl | default 3600 }}
+      {{- end }}
+    
+    general_settings:
+      master_key: ${LITELLM_MASTER_KEY}
+      database_url: ${DATABASE_URL}
+      max_parallel_requests: {{ .Values.litellm.maxParallelRequests | default 100 }}
+      request_timeout: {{ .Values.litellm.requestTimeout | default 600 }}
+      json_logs: true
+      detailed_debug: {{ .Values.litellm.debug | default false }}
+      health_check_interval: 30
+    
+    litellm_settings:
+      enable_request_priority: true
+      priority_queue:
+        enabled: true
+        redis_host: ${REDIS_HOST}
+        redis_port: ${REDIS_PORT}
+        levels:
+          high: 1
+          normal: 5
+          low: 10
+        max_queue_size:
+          high: {{ .Values.litellm.queue.maxSize.high | default 50 }}
+          normal: {{ .Values.litellm.queue.maxSize.normal | default 200 }}
+          low: {{ .Values.litellm.queue.maxSize.low | default 500 }}
+        queue_timeout:
+          high: {{ .Values.litellm.queue.timeout.high | default 30 }}
+          normal: {{ .Values.litellm.queue.timeout.normal | default 120 }}
+          low: {{ .Values.litellm.queue.timeout.low | default 600 }}
+      success_callback:
+        - prometheus
+        {{- if .Values.litellm.langfuse.enabled }}
+        - langfuse
+        {{- end }}
+      failure_callback:
+        - prometheus
+        {{- if .Values.litellm.langfuse.enabled }}
+        - langfuse
+        {{- end }}
+      cache: true
+      cache_params:
+        type: redis
+        host: ${REDIS_HOST}
+        port: ${REDIS_PORT}
+        namespace: litellm_cache
+    
+    guardrails:
+      max_input_tokens: {{ .Values.litellm.guardrails.maxInputTokens | default 128000 }}
+      max_output_tokens: {{ .Values.litellm.guardrails.maxOutputTokens | default 32000 }}
+    
+    prometheus:
+      enabled: true
+      port: 9090
+      path: /metrics
+{{- end }}

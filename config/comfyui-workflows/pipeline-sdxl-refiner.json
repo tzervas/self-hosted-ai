@@ -1,0 +1,123 @@
+{
+  "_meta": {
+    "name": "SDXL + Refiner Pipeline",
+    "description": "Two-stage generation: SDXL base for composition, then refiner for detail enhancement.",
+    "version": "1.0.0",
+    "author": "self-hosted-ai",
+    "tags": ["txt2img", "sdxl", "refiner", "pipeline", "multi-step", "high-quality"],
+    "requirements": {
+      "checkpoint": "sd_xl_base_1.0.safetensors",
+      "refiner": "sd_xl_refiner_1.0.safetensors",
+      "vram_min_gb": 12
+    }
+  },
+  "4": {
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": { "title": "Load SDXL Base" }
+  },
+  "5": {
+    "inputs": {
+      "ckpt_name": "sd_xl_refiner_1.0.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": { "title": "Load SDXL Refiner" }
+  },
+  "6": {
+    "inputs": {
+      "text": "Prompt",
+      "clip": ["4", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Positive Prompt (Base)" }
+  },
+  "7": {
+    "inputs": {
+      "text": "blurry, bad quality, distorted, ugly, deformed, low resolution",
+      "clip": ["4", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Negative Prompt (Base)" }
+  },
+  "8": {
+    "inputs": {
+      "text": "Prompt",
+      "clip": ["5", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Positive Prompt (Refiner)" }
+  },
+  "9": {
+    "inputs": {
+      "text": "blurry, bad quality, distorted, ugly, deformed",
+      "clip": ["5", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Negative Prompt (Refiner)" }
+  },
+  "10": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": { "title": "Empty Latent Image" }
+  },
+  "11": {
+    "inputs": {
+      "seed": 0,
+      "steps": 25,
+      "cfg": 7.5,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "normal",
+      "denoise": 1,
+      "model": ["4", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["10", 0],
+      "start_at_step": 0,
+      "end_at_step": 20
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": { "title": "KSampler (Base - Steps 0-20)" }
+  },
+  "12": {
+    "inputs": {
+      "seed": 0,
+      "steps": 25,
+      "cfg": 7.5,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "normal",
+      "denoise": 1,
+      "model": ["5", 0],
+      "positive": ["8", 0],
+      "negative": ["9", 0],
+      "latent_image": ["11", 0],
+      "start_at_step": 20,
+      "end_at_step": 25,
+      "add_noise": "disable",
+      "return_with_leftover_noise": "disable"
+    },
+    "class_type": "KSamplerAdvanced",
+    "_meta": { "title": "KSampler (Refiner - Steps 20-25)" }
+  },
+  "13": {
+    "inputs": {
+      "samples": ["12", 0],
+      "vae": ["4", 2]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "VAE Decode" }
+  },
+  "14": {
+    "inputs": {
+      "filename_prefix": "SDXL_refined",
+      "images": ["13", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": { "title": "Save Image" }
+  }
+}

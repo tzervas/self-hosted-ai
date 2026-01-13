@@ -1,0 +1,27 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.nodeExporter.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-node-exporter
+  labels:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: node-exporter
+  {{- with .Values.monitoring.nodeExporter.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.monitoring.nodeExporter.service.type }}
+  ports:
+    - port: {{ .Values.monitoring.nodeExporter.service.port }}
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+  selector:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: node-exporter
+{{- end }}

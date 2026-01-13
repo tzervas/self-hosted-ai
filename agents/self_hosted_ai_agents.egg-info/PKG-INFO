@@ -1,0 +1,146 @@
+Metadata-Version: 2.4
+Name: self-hosted-ai-agents
+Version: 0.1.0
+Summary: Multi-agent system for AI-powered development workflows
+Author: tzervas
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: httpx>=0.27.0
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: pydantic-settings>=2.0.0
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: loguru>=0.7.0
+Requires-Dist: prometheus-client>=0.19.0
+Requires-Dist: google-adk>=0.1.0
+Requires-Dist: google-genai>=0.1.0
+Requires-Dist: fastapi>=0.109.0
+Requires-Dist: uvicorn>=0.27.0
+Requires-Dist: sqlalchemy[asyncio]>=2.0.0
+Requires-Dist: asyncpg>=0.29.0
+Requires-Dist: redis>=5.0.0
+Requires-Dist: alembic>=1.13.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.1.0; extra == "dev"
+Requires-Dist: pytest-mock>=3.12.0; extra == "dev"
+Requires-Dist: black>=24.0.0; extra == "dev"
+Requires-Dist: isort>=5.13.0; extra == "dev"
+Requires-Dist: mypy>=1.8.0; extra == "dev"
+Requires-Dist: pylint>=3.0.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+
+# Agent Framework Development
+
+Python-based multi-agent system with Rust performance optimizations.
+
+## Setup
+
+```bash
+# Install Python dependencies
+cd agents
+pip install -e ".[dev]"
+
+# Install Rust (if not already installed)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Build Rust components
+cd ../rust-agents
+cargo build --release
+```
+
+## Running Tests
+
+```bash
+# Python tests
+cd agents
+pytest
+
+# Rust tests
+cd rust-agents
+cargo test
+```
+
+## Code Quality
+
+```bash
+# Python
+black agents tests
+isort agents tests
+mypy agents
+ruff check agents tests
+pylint agents
+
+# Rust
+cd rust-agents
+cargo fmt
+cargo clippy
+```
+
+## Usage
+
+```python
+from agents import ResearchAgent, DevelopmentAgent, Workflow, WorkflowOrchestrator
+from agents.core.base import AgentConfig
+from agents.core.task import TaskConfig
+
+# Create agents
+research_config = AgentConfig(name="researcher", agent_type="research")
+research_agent = ResearchAgent(research_config)
+
+dev_config = AgentConfig(name="developer", agent_type="development")
+dev_agent = DevelopmentAgent(dev_config)
+
+# Create workflow
+workflow_config = WorkflowConfig(name="research-dev", description="Research and develop")
+workflow = Workflow(workflow_config)
+
+# Add agents
+workflow.add_agent("research", research_agent)
+workflow.add_agent("development", dev_agent)
+
+# Add tasks
+workflow.add_task(
+    TaskConfig(name="research", description="Research topic", required_agents=["research"]),
+    {"prompt": "Research Python async patterns"}
+)
+
+workflow.add_task(
+    TaskConfig(
+        name="develop",
+        description="Implement feature",
+        required_agents=["development"],
+        dependencies=["research"]
+    ),
+    {"prompt": "Implement async handler", "context": {"language": "python"}}
+)
+
+# Execute
+orchestrator = WorkflowOrchestrator()
+result = await orchestrator.execute_workflow(workflow)
+```
+
+## Architecture
+
+```
+agents/
+├── core/               # Base abstractions
+│   ├── base.py        # Agent base class
+│   ├── task.py        # Task management
+│   └── workflow.py    # Workflow orchestration
+├── specialized/        # Specialized agents
+│   ├── research.py
+│   ├── development.py
+│   ├── code_review.py
+│   ├── testing.py
+│   └── documentation.py
+└── workflows/          # Workflow configurations
+
+rust-agents/            # Rust performance runtime
+└── src/
+    └── lib.rs         # Parallel execution engine
+
+tests/                  # Comprehensive test suite
+workflows/              # YAML workflow definitions
+```

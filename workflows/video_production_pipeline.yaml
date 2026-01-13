@@ -1,0 +1,220 @@
+# Video Production Pipeline
+# Generate video content with audio (voice, SFX) and visual elements
+
+name: "video_production_pipeline"
+description: "End-to-end video production with multi-modal generation"
+version: "1.0"
+
+agents:
+  - id: script_writer
+    type: DevelopmentAgent
+    config:
+      model: "llama3.1:8b"
+      temperature: 0.8
+      timeout: 180
+
+  - id: visual_designer
+    type: MultiModalAgent
+    config:
+      model: "llava:13b"
+      temperature: 0.7
+      timeout: 300
+
+  - id: audio_producer
+    type: MultiModalAgent
+    config:
+      model: "mistral:7b"
+      temperature: 0.6
+      timeout: 180
+      tts_url: "http://localhost:5002"
+
+  - id: video_assembler
+    type: DevelopmentAgent
+    config:
+      model: "qwen2.5-coder:14b"
+      temperature: 0.3
+      timeout: 300
+
+tasks:
+  - id: generate_script
+    agent_id: script_writer
+    name: "Generate Video Script"
+    description: |
+      Create a detailed video script including:
+      - Narrative structure
+      - Scene descriptions
+      - Dialogue and narration
+      - Visual cues
+      - Audio cues (SFX, music)
+      
+      Topic: ${video_topic}
+      Duration: ${target_duration}
+      Style: ${video_style}
+    priority: 1
+
+  - id: design_visuals
+    agent_id: visual_designer
+    name: "Design Visual Elements"
+    description: |
+      Create visual design specifications:
+      - Scene compositions
+      - Color palettes
+      - Character designs
+      - Visual effects
+      - Transitions
+      
+      Based on script: generate_script
+      Style guide: ${visual_style}
+    dependencies: [generate_script]
+    priority: 2
+
+  - id: generate_voiceover
+    agent_id: audio_producer
+    name: "Generate Voiceover"
+    description: |
+      Create voiceover narration using TTS:
+      - Extract dialogue from script
+      - Generate voice with: ${voice_model}
+      - Apply audio effects
+      - Export as WAV/MP3
+      
+      Voice style: ${voice_style}
+      Language: ${language}
+    dependencies: [generate_script]
+    priority: 2
+
+  - id: generate_sfx
+    agent_id: audio_producer
+    name: "Generate Sound Effects"
+    description: |
+      Create or select sound effects:
+      - Identify required SFX from script
+      - Generate/source appropriate sounds
+      - Time sync with video timeline
+      - Mix audio levels
+      
+      SFX library: ${sfx_library}
+    dependencies: [generate_script]
+    priority: 2
+
+  - id: render_visuals
+    agent_id: visual_designer
+    name: "Render Visual Frames"
+    description: |
+      Generate visual content for each scene:
+      - Use ComfyUI for image generation
+      - Apply scene-specific prompts
+      - Generate frame sequences
+      - Apply visual effects
+      
+      Resolution: ${output_resolution}
+      Frame rate: ${frame_rate}
+      Workflow: ${comfyui_workflow}
+    dependencies: [design_visuals]
+    priority: 3
+    config:
+      timeout: 600
+
+  - id: assemble_video
+    agent_id: video_assembler
+    name: "Assemble Final Video"
+    description: |
+      Combine all elements into final video:
+      - Import visual frames
+      - Sync voiceover audio
+      - Add sound effects
+      - Add music track
+      - Render final video
+      - Export in format: ${output_format}
+      
+      Tools: ffmpeg, ComfyUI
+    dependencies: [render_visuals, generate_voiceover, generate_sfx]
+    priority: 4
+    config:
+      timeout: 600
+
+workflow:
+  max_parallel: 3
+  fail_fast: false
+  retry_failed_tasks: true
+
+variables:
+  video_topic:
+    description: "Main topic/subject of video"
+    type: "string"
+    required: true
+
+  target_duration:
+    description: "Target video duration in seconds"
+    type: "integer"
+    default: 60
+
+  video_style:
+    description: "Video style (documentary, explainer, tutorial, etc.)"
+    type: "string"
+    default: "explainer"
+
+  visual_style:
+    description: "Visual art style"
+    type: "string"
+    default: "realistic"
+    options: ["realistic", "animated", "artistic", "cinematic"]
+
+  voice_style:
+    description: "Voice narration style"
+    type: "string"
+    default: "professional"
+    options: ["professional", "casual", "energetic", "calm"]
+
+  voice_model:
+    description: "TTS voice model"
+    type: "string"
+    default: "en_US-amy-medium"
+
+  language:
+    description: "Content language"
+    type: "string"
+    default: "en"
+
+  sfx_library:
+    description: "Sound effects library path"
+    type: "string"
+    default: "/data/audio/sfx"
+
+  output_resolution:
+    description: "Video resolution"
+    type: "string"
+    default: "1920x1080"
+    options: ["1280x720", "1920x1080", "3840x2160"]
+
+  frame_rate:
+    description: "Video frame rate"
+    type: "integer"
+    default: 30
+
+  comfyui_workflow:
+    description: "ComfyUI workflow to use"
+    type: "string"
+    default: "text2img-sdxl"
+
+  output_format:
+    description: "Video output format"
+    type: "string"
+    default: "mp4"
+    options: ["mp4", "webm", "mov"]
+
+outputs:
+  - name: "final_video"
+    type: "video"
+    format: "${output_format}"
+    source: "assemble_video"
+
+  - name: "script"
+    type: "document"
+    format: "markdown"
+    source: "generate_script"
+
+  - name: "storyboard"
+    type: "document"
+    format: "json"
+    source: "design_visuals"

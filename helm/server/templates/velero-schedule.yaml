@@ -1,0 +1,101 @@
+{{- if .Values.backup.velero.enabled }}
+---
+# Velero Schedule for incremental cluster backups using Kopia
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-daily
+  namespace: velero
+  labels:
+    {{- include "self-hosted-ai-server.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.velero.schedules.daily | default "0 2 * * *" | quote }}
+  template:
+    includedNamespaces:
+      {{- toYaml .Values.backup.velero.includedNamespaces | nindent 6 }}
+    excludedNamespaces:
+      - kube-system
+      - velero
+    includedResources:
+      - '*'
+    excludedResources:
+      - events
+      - events.events.k8s.io
+    labelSelector: {}
+    snapshotVolumes: {{ .Values.backup.velero.snapshotVolumes | default true }}
+    # Use Kopia for file-system backup (incremental/deduplication)
+    defaultVolumesToFsBackup: {{ .Values.backup.velero.defaultVolumesToFsBackup | default true }}
+    storageLocation: {{ .Values.backup.velero.storageLocation | default "default" }}
+    volumeSnapshotLocations:
+      {{- if .Values.backup.velero.volumeSnapshotLocations }}
+      {{- toYaml .Values.backup.velero.volumeSnapshotLocations | nindent 6 }}
+      {{- else }}
+      - default
+      {{- end }}
+    ttl: {{ .Values.backup.velero.retention.daily | default "168h" }}  # 7 days
+    metadata:
+      labels:
+        backup-type: daily
+        app.kubernetes.io/part-of: self-hosted-ai
+---
+# Weekly backup with longer retention
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-weekly
+  namespace: velero
+  labels:
+    {{- include "self-hosted-ai-server.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.velero.schedules.weekly | default "0 3 * * 0" | quote }}
+  template:
+    includedNamespaces:
+      {{- toYaml .Values.backup.velero.includedNamespaces | nindent 6 }}
+    excludedNamespaces:
+      - kube-system
+      - velero
+    includedResources:
+      - '*'
+    excludedResources:
+      - events
+      - events.events.k8s.io
+    snapshotVolumes: {{ .Values.backup.velero.snapshotVolumes | default true }}
+    defaultVolumesToFsBackup: {{ .Values.backup.velero.defaultVolumesToFsBackup | default true }}
+    storageLocation: {{ .Values.backup.velero.storageLocation | default "default" }}
+    volumeSnapshotLocations:
+      {{- if .Values.backup.velero.volumeSnapshotLocations }}
+      {{- toYaml .Values.backup.velero.volumeSnapshotLocations | nindent 6 }}
+      {{- else }}
+      - default
+      {{- end }}
+    ttl: {{ .Values.backup.velero.retention.weekly | default "672h" }}  # 28 days (4 weeks)
+    metadata:
+      labels:
+        backup-type: weekly
+        app.kubernetes.io/part-of: self-hosted-ai
+---
+# Backup Storage Location (local or S3-compatible)
+{{- if .Values.backup.velero.backupStorageLocation.create }}
+apiVersion: velero.io/v1
+kind: BackupStorageLocation
+metadata:
+  name: {{ .Values.backup.velero.storageLocation | default "default" }}
+  namespace: velero
+  labels:
+    {{- include "self-hosted-ai-server.labels" . | nindent 4 }}
+spec:
+  provider: {{ .Values.backup.velero.backupStorageLocation.provider | default "aws" }}
+  objectStorage:
+    bucket: {{ .Values.backup.velero.backupStorageLocation.bucket | required "backup.velero.backupStorageLocation.bucket is required" }}
+    prefix: {{ .Values.backup.velero.backupStorageLocation.prefix | default "self-hosted-ai" }}
+  {{- if .Values.backup.velero.backupStorageLocation.config }}
+  config:
+    {{- toYaml .Values.backup.velero.backupStorageLocation.config | nindent 4 }}
+  {{- end }}
+  credential:
+    name: {{ .Values.backup.velero.backupStorageLocation.credentialSecret | default "velero-credentials" }}
+    key: cloud
+  accessMode: ReadWrite
+  default: true
+{{- end }}
+{{- end }}

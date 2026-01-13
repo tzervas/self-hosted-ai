@@ -1,0 +1,77 @@
+{{- if .Values.automatic1111.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "self-hosted-ai-gpu-worker.fullname" . }}-automatic1111
+  labels:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-gpu-worker.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: automatic1111
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "self-hosted-ai-gpu-worker.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: automatic1111
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "self-hosted-ai-gpu-worker.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/component: automatic1111
+    spec:
+      {{- with .Values.automatic1111.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.automatic1111.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: automatic1111
+          image: "{{ .Values.automatic1111.image.repository }}:{{ .Values.automatic1111.image.tag }}"
+          imagePullPolicy: {{ .Values.automatic1111.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 7860
+              protocol: TCP
+          env:
+            {{- range .Values.automatic1111.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: models
+              mountPath: /app/stable-diffusion-webui/models
+            - name: outputs
+              mountPath: /app/stable-diffusion-webui/outputs
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            timeoutSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+          resources:
+            {{- toYaml .Values.automatic1111.resources | nindent 12 }}
+      volumes:
+        - name: models
+          persistentVolumeClaim:
+            claimName: {{ include "self-hosted-ai-gpu-worker.fullname" . }}-models
+        - name: outputs
+          persistentVolumeClaim:
+            claimName: {{ include "self-hosted-ai-gpu-worker.fullname" . }}-automatic1111-outputs
+{{- end }}

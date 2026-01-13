@@ -1,0 +1,27 @@
+{{- if .Values.redis.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-redis
+  labels:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: redis
+  {{- with .Values.redis.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.redis.service.type }}
+  ports:
+    - port: {{ .Values.redis.service.port }}
+      targetPort: redis
+      protocol: TCP
+      name: redis
+  selector:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: redis
+{{- end }}

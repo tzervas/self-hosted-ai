@@ -1,0 +1,117 @@
+{
+  "last_node_id": 30,
+  "last_link_id": 40,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [50, 100],
+      "size": [315, 314],
+      "properties": {},
+      "widgets_values": ["input_image.png", "image"],
+      "title": "Input Image"
+    },
+    {
+      "id": 2,
+      "type": "ImageCaption",
+      "pos": [400, 100],
+      "size": [350, 150],
+      "properties": {},
+      "widgets_values": ["blip2", "detailed"],
+      "title": "Generate Caption"
+    },
+    {
+      "id": 3,
+      "type": "CheckpointLoaderSimple",
+      "pos": [50, 450],
+      "size": [315, 98],
+      "properties": {},
+      "widgets_values": ["sd_xl_base_1.0.safetensors"]
+    },
+    {
+      "id": 4,
+      "type": "CLIPTextEncode",
+      "pos": [400, 300],
+      "size": [400, 150],
+      "properties": {},
+      "title": "Caption → Prompt"
+    },
+    {
+      "id": 5,
+      "type": "CLIPTextEncode",
+      "pos": [400, 480],
+      "size": [400, 100],
+      "properties": {},
+      "widgets_values": ["blurry, distorted, low quality, watermark"],
+      "title": "Negative"
+    },
+    {
+      "id": 6,
+      "type": "VAEEncode",
+      "pos": [850, 100],
+      "size": [210, 46],
+      "properties": {},
+      "title": "Encode Input Image"
+    },
+    {
+      "id": 7,
+      "type": "KSampler",
+      "pos": [850, 300],
+      "size": [315, 262],
+      "properties": {},
+      "widgets_values": [42, "randomize", 25, 6.5, "dpmpp_2m", "normal", 0.65],
+      "title": "img2img Sampler"
+    },
+    {
+      "id": 8,
+      "type": "VAEDecode",
+      "pos": [1200, 300],
+      "size": [210, 46],
+      "properties": {}
+    },
+    {
+      "id": 9,
+      "type": "ImageResize",
+      "pos": [1200, 100],
+      "size": [250, 100],
+      "properties": {},
+      "widgets_values": [1024, 1024, "lanczos"],
+      "title": "Resize for SDXL"
+    },
+    {
+      "id": 10,
+      "type": "SaveImage",
+      "pos": [1450, 300],
+      "size": [315, 270],
+      "properties": {},
+      "widgets_values": ["img2img/generated"]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "IMAGE"],
+    [2, 2, 0, 4, 1, "STRING"],
+    [3, 3, 0, 4, 0, "CLIP"],
+    [4, 3, 0, 5, 0, "CLIP"],
+    [5, 1, 0, 9, 0, "IMAGE"],
+    [6, 9, 0, 6, 0, "IMAGE"],
+    [7, 3, 2, 6, 1, "VAE"],
+    [8, 3, 1, 7, 0, "MODEL"],
+    [9, 4, 0, 7, 1, "CONDITIONING"],
+    [10, 5, 0, 7, 2, "CONDITIONING"],
+    [11, 6, 0, 7, 3, "LATENT"],
+    [12, 7, 0, 8, 0, "LATENT"],
+    [13, 3, 2, 8, 1, "VAE"],
+    [14, 8, 0, 10, 0, "IMAGE"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "workflow_type": "img2img_caption",
+    "description": "Analyzes input image, generates caption, and creates variation",
+    "requirements": {
+      "custom_nodes": ["ComfyUI-BLIP", "ComfyUI-Image-Captioning"],
+      "vram_min_gb": 12
+    }
+  },
+  "version": 0.4
+}

@@ -1,0 +1,18 @@
+# Cargo configuration for rust-agents
+
+[build]
+# Use all available CPU cores for compilation
+jobs = 8
+
+[target.x86_64-unknown-linux-gnu]
+rustflags = [
+    "-C", "link-arg=-fuse-ld=lld",  # Use LLD linker for faster builds
+    "-C", "target-cpu=native",       # Optimize for native CPU
+]
+
+[alias]
+# Convenient aliases
+check-all = "check --all-features --all-targets"
+test-all = "test --all-features"
+lint = "clippy --all-features --all-targets -- -D warnings"
+fmt-check = "fmt --all -- --check"

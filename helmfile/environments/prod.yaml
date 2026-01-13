@@ -1,0 +1,49 @@
+# Production environment values
+global:
+  storageClass: "ceph-rbd"
+
+openwebui:
+  persistence:
+    size: 50Gi
+    storageClass: "ceph-rbd"
+  env:
+    - name: WEBUI_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: webui-secret
+          key: secret-key
+
+ollama:
+  cpu:
+    persistence:
+      size: 200Gi
+      storageClass: "ceph-rbd"
+  gpu:
+    persistence:
+      size: 500Gi
+      storageClass: "ceph-rbd"
+
+redis:
+  persistence:
+    size: 20Gi
+    storageClass: "ceph-rbd"
+
+comfyui:
+  persistence:
+    size: 200Gi
+    storageClass: "ceph-rbd"
+
+monitoring:
+  enabled: true
+  prometheus:
+    persistence:
+      size: 50Gi
+      storageClass: "ceph-rbd"
+  grafana:
+    persistence:
+      size: 20Gi
+      storageClass: "ceph-rbd"
+  loki:
+    persistence:
+      size: 100Gi
+      storageClass: "ceph-rbd"

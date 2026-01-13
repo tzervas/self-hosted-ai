@@ -1,0 +1,109 @@
+# Agent Server - Docker Compose Configuration
+# Dedicated server for running AI agents with API key authentication
+
+services:
+  agent-server:
+    build:
+      context: ..
+      dockerfile: agent-server/Dockerfile
+    image: self-hosted-ai/agent-server:latest
+    container_name: agent-server
+    ports:
+      - "${AGENT_SERVER_PORT:-8000}:8000"
+    environment:
+      # Database
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-agent}:${POSTGRES_PASSWORD}@postgres:5432/agent_server
+      - REDIS_URL=redis://redis:6379/1
+      
+      # API Security
+      - API_SECRET_KEY=${AGENT_API_SECRET_KEY}
+      - API_KEY_ROTATION_DAYS=${API_KEY_ROTATION_DAYS:-90}
+      - API_KEY_WARNING_DAYS=${API_KEY_WARNING_DAYS:-80}
+      
+      # LiteLLM Backend
+      - LITELLM_URL=http://litellm:4000
+      - LITELLM_API_KEY=${LITELLM_MASTER_KEY}
+      
+      # Ollama Direct (fallback)
+      - OLLAMA_GPU_URL=http://${GPU_WORKER_HOST:-192.168.1.99}:11434
+      - OLLAMA_CPU_URL=http://ollama-cpu:11434
+      
+      # Agent Configuration
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-qwen2.5-coder:14b}
+      - DEFAULT_TEMPERATURE=${DEFAULT_TEMPERATURE:-0.7}
+      - DEFAULT_TIMEOUT=${DEFAULT_TIMEOUT:-300}
+      - MAX_CONCURRENT_AGENTS=${MAX_CONCURRENT_AGENTS:-10}
+      
+      # Logging & Metrics
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - PROMETHEUS_ENABLED=true
+      - AUDIT_LOG_ENABLED=true
+      
+      # Environment
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+    volumes:
+      - ${DATA_PATH:-/data}/agent-server/logs:/app/logs
+      - ${DATA_PATH:-/data}/agent-server/data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      litellm:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+    profiles:
+      - full
+      - agents
+
+  # PostgreSQL for agent server (API keys, audit logs, etc.)
+  postgres:
+    image: postgres:16-alpine
+    container_name: agent-postgres
+    environment:
+      - POSTGRES_DB=agent_server
+      - POSTGRES_USER=${POSTGRES_USER:-agent}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ${DATA_PATH:-/data}/agent-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-agent} -d agent_server"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    profiles:
+      - full
+      - agents
+
+  # Redis for caching and rate limiting
+  redis:
+    image: redis:8.5.2-alpine
+    container_name: agent-redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - ${DATA_PATH:-/data}/agent-redis:/data
+    restart: unless-stopped
+    profiles:
+      - full
+      - agents
+
+networks:
+  default:
+    name: self-hosted-ai
+    external: true

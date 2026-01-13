@@ -1,0 +1,199 @@
+{
+  "last_node_id": 35,
+  "last_link_id": 50,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadAudio",
+      "pos": [50, 50],
+      "size": [315, 80],
+      "properties": {},
+      "widgets_values": ["input_audio.wav"],
+      "title": "Input Audio"
+    },
+    {
+      "id": 2,
+      "type": "WhisperTranscribe",
+      "pos": [400, 50],
+      "size": [350, 150],
+      "properties": {},
+      "widgets_values": ["large-v3", "auto", true],
+      "title": "Audio → Text"
+    },
+    {
+      "id": 3,
+      "type": "LLMPromptEnhancer",
+      "pos": [800, 50],
+      "size": [400, 200],
+      "properties": {},
+      "widgets_values": ["Enhance this transcription into a detailed image generation prompt:", "llama3.2"],
+      "title": "Enhance Prompt with LLM"
+    },
+    {
+      "id": 4,
+      "type": "CheckpointLoaderSimple",
+      "pos": [50, 250],
+      "size": [315, 98],
+      "properties": {},
+      "widgets_values": ["sd_xl_base_1.0.safetensors"]
+    },
+    {
+      "id": 5,
+      "type": "CLIPTextEncode",
+      "pos": [400, 250],
+      "size": [400, 150],
+      "properties": {},
+      "title": "Enhanced Prompt"
+    },
+    {
+      "id": 6,
+      "type": "CLIPTextEncode",
+      "pos": [400, 430],
+      "size": [400, 100],
+      "properties": {},
+      "widgets_values": ["blurry, distorted, low quality, watermark, text, ugly"],
+      "title": "Negative"
+    },
+    {
+      "id": 7,
+      "type": "EmptyLatentImage",
+      "pos": [50, 430],
+      "size": [315, 106],
+      "properties": {},
+      "widgets_values": [1024, 1024, 1]
+    },
+    {
+      "id": 8,
+      "type": "KSampler",
+      "pos": [850, 300],
+      "size": [315, 262],
+      "properties": {},
+      "widgets_values": [42, "randomize", 35, 7.5, "dpmpp_2m", "karras", 1]
+    },
+    {
+      "id": 9,
+      "type": "VAEDecode",
+      "pos": [1200, 300],
+      "size": [210, 46],
+      "properties": {}
+    },
+    {
+      "id": 10,
+      "type": "UpscaleModelLoader",
+      "pos": [1200, 100],
+      "size": [315, 58],
+      "properties": {},
+      "widgets_values": ["RealESRGAN_x2plus.pth"]
+    },
+    {
+      "id": 11,
+      "type": "ImageUpscaleWithModel",
+      "pos": [1450, 200],
+      "size": [241, 46],
+      "properties": {}
+    },
+    {
+      "id": 12,
+      "type": "CheckpointLoaderSimple",
+      "pos": [1200, 400],
+      "size": [315, 98],
+      "properties": {},
+      "widgets_values": ["wan_1.3B_exp_e9.safetensors"],
+      "title": "Video Model"
+    },
+    {
+      "id": 13,
+      "type": "ImageToLatent",
+      "pos": [1550, 300],
+      "size": [210, 46],
+      "properties": {}
+    },
+    {
+      "id": 14,
+      "type": "KSampler",
+      "pos": [1550, 400],
+      "size": [315, 262],
+      "properties": {},
+      "widgets_values": [42, "randomize", 20, 7.0, "euler_ancestral", "normal", 0.7],
+      "title": "Video Sampler"
+    },
+    {
+      "id": 15,
+      "type": "VAEDecode",
+      "pos": [1900, 400],
+      "size": [210, 46],
+      "properties": {}
+    },
+    {
+      "id": 16,
+      "type": "VHS_VideoCombine",
+      "pos": [2150, 400],
+      "size": [315, 290],
+      "properties": {},
+      "widgets_values": [24, 0, "video/h264-mp4", true, true, "multimodal_output"],
+      "title": "Final Video Output"
+    },
+    {
+      "id": 17,
+      "type": "SaveImage",
+      "pos": [1750, 100],
+      "size": [315, 270],
+      "properties": {},
+      "widgets_values": ["multimodal/image_output"],
+      "title": "Image Output"
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "AUDIO"],
+    [2, 2, 0, 3, 0, "STRING"],
+    [3, 3, 0, 5, 1, "STRING"],
+    [4, 4, 0, 5, 0, "CLIP"],
+    [5, 4, 0, 6, 0, "CLIP"],
+    [6, 4, 1, 8, 0, "MODEL"],
+    [7, 5, 0, 8, 1, "CONDITIONING"],
+    [8, 6, 0, 8, 2, "CONDITIONING"],
+    [9, 7, 0, 8, 3, "LATENT"],
+    [10, 8, 0, 9, 0, "LATENT"],
+    [11, 4, 2, 9, 1, "VAE"],
+    [12, 10, 0, 11, 0, "UPSCALE_MODEL"],
+    [13, 9, 0, 11, 1, "IMAGE"],
+    [14, 11, 0, 17, 0, "IMAGE"],
+    [15, 11, 0, 13, 0, "IMAGE"],
+    [16, 12, 2, 13, 1, "VAE"],
+    [17, 12, 1, 14, 0, "MODEL"],
+    [18, 5, 0, 14, 1, "CONDITIONING"],
+    [19, 6, 0, 14, 2, "CONDITIONING"],
+    [20, 13, 0, 14, 3, "LATENT"],
+    [21, 14, 0, 15, 0, "LATENT"],
+    [22, 12, 2, 15, 1, "VAE"],
+    [23, 15, 0, 16, 0, "IMAGE"]
+  ],
+  "groups": [
+    {
+      "title": "Audio Processing",
+      "bounding": [40, 20, 1200, 200],
+      "color": "#3f789e"
+    },
+    {
+      "title": "Image Generation",
+      "bounding": [40, 220, 1200, 400],
+      "color": "#8AA041"
+    },
+    {
+      "title": "Video Generation",
+      "bounding": [1180, 260, 1300, 500],
+      "color": "#b58b00"
+    }
+  ],
+  "config": {},
+  "extra": {
+    "workflow_type": "full_multimodal_pipeline",
+    "description": "Complete audio → text → enhanced prompt → image → upscale → video pipeline",
+    "requirements": {
+      "custom_nodes": ["ComfyUI-Whisper", "ComfyUI-LLM", "VideoHelperSuite"],
+      "vram_min_gb": 16,
+      "estimated_time_s": 180
+    }
+  },
+  "version": 0.4
+}

@@ -1,0 +1,1467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>agents.agents.adk.agents API documentation</title>
+<meta name="description" content="Specialized ADK Agent Implementations …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>agents.agents.adk.agents</code></h1>
+</header>
+<section id="section-intro">
+<p>Specialized ADK Agent Implementations</p>
+<p>Concrete implementations of ADK agents for specific tasks:
+- Development (code generation)
+- Code Review
+- Testing
+- Documentation
+- Research</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="agents.agents.adk.agents.CodeReviewADKAgent"><code class="flex name class">
+<span>class <span class="ident">CodeReviewADKAgent</span></span>
+<span>(</span><span>config: agents.adk.base.ADKConfig,<br>http_client: httpx.AsyncClient | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CodeReviewADKAgent(ADKAgent):
+    &#34;&#34;&#34;Agent specialized in code review and analysis.&#34;&#34;&#34;
+    
+    def get_agent_type(self) -&gt; str:
+        return &#34;code_review&#34;
+    
+    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert code reviewer with extensive experience in software quality and security.
+
+Your review should cover:
+1. **Code Quality**: Readability, maintainability, complexity
+2. **Best Practices**: Language conventions, design patterns
+3. **Bugs &amp; Issues**: Logic errors, edge cases, potential crashes
+4. **Security**: Vulnerabilities, input validation, data handling
+5. **Performance**: Inefficiencies, resource usage, scalability
+6. **Testing**: Test coverage, edge case handling
+
+Review Format:
+- Start with a brief summary
+- List issues by severity (Critical, High, Medium, Low)
+- Provide specific line references when possible
+- Suggest concrete improvements with code examples
+- End with an overall quality score (1-10)
+
+Be constructive and specific. Focus on issues that matter most.&#34;&#34;&#34;
+
+    async def review_code(
+        self,
+        code: str,
+        language: str,
+        focus_areas: Optional[List[str]] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Review code for quality and issues.
+        
+        Args:
+            code: Code to review
+            language: Programming language
+            focus_areas: Specific areas to focus on
+            
+        Returns:
+            ADKResult with review feedback
+        &#34;&#34;&#34;
+        task = f&#34;Review the following {language} code:\n\n```{language}\n{code}\n```&#34;
+        
+        context = {&#34;language&#34;: language}
+        if focus_areas:
+            context[&#34;focus_areas&#34;] = &#34;, &#34;.join(focus_areas)
+            task += f&#34;\n\nFocus especially on: {&#39;, &#39;.join(focus_areas)}&#34;
+        
+        return await self.execute(task, context)
+    
+    async def security_audit(
+        self,
+        code: str,
+        language: str
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Perform security-focused code audit.
+        
+        Args:
+            code: Code to audit
+            language: Programming language
+            
+        Returns:
+            ADKResult with security findings
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Perform a security audit of the following {language} code.
+
+Look for:
+- Injection vulnerabilities (SQL, command, XSS)
+- Authentication/authorization issues
+- Sensitive data exposure
+- Insecure cryptography
+- Input validation problems
+- Security misconfigurations
+
+Code:
+```{language}
+{code}
+```
+
+Provide findings with severity levels and remediation steps.&#34;&#34;&#34;
+        
+        return await self.execute(task, {&#34;language&#34;: language, &#34;focus&#34;: &#34;security&#34;})</code></pre>
+</details>
+<div class="desc"><p>Agent specialized in code review and analysis.</p>
+<p>Initialize ADK agent.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+<dt><strong><code>http_client</code></strong></dt>
+<dd>Optional shared HTTP client</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>agents.adk.base.ADKAgent</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.adk.agents.CodeReviewADKAgent.get_agent_type"><code class="name flex">
+<span>def <span class="ident">get_agent_type</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_agent_type(self) -&gt; str:
+    return &#34;code_review&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the agent type identifier.</p>
+<h2 id="returns">Returns</h2>
+<p>Agent type string (e.g., 'development', 'code_review')</p></div>
+</dd>
+<dt id="agents.agents.adk.agents.CodeReviewADKAgent.get_system_prompt"><code class="name flex">
+<span>def <span class="ident">get_system_prompt</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert code reviewer with extensive experience in software quality and security.
+
+Your review should cover:
+1. **Code Quality**: Readability, maintainability, complexity
+2. **Best Practices**: Language conventions, design patterns
+3. **Bugs &amp; Issues**: Logic errors, edge cases, potential crashes
+4. **Security**: Vulnerabilities, input validation, data handling
+5. **Performance**: Inefficiencies, resource usage, scalability
+6. **Testing**: Test coverage, edge case handling
+
+Review Format:
+- Start with a brief summary
+- List issues by severity (Critical, High, Medium, Low)
+- Provide specific line references when possible
+- Suggest concrete improvements with code examples
+- End with an overall quality score (1-10)
+
+Be constructive and specific. Focus on issues that matter most.&#34;&#34;&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the system prompt for this agent type.</p>
+<h2 id="returns">Returns</h2>
+<p>System prompt string</p></div>
+</dd>
+<dt id="agents.agents.adk.agents.CodeReviewADKAgent.review_code"><code class="name flex">
+<span>async def <span class="ident">review_code</span></span>(<span>self, code: str, language: str, focus_areas: List[str] | None = None) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def review_code(
+    self,
+    code: str,
+    language: str,
+    focus_areas: Optional[List[str]] = None
+) -&gt; ADKResult:
+    &#34;&#34;&#34;Review code for quality and issues.
+    
+    Args:
+        code: Code to review
+        language: Programming language
+        focus_areas: Specific areas to focus on
+        
+    Returns:
+        ADKResult with review feedback
+    &#34;&#34;&#34;
+    task = f&#34;Review the following {language} code:\n\n```{language}\n{code}\n```&#34;
+    
+    context = {&#34;language&#34;: language}
+    if focus_areas:
+        context[&#34;focus_areas&#34;] = &#34;, &#34;.join(focus_areas)
+        task += f&#34;\n\nFocus especially on: {&#39;, &#39;.join(focus_areas)}&#34;
+    
+    return await self.execute(task, context)</code></pre>
+</details>
+<div class="desc"><p>Review code for quality and issues.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>code</code></strong></dt>
+<dd>Code to review</dd>
+<dt><strong><code>language</code></strong></dt>
+<dd>Programming language</dd>
+<dt><strong><code>focus_areas</code></strong></dt>
+<dd>Specific areas to focus on</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with review feedback</p></div>
+</dd>
+<dt id="agents.agents.adk.agents.CodeReviewADKAgent.security_audit"><code class="name flex">
+<span>async def <span class="ident">security_audit</span></span>(<span>self, code: str, language: str) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    async def security_audit(
+        self,
+        code: str,
+        language: str
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Perform security-focused code audit.
+        
+        Args:
+            code: Code to audit
+            language: Programming language
+            
+        Returns:
+            ADKResult with security findings
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Perform a security audit of the following {language} code.
+
+Look for:
+- Injection vulnerabilities (SQL, command, XSS)
+- Authentication/authorization issues
+- Sensitive data exposure
+- Insecure cryptography
+- Input validation problems
+- Security misconfigurations
+
+Code:
+```{language}
+{code}
+```
+
+Provide findings with severity levels and remediation steps.&#34;&#34;&#34;
+        
+        return await self.execute(task, {&#34;language&#34;: language, &#34;focus&#34;: &#34;security&#34;})</code></pre>
+</details>
+<div class="desc"><p>Perform security-focused code audit.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>code</code></strong></dt>
+<dd>Code to audit</dd>
+<dt><strong><code>language</code></strong></dt>
+<dd>Programming language</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with security findings</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.agents.DevelopmentADKAgent"><code class="flex name class">
+<span>class <span class="ident">DevelopmentADKAgent</span></span>
+<span>(</span><span>config: agents.adk.base.ADKConfig,<br>http_client: httpx.AsyncClient | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DevelopmentADKAgent(ADKAgent):
+    &#34;&#34;&#34;Agent specialized in code development and generation.&#34;&#34;&#34;
+    
+    def get_agent_type(self) -&gt; str:
+        return &#34;development&#34;
+    
+    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert software developer with deep expertise across multiple programming languages and frameworks.
+
+Your responsibilities:
+1. Write clean, efficient, and well-documented code
+2. Follow best practices and design patterns
+3. Implement proper error handling and input validation
+4. Write code that is testable and maintainable
+5. Consider edge cases and potential issues
+
+Guidelines:
+- Use descriptive variable and function names
+- Add comments for complex logic
+- Follow the language&#39;s conventions and style guides
+- Optimize for readability first, then performance
+- Include type hints/annotations where applicable
+
+When generating code:
+- Provide complete, working implementations
+- Include necessary imports
+- Add docstrings and inline comments
+- Consider security implications
+- Handle errors gracefully&#34;&#34;&#34;
+
+    async def generate_code(
+        self,
+        description: str,
+        language: str,
+        framework: Optional[str] = None,
+        context: Optional[Dict[str, Any]] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Generate code based on description.
+        
+        Args:
+            description: What to implement
+            language: Programming language
+            framework: Optional framework
+            context: Additional context
+            
+        Returns:
+            ADKResult with generated code
+        &#34;&#34;&#34;
+        ctx = context or {}
+        ctx[&#34;language&#34;] = language
+        if framework:
+            ctx[&#34;framework&#34;] = framework
+        
+        task = f&#34;Implement the following in {language}&#34;
+        if framework:
+            task += f&#34; using {framework}&#34;
+        task += f&#34;:\n\n{description}&#34;
+        
+        return await self.execute(task, ctx)
+    
+    async def refactor_code(
+        self,
+        code: str,
+        instructions: str,
+        language: str
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Refactor existing code.
+        
+        Args:
+            code: Code to refactor
+            instructions: Refactoring instructions
+            language: Programming language
+            
+        Returns:
+            ADKResult with refactored code
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Refactor the following {language} code according to these instructions:
+
+Instructions: {instructions}
+
+Code:
+```{language}
+{code}
+```
+
+Provide the refactored code with explanations of changes made.&#34;&#34;&#34;
+        
+        return await self.execute(task)</code></pre>
+</details>
+<div class="desc"><p>Agent specialized in code development and generation.</p>
+<p>Initialize ADK agent.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+<dt><strong><code>http_client</code></strong></dt>
+<dd>Optional shared HTTP client</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>agents.adk.base.ADKAgent</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.adk.agents.DevelopmentADKAgent.generate_code"><code class="name flex">
+<span>async def <span class="ident">generate_code</span></span>(<span>self,<br>description: str,<br>language: str,<br>framework: str | None = None,<br>context: Dict[str, Any] | None = None) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def generate_code(
+    self,
+    description: str,
+    language: str,
+    framework: Optional[str] = None,
+    context: Optional[Dict[str, Any]] = None
+) -&gt; ADKResult:
+    &#34;&#34;&#34;Generate code based on description.
+    
+    Args:
+        description: What to implement
+        language: Programming language
+        framework: Optional framework
+        context: Additional context
+        
+    Returns:
+        ADKResult with generated code
+    &#34;&#34;&#34;
+    ctx = context or {}
+    ctx[&#34;language&#34;] = language
+    if framework:
+        ctx[&#34;framework&#34;] = framework
+    
+    task = f&#34;Implement the following in {language}&#34;
+    if framework:
+        task += f&#34; using {framework}&#34;
+    task += f&#34;:\n\n{description}&#34;
+    
+    return await self.execute(task, ctx)</code></pre>
+</details>
+<div class="desc"><p>Generate code based on description.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>description</code></strong></dt>
+<dd>What to implement</dd>
+<dt><strong><code>language</code></strong></dt>
+<dd>Programming language</dd>
+<dt><strong><code>framework</code></strong></dt>
+<dd>Optional framework</dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>Additional context</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with generated code</p></div>
+</dd>
+<dt id="agents.agents.adk.agents.DevelopmentADKAgent.get_agent_type"><code class="name flex">
+<span>def <span class="ident">get_agent_type</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_agent_type(self) -&gt; str:
+    return &#34;development&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the agent type identifier.</p>
+<h2 id="returns">Returns</h2>
+<p>Agent type string (e.g., 'development', 'code_review')</p></div>
+</dd>
+<dt id="agents.agents.adk.agents.DevelopmentADKAgent.get_system_prompt"><code class="name flex">
+<span>def <span class="ident">get_system_prompt</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert software developer with deep expertise across multiple programming languages and frameworks.
+
+Your responsibilities:
+1. Write clean, efficient, and well-documented code
+2. Follow best practices and design patterns
+3. Implement proper error handling and input validation
+4. Write code that is testable and maintainable
+5. Consider edge cases and potential issues
+
+Guidelines:
+- Use descriptive variable and function names
+- Add comments for complex logic
+- Follow the language&#39;s conventions and style guides
+- Optimize for readability first, then performance
+- Include type hints/annotations where applicable
+
+When generating code:
+- Provide complete, working implementations
+- Include necessary imports
+- Add docstrings and inline comments
+- Consider security implications
+- Handle errors gracefully&#34;&#34;&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the system prompt for this agent type.</p>
+<h2 id="returns">Returns</h2>
+<p>System prompt string</p></div>
+</dd>
+<dt id="agents.agents.adk.agents.DevelopmentADKAgent.refactor_code"><code class="name flex">
+<span>async def <span class="ident">refactor_code</span></span>(<span>self, code: str, instructions: str, language: str) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    async def refactor_code(
+        self,
+        code: str,
+        instructions: str,
+        language: str
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Refactor existing code.
+        
+        Args:
+            code: Code to refactor
+            instructions: Refactoring instructions
+            language: Programming language
+            
+        Returns:
+            ADKResult with refactored code
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Refactor the following {language} code according to these instructions:
+
+Instructions: {instructions}
+
+Code:
+```{language}
+{code}
+```
+
+Provide the refactored code with explanations of changes made.&#34;&#34;&#34;
+        
+        return await self.execute(task)</code></pre>
+</details>
+<div class="desc"><p>Refactor existing code.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>code</code></strong></dt>
+<dd>Code to refactor</dd>
+<dt><strong><code>instructions</code></strong></dt>
+<dd>Refactoring instructions</dd>
+<dt><strong><code>language</code></strong></dt>
+<dd>Programming language</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with refactored code</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.agents.DocumentationADKAgent"><code class="flex name class">
+<span>class <span class="ident">DocumentationADKAgent</span></span>
+<span>(</span><span>config: agents.adk.base.ADKConfig,<br>http_client: httpx.AsyncClient | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DocumentationADKAgent(ADKAgent):
+    &#34;&#34;&#34;Agent specialized in documentation generation.&#34;&#34;&#34;
+    
+    def get_agent_type(self) -&gt; str:
+        return &#34;documentation&#34;
+    
+    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert technical writer creating clear, comprehensive documentation.
+
+Documentation standards:
+1. **Clarity**: Write for your audience, explain jargon
+2. **Completeness**: Cover all necessary topics
+3. **Examples**: Include practical code examples
+4. **Structure**: Use clear headings and organization
+5. **Accuracy**: Ensure technical correctness
+
+Documentation types you create:
+- API documentation with endpoints, parameters, responses
+- README files with setup, usage, and examples
+- Code comments and docstrings
+- User guides and tutorials
+- Architecture documentation
+
+Format guidelines:
+- Use proper Markdown formatting
+- Include code blocks with syntax highlighting
+- Add tables for structured information
+- Use bullet points for lists
+- Include diagrams descriptions where helpful&#34;&#34;&#34;
+
+    async def generate_api_docs(
+        self,
+        code: str,
+        language: str,
+        format: str = &#34;markdown&#34;
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Generate API documentation.
+        
+        Args:
+            code: Code to document
+            language: Programming language
+            format: Output format
+            
+        Returns:
+            ADKResult with API documentation
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Generate {format} API documentation for this {language} code:
+
+```{language}
+{code}
+```
+
+Include:
+- Function/method signatures
+- Parameter descriptions with types
+- Return value descriptions
+- Usage examples
+- Error conditions&#34;&#34;&#34;
+        
+        return await self.execute(task, {&#34;language&#34;: language, &#34;format&#34;: format})
+    
+    async def generate_readme(
+        self,
+        project_info: Dict[str, Any]
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Generate README file.
+        
+        Args:
+            project_info: Project information dict
+            
+        Returns:
+            ADKResult with README content
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Generate a comprehensive README.md for this project:
+
+Project Name: {project_info.get(&#39;name&#39;, &#39;Unknown&#39;)}
+Description: {project_info.get(&#39;description&#39;, &#39;No description&#39;)}
+Language: {project_info.get(&#39;language&#39;, &#39;Unknown&#39;)}
+Features: {&#39;, &#39;.join(project_info.get(&#39;features&#39;, []))}
+
+Include sections:
+- Project title and badges
+- Description
+- Features
+- Installation
+- Quick start
+- Usage examples
+- Configuration
+- Contributing
+- License&#34;&#34;&#34;
+        
+        return await self.execute(task, project_info)</code></pre>
+</details>
+<div class="desc"><p>Agent specialized in documentation generation.</p>
+<p>Initialize ADK agent.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+<dt><strong><code>http_client</code></strong></dt>
+<dd>Optional shared HTTP client</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>agents.adk.base.ADKAgent</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.adk.agents.DocumentationADKAgent.generate_api_docs"><code class="name flex">
+<span>async def <span class="ident">generate_api_docs</span></span>(<span>self, code: str, language: str, format: str = 'markdown') ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    async def generate_api_docs(
+        self,
+        code: str,
+        language: str,
+        format: str = &#34;markdown&#34;
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Generate API documentation.
+        
+        Args:
+            code: Code to document
+            language: Programming language
+            format: Output format
+            
+        Returns:
+            ADKResult with API documentation
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Generate {format} API documentation for this {language} code:
+
+```{language}
+{code}
+```
+
+Include:
+- Function/method signatures
+- Parameter descriptions with types
+- Return value descriptions
+- Usage examples
+- Error conditions&#34;&#34;&#34;
+        
+        return await self.execute(task, {&#34;language&#34;: language, &#34;format&#34;: format})</code></pre>
+</details>
+<div class="desc"><p>Generate API documentation.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>code</code></strong></dt>
+<dd>Code to document</dd>
+<dt><strong><code>language</code></strong></dt>
+<dd>Programming language</dd>
+<dt><strong><code>format</code></strong></dt>
+<dd>Output format</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with API documentation</p></div>
+</dd>
+<dt id="agents.agents.adk.agents.DocumentationADKAgent.generate_readme"><code class="name flex">
+<span>async def <span class="ident">generate_readme</span></span>(<span>self, project_info: Dict[str, Any]) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    async def generate_readme(
+        self,
+        project_info: Dict[str, Any]
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Generate README file.
+        
+        Args:
+            project_info: Project information dict
+            
+        Returns:
+            ADKResult with README content
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Generate a comprehensive README.md for this project:
+
+Project Name: {project_info.get(&#39;name&#39;, &#39;Unknown&#39;)}
+Description: {project_info.get(&#39;description&#39;, &#39;No description&#39;)}
+Language: {project_info.get(&#39;language&#39;, &#39;Unknown&#39;)}
+Features: {&#39;, &#39;.join(project_info.get(&#39;features&#39;, []))}
+
+Include sections:
+- Project title and badges
+- Description
+- Features
+- Installation
+- Quick start
+- Usage examples
+- Configuration
+- Contributing
+- License&#34;&#34;&#34;
+        
+        return await self.execute(task, project_info)</code></pre>
+</details>
+<div class="desc"><p>Generate README file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>project_info</code></strong></dt>
+<dd>Project information dict</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with README content</p></div>
+</dd>
+<dt id="agents.agents.adk.agents.DocumentationADKAgent.get_agent_type"><code class="name flex">
+<span>def <span class="ident">get_agent_type</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_agent_type(self) -&gt; str:
+    return &#34;documentation&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the agent type identifier.</p>
+<h2 id="returns">Returns</h2>
+<p>Agent type string (e.g., 'development', 'code_review')</p></div>
+</dd>
+<dt id="agents.agents.adk.agents.DocumentationADKAgent.get_system_prompt"><code class="name flex">
+<span>def <span class="ident">get_system_prompt</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert technical writer creating clear, comprehensive documentation.
+
+Documentation standards:
+1. **Clarity**: Write for your audience, explain jargon
+2. **Completeness**: Cover all necessary topics
+3. **Examples**: Include practical code examples
+4. **Structure**: Use clear headings and organization
+5. **Accuracy**: Ensure technical correctness
+
+Documentation types you create:
+- API documentation with endpoints, parameters, responses
+- README files with setup, usage, and examples
+- Code comments and docstrings
+- User guides and tutorials
+- Architecture documentation
+
+Format guidelines:
+- Use proper Markdown formatting
+- Include code blocks with syntax highlighting
+- Add tables for structured information
+- Use bullet points for lists
+- Include diagrams descriptions where helpful&#34;&#34;&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the system prompt for this agent type.</p>
+<h2 id="returns">Returns</h2>
+<p>System prompt string</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.agents.ResearchADKAgent"><code class="flex name class">
+<span>class <span class="ident">ResearchADKAgent</span></span>
+<span>(</span><span>config: agents.adk.base.ADKConfig,<br>http_client: httpx.AsyncClient | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ResearchADKAgent(ADKAgent):
+    &#34;&#34;&#34;Agent specialized in research and information synthesis.&#34;&#34;&#34;
+    
+    def get_agent_type(self) -&gt; str:
+        return &#34;research&#34;
+    
+    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert researcher skilled at gathering, analyzing, and synthesizing information.
+
+Research approach:
+1. **Comprehensive**: Cover all relevant aspects
+2. **Objective**: Present multiple viewpoints
+3. **Evidence-based**: Support claims with reasoning
+4. **Structured**: Organize findings clearly
+5. **Actionable**: Provide practical recommendations
+
+Research output format:
+- Executive summary
+- Key findings with supporting details
+- Analysis and comparison
+- Recommendations
+- Limitations and caveats
+
+Be thorough but concise. Distinguish between facts and opinions.
+Acknowledge uncertainty where it exists.&#34;&#34;&#34;
+
+    async def research_topic(
+        self,
+        topic: str,
+        depth: str = &#34;comprehensive&#34;,
+        aspects: Optional[List[str]] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Research a topic.
+        
+        Args:
+            topic: Topic to research
+            depth: Research depth (brief, comprehensive, exhaustive)
+            aspects: Specific aspects to cover
+            
+        Returns:
+            ADKResult with research findings
+        &#34;&#34;&#34;
+        task = f&#34;Research the following topic ({depth} analysis): {topic}&#34;
+        
+        if aspects:
+            task += f&#34;\n\nFocus on these aspects: {&#39;, &#39;.join(aspects)}&#34;
+        
+        task += &#34;&#34;&#34;
+
+Provide:
+1. Overview and background
+2. Key findings
+3. Different perspectives
+4. Best practices or recommendations
+5. Potential challenges or considerations&#34;&#34;&#34;
+        
+        return await self.execute(task, {&#34;topic&#34;: topic, &#34;depth&#34;: depth})
+    
+    async def compare_options(
+        self,
+        options: List[str],
+        criteria: List[str],
+        context: Optional[str] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Compare multiple options.
+        
+        Args:
+            options: Options to compare
+            criteria: Comparison criteria
+            context: Additional context
+            
+        Returns:
+            ADKResult with comparison analysis
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Compare these options: {&#39;, &#39;.join(options)}
+
+Criteria for comparison:
+{chr(10).join(f&#39;- {c}&#39; for c in criteria)}&#34;&#34;&#34;
+        
+        if context:
+            task += f&#34;\n\nContext: {context}&#34;
+        
+        task += &#34;&#34;&#34;
+
+Provide:
+1. Brief overview of each option
+2. Comparison table/matrix
+3. Pros and cons of each
+4. Recommendation with reasoning&#34;&#34;&#34;
+        
+        return await self.execute(task)</code></pre>
+</details>
+<div class="desc"><p>Agent specialized in research and information synthesis.</p>
+<p>Initialize ADK agent.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+<dt><strong><code>http_client</code></strong></dt>
+<dd>Optional shared HTTP client</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>agents.adk.base.ADKAgent</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.adk.agents.ResearchADKAgent.compare_options"><code class="name flex">
+<span>async def <span class="ident">compare_options</span></span>(<span>self, options: List[str], criteria: List[str], context: str | None = None) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    async def compare_options(
+        self,
+        options: List[str],
+        criteria: List[str],
+        context: Optional[str] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Compare multiple options.
+        
+        Args:
+            options: Options to compare
+            criteria: Comparison criteria
+            context: Additional context
+            
+        Returns:
+            ADKResult with comparison analysis
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Compare these options: {&#39;, &#39;.join(options)}
+
+Criteria for comparison:
+{chr(10).join(f&#39;- {c}&#39; for c in criteria)}&#34;&#34;&#34;
+        
+        if context:
+            task += f&#34;\n\nContext: {context}&#34;
+        
+        task += &#34;&#34;&#34;
+
+Provide:
+1. Brief overview of each option
+2. Comparison table/matrix
+3. Pros and cons of each
+4. Recommendation with reasoning&#34;&#34;&#34;
+        
+        return await self.execute(task)</code></pre>
+</details>
+<div class="desc"><p>Compare multiple options.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>options</code></strong></dt>
+<dd>Options to compare</dd>
+<dt><strong><code>criteria</code></strong></dt>
+<dd>Comparison criteria</dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>Additional context</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with comparison analysis</p></div>
+</dd>
+<dt id="agents.agents.adk.agents.ResearchADKAgent.get_agent_type"><code class="name flex">
+<span>def <span class="ident">get_agent_type</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_agent_type(self) -&gt; str:
+    return &#34;research&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the agent type identifier.</p>
+<h2 id="returns">Returns</h2>
+<p>Agent type string (e.g., 'development', 'code_review')</p></div>
+</dd>
+<dt id="agents.agents.adk.agents.ResearchADKAgent.get_system_prompt"><code class="name flex">
+<span>def <span class="ident">get_system_prompt</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert researcher skilled at gathering, analyzing, and synthesizing information.
+
+Research approach:
+1. **Comprehensive**: Cover all relevant aspects
+2. **Objective**: Present multiple viewpoints
+3. **Evidence-based**: Support claims with reasoning
+4. **Structured**: Organize findings clearly
+5. **Actionable**: Provide practical recommendations
+
+Research output format:
+- Executive summary
+- Key findings with supporting details
+- Analysis and comparison
+- Recommendations
+- Limitations and caveats
+
+Be thorough but concise. Distinguish between facts and opinions.
+Acknowledge uncertainty where it exists.&#34;&#34;&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the system prompt for this agent type.</p>
+<h2 id="returns">Returns</h2>
+<p>System prompt string</p></div>
+</dd>
+<dt id="agents.agents.adk.agents.ResearchADKAgent.research_topic"><code class="name flex">
+<span>async def <span class="ident">research_topic</span></span>(<span>self, topic: str, depth: str = 'comprehensive', aspects: List[str] | None = None) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    async def research_topic(
+        self,
+        topic: str,
+        depth: str = &#34;comprehensive&#34;,
+        aspects: Optional[List[str]] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Research a topic.
+        
+        Args:
+            topic: Topic to research
+            depth: Research depth (brief, comprehensive, exhaustive)
+            aspects: Specific aspects to cover
+            
+        Returns:
+            ADKResult with research findings
+        &#34;&#34;&#34;
+        task = f&#34;Research the following topic ({depth} analysis): {topic}&#34;
+        
+        if aspects:
+            task += f&#34;\n\nFocus on these aspects: {&#39;, &#39;.join(aspects)}&#34;
+        
+        task += &#34;&#34;&#34;
+
+Provide:
+1. Overview and background
+2. Key findings
+3. Different perspectives
+4. Best practices or recommendations
+5. Potential challenges or considerations&#34;&#34;&#34;
+        
+        return await self.execute(task, {&#34;topic&#34;: topic, &#34;depth&#34;: depth})</code></pre>
+</details>
+<div class="desc"><p>Research a topic.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>topic</code></strong></dt>
+<dd>Topic to research</dd>
+<dt><strong><code>depth</code></strong></dt>
+<dd>Research depth (brief, comprehensive, exhaustive)</dd>
+<dt><strong><code>aspects</code></strong></dt>
+<dd>Specific aspects to cover</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with research findings</p></div>
+</dd>
+</dl>
+</dd>
+<dt id="agents.agents.adk.agents.TestingADKAgent"><code class="flex name class">
+<span>class <span class="ident">TestingADKAgent</span></span>
+<span>(</span><span>config: agents.adk.base.ADKConfig,<br>http_client: httpx.AsyncClient | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TestingADKAgent(ADKAgent):
+    &#34;&#34;&#34;Agent specialized in test generation and quality assurance.&#34;&#34;&#34;
+    
+    def get_agent_type(self) -&gt; str:
+        return &#34;testing&#34;
+    
+    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert software tester specializing in comprehensive test coverage.
+
+Your testing approach:
+1. **Unit Tests**: Individual function/method testing
+2. **Edge Cases**: Boundary conditions, null values, empty inputs
+3. **Error Handling**: Exception cases, invalid inputs
+4. **Integration**: Component interactions
+5. **Performance**: Load and stress considerations
+
+Test quality guidelines:
+- Use descriptive test names that explain what&#39;s being tested
+- Follow Arrange-Act-Assert (AAA) pattern
+- Keep tests independent and isolated
+- Mock external dependencies appropriately
+- Aim for high code coverage but prioritize critical paths
+- Include both positive and negative test cases
+
+Use appropriate testing frameworks for the language (pytest, Jest, JUnit, etc.).&#34;&#34;&#34;
+
+    async def generate_tests(
+        self,
+        code: str,
+        language: str,
+        framework: Optional[str] = None,
+        test_types: Optional[List[str]] = None
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Generate tests for code.
+        
+        Args:
+            code: Code to test
+            language: Programming language
+            framework: Testing framework
+            test_types: Types of tests to generate
+            
+        Returns:
+            ADKResult with generated tests
+        &#34;&#34;&#34;
+        task = f&#34;Generate comprehensive tests for the following {language} code&#34;
+        
+        if framework:
+            task += f&#34; using {framework}&#34;
+        
+        if test_types:
+            task += f&#34;\n\nInclude these test types: {&#39;, &#39;.join(test_types)}&#34;
+        
+        task += f&#34;\n\nCode:\n```{language}\n{code}\n```&#34;
+        
+        context = {&#34;language&#34;: language}
+        if framework:
+            context[&#34;framework&#34;] = framework
+        
+        return await self.execute(task, context)
+    
+    async def suggest_edge_cases(
+        self,
+        function_signature: str,
+        description: str
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Suggest edge cases for testing.
+        
+        Args:
+            function_signature: Function to analyze
+            description: What the function does
+            
+        Returns:
+            ADKResult with edge case suggestions
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Analyze this function and suggest edge cases for testing:
+
+Function: {function_signature}
+Description: {description}
+
+List potential edge cases including:
+- Boundary values
+- Null/undefined inputs
+- Empty collections
+- Invalid types
+- Concurrent access scenarios
+- Resource exhaustion
+- Error conditions&#34;&#34;&#34;
+        
+        return await self.execute(task)</code></pre>
+</details>
+<div class="desc"><p>Agent specialized in test generation and quality assurance.</p>
+<p>Initialize ADK agent.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>config</code></strong></dt>
+<dd>Agent configuration</dd>
+<dt><strong><code>http_client</code></strong></dt>
+<dd>Optional shared HTTP client</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>agents.adk.base.ADKAgent</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="agents.agents.adk.agents.TestingADKAgent.generate_tests"><code class="name flex">
+<span>async def <span class="ident">generate_tests</span></span>(<span>self,<br>code: str,<br>language: str,<br>framework: str | None = None,<br>test_types: List[str] | None = None) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def generate_tests(
+    self,
+    code: str,
+    language: str,
+    framework: Optional[str] = None,
+    test_types: Optional[List[str]] = None
+) -&gt; ADKResult:
+    &#34;&#34;&#34;Generate tests for code.
+    
+    Args:
+        code: Code to test
+        language: Programming language
+        framework: Testing framework
+        test_types: Types of tests to generate
+        
+    Returns:
+        ADKResult with generated tests
+    &#34;&#34;&#34;
+    task = f&#34;Generate comprehensive tests for the following {language} code&#34;
+    
+    if framework:
+        task += f&#34; using {framework}&#34;
+    
+    if test_types:
+        task += f&#34;\n\nInclude these test types: {&#39;, &#39;.join(test_types)}&#34;
+    
+    task += f&#34;\n\nCode:\n```{language}\n{code}\n```&#34;
+    
+    context = {&#34;language&#34;: language}
+    if framework:
+        context[&#34;framework&#34;] = framework
+    
+    return await self.execute(task, context)</code></pre>
+</details>
+<div class="desc"><p>Generate tests for code.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>code</code></strong></dt>
+<dd>Code to test</dd>
+<dt><strong><code>language</code></strong></dt>
+<dd>Programming language</dd>
+<dt><strong><code>framework</code></strong></dt>
+<dd>Testing framework</dd>
+<dt><strong><code>test_types</code></strong></dt>
+<dd>Types of tests to generate</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with generated tests</p></div>
+</dd>
+<dt id="agents.agents.adk.agents.TestingADKAgent.get_agent_type"><code class="name flex">
+<span>def <span class="ident">get_agent_type</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_agent_type(self) -&gt; str:
+    return &#34;testing&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the agent type identifier.</p>
+<h2 id="returns">Returns</h2>
+<p>Agent type string (e.g., 'development', 'code_review')</p></div>
+</dd>
+<dt id="agents.agents.adk.agents.TestingADKAgent.get_system_prompt"><code class="name flex">
+<span>def <span class="ident">get_system_prompt</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    def get_system_prompt(self) -&gt; str:
+        return &#34;&#34;&#34;You are an expert software tester specializing in comprehensive test coverage.
+
+Your testing approach:
+1. **Unit Tests**: Individual function/method testing
+2. **Edge Cases**: Boundary conditions, null values, empty inputs
+3. **Error Handling**: Exception cases, invalid inputs
+4. **Integration**: Component interactions
+5. **Performance**: Load and stress considerations
+
+Test quality guidelines:
+- Use descriptive test names that explain what&#39;s being tested
+- Follow Arrange-Act-Assert (AAA) pattern
+- Keep tests independent and isolated
+- Mock external dependencies appropriately
+- Aim for high code coverage but prioritize critical paths
+- Include both positive and negative test cases
+
+Use appropriate testing frameworks for the language (pytest, Jest, JUnit, etc.).&#34;&#34;&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the system prompt for this agent type.</p>
+<h2 id="returns">Returns</h2>
+<p>System prompt string</p></div>
+</dd>
+<dt id="agents.agents.adk.agents.TestingADKAgent.suggest_edge_cases"><code class="name flex">
+<span>async def <span class="ident">suggest_edge_cases</span></span>(<span>self, function_signature: str, description: str) ‑> agents.adk.base.ADKResult</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">    async def suggest_edge_cases(
+        self,
+        function_signature: str,
+        description: str
+    ) -&gt; ADKResult:
+        &#34;&#34;&#34;Suggest edge cases for testing.
+        
+        Args:
+            function_signature: Function to analyze
+            description: What the function does
+            
+        Returns:
+            ADKResult with edge case suggestions
+        &#34;&#34;&#34;
+        task = f&#34;&#34;&#34;Analyze this function and suggest edge cases for testing:
+
+Function: {function_signature}
+Description: {description}
+
+List potential edge cases including:
+- Boundary values
+- Null/undefined inputs
+- Empty collections
+- Invalid types
+- Concurrent access scenarios
+- Resource exhaustion
+- Error conditions&#34;&#34;&#34;
+        
+        return await self.execute(task)</code></pre>
+</details>
+<div class="desc"><p>Suggest edge cases for testing.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>function_signature</code></strong></dt>
+<dd>Function to analyze</dd>
+<dt><strong><code>description</code></strong></dt>
+<dd>What the function does</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>ADKResult with edge case suggestions</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="agents.agents.adk" href="index.html">agents.agents.adk</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="agents.agents.adk.agents.CodeReviewADKAgent" href="#agents.agents.adk.agents.CodeReviewADKAgent">CodeReviewADKAgent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.agents.CodeReviewADKAgent.get_agent_type" href="#agents.agents.adk.agents.CodeReviewADKAgent.get_agent_type">get_agent_type</a></code></li>
+<li><code><a title="agents.agents.adk.agents.CodeReviewADKAgent.get_system_prompt" href="#agents.agents.adk.agents.CodeReviewADKAgent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.agents.adk.agents.CodeReviewADKAgent.review_code" href="#agents.agents.adk.agents.CodeReviewADKAgent.review_code">review_code</a></code></li>
+<li><code><a title="agents.agents.adk.agents.CodeReviewADKAgent.security_audit" href="#agents.agents.adk.agents.CodeReviewADKAgent.security_audit">security_audit</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.agents.DevelopmentADKAgent" href="#agents.agents.adk.agents.DevelopmentADKAgent">DevelopmentADKAgent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.agents.DevelopmentADKAgent.generate_code" href="#agents.agents.adk.agents.DevelopmentADKAgent.generate_code">generate_code</a></code></li>
+<li><code><a title="agents.agents.adk.agents.DevelopmentADKAgent.get_agent_type" href="#agents.agents.adk.agents.DevelopmentADKAgent.get_agent_type">get_agent_type</a></code></li>
+<li><code><a title="agents.agents.adk.agents.DevelopmentADKAgent.get_system_prompt" href="#agents.agents.adk.agents.DevelopmentADKAgent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.agents.adk.agents.DevelopmentADKAgent.refactor_code" href="#agents.agents.adk.agents.DevelopmentADKAgent.refactor_code">refactor_code</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.agents.DocumentationADKAgent" href="#agents.agents.adk.agents.DocumentationADKAgent">DocumentationADKAgent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.agents.DocumentationADKAgent.generate_api_docs" href="#agents.agents.adk.agents.DocumentationADKAgent.generate_api_docs">generate_api_docs</a></code></li>
+<li><code><a title="agents.agents.adk.agents.DocumentationADKAgent.generate_readme" href="#agents.agents.adk.agents.DocumentationADKAgent.generate_readme">generate_readme</a></code></li>
+<li><code><a title="agents.agents.adk.agents.DocumentationADKAgent.get_agent_type" href="#agents.agents.adk.agents.DocumentationADKAgent.get_agent_type">get_agent_type</a></code></li>
+<li><code><a title="agents.agents.adk.agents.DocumentationADKAgent.get_system_prompt" href="#agents.agents.adk.agents.DocumentationADKAgent.get_system_prompt">get_system_prompt</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.agents.ResearchADKAgent" href="#agents.agents.adk.agents.ResearchADKAgent">ResearchADKAgent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.agents.ResearchADKAgent.compare_options" href="#agents.agents.adk.agents.ResearchADKAgent.compare_options">compare_options</a></code></li>
+<li><code><a title="agents.agents.adk.agents.ResearchADKAgent.get_agent_type" href="#agents.agents.adk.agents.ResearchADKAgent.get_agent_type">get_agent_type</a></code></li>
+<li><code><a title="agents.agents.adk.agents.ResearchADKAgent.get_system_prompt" href="#agents.agents.adk.agents.ResearchADKAgent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.agents.adk.agents.ResearchADKAgent.research_topic" href="#agents.agents.adk.agents.ResearchADKAgent.research_topic">research_topic</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="agents.agents.adk.agents.TestingADKAgent" href="#agents.agents.adk.agents.TestingADKAgent">TestingADKAgent</a></code></h4>
+<ul class="">
+<li><code><a title="agents.agents.adk.agents.TestingADKAgent.generate_tests" href="#agents.agents.adk.agents.TestingADKAgent.generate_tests">generate_tests</a></code></li>
+<li><code><a title="agents.agents.adk.agents.TestingADKAgent.get_agent_type" href="#agents.agents.adk.agents.TestingADKAgent.get_agent_type">get_agent_type</a></code></li>
+<li><code><a title="agents.agents.adk.agents.TestingADKAgent.get_system_prompt" href="#agents.agents.adk.agents.TestingADKAgent.get_system_prompt">get_system_prompt</a></code></li>
+<li><code><a title="agents.agents.adk.agents.TestingADKAgent.suggest_edge_cases" href="#agents.agents.adk.agents.TestingADKAgent.suggest_edge_cases">suggest_edge_cases</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

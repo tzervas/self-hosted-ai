@@ -1,0 +1,106 @@
+{{- if .Values.keyRotation.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "agent-server.fullname" . }}-key-rotation
+  labels:
+    {{- include "agent-server.labels" . | nindent 4 }}
+    app.kubernetes.io/component: key-rotation
+spec:
+  schedule: {{ .Values.keyRotation.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 600
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            {{- include "agent-server.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: key-rotation
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: {{ include "agent-server.serviceAccountName" . }}
+          containers:
+            - name: key-rotation
+              image: curlimages/curl:8.5.0
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  
+                  AGENT_URL="{{ include "agent-server.fullname" . }}:{{ .Values.service.port }}"
+                  API_KEY="${ADMIN_API_KEY}"
+                  WARNING_DAYS="{{ .Values.config.apiKeyWarningDays }}"
+                  ROTATION_DAYS="{{ .Values.config.apiKeyRotationDays }}"
+                  
+                  echo "=== API Key Rotation Check ==="
+                  echo "Checking keys expiring within $WARNING_DAYS days..."
+                  
+                  # Get all keys
+                  KEYS=$(curl -sf -H "X-API-Key: ${API_KEY}" "http://${AGENT_URL}/v1/keys")
+                  
+                  if [ -z "$KEYS" ]; then
+                    echo "ERROR: Failed to fetch keys or no admin access"
+                    exit 1
+                  fi
+                  
+                  # Parse keys and check expiration
+                  echo "$KEYS" | jq -r '.keys[] | "\(.id) \(.name) \(.days_until_expiry)"' | while read ID NAME DAYS; do
+                    if [ "$DAYS" -le 10 ]; then
+                      echo "ROTATING: Key '$NAME' ($ID) expires in $DAYS days"
+                      
+                      # Rotate the key
+                      RESULT=$(curl -sf -X POST -H "X-API-Key: ${API_KEY}" \
+                        "http://${AGENT_URL}/v1/keys/${ID}/rotate")
+                      
+                      if [ -n "$RESULT" ]; then
+                        NEW_KEY_ID=$(echo "$RESULT" | jq -r '.new_key.id')
+                        echo "SUCCESS: Rotated to new key $NEW_KEY_ID"
+                        
+                        # Write metric
+                        cat >> /tmp/metrics.prom << EOF
+                  api_key_rotation_total{key_id="${ID}",status="success"} 1
+                  api_key_rotation_timestamp_seconds{key_id="${NEW_KEY_ID}"} $(date +%s)
+                  EOF
+                      else
+                        echo "ERROR: Failed to rotate key $ID"
+                        cat >> /tmp/metrics.prom << EOF
+                  api_key_rotation_total{key_id="${ID}",status="failed"} 1
+                  EOF
+                      fi
+                    elif [ "$DAYS" -le "$WARNING_DAYS" ]; then
+                      echo "WARNING: Key '$NAME' ($ID) expires in $DAYS days"
+                      cat >> /tmp/metrics.prom << EOF
+                  api_key_expiring_soon{key_id="${ID}",name="${NAME}",days="${DAYS}"} 1
+                  EOF
+                    fi
+                  done
+                  
+                  # Push metrics to Pushgateway if configured
+                  {{- if .Values.metrics.pushgatewayUrl }}
+                  if [ -f /tmp/metrics.prom ]; then
+                    cat /tmp/metrics.prom | curl --data-binary @- \
+                      "{{ .Values.metrics.pushgatewayUrl }}/metrics/job/key_rotation"
+                  fi
+                  {{- end }}
+                  
+                  echo "=== Key Rotation Check Complete ==="
+              env:
+                - name: ADMIN_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.secrets.name }}
+                      key: admin-api-key
+              resources:
+                requests:
+                  memory: "64Mi"
+                  cpu: "50m"
+                limits:
+                  memory: "128Mi"
+                  cpu: "100m"
+{{- end }}

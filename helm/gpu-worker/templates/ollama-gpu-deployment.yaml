@@ -1,0 +1,70 @@
+{{- if .Values.ollama.gpu.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "self-hosted-ai-gpu-worker.fullname" . }}-ollama-gpu
+  labels:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-gpu-worker.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: ollama-gpu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "self-hosted-ai-gpu-worker.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: ollama-gpu
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "self-hosted-ai-gpu-worker.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/component: ollama-gpu
+    spec:
+      {{- with .Values.ollama.gpu.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.ollama.gpu.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: ollama
+          image: "{{ .Values.ollama.gpu.image.repository }}:{{ .Values.ollama.gpu.image.tag }}"
+          imagePullPolicy: {{ .Values.ollama.gpu.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 11434
+              protocol: TCP
+          env:
+            {{- range .Values.ollama.gpu.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /root/.ollama
+          livenessProbe:
+            httpGet:
+              path: /api/version
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/version
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.ollama.gpu.resources | nindent 12 }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "self-hosted-ai-gpu-worker.fullname" . }}-ollama-gpu
+{{- end }}

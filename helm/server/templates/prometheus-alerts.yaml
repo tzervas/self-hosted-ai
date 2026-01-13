@@ -1,0 +1,89 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-alerts
+  labels:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: prometheus
+    prometheus: k8s
+    role: alert-rules
+spec:
+  groups:
+    - name: self-hosted-ai
+      rules:
+        - alert: OpenWebUI Down
+          expr: up{job="openwebui"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Open WebUI is down"
+            description: "Open WebUI has been down for more than 5 minutes."
+
+        - alert: Ollama CPU Down
+          expr: up{job="ollama"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Ollama CPU is down"
+            description: "Ollama CPU has been down for more than 5 minutes."
+
+        - alert: Redis Down
+          expr: up{job="redis"} == 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Redis is down"
+            description: "Redis has been down for more than 5 minutes."
+
+        - alert: High CPU Usage
+          expr: rate(container_cpu_usage_seconds_total{pod=~"self-hosted-ai-.*"}[5m]) > 0.8
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High CPU usage detected"
+            description: "CPU usage is above 80% for more than 10 minutes."
+
+        - alert: High Memory Usage
+          expr: (container_memory_usage_bytes{pod=~"self-hosted-ai-.*"} / container_spec_memory_limit_bytes) > 0.9
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High memory usage detected"
+            description: "Memory usage is above 90% for more than 10 minutes."
+
+        - alert: Disk Space Low
+          expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) > 0.85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Disk space low"
+            description: "Disk usage is above 85%."
+
+        - alert: GPU Worker Down
+          expr: up{job="ollama-gpu"} == 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "GPU Worker is down"
+            description: "GPU Worker (Ollama GPU) has been down for more than 10 minutes."
+
+        - alert: ComfyUI Down
+          expr: up{job="comfyui"} == 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "ComfyUI is down"
+            description: "ComfyUI has been down for more than 10 minutes."
+{{- end }}

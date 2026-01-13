@@ -1,0 +1,465 @@
+{
+  "version": "0.7.2",
+  "models": {
+    "presets": [
+      {
+        "id": "coding-expert",
+        "name": "Coding Expert",
+        "description": "Specialized for code generation, review, and debugging",
+        "model": "qwen2.5-coder:14b",
+        "params": {
+          "temperature": 0.2,
+          "top_p": 0.95,
+          "top_k": 40,
+          "num_ctx": 16384,
+          "repeat_penalty": 1.1
+        },
+        "system_prompt": "You are an expert software engineer specialized in writing clean, efficient, and well-documented code. You excel at multiple programming languages including Rust, Python, TypeScript, and Shell scripting. Always provide complete, working code with proper error handling and best practices.",
+        "tags": ["code", "development", "programming"]
+      },
+      {
+        "id": "research-analyst",
+        "name": "Research Analyst",
+        "description": "Deep research and analysis with citations",
+        "model": "llama3.1:8b",
+        "params": {
+          "temperature": 0.5,
+          "top_p": 0.9,
+          "num_ctx": 32768
+        },
+        "system_prompt": "You are a meticulous research analyst. Provide comprehensive analysis with proper citations, multiple perspectives, and evidence-based conclusions. Always structure your responses with clear sections and references.",
+        "tags": ["research", "analysis", "citations"]
+      },
+      {
+        "id": "vision-analyzer",
+        "name": "Vision Analyzer",
+        "description": "Image understanding and visual analysis",
+        "model": "llava:13b",
+        "params": {
+          "temperature": 0.3,
+          "top_p": 0.95,
+          "num_ctx": 4096
+        },
+        "system_prompt": "You are a vision AI specialized in analyzing and describing images. Provide detailed, structured descriptions including objects, people, setting, colors, mood, text (OCR), and any notable details. Be precise and thorough.",
+        "tags": ["vision", "image", "multimodal"]
+      },
+      {
+        "id": "function-caller",
+        "name": "Function Caller",
+        "description": "Function calling and tool use specialist",
+        "model": "mistral:7b-instruct-v0.3",
+        "params": {
+          "temperature": 0.1,
+          "top_p": 0.95,
+          "num_ctx": 8192,
+          "format": "json"
+        },
+        "system_prompt": "You are a function calling specialist. When given a task, determine the appropriate function to call and format the response as valid JSON with the function name and arguments. Always use proper JSON formatting.",
+        "tags": ["functions", "tools", "api"]
+      },
+      {
+        "id": "embedding-expert",
+        "name": "Embedding Expert",
+        "description": "Semantic search and RAG operations",
+        "model": "nomic-embed-text:latest",
+        "params": {
+          "temperature": 0.0
+        },
+        "system_prompt": "You generate high-quality embeddings for semantic search and retrieval-augmented generation. Optimize text for embedding quality.",
+        "tags": ["embeddings", "rag", "search"]
+      },
+      {
+        "id": "sql-master",
+        "name": "SQL Master",
+        "description": "Database queries and data analysis",
+        "model": "sqlcoder:15b",
+        "params": {
+          "temperature": 0.1,
+          "top_p": 0.95,
+          "num_ctx": 8192
+        },
+        "system_prompt": "You are an expert SQL developer. Generate efficient, optimized SQL queries for various database systems. Include proper indexing suggestions, query explanations, and performance considerations.",
+        "tags": ["sql", "database", "queries"]
+      },
+      {
+        "id": "math-solver",
+        "name": "Math Solver",
+        "description": "Mathematical reasoning and problem solving",
+        "model": "deepseek-math:7b",
+        "params": {
+          "temperature": 0.2,
+          "top_p": 0.95,
+          "num_ctx": 8192
+        },
+        "system_prompt": "You are a mathematics expert. Solve problems step-by-step, showing all work. Explain reasoning clearly and verify solutions. Handle algebra, calculus, statistics, and more.",
+        "tags": ["math", "reasoning", "problem-solving"]
+      },
+      {
+        "id": "doc-analyzer",
+        "name": "Document Analyzer",
+        "description": "Long document processing and analysis",
+        "model": "qwen2.5:7b",
+        "params": {
+          "temperature": 0.3,
+          "top_p": 0.95,
+          "num_ctx": 131072
+        },
+        "system_prompt": "You specialize in analyzing long documents. Extract key information, summarize content, identify themes, and provide structured analysis. Handle documents up to 128k tokens.",
+        "tags": ["documents", "analysis", "long-context"]
+      },
+      {
+        "id": "quick-chat",
+        "name": "Quick Chat",
+        "description": "Fast responses for simple queries",
+        "model": "phi3:latest",
+        "params": {
+          "temperature": 0.7,
+          "top_p": 0.95,
+          "num_ctx": 4096
+        },
+        "system_prompt": "You provide quick, concise, and helpful responses. Be friendly and efficient.",
+        "tags": ["chat", "fast", "general"]
+      },
+      {
+        "id": "creative-writer",
+        "name": "Creative Writer",
+        "description": "Creative content generation",
+        "model": "llama3.1:8b",
+        "params": {
+          "temperature": 0.9,
+          "top_p": 0.95,
+          "top_k": 50,
+          "num_ctx": 8192,
+          "repeat_penalty": 1.1
+        },
+        "system_prompt": "You are a creative writer. Generate engaging, imaginative content with vivid descriptions and compelling narratives. Adapt your style to the requested genre or format.",
+        "tags": ["creative", "writing", "content"]
+      }
+    ],
+    "defaults": {
+      "temperature": 0.7,
+      "top_p": 0.9,
+      "top_k": 40,
+      "num_ctx": 8192,
+      "repeat_penalty": 1.1,
+      "seed": -1,
+      "stop": []
+    }
+  },
+  "functions": [
+    {
+      "id": "generate_embeddings",
+      "name": "Generate Embeddings",
+      "description": "Generate vector embeddings for text using embedding models",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Text to generate embeddings for"
+          },
+          "model": {
+            "type": "string",
+            "description": "Embedding model to use",
+            "enum": ["nomic-embed-text:latest", "mxbai-embed-large:latest"],
+            "default": "nomic-embed-text:latest"
+          }
+        },
+        "required": ["text"]
+      },
+      "endpoint": "http://localhost:11434/api/embeddings"
+    },
+    {
+      "id": "transcribe_audio",
+      "name": "Transcribe Audio",
+      "description": "Transcribe audio file to text using Whisper",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "audio_file": {
+            "type": "string",
+            "description": "Path to audio file"
+          },
+          "language": {
+            "type": "string",
+            "description": "Audio language code",
+            "default": "en"
+          },
+          "task": {
+            "type": "string",
+            "enum": ["transcribe", "translate"],
+            "default": "transcribe"
+          }
+        },
+        "required": ["audio_file"]
+      },
+      "endpoint": "http://localhost:9000/asr"
+    },
+    {
+      "id": "generate_speech",
+      "name": "Generate Speech",
+      "description": "Convert text to speech using TTS service",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Text to convert to speech"
+          },
+          "voice": {
+            "type": "string",
+            "description": "Voice model to use",
+            "default": "en_US-amy-medium"
+          },
+          "speed": {
+            "type": "number",
+            "description": "Speech speed multiplier",
+            "default": 1.0,
+            "minimum": 0.5,
+            "maximum": 2.0
+          }
+        },
+        "required": ["text"]
+      },
+      "endpoint": "http://localhost:5002/api/tts"
+    },
+    {
+      "id": "analyze_image",
+      "name": "Analyze Image",
+      "description": "Analyze image content using vision model",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "image_path": {
+            "type": "string",
+            "description": "Path to image file"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Analysis prompt or question about image",
+            "default": "Describe this image in detail"
+          },
+          "model": {
+            "type": "string",
+            "enum": ["llava:13b", "bakllava:latest"],
+            "default": "llava:13b"
+          }
+        },
+        "required": ["image_path"]
+      },
+      "endpoint": "http://192.168.1.99:11434/api/generate"
+    },
+    {
+      "id": "semantic_search",
+      "name": "Semantic Search",
+      "description": "Search vector database for similar content",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query text"
+          },
+          "collection": {
+            "type": "string",
+            "description": "Qdrant collection name"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Number of results to return",
+            "default": 5,
+            "minimum": 1,
+            "maximum": 100
+          },
+          "threshold": {
+            "type": "number",
+            "description": "Similarity threshold (0-1)",
+            "default": 0.7,
+            "minimum": 0.0,
+            "maximum": 1.0
+          }
+        },
+        "required": ["query", "collection"]
+      },
+      "endpoint": "http://localhost:6333/collections/{collection}/points/search"
+    },
+    {
+      "id": "execute_sql",
+      "name": "Execute SQL",
+      "description": "Execute SQL query on database",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "SQL query to execute"
+          },
+          "database": {
+            "type": "string",
+            "description": "Database name"
+          },
+          "read_only": {
+            "type": "boolean",
+            "description": "Execute in read-only mode",
+            "default": true
+          }
+        },
+        "required": ["query", "database"]
+      },
+      "endpoint": "http://localhost:5432"
+    },
+    {
+      "id": "generate_image",
+      "name": "Generate Image",
+      "description": "Generate image using ComfyUI",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "Image generation prompt"
+          },
+          "negative_prompt": {
+            "type": "string",
+            "description": "Negative prompt",
+            "default": ""
+          },
+          "workflow": {
+            "type": "string",
+            "description": "ComfyUI workflow to use",
+            "enum": ["text2img-sdxl", "img2img", "inpaint", "upscale"],
+            "default": "text2img-sdxl"
+          },
+          "width": {
+            "type": "integer",
+            "default": 1024
+          },
+          "height": {
+            "type": "integer",
+            "default": 1024
+          },
+          "steps": {
+            "type": "integer",
+            "default": 30,
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "required": ["prompt"]
+      },
+      "endpoint": "http://192.168.1.99:8188/api/prompt"
+    }
+  ],
+  "pipelines": [
+    {
+      "id": "rag_pipeline",
+      "name": "RAG Pipeline",
+      "description": "Retrieval-Augmented Generation workflow",
+      "steps": [
+        {
+          "function": "generate_embeddings",
+          "input": "${query}"
+        },
+        {
+          "function": "semantic_search",
+          "input": "${embeddings}",
+          "params": {
+            "collection": "knowledge_base",
+            "limit": 5
+          }
+        },
+        {
+          "model": "llama3.1:8b",
+          "input": "Context: ${search_results}\n\nQuestion: ${query}\n\nAnswer based on the provided context:",
+          "params": {
+            "temperature": 0.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "multimodal_analysis",
+      "name": "Multi-Modal Analysis",
+      "description": "Analyze text, images, and audio together",
+      "steps": [
+        {
+          "function": "analyze_image",
+          "input": "${image_path}",
+          "condition": "has_image"
+        },
+        {
+          "function": "transcribe_audio",
+          "input": "${audio_path}",
+          "condition": "has_audio"
+        },
+        {
+          "model": "llama3.1:8b",
+          "input": "Image analysis: ${image_analysis}\nAudio transcription: ${audio_text}\nText input: ${text}\n\nProvide comprehensive analysis:",
+          "params": {
+            "temperature": 0.5,
+            "num_ctx": 16384
+          }
+        }
+      ]
+    },
+    {
+      "id": "code_review_pipeline",
+      "name": "Code Review Pipeline",
+      "description": "Multi-agent code review workflow",
+      "steps": [
+        {
+          "model": "qwen2.5-coder:14b",
+          "input": "Review this code for correctness and best practices:\n\n${code}",
+          "params": {
+            "temperature": 0.2
+          }
+        },
+        {
+          "model": "deepseek-coder-v2:16b",
+          "input": "Review this code for security issues:\n\n${code}",
+          "params": {
+            "temperature": 0.1
+          }
+        },
+        {
+          "model": "llama3.1:8b",
+          "input": "Synthesize these code reviews:\n\nReview 1: ${review1}\nReview 2: ${review2}\n\nProvide final recommendations:",
+          "params": {
+            "temperature": 0.3
+          }
+        }
+      ]
+    }
+  ],
+  "rag": {
+    "enabled": true,
+    "embedding_model": "nomic-embed-text:latest",
+    "chunk_size": 512,
+    "chunk_overlap": 50,
+    "vector_db": "qdrant",
+    "vector_db_url": "http://localhost:6333",
+    "default_collection": "knowledge_base"
+  },
+  "image_generation": {
+    "enabled": true,
+    "engine": "auto",
+    "comfyui_url": "http://192.168.1.99:8188",
+    "automatic1111_url": "http://192.168.1.99:7860",
+    "default_workflow": "text2img-sdxl",
+    "default_params": {
+      "width": 1024,
+      "height": 1024,
+      "steps": 30,
+      "cfg_scale": 7.0
+    }
+  },
+  "audio": {
+    "stt_enabled": true,
+    "stt_engine": "whisper",
+    "whisper_url": "http://localhost:9000",
+    "tts_enabled": true,
+    "tts_engine": "coqui",
+    "tts_url": "http://localhost:5002",
+    "default_voice": "en_US-amy-medium"
+  }
+}

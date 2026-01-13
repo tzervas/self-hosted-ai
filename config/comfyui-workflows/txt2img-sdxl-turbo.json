@@ -1,0 +1,77 @@
+{
+  "_meta": {
+    "name": "SDXL Turbo - Fast Generation",
+    "description": "Ultra-fast 4-step generation using SDXL Turbo. Near real-time image generation.",
+    "version": "1.0.0",
+    "author": "self-hosted-ai",
+    "tags": ["txt2img", "sdxl", "turbo", "fast", "real-time"],
+    "requirements": {
+      "checkpoint": "sd_xl_turbo_1.0_fp16.safetensors",
+      "vram_min_gb": 8
+    }
+  },
+  "1": {
+    "inputs": {
+      "ckpt_name": "sd_xl_turbo_1.0_fp16.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": { "title": "Load SDXL Turbo" }
+  },
+  "2": {
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": { "title": "Empty Latent Image" }
+  },
+  "3": {
+    "inputs": {
+      "text": "Prompt",
+      "clip": ["1", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "CLIP Text Encode (Positive)" }
+  },
+  "4": {
+    "inputs": {
+      "text": "",
+      "clip": ["1", 1]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "CLIP Text Encode (Negative)" }
+  },
+  "5": {
+    "inputs": {
+      "seed": 0,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "normal",
+      "denoise": 1,
+      "model": ["1", 0],
+      "positive": ["3", 0],
+      "negative": ["4", 0],
+      "latent_image": ["2", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": { "title": "KSampler (4 Steps)" }
+  },
+  "6": {
+    "inputs": {
+      "samples": ["5", 0],
+      "vae": ["1", 2]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "VAE Decode" }
+  },
+  "7": {
+    "inputs": {
+      "filename_prefix": "SDXL_turbo",
+      "images": ["6", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": { "title": "Save Image" }
+  }
+}

@@ -1,0 +1,93 @@
+name: Python Agent Tests
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'agents/**'
+      - 'tests/**'
+      - 'workflows/**'
+      - '.github/workflows/python-tests.yml'
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - 'agents/**'
+      - 'tests/**'
+      - 'workflows/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          cd agents
+          pip install -e ".[dev]"
+
+      - name: Run tests with coverage
+        run: |
+          cd agents
+          pytest tests/ -v --cov=agents --cov-report=xml --cov-report=term
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./agents/coverage.xml
+          flags: python-agents
+          name: python-${{ matrix.python-version }}
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          cd agents
+          pip install -e ".[dev]"
+
+      - name: Run black
+        run: |
+          cd agents
+          black --check --diff agents/
+
+      - name: Run isort
+        run: |
+          cd agents
+          isort --check-only --diff agents/
+
+      - name: Run mypy
+        run: |
+          cd agents
+          mypy agents/
+
+      - name: Run ruff
+        run: |
+          cd agents
+          ruff check agents/
+
+      - name: Run pylint
+        run: |
+          cd agents
+          pylint agents/
+        continue-on-error: true  # Pylint is strict, don't fail on warnings

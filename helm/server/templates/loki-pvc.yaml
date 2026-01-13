@@ -1,0 +1,27 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.loki.enabled .Values.monitoring.loki.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-loki
+  labels:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: loki
+  {{- with .Values.monitoring.loki.persistence.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- range .Values.monitoring.loki.persistence.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.monitoring.loki.persistence.size }}
+  {{- if .Values.monitoring.loki.persistence.storageClass }}
+  storageClassName: {{ .Values.monitoring.loki.persistence.storageClass }}
+  {{- end }}
+{{- end }}

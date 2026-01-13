@@ -1,0 +1,35 @@
+# Rust formatting configuration
+# Run with: cargo fmt
+
+edition = "2021"
+max_width = 100
+hard_tabs = false
+tab_spaces = 4
+newline_style = "Unix"
+use_small_heuristics = "Default"
+reorder_imports = true
+reorder_modules = true
+remove_nested_parens = true
+edition_style = "2021"
+
+# Function definitions
+fn_args_layout = "Tall"
+fn_single_line = false
+
+# Imports
+imports_granularity = "Crate"
+group_imports = "StdExternalCrate"
+
+# Control flow
+control_brace_style = "AlwaysSameLine"
+trailing_comma = "Vertical"
+match_block_trailing_comma = true
+
+# Strings
+format_strings = true
+format_macro_matchers = true
+
+# Comments
+wrap_comments = true
+comment_width = 80
+normalize_comments = true

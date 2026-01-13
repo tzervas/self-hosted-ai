@@ -1,0 +1,93 @@
+name: full-development-cycle
+description: Complete SDLC pipeline with all specialized agents
+
+config:
+  max_parallel_tasks: 3
+  fail_fast: false
+  timeout_seconds: 3600
+  retry_failed_tasks: true
+  collect_metrics: true
+
+agents:
+  - type: research
+    name: researcher
+    config:
+      model: qwen2.5-coder:14b
+      temperature: 0.7
+      
+  - type: development
+    name: developer
+    config:
+      model: qwen2.5-coder:14b
+      temperature: 0.3
+      
+  - type: code_review
+    name: reviewer
+    config:
+      model: qwen2.5-coder:14b
+      temperature: 0.2
+      
+  - type: testing
+    name: tester
+    config:
+      model: qwen2.5-coder:14b
+      temperature: 0.3
+      
+  - type: documentation
+    name: documenter
+    config:
+      model: qwen2.5-coder:14b
+      temperature: 0.5
+
+tasks:
+  - name: research
+    description: Research requirements and design patterns
+    agent_types: [research]
+    priority: critical
+    dependencies: []
+    payload:
+      prompt: "Research: {{requirements}}"
+
+  - name: implement
+    description: Implement the feature
+    agent_types: [development]
+    priority: high
+    dependencies: [research]
+    payload:
+      prompt: "Implement: {{feature}} using research: {{research.output}}"
+      context:
+        language: "{{language}}"
+
+  - name: review
+    description: Review implementation for quality and security
+    agent_types: [code_review]
+    priority: high
+    dependencies: [implement]
+    payload:
+      prompt: "Review code: {{implement.output.code}}"
+
+  - name: generate-tests
+    description: Generate comprehensive test suite
+    agent_types: [testing]
+    priority: normal
+    dependencies: [implement]
+    payload:
+      prompt: "Generate tests for: {{implement.output.code}}"
+
+  - name: document
+    description: Generate documentation
+    agent_types: [documentation]
+    priority: normal
+    dependencies: [implement, review]
+    payload:
+      prompt: "Document code with review insights: {{implement.output.code}}"
+      context:
+        doc_type: "api"
+
+  - name: final-review
+    description: Final review after tests and docs
+    agent_types: [code_review]
+    priority: normal
+    dependencies: [generate-tests, document]
+    payload:
+      prompt: "Final review with tests and docs completed"

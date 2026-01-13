@@ -1,0 +1,35 @@
+repositories:
+  - name: bitnami
+    url: https://charts.bitnami.com/bitnami
+
+releases:
+  - name: self-hosted-ai-server
+    namespace: self-hosted-ai
+    chart: ./helm/server
+    values:
+      - ./helm/server/values.yaml
+    set:
+      - name: global.storageClass
+        value: "local-path"
+    createNamespace: true
+
+  - name: self-hosted-ai-gpu-worker
+    namespace: self-hosted-ai
+    chart: ./helm/gpu-worker
+    values:
+      - ./helm/gpu-worker/values.yaml
+    set:
+      - name: global.storageClass
+        value: "local-path"
+    createNamespace: true
+
+environments:
+  dev:
+    values:
+      - environments/dev.yaml
+  staging:
+    values:
+      - environments/staging.yaml
+  prod:
+    values:
+      - environments/prod.yaml

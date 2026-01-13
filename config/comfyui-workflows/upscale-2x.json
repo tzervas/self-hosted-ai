@@ -1,0 +1,45 @@
+{
+  "_meta": {
+    "name": "Upscale 2x - Real-ESRGAN",
+    "description": "Upscale images 2x using Real-ESRGAN model. Great for enhancing AI-generated images.",
+    "version": "1.0.0",
+    "author": "self-hosted-ai",
+    "tags": ["upscale", "enhance", "post-process", "esrgan"],
+    "requirements": {
+      "upscale_model": "RealESRGAN_x2plus.pth",
+      "vram_min_gb": 4,
+      "input_image": true
+    }
+  },
+  "1": {
+    "inputs": {
+      "image": "input.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Load Input Image" }
+  },
+  "2": {
+    "inputs": {
+      "model_name": "RealESRGAN_x2plus.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": { "title": "Load Upscale Model" }
+  },
+  "3": {
+    "inputs": {
+      "upscale_model": ["2", 0],
+      "image": ["1", 0]
+    },
+    "class_type": "ImageUpscaleWithModel",
+    "_meta": { "title": "Upscale Image" }
+  },
+  "4": {
+    "inputs": {
+      "filename_prefix": "Upscaled_2x",
+      "images": ["3", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": { "title": "Save Image" }
+  }
+}

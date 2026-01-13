@@ -1,0 +1,113 @@
+{
+  "last_node_id": 20,
+  "last_link_id": 25,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadAudio",
+      "pos": [50, 100],
+      "size": [315, 80],
+      "properties": {},
+      "widgets_values": ["input_audio.wav"]
+    },
+    {
+      "id": 2,
+      "type": "WhisperTranscribe",
+      "pos": [400, 100],
+      "size": [350, 150],
+      "properties": {},
+      "widgets_values": ["large-v3", "auto", true],
+      "title": "Whisper Transcription"
+    },
+    {
+      "id": 3,
+      "type": "TextToPrompt",
+      "pos": [800, 100],
+      "size": [300, 100],
+      "properties": {},
+      "widgets_values": [""],
+      "title": "Convert to Image Prompt"
+    },
+    {
+      "id": 4,
+      "type": "CheckpointLoaderSimple",
+      "pos": [50, 300],
+      "size": [315, 98],
+      "properties": {},
+      "widgets_values": ["sd_xl_base_1.0.safetensors"]
+    },
+    {
+      "id": 5,
+      "type": "CLIPTextEncode",
+      "pos": [400, 300],
+      "size": [400, 150],
+      "properties": {},
+      "title": "Positive (from transcription)"
+    },
+    {
+      "id": 6,
+      "type": "CLIPTextEncode",
+      "pos": [400, 480],
+      "size": [400, 100],
+      "properties": {},
+      "widgets_values": ["blurry, distorted, low quality, text, watermark"],
+      "title": "Negative"
+    },
+    {
+      "id": 7,
+      "type": "EmptyLatentImage",
+      "pos": [50, 480],
+      "size": [315, 106],
+      "properties": {},
+      "widgets_values": [1024, 1024, 1]
+    },
+    {
+      "id": 8,
+      "type": "KSampler",
+      "pos": [850, 350],
+      "size": [315, 262],
+      "properties": {},
+      "widgets_values": [42, "randomize", 30, 7.5, "dpmpp_2m", "normal", 1]
+    },
+    {
+      "id": 9,
+      "type": "VAEDecode",
+      "pos": [1200, 350],
+      "size": [210, 46],
+      "properties": {}
+    },
+    {
+      "id": 10,
+      "type": "SaveImage",
+      "pos": [1450, 350],
+      "size": [315, 270],
+      "properties": {},
+      "widgets_values": ["audio2img/generated"]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "AUDIO"],
+    [2, 2, 0, 3, 0, "STRING"],
+    [3, 3, 0, 5, 1, "STRING"],
+    [4, 4, 0, 5, 0, "CLIP"],
+    [5, 4, 0, 6, 0, "CLIP"],
+    [6, 4, 1, 8, 0, "MODEL"],
+    [7, 5, 0, 8, 1, "CONDITIONING"],
+    [8, 6, 0, 8, 2, "CONDITIONING"],
+    [9, 7, 0, 8, 3, "LATENT"],
+    [10, 8, 0, 9, 0, "LATENT"],
+    [11, 4, 2, 9, 1, "VAE"],
+    [12, 9, 0, 10, 0, "IMAGE"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "workflow_type": "audio2img",
+    "description": "Transcribes audio using Whisper and generates an image from the transcription",
+    "requirements": {
+      "custom_nodes": ["ComfyUI-Whisper", "ComfyUI-AudioTools"],
+      "vram_min_gb": 10
+    }
+  },
+  "version": 0.4
+}

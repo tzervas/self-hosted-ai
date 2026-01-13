@@ -1,0 +1,48 @@
+{{- if .Values.imageRouter.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-image-router
+  labels:
+    {{- include "self-hosted-ai-server.labels" . | nindent 4 }}
+    app.kubernetes.io/component: image-router
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "self-hosted-ai-server.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: image-router
+  template:
+    metadata:
+      labels:
+        {{- include "self-hosted-ai-server.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: image-router
+    spec:
+      containers:
+        - name: image-router
+          image: "{{ .Values.imageRouter.image.repository }}:{{ .Values.imageRouter.image.tag }}"
+          imagePullPolicy: {{ .Values.imageRouter.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          env:
+            {{- range .Values.imageRouter.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.imageRouter.resources | nindent 12 }}
+{{- end }}

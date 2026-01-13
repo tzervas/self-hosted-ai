@@ -1,0 +1,27 @@
+{{- if and .Values.ollama.gpu.enabled .Values.ollama.gpu.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "self-hosted-ai-gpu-worker.fullname" . }}-ollama-gpu
+  labels:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-gpu-worker.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: ollama-gpu
+  {{- with .Values.ollama.gpu.persistence.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- range .Values.ollama.gpu.persistence.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.ollama.gpu.persistence.size }}
+  {{- if .Values.ollama.gpu.persistence.storageClass }}
+  storageClassName: {{ .Values.ollama.gpu.persistence.storageClass }}
+  {{- end }}
+{{- end }}

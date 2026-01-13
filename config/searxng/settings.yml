@@ -1,0 +1,196 @@
+# SearXNG Configuration for Self-Hosted AI Stack
+# This file is mounted to /etc/searxng/settings.yml
+
+use_default_settings: true
+
+general:
+  debug: false
+  instance_name: "Self-Hosted AI Search"
+  privacypolicy_url: false
+  donation_url: false
+  contact_url: false
+  enable_metrics: true
+
+search:
+  safe_search: 0  # 0=off, 1=moderate, 2=strict
+  autocomplete: "google"
+  default_lang: "en"
+  formats:
+    - html
+    - json
+  # Enable special queries
+  special_queries:
+    image_proxy: true
+
+server:
+  # Bind to 0.0.0.0 for container networking
+  bind_address: "0.0.0.0"
+  port: 8080
+  secret_key: "${SEARXNG_SECRET_KEY}"
+  base_url: false
+  limiter: true
+  image_proxy: true
+  http_protocol_version: "1.0"
+
+redis:
+  url: redis://searxng-redis:6379/0
+
+ui:
+  static_use_hash: true
+  default_theme: "simple"
+  infinite_scroll: true
+  center_alignment: true
+  results_on_new_tab: false
+  query_in_title: true
+
+# Engine configurations
+engines:
+  # General search
+  - name: google
+    disabled: false
+    weight: 1.5
+
+  - name: duckduckgo
+    disabled: false
+    weight: 1.2
+
+  - name: bing
+    disabled: false
+    weight: 1.0
+
+  - name: brave
+    disabled: false
+    weight: 1.0
+
+  - name: qwant
+    disabled: false
+    weight: 0.8
+
+  # Developer resources
+  - name: github
+    disabled: false
+    weight: 1.3
+    shortcut: gh
+
+  - name: stackoverflow
+    disabled: false
+    weight: 1.2
+    shortcut: so
+
+  - name: gitlab
+    disabled: false
+    weight: 1.0
+    shortcut: gl
+
+  # Documentation
+  - name: archwiki
+    disabled: false
+    shortcut: aw
+
+  - name: wikipedia
+    disabled: false
+    weight: 1.0
+    shortcut: wp
+
+  - name: wikidata
+    disabled: false
+    shortcut: wd
+
+  # AI/ML specific
+  - name: huggingface
+    engine: xpath
+    paging: true
+    search_url: https://huggingface.co/search/full-text?q={query}&skip={pageno}
+    url_xpath: //a[contains(@class, "card")]/@href
+    title_xpath: //a[contains(@class, "card")]//h4/text()
+    content_xpath: //a[contains(@class, "card")]//p/text()
+    categories: [ai, models]
+    shortcut: hf
+    disabled: false
+
+  - name: arxiv
+    disabled: false
+    shortcut: ax
+    weight: 1.2
+
+  - name: semantic scholar
+    disabled: false
+    shortcut: ss
+    weight: 1.0
+
+  # Science and research
+  - name: google scholar
+    disabled: false
+    shortcut: gs
+    weight: 1.3
+
+  - name: pubmed
+    disabled: false
+    shortcut: pm
+
+  # News
+  - name: google news
+    disabled: false
+    weight: 1.0
+
+  - name: hackernews
+    disabled: false
+    shortcut: hn
+    weight: 1.1
+
+  # Images
+  - name: google images
+    disabled: false
+    weight: 1.2
+
+  - name: unsplash
+    disabled: false
+    shortcut: us
+
+  # Videos
+  - name: youtube
+    disabled: false
+    weight: 1.2
+    shortcut: yt
+
+  - name: peertube
+    disabled: false
+    shortcut: pt
+
+  # Files/Code
+  - name: npm
+    disabled: false
+    shortcut: npm
+
+  - name: pypi
+    disabled: false
+    shortcut: pip
+
+  - name: crates.io
+    disabled: false
+    shortcut: rs
+
+# Outgoing request settings
+outgoing:
+  request_timeout: 8.0
+  max_request_timeout: 15.0
+  useragent_suffix: ""
+  pool_connections: 100
+  pool_maxsize: 20
+  enable_http2: true
+
+# Rate limiting
+limiter:
+  # Requests per time window
+  request_limit: 100
+  # Time window in seconds
+  time_window: 60
+
+# Plugin settings
+enabled_plugins:
+  - Hash plugin
+  - Self information
+  - Tracker URL remover
+  - Unit converter
+  - Basic calculator
+  - Open Access DOI rewrite

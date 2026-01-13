@@ -1,0 +1,15 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.promtail.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "self-hosted-ai-server.fullname" . }}-promtail
+  labels:
+    app.kubernetes.io/name: {{ include "self-hosted-ai-server.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: promtail
+data:
+  config.yaml: |
+    {{- toYaml .Values.monitoring.promtail.config | nindent 4 }}
+{{- end }}

@@ -1,0 +1,98 @@
+{
+  "last_node_id": 18,
+  "last_link_id": 22,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "CheckpointLoaderSimple",
+      "pos": [50, 100],
+      "size": [315, 98],
+      "properties": {},
+      "widgets_values": ["wan_1.3B_exp_e9.safetensors"]
+    },
+    {
+      "id": 2,
+      "type": "CLIPTextEncode",
+      "pos": [400, 50],
+      "size": [400, 200],
+      "properties": {},
+      "widgets_values": ["A majestic eagle soaring through clouds at sunset, cinematic lighting, 4k quality"],
+      "title": "Positive Prompt"
+    },
+    {
+      "id": 3,
+      "type": "CLIPTextEncode",
+      "pos": [400, 280],
+      "size": [400, 130],
+      "properties": {},
+      "widgets_values": ["blurry, low quality, distorted, watermark, text"],
+      "title": "Negative Prompt"
+    },
+    {
+      "id": 4,
+      "type": "EmptyLatentImage",
+      "pos": [50, 280],
+      "size": [315, 106],
+      "properties": {},
+      "widgets_values": [512, 512, 24]
+    },
+    {
+      "id": 5,
+      "type": "KSampler",
+      "pos": [850, 100],
+      "size": [315, 262],
+      "properties": {},
+      "widgets_values": [
+        42,
+        "randomize",
+        30,
+        7.5,
+        "euler_ancestral",
+        "normal",
+        1
+      ]
+    },
+    {
+      "id": 6,
+      "type": "VAEDecode",
+      "pos": [1200, 100],
+      "size": [210, 46],
+      "properties": {}
+    },
+    {
+      "id": 7,
+      "type": "VHS_VideoCombine",
+      "pos": [1450, 100],
+      "size": [315, 290],
+      "properties": {},
+      "widgets_values": [
+        24,
+        0,
+        "video/h264-mp4",
+        true,
+        true,
+        "wan_video"
+      ]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "CLIP"],
+    [2, 1, 0, 3, 0, "CLIP"],
+    [3, 1, 1, 5, 0, "MODEL"],
+    [4, 2, 0, 5, 1, "CONDITIONING"],
+    [5, 3, 0, 5, 2, "CONDITIONING"],
+    [6, 4, 0, 5, 3, "LATENT"],
+    [7, 5, 0, 6, 0, "LATENT"],
+    [8, 1, 2, 6, 1, "VAE"],
+    [9, 6, 0, 7, 0, "IMAGE"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "workflow_type": "text2video",
+    "model_type": "wan",
+    "version": "1.0",
+    "author": "self-hosted-ai"
+  },
+  "version": 0.4
+}

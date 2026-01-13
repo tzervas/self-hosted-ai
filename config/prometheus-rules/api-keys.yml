@@ -1,0 +1,115 @@
+# Prometheus Alert Rules for API Key Management
+# Deploy to /etc/prometheus/rules/ or mount via ConfigMap
+
+groups:
+  - name: api_keys
+    rules:
+      # Alert when any API keys have expired
+      - alert: APIKeyExpired
+        expr: api_keys_expired > 0
+        for: 5m
+        labels:
+          severity: critical
+          component: agent-server
+        annotations:
+          summary: "{{ $value }} API keys have expired"
+          description: "There are {{ $value }} expired API keys that need immediate rotation. Run 'manage-keys.sh auto-rotate' or check the agent-server logs."
+          runbook_url: "https://docs.example.com/runbooks/api-key-rotation"
+      
+      # Alert when keys are expiring within warning period (80 days by default)
+      - alert: APIKeyExpiringSoon
+        expr: api_keys_expiring_soon > 0
+        for: 1h
+        labels:
+          severity: warning
+          component: agent-server
+        annotations:
+          summary: "{{ $value }} API keys expiring soon"
+          description: "There are {{ $value }} API keys expiring within the warning period. Schedule key rotation soon."
+          runbook_url: "https://docs.example.com/runbooks/api-key-rotation"
+      
+      # Alert when individual key is about to expire (per-key granularity)
+      - alert: APIKeyExpiringCritical
+        expr: api_key_days_until_expiry < 7 and api_key_days_until_expiry > 0
+        for: 1h
+        labels:
+          severity: warning
+          component: agent-server
+        annotations:
+          summary: "API key {{ $labels.key_prefix }} expires in {{ $value }} days"
+          description: "API key {{ $labels.key_prefix }} will expire in {{ $value }} days. Rotate this key immediately."
+      
+      # Alert for keys older than rotation threshold
+      - alert: APIKeyRotationOverdue
+        expr: api_key_age_days > 90
+        for: 1h
+        labels:
+          severity: warning
+          component: agent-server
+        annotations:
+          summary: "API key {{ $labels.key_prefix }} is {{ $value }} days old"
+          description: "API key {{ $labels.key_prefix }} has exceeded the 90-day rotation policy and should be rotated."
+      
+      # Alert if no active keys (service disruption)
+      - alert: NoActiveAPIKeys
+        expr: api_keys_active == 0
+        for: 5m
+        labels:
+          severity: critical
+          component: agent-server
+        annotations:
+          summary: "No active API keys available"
+          description: "There are no active API keys. The agent server will reject all requests. Generate new keys immediately."
+      
+      # Alert for unusual number of key operations (potential abuse)
+      - alert: HighKeyOperationRate
+        expr: rate(agent_server_key_operations_total[5m]) > 10
+        for: 10m
+        labels:
+          severity: warning
+          component: agent-server
+        annotations:
+          summary: "High rate of API key operations"
+          description: "Unusual rate of API key operations detected ({{ $value }}/s). Check for potential abuse or misconfiguration."
+      
+      # Backup verification alerts
+      - alert: BackupVerificationFailed
+        expr: backup_verify_status{component="postgres"} == 0 or backup_verify_status{component="qdrant"} == 0
+        for: 1h
+        labels:
+          severity: critical
+          component: backup
+        annotations:
+          summary: "Backup verification failed for {{ $labels.component }}"
+          description: "The weekly backup verification for {{ $labels.component }} has failed. Investigate immediately."
+      
+      - alert: BackupVerificationStale
+        expr: time() - backup_verify_timestamp > 604800  # 7 days
+        for: 1h
+        labels:
+          severity: warning
+          component: backup
+        annotations:
+          summary: "Backup verification is stale"
+          description: "Backup verification has not run in over 7 days. Check the backup-verify CronJob."
+      
+      # GPU queue alerts
+      - alert: GPUQueueHighLatency
+        expr: histogram_quantile(0.95, rate(litellm_request_duration_seconds_bucket{priority="high"}[5m])) > 30
+        for: 10m
+        labels:
+          severity: warning
+          component: litellm
+        annotations:
+          summary: "High priority GPU queue latency is elevated"
+          description: "95th percentile latency for high-priority GPU requests is {{ $value }}s. Check GPU worker health."
+      
+      - alert: GPUQueueBacklog
+        expr: litellm_queue_size{priority="high"} > 50
+        for: 5m
+        labels:
+          severity: warning
+          component: litellm
+        annotations:
+          summary: "GPU queue backlog building up"
+          description: "High priority GPU queue has {{ $value }} pending requests. May need to scale GPU workers."

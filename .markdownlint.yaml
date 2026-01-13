@@ -1,0 +1,25 @@
+# Markdownlint configuration
+# Aligned with pre-commit hooks - fix what's safe, ignore style preferences
+
+# Disable rules that conflict with our docs style
+MD013: false  # Line length - we wrap prose naturally
+MD033: false  # Allow inline HTML (diagrams, badges)
+MD041: false  # First line doesn't have to be h1
+
+# Configure rules we do enforce
+MD007:
+  indent: 2  # List indent
+MD009:
+  br_spaces: 2  # Trailing spaces for line breaks
+MD010:
+  code_blocks: false  # Allow tabs in code blocks
+MD024:
+  siblings_only: true  # Allow duplicate headings in different sections
+MD029:
+  style: ordered  # Use 1. 2. 3. not 1. 1. 1.
+MD035:
+  style: "---"  # Horizontal rule style
+MD046:
+  style: fenced  # Code block style
+MD048:
+  style: backtick  # Fence style

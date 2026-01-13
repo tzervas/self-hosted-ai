@@ -1,0 +1,155 @@
+# Multi-Modal Content Processing Pipeline
+# Ingests various content types and produces structured outputs
+
+name: "multimodal_content_processing"
+description: "Process text, images, audio, and video to create comprehensive analysis"
+version: "1.0"
+
+# Agent definitions
+agents:
+  - id: content_ingestion
+    type: MultiModalAgent
+    config:
+      model: "llava:13b"
+      temperature: 0.3
+      timeout: 180
+      vision_model: "llava:13b"
+      whisper_url: "http://localhost:9000"
+
+  - id: embedding_generator
+    type: EmbeddingAgent
+    config:
+      model: "nomic-embed-text:latest"
+      temperature: 0.0
+      timeout: 60
+      embedding_model: "mxbai-embed-large:latest"
+      qdrant_url: "http://localhost:6333"
+
+  - id: content_analyzer
+    type: ResearchAgent
+    config:
+      model: "llama3.1:8b"
+      temperature: 0.5
+      timeout: 120
+
+  - id: documentation_generator
+    type: DocumentationAgent
+    config:
+      model: "qwen2.5-coder:14b"
+      temperature: 0.2
+      timeout: 120
+
+# Task pipeline
+tasks:
+  - id: ingest_content
+    agent_id: content_ingestion
+    name: "Ingest Multi-Modal Content"
+    description: |
+      Ingest and process all provided content types:
+      - Images: Extract visual information
+      - Audio: Transcribe speech and identify sounds
+      - Video: Analyze frames and motion
+      - Text: Parse and understand structure
+      
+      Input: ${content_paths}
+      Modalities: ${modalities}
+    priority: 1
+    config:
+      timeout: 180
+      retry_on_failure: true
+      max_retries: 2
+
+  - id: generate_embeddings
+    agent_id: embedding_generator
+    name: "Generate Content Embeddings"
+    description: |
+      Create vector embeddings for all processed content.
+      Store in Qdrant collection: ${collection_name}
+    dependencies: [ingest_content]
+    priority: 2
+    config:
+      timeout: 60
+
+  - id: analyze_content
+    agent_id: content_analyzer
+    name: "Analyze Content"
+    description: |
+      Perform deep analysis of ingested content:
+      - Identify key themes and topics
+      - Extract entities and relationships
+      - Determine sentiment and tone
+      - Find patterns and insights
+      
+      Based on outputs from: ingest_content
+    dependencies: [ingest_content]
+    priority: 2
+    config:
+      timeout: 120
+
+  - id: generate_documentation
+    agent_id: documentation_generator
+    name: "Generate Structured Documentation"
+    description: |
+      Create comprehensive structured documentation:
+      - Executive summary
+      - Detailed analysis by modality
+      - Key findings and insights
+      - Metadata and technical details
+      - Recommendations and next steps
+      
+      Format: ${output_format}
+      Based on: analyze_content, ingest_content
+    dependencies: [analyze_content, generate_embeddings]
+    priority: 3
+    config:
+      timeout: 120
+
+# Workflow configuration
+workflow:
+  max_parallel: 2
+  fail_fast: false
+  retry_failed_tasks: true
+  output_format: "markdown"
+  
+# Variables (can be overridden at runtime)
+variables:
+  content_paths:
+    description: "Paths to content files"
+    type: "dict"
+    default:
+      image: null
+      audio: null
+      video: null
+      text: null
+  
+  modalities:
+    description: "List of modalities to process"
+    type: "list"
+    default: ["text", "image"]
+  
+  collection_name:
+    description: "Qdrant collection for embeddings"
+    type: "string"
+    default: "multimodal_content"
+  
+  output_format:
+    description: "Output documentation format"
+    type: "string"
+    default: "markdown"
+    options: ["markdown", "json", "html"]
+
+# Expected outputs
+outputs:
+  - name: "analysis_report"
+    type: "document"
+    format: "${output_format}"
+    source: "generate_documentation"
+  
+  - name: "embeddings_collection"
+    type: "vector_db"
+    location: "qdrant://${collection_name}"
+    source: "generate_embeddings"
+  
+  - name: "content_metadata"
+    type: "json"
+    source: "ingest_content"
