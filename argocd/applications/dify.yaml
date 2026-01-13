@@ -4,15 +4,21 @@ metadata:
   name: dify
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-wave: "4"  # Deploy after databases and storage
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: https://github.com/kang/self-hosted-ai
-    targetRevision: HEAD
-    path: argocd/helm/dify
+    # Migrated from Git-based deployment to upstream Helm chart
+    # Repository: https://langgenius.github.io/dify-helm (official Dify Helm repo)
+    # Version: 3.7.3 (latest stable with AI agent workflow improvements)
+    chart: dify
+    repoURL: https://langgenius.github.io/dify-helm
+    targetRevision: 3.7.3
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: dify

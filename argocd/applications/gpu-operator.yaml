@@ -4,13 +4,19 @@ metadata:
   name: gpu-operator
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "0"  # Deploy first - required for GPU workloads
 spec:
   project: default
   source:
-    repoURL: https://github.com/tzervas/self-hosted-ai
-    targetRevision: HEAD
-    path: argocd/helm/gpu-operator
+    # Repository: https://helm.ngc.nvidia.com/nvidia (official NVIDIA GPU Operator)
+    # Version: v25.10.1 (latest with RTX 5080 support and time-slicing)
+    chart: gpu-operator
+    repoURL: https://helm.ngc.nvidia.com/nvidia
+    targetRevision: v25.10.1
+    helm:
+      values: |
+        # Inline Helm values for the gpu-operator chart.
+        # Add any custom configuration here instead of referencing a local values.yaml file.
   destination:
     server: https://kubernetes.default.svc
     namespace: gpu-operator

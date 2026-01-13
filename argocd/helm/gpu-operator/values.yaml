@@ -1,9 +1,16 @@
 # NVIDIA GPU Operator for RTX 5080 with Time-Slicing
 # Chart: nvidia/gpu-operator
 # Version: 25.10.x
+# Target Hardware: RTX 5080 (16GB GDDR7 VRAM, Blackwell architecture)
+#
+# Configuration Rationale:
+# - Driver installation enabled for RTX 5080 compatibility
+# - Time-slicing enabled to share GPU across multiple workloads
+# - MIG disabled (not supported on RTX 5080)
+# - Containerd runtime configured for k3s compatibility
 
 driver:
-  enabled: false  # Use pre-installed host drivers
+  enabled: true  # Required for RTX 5080 - installs NVIDIA drivers on host
 
 toolkit:
   enabled: true
@@ -23,7 +30,7 @@ gfd:
   enabled: true
 
 migManager:
-  enabled: false  # Not supported on RTX 5080
+  enabled: false  # RTX 5080 does not support MIG (Multi-Instance GPU)
 
 validator:
   enabled: true
@@ -38,3 +45,19 @@ cdi:
 # Time-slicing configuration for 4 virtual GPUs
 operator:
   defaultRuntime: containerd
+
+# Time-slicing ConfigMap
+timeSlicing:
+  enabled: true  # Enables GPU sharing across multiple containers
+  config:
+    rtx-5080: |-
+      version: v1
+      flags:
+        migStrategy: none  # MIG not supported on RTX 5080
+      sharing:
+        timeSlicing:
+          renameByDefault: false
+          failRequestsGreaterThanOne: false
+          resources:
+            - name: nvidia.com/gpu
+              replicas: 4  # Creates 4 virtual GPUs from single RTX 5080

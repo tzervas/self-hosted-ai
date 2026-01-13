@@ -135,7 +135,7 @@ kind: Specification
 metadata:
   name: feature-name
   version: "1.0.0"
-  created: "2026-01-12"
+  created: "YYYY-MM-DD"
   author: coding-agent
   status: draft | review | approved | implemented
   
@@ -571,7 +571,7 @@ def trigger_review(diff: str, spec: str) -> dict:
 | Version | Date | Changes |
 |---------|------|---------|
 | 2.0.0 | 2026-01-12 | Complete rewrite with verified model names, accurate VRAM constraints, k3s/GitLab integration |
-| 1.0.0 | 2026-01-XX | Initial version (contained inaccurate model references) |
+| 1.0.0 | N/A | Initial version (contained inaccurate model references) |
 
 ---
 

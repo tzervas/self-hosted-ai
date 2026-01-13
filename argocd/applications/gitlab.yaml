@@ -4,15 +4,20 @@ metadata:
   name: gitlab
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "3"  # Deploy after storage (wave 2)
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: https://github.com/kang/self-hosted-ai
-    targetRevision: HEAD
-    path: argocd/helm/gitlab
+    # Repository: https://charts.gitlab.io (official GitLab Helm charts)
+    # Version: 9.7.1 (latest stable with enterprise features)
+    chart: gitlab
+    repoURL: https://charts.gitlab.io
+    targetRevision: 9.7.1
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: gitlab
