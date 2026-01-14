@@ -31,7 +31,11 @@ This stack runs Open WebUI on a server with CPU Ollama for lightweight tasks, co
 |  |  +--------------+  +-------------+  |                  | LAN             |
 |  |                    +-------------+  |<-----------------+                 |
 |  |                    |  Grafana    |  |                                    |
-|  |                    |   :3000     |  |                                    |
+|  |                    |   :3003     |  |                                    |
+|  |                    +-------------+  |                                    |
+|  |                    +-------------+  |                                    |
+|  |                    |    N8N      |  |                                    |
+|  |                    |   :5679     |  |                                    |
 |  |                    +-------------+  |                                    |
 |  +-------------------------------------+                                    |
 |                                                                             |
@@ -45,6 +49,22 @@ This stack runs Open WebUI on a server with CPU Ollama for lightweight tasks, co
 |------|------|-------|-----|
 | **homelab** | Server | Dual E5-2660v4 (28c/56t), 120GB DDR4 | 192.168.1.170 |
 | **akula-prime** | GPU Worker | Intel 14700K, 48GB DDR5, RTX 5080 (16GB) | 192.168.1.99 |
+
+## Changelog
+
+### v0.1.0 (January 13, 2026)
+- **Container Updates:**
+  - Traefik: v3.3 → v3.6.6 (security fixes)
+  - N8N: 1.73.1 → 2.3.4 (major update)
+  - Node Exporter: v1.9.0 → v1.10.2
+- **Infrastructure:**
+  - Fixed N8N routing (dedicated HTTPS port 5679)
+  - Grafana port changed to 3003 (avoid conflicts)
+  - TLS/SSL setup with self-signed certificates
+  - Fixed Prometheus/Grafana data permissions
+- **Architecture:**
+  - Homelab (192.168.1.170): Full AI stack
+  - Akula-Prime (192.168.1.99): GPU worker only
 
 ## Quick Start
 
@@ -620,8 +640,6 @@ cp server/.env.example server/.env
 cp gpu-worker/.env.example gpu-worker/.env
 ```
 
-### Key Configuration
-
 | Variable | Location | Description |
 |----------|----------|-------------|
 | `WEBUI_SECRET_KEY` | server/.env | **MUST CHANGE** - Session encryption |
@@ -629,6 +647,9 @@ cp gpu-worker/.env.example gpu-worker/.env
 | `OLLAMA_NUM_THREADS` | server/.env | CPU threads (default: 56) |
 | `OLLAMA_NUM_PARALLEL` | gpu-worker/.env | Concurrent requests (default: 4) |
 | `OLLAMA_MAX_LOADED_MODELS` | gpu-worker/.env | Models in VRAM (default: 2) |
+| `LITELLM_MASTER_KEY` | server/.env | API gateway authentication |
+| `N8N_PASSWORD` | server/.env | Workflow automation access |
+| `POSTGRES_PASSWORD` | server/.env | Database access |
 
 ### Model Configuration
 
@@ -645,25 +666,51 @@ Edit `config/openwebui-defaults.json.template` for model-specific parameters:
 ```text
 self-hosted-ai/
 ├── server/                     # Server stack (homelab)
-│   ├── docker-compose.yml
-│   ├── .env.example
-│   └── monitoring/
+│   ├── docker-compose.yml      # Multi-profile deployment
+│   ├── docker-compose.multimodal.yml  # Extended services
+│   ├── .env.example           # Environment template
+│   └── monitoring/            # Prometheus/Grafana config
 ├── gpu-worker/                 # GPU worker (akula-prime)
-│   ├── docker-compose.yml      # Ollama GPU + ComfyUI
-│   └── .env.example
+│   ├── docker-compose.yml      # Ollama GPU + ComfyUI + Whisper
+│   └── .env.example           # GPU worker config
 ├── config/                     # Configuration templates
 │   ├── models-manifest.yml     # LLM model sync manifest
-│   ├── comfyui-workflow.json   # Default image gen workflow
-│   └── openwebui-defaults.json.template
-├── scripts/
-│   ├── bootstrap.sh            # Setup and model sync
-│   ├── deploy-server.sh        # Server management
-│   ├── deploy-gpu-worker.sh    # GPU worker management
-│   └── release.sh              # Release automation
-├── .pre-commit-config.yaml     # Pre-commit hooks
-├── VERSION                     # Semantic version
-└── README.md
+│   ├── litellm-config.yml      # API gateway config
+│   ├── openwebui-defaults.json.template  # Model presets
+│   └── comfyui-workflows/      # Image generation workflows
+├── agents/                     # Multi-agent framework (Python)
+│   ├── agents/                 # Agent implementations
+│   ├── core/                   # Framework core
+│   └── pyproject.toml          # Python dependencies
+├── rust-agents/                # High-performance agents (Rust)
+│   ├── src/                    # Rust source code
+│   └── Cargo.toml              # Rust dependencies
+├── workflows/                  # Agent workflow definitions
+├── scripts/                    # Management scripts
+├── helm/                       # Kubernetes deployments
+├── argocd/                     # GitOps configurations
+└── docs/                       # Documentation (SEE ARCHIVE NOTES)
 ```
+
+## 📚 Documentation Notes
+
+**Current Documentation Status:**
+- `README.md` - ✅ Updated for current architecture
+- `QUICKSTART.md` - ✅ Comprehensive deployment guide  
+- `PRODUCTION_FEATURES.md` - ✅ Multi-modal capabilities
+- `DEPLOYMENT.md` - ⚠️ Status document (Jan 13, 2026)
+- `UPGRADE_SUMMARY.md` - ✅ Recent changes (Jan 11, 2026)
+
+**Archived Documentation (Outdated):**
+- `docs/archive/GETTING_STARTED.md` - Version 2.0.0, incorrect ports/services
+- `docs/archive/USAGE_GUIDE.md` - Version 2.1.0, port inconsistencies  
+- `docs/archive/HOW_TO_BUILD.md` - References deprecated services
+- `docs/archive/WORKFLOW_GUIDES.md` - May reference non-existent workflows
+- `docs/archive/GAP_REMEDIATION_GUIDE.md` - Specific to gap fixes
+- `docs/archive/deployment-report.md` - Status report (Jan 13, 2026)
+- `docs/archive/context-refactor/` - Old refactor notes and artifacts
+
+**Recommendation:** Archive outdated docs/ files to prevent confusion. Keep only current guides in repository root.
 
 ## Management Commands
 
@@ -742,15 +789,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 ./scripts/release.sh status
 ```
 
-## Endpoints
-
 | Service | URL | Purpose |
 |---------|-----|---------|
 | Open WebUI | <http://192.168.1.170:3001> | Web interface |
 | Ollama CPU | <http://192.168.1.170:11434> | CPU inference API |
 | Ollama GPU | <http://192.168.1.99:11434> | GPU inference API |
 | ComfyUI | <http://192.168.1.99:8188> | Image generation API & UI |
-| Prometheus | <http://192.168.1.170:9090> | Metrics |
+| LiteLLM | <http://192.168.1.170:4000> | Unified API gateway |
+| N8N | <http://192.168.1.170:5678> | Workflow automation |
+| SearXNG | <http://192.168.1.170:8082> | Private search |
 | Grafana | <http://192.168.1.170:3000> | Dashboards |
 
 ## Troubleshooting

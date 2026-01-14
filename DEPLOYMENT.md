@@ -1,33 +1,49 @@
-# Deployment Status - January 11, 2026
+# Deployment Status - January 13, 2026
 
-## ✅ Server Stack (192.168.1.170) - DEPLOYED
+## ✅ Server Stack (192.168.1.170) - DEPLOYED & UPDATED
 
 ### Services Running
-- **Open WebUI v0.7.2**: ✓ Running on http://192.168.1.170:3001
+- **Open WebUI v0.7.2**: ✓ Running on https://192.168.1.170/ (port 443, redirects from 80)
 - **Ollama CPU 0.13.5**: ✓ Running on http://192.168.1.170:11434
 - **Redis 8.4.0-alpine**: ✓ Running on port 6379
+- **N8N 2.3.4**: ✓ Running on https://192.168.1.170:5679
+- **Traefik v3.6.6**: ✓ Running on ports 80/443/5679/8083
+- **Node Exporter v1.10.2**: ✓ Running on port 9100
+- **Prometheus v3.9.1**: ✓ Running on port 9090
+- **Grafana 12.3.1**: ✓ Running on port 3003
+- **LiteLLM v1.80.11-stable**: ✓ Running on port 4000
+- **PostgreSQL 16-alpine**: ✓ Running on port 5432
+- **SearXNG 2026.1.11-cf74e1d9e**: ✓ Running on port 8082
 
 ### Deployment Details
 ```bash
-Location: /home/kang/Documents/projects/github/self-hosted-ai/server
-Command: COMPOSE_PROFILES="basic" docker compose up -d
+Location: /home/kang/self-hosted-ai/server
+Command: docker compose --profile secure up -d && docker compose --profile full up -d && docker compose --profile monitoring up -d
 Status: All services healthy and responding
 ```
 
 ### Configuration
-- Profile: `basic` (Open WebUI + Ollama CPU + Redis)
-- Environment: server/.env configured
+- Profiles: `secure` (Traefik), `full` (main services), `monitoring` (Prometheus/Grafana)
+- Environment: server/.env configured with secrets
 - Data Path: /data (bind mounts)
+- TLS: Self-signed certificates for HTTPS
 - Ports:
-  - 3001: Open WebUI web interface
-  - 11434: Ollama CPU API
-  - 6379: Redis
+  - 80/443: Open WebUI (HTTPS redirect)
+  - 5679: N8N (dedicated HTTPS)
+  - 3003: Grafana
+  - 8083: Traefik Dashboard
+  - 9100: Node Exporter
+  - 9090: Prometheus
+  - 4000: LiteLLM API
+  - 8082: SearXNG
 
 ### Verified Endpoints
 ```bash
+✓ curl -sk https://localhost/ | grep -q "Open WebUI"
+✓ curl -sk https://localhost:5679/ | grep -q "n8n"
 ✓ curl http://localhost:11434/api/version
-✓ curl http://localhost:3001/
-✓ docker exec redis-server redis-cli ping
+✓ curl http://localhost:3003/login
+✓ curl http://localhost:9100/metrics | head -5
 ```
 
 ## ⚠️ GPU Worker (192.168.1.99) - REQUIRES MANUAL DEPLOYMENT
