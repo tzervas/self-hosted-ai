@@ -1,0 +1,33 @@
+image:
+  repository: postgres
+  tag: "16-alpine"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5432
+
+auth:
+  existingSecret: postgresql-secret
+  adminPasswordKey: postgres-password
+  userPasswordKey: password
+  database: litellm
+  username: litellm
+
+persistence:
+  enabled: true
+  size: 20Gi
+  storageClass: ""
+  accessMode: ReadWriteOnce
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

@@ -8,36 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    chart: postgresql
-    repoURL: https://charts.bitnami.com/bitnami
-    targetRevision: 15.5.32
-    helm:
-      values: |
-        auth:
-          existingSecret: postgresql-secret
-          secretKeys:
-            adminPasswordKey: postgres-password
-            userPasswordKey: password
-          database: litellm
-          username: litellm
-        image:
-          tag: 16.4.0-debian-12-r12
-        primary:
-          persistence:
-            enabled: true
-            size: 20Gi
-          resources:
-            requests:
-              cpu: 250m
-              memory: 512Mi
-            limits:
-              cpu: 1000m
-              memory: 2Gi
-          extendedConfiguration: |
-            shared_preload_libraries = 'pg_stat_statements'
-            pg_stat_statements.track = all
-        metrics:
-          enabled: false
+    repoURL: https://github.com/tzervas/self-hosted-ai.git
+    targetRevision: dev
+    path: helm/postgresql
   destination:
     server: https://kubernetes.default.svc
     namespace: self-hosted-ai

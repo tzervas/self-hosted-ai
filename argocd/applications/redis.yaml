@@ -8,31 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    chart: redis
-    repoURL: https://charts.bitnami.com/bitnami
-    targetRevision: 19.6.4
-    helm:
-      values: |
-        architecture: standalone
-        auth:
-          enabled: true
-          existingSecret: redis-secret
-          existingSecretPasswordKey: redis-password
-        image:
-          tag: 7.2.5-debian-12-r0
-        master:
-          persistence:
-            enabled: true
-            size: 8Gi
-          resources:
-            requests:
-              cpu: 100m
-              memory: 256Mi
-            limits:
-              cpu: 500m
-              memory: 1Gi
-        metrics:
-          enabled: false
+    repoURL: https://github.com/tzervas/self-hosted-ai.git
+    targetRevision: dev
+    path: helm/redis
   destination:
     server: https://kubernetes.default.svc
     namespace: self-hosted-ai

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "postgresql.fullname" . }}-init
+  labels:
+    {{- include "postgresql.labels" . | nindent 4 }}
+data:
+  init-db.sql: |
+    -- Create litellm user and database
+    DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '{{ .Values.auth.username }}') THEN
+        CREATE ROLE {{ .Values.auth.username }} WITH LOGIN PASSWORD '{{ .Values.auth.username }}';
+      END IF;
+    END
+    $$;
+    
+    GRANT ALL PRIVILEGES ON DATABASE {{ .Values.auth.database }} TO {{ .Values.auth.username }};
