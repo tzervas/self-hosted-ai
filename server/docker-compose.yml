@@ -176,7 +176,7 @@ services:
       - monitoring
 
   node-exporter:
-    image: prom/node-exporter:v1.9.0
+    image: prom/node-exporter:v1.10.2
     container_name: node-exporter-server
     ports:
       - "9100:9100"
@@ -197,7 +197,7 @@ services:
   # N8N - Workflow Automation
   # =============================================================================
   n8n:
-    image: n8nio/n8n:1.73.1
+    image: n8nio/n8n:2.3.4
     container_name: n8n-server
     ports:
       - "${N8N_PORT:-5678}:5678"
@@ -248,7 +248,7 @@ services:
   # Traefik - Reverse Proxy with TLS
   # =============================================================================
   traefik:
-    image: traefik:v3.3
+    image: traefik:v3.6.6
     container_name: traefik-server
     ports:
       - "80:80"
