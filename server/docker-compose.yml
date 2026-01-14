@@ -10,6 +10,9 @@ services:
       - OLLAMA_BASE_URLS=http://ollama-cpu:11434;http://${GPU_WORKER_HOST:-192.168.1.99}:${GPU_WORKER_PORT:-11434}
       - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY}
       - WEBUI_NAME=${WEBUI_NAME:-Self-Hosted AI Server}
+      - WEBUI_ADMIN_EMAIL=${WEBUI_ADMIN_EMAIL:-admin@homelab.local}
+      - WEBUI_ADMIN_PASSWORD=${WEBUI_ADMIN_PASSWORD:-admin123}
+      - ENABLE_AUTH=${ENABLE_AUTH:-false}
       - ENABLE_SIGNUP=${ENABLE_SIGNUP:-true}
       - ENABLE_COMMUNITY_SHARING=${ENABLE_COMMUNITY_SHARING:-false}
       # SearXNG Web Search Integration
