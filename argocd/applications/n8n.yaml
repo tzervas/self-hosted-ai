@@ -20,23 +20,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-            path: /healthz
-            port: 5678
-          initialDelaySeconds: 60
-          periodSeconds: 30
-        
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 5678
-          initialDelaySeconds: 30
-          periodSeconds: 10
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: self-hosted-ai
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
