@@ -253,7 +253,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"  # Dashboard (disable in production)
+      - "5679:5679"   # N8N dedicated HTTPS port
+      - "8083:8080"   # Dashboard (disable in production)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${DATA_PATH:-/data}/traefik/certs:/certs
@@ -271,6 +272,8 @@ services:
       # Entrypoints
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.n8n.address=:5679"
+      - "--entrypoints.n8n.http.tls=true"
       # HTTP to HTTPS redirect
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
