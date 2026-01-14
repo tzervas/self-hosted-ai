@@ -1,0 +1,71 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/open-webui/open-webui
+  tag: v0.8.5
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+  hosts:
+    - host: ai.homelab.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+# Environment configuration
+env:
+  OLLAMA_BASE_URLS: "http://ollama:11434;http://gpu-worker-ollama.gpu-worker:11434"
+  WEBUI_NAME: "Self-Hosted AI Server"
+  WEBUI_ADMIN_NAME: "Administrator"
+  # CRITICAL: Force env vars to override database
+  ENABLE_PERSISTENT_CONFIG: "False"
+  ENABLE_AUTH: "true"
+  ENABLE_SIGNUP: "false"
+  # SearXNG web search
+  ENABLE_RAG_WEB_SEARCH: "true"
+  RAG_WEB_SEARCH_ENGINE: "searxng"
+  SEARXNG_QUERY_URL: "http://searxng:8080/search?q=<query>"
+  RAG_WEB_SEARCH_RESULT_COUNT: "3"
+  # Image generation
+  ENABLE_IMAGE_GENERATION: "true"
+  IMAGE_GENERATION_ENGINE: "comfyui"
+  COMFYUI_BASE_URL: "http://comfyui.gpu-worker:8188"
+
+# Secret references
+secretEnv:
+  WEBUI_SECRET_KEY:
+    secretName: webui-secret
+    key: secret-key
+  WEBUI_ADMIN_EMAIL:
+    secretName: webui-secret
+    key: admin-email
+  WEBUI_ADMIN_PASSWORD:
+    secretName: webui-secret
+    key: admin-password
+
+persistence:
+  enabled: true
+  size: 20Gi
+  storageClass: ""
+  accessMode: ReadWriteOnce
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
