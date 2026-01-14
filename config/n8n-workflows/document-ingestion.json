@@ -1,0 +1,111 @@
+{
+  "name": "Document Ingestion Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ingest",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "document-ingest"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ollama-cpu:11434/api/embeddings",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'nomic-embed-text', prompt: $json.body.text }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "generate-embeddings",
+      "name": "Generate Embeddings",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process document and prepare for vector storage\nconst input = $input.first();\nconst embeddings = input.json.embedding;\nconst originalText = $('Webhook').first().json.body.text;\nconst metadata = $('Webhook').first().json.body.metadata || {};\n\nreturn {\n  json: {\n    id: metadata.id || `doc_${Date.now()}`,\n    text: originalText,\n    embedding: embeddings,\n    metadata: {\n      ...metadata,\n      ingested_at: new Date().toISOString(),\n      embedding_model: 'nomic-embed-text'\n    }\n  }\n};"
+      },
+      "id": "process-document",
+      "name": "Process Document",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, document_id: $json.id, embedding_dimensions: $json.embedding.length }) }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [910, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Generate Embeddings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Embeddings": {
+      "main": [
+        [
+          {
+            "node": "Process Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Document": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "instanceId": "self-hosted-ai"
+  },
+  "tags": [
+    {
+      "name": "rag"
+    },
+    {
+      "name": "embeddings"
+    }
+  ]
+}

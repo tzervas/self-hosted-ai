@@ -1,0 +1,64 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: searxng
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"  # Deploy before Open WebUI
+spec:
+  project: default
+  source:
+    chart: searxng
+    repoURL: https://charts.searxng.org
+    targetRevision: 1.0.0
+    helm:
+      values: |
+        image:
+          repository: searxng/searxng
+          tag: 2026.1.11-cf74e1d9e
+          pullPolicy: IfNotPresent
+        
+        service:
+          type: ClusterIP
+          port: 8080
+        
+        env:
+          SEARXNG_BASE_URL: "http://searxng:8080"
+          SEARXNG_SECRET_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: searxng-secret
+                key: secret-key
+        
+        persistence:
+          config:
+            enabled: true
+            size: 1Gi
+        
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        
+        # Redis for SearXNG caching
+        redis:
+          enabled: true
+          architecture: standalone
+          auth:
+            enabled: false
+          master:
+            persistence:
+              enabled: true
+              size: 1Gi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: self-hosted-ai
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

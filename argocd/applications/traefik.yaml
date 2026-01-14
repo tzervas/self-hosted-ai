@@ -1,0 +1,121 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"  # Deploy early - ingress infrastructure
+spec:
+  project: default
+  source:
+    chart: traefik
+    repoURL: https://traefik.github.io/charts
+    targetRevision: 32.0.0
+    helm:
+      values: |
+        image:
+          tag: v3.6.6
+        
+        # Deployment configuration
+        deployment:
+          replicas: 1
+        
+        # Entrypoints
+        ports:
+          web:
+            port: 8000
+            exposedPort: 80
+            protocol: TCP
+            redirectTo:
+              port: websecure
+          websecure:
+            port: 8443
+            exposedPort: 443
+            protocol: TCP
+            tls:
+              enabled: true
+          traefik:
+            port: 9000
+            exposedPort: 9000
+        
+        # Service configuration
+        service:
+          type: LoadBalancer
+          annotations: {}
+        
+        # Enable API and dashboard
+        api:
+          dashboard: true
+          insecure: false
+        
+        # IngressRoute for dashboard
+        ingressRoute:
+          dashboard:
+            enabled: true
+            matchRule: Host(`traefik.homelab.local`)
+            entryPoints:
+              - websecure
+        
+        # Kubernetes CRD provider
+        providers:
+          kubernetesCRD:
+            enabled: true
+            allowCrossNamespace: true
+          kubernetesIngress:
+            enabled: true
+            publishedService:
+              enabled: true
+        
+        # TLS configuration
+        tlsOptions:
+          default:
+            minVersion: VersionTLS12
+            sniStrict: true
+        
+        # Let's Encrypt certificate resolver
+        certificatesResolvers:
+          letsencrypt:
+            acme:
+              email: admin@homelab.local
+              storage: /data/acme.json
+              httpChallenge:
+                entryPoint: web
+        
+        # Persistence for ACME certificates
+        persistence:
+          enabled: true
+          size: 1Gi
+          storageClass: ""
+        
+        # Resources
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        
+        # Prometheus metrics
+        metrics:
+          prometheus:
+            service:
+              enabled: true
+            serviceMonitor:
+              enabled: true
+        
+        # Logs
+        logs:
+          general:
+            level: INFO
+          access:
+            enabled: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: traefik
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

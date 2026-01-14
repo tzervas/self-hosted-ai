@@ -4,6 +4,7 @@
 .env.production
 *.env.secret
 */.env
+.env.secrets
 
 # Keep example env files
 !.env.example
@@ -16,6 +17,10 @@ secrets/
 *.crt
 id_rsa*
 *.secret
+
+# ArgoCD raw secrets (sealed secrets are safe)
+argocd/secrets/*.yaml
+!argocd/secrets/sealed/
 
 # OS files
 .DS_Store

@@ -1,6 +1,6 @@
 services:
   open-webui:
-    image: ghcr.io/open-webui/open-webui:v0.7.2
+    image: ghcr.io/open-webui/open-webui:v0.8.5
     container_name: open-webui-server
     ports:
       - "${WEBUI_PORT:-3000}:8080"
@@ -10,10 +10,14 @@ services:
       - OLLAMA_BASE_URLS=http://ollama-cpu:11434;http://${GPU_WORKER_HOST:-192.168.1.99}:${GPU_WORKER_PORT:-11434}
       - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY}
       - WEBUI_NAME=${WEBUI_NAME:-Self-Hosted AI Server}
+      # Admin account creation (only on fresh install)
       - WEBUI_ADMIN_EMAIL=${WEBUI_ADMIN_EMAIL:-admin@homelab.local}
-      - WEBUI_ADMIN_PASSWORD=${WEBUI_ADMIN_PASSWORD:-admin123}
-      - ENABLE_AUTH=${ENABLE_AUTH:-false}
-      - ENABLE_SIGNUP=${ENABLE_SIGNUP:-true}
+      - WEBUI_ADMIN_PASSWORD=${WEBUI_ADMIN_PASSWORD}
+      - WEBUI_ADMIN_NAME=${WEBUI_ADMIN_NAME:-Administrator}
+      # CRITICAL: Force env vars to override database values
+      - ENABLE_PERSISTENT_CONFIG=False
+      - ENABLE_AUTH=${ENABLE_AUTH:-true}
+      - ENABLE_SIGNUP=${ENABLE_SIGNUP:-false}
       - ENABLE_COMMUNITY_SHARING=${ENABLE_COMMUNITY_SHARING:-false}
       # SearXNG Web Search Integration
       - ENABLE_RAG_WEB_SEARCH=${ENABLE_RAG_WEB_SEARCH:-true}
@@ -42,7 +46,7 @@ services:
       - monitoring
 
   ollama-cpu:
-    image: ollama/ollama:0.13.5
+    image: ollama/ollama:0.16.0
     container_name: ollama-cpu-server
     ports:
       - "${OLLAMA_PORT:-11434}:11434"
@@ -53,6 +57,7 @@ services:
       - OLLAMA_MAX_LOADED_MODELS=${OLLAMA_CPU_MAX_LOADED_MODELS:-4}
       - OLLAMA_KEEP_ALIVE=${OLLAMA_KEEP_ALIVE:-30m}
       - OLLAMA_NUM_THREADS=${OLLAMA_NUM_THREADS:-56}
+      - OLLAMA_KV_CACHE_TYPE=${OLLAMA_KV_CACHE_TYPE:-q8_0}
     restart: unless-stopped
     profiles:
       - basic
@@ -130,7 +135,7 @@ services:
   #     - monitoring
 
   redis:
-    image: redis:8.4.0-alpine
+    image: redis:8.5.2-alpine
     container_name: redis-server
     ports:
       - "${REDIS_PORT:-6379}:6379"
@@ -200,7 +205,7 @@ services:
   # N8N - Workflow Automation
   # =============================================================================
   n8n:
-    image: n8nio/n8n:2.3.4
+    image: n8nio/n8n:2.4.0
     container_name: n8n-server
     ports:
       - "${N8N_PORT:-5678}:5678"

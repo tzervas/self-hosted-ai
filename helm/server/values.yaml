@@ -39,8 +39,26 @@ openwebui:
           key: secret-key
     - name: WEBUI_NAME
       value: "Self-Hosted AI Server"
-    - name: ENABLE_SIGNUP
+    # Admin account creation (only on fresh install)
+    - name: WEBUI_ADMIN_EMAIL
+      valueFrom:
+        secretKeyRef:
+          name: webui-secret
+          key: admin-email
+    - name: WEBUI_ADMIN_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: webui-secret
+          key: admin-password
+    - name: WEBUI_ADMIN_NAME
+      value: "Administrator"
+    # CRITICAL: Force env vars to override database values
+    - name: ENABLE_PERSISTENT_CONFIG
+      value: "False"
+    - name: ENABLE_AUTH
       value: "true"
+    - name: ENABLE_SIGNUP
+      value: "false"
     - name: ENABLE_COMMUNITY_SHARING
       value: "false"
     - name: ENABLE_RAG_WEB_SEARCH
@@ -71,7 +89,7 @@ ollama:
     enabled: true
     image:
       repository: ollama/ollama
-      tag: 0.15.2
+      tag: 0.16.0
       pullPolicy: IfNotPresent
     service:
       type: ClusterIP
@@ -86,6 +104,15 @@ ollama:
         value: "30m"
       - name: OLLAMA_NUM_THREADS
         value: "56"
+      - name: OLLAMA_KV_CACHE_TYPE
+        value: "q8_0"
+    resources:
+      requests:
+        cpu: "2000m"
+        memory: "8Gi"
+      limits:
+        cpu: "8000m"
+        memory: "32Gi"
     persistence:
       enabled: true
       size: 50Gi
@@ -122,7 +149,7 @@ monitoring:
     enabled: true
     image:
       repository: prom/prometheus
-      tag: v2.56.1
+      tag: v3.9.1
       pullPolicy: IfNotPresent
     service:
       type: ClusterIP
@@ -163,7 +190,7 @@ monitoring:
     enabled: true
     image:
       repository: grafana/grafana
-      tag: 11.5.0
+      tag: 12.3.1
       pullPolicy: IfNotPresent
     service:
       type: ClusterIP
@@ -254,7 +281,7 @@ monitoring:
     enabled: true
     image:
       repository: prom/node-exporter
-      tag: v1.9.0
+      tag: v1.10.2
       pullPolicy: IfNotPresent
     service:
       type: ClusterIP
@@ -266,7 +293,7 @@ litellm:
   enabled: true
   image:
     repository: ghcr.io/berriai/litellm
-    tag: v1.52.4
+    tag: v1.80.11-stable
     pullPolicy: IfNotPresent
   replicas: 1
   service:

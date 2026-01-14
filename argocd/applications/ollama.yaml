@@ -9,7 +9,7 @@ spec:
   project: default
   sources:
     - chart: ollama
-      repoURL: https://otwld.github.io/helm-charts
+      repoURL: https://helm.otwld.com
       targetRevision: 1.37.0
       helm:
         valueFiles:

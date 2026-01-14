@@ -10,7 +10,7 @@ model_list:
   # === GPU Worker Models (High Priority) ===
   - model_name: qwen2.5-coder:14b
     litellm_params:
-      model: ollama/qwen2.5-coder:14b
+      model: ollama_chat/qwen2.5-coder:14b
       api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
       timeout: 300
       stream: true
@@ -21,7 +21,7 @@ model_list:
 
   - model_name: deepseek-coder-v2:16b
     litellm_params:
-      model: ollama/deepseek-coder-v2:16b
+      model: ollama_chat/deepseek-coder-v2:16b
       api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
       timeout: 300
       stream: true
@@ -31,7 +31,7 @@ model_list:
 
   - model_name: codellama:13b
     litellm_params:
-      model: ollama/codellama:13b
+      model: ollama_chat/codellama:13b
       api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
       timeout: 300
       stream: true
@@ -41,7 +41,7 @@ model_list:
 
   - model_name: phi4:latest
     litellm_params:
-      model: ollama/phi4:latest
+      model: ollama_chat/phi4:latest
       api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
       timeout: 300
       stream: true
@@ -51,7 +51,7 @@ model_list:
 
   - model_name: llama3.1:8b
     litellm_params:
-      model: ollama/llama3.1:8b
+      model: ollama_chat/llama3.1:8b
       api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
       timeout: 300
       stream: true
@@ -61,7 +61,7 @@ model_list:
 
   - model_name: llama3.1:70b-instruct-q4_0
     litellm_params:
-      model: ollama/llama3.1:70b-instruct-q4_0
+      model: ollama_chat/llama3.1:70b-instruct-q4_0
       api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
       timeout: 600
       stream: true
@@ -72,7 +72,7 @@ model_list:
   # Vision models
   - model_name: llava:13b
     litellm_params:
-      model: ollama/llava:13b
+      model: ollama_chat/llava:13b
       api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
       timeout: 300
       stream: true
@@ -82,7 +82,7 @@ model_list:
 
   - model_name: bakllava:latest
     litellm_params:
-      model: ollama/bakllava:latest
+      model: ollama_chat/bakllava:latest
       api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
       timeout: 300
       stream: true
@@ -92,7 +92,7 @@ model_list:
 
   - model_name: mistral:7b-instruct-v0.3
     litellm_params:
-      model: ollama/mistral:7b-instruct-v0.3
+      model: ollama_chat/mistral:7b-instruct-v0.3
       api_base: ${OLLAMA_GPU_URL:-http://192.168.1.99:11434}
       timeout: 300
       stream: true
@@ -103,7 +103,7 @@ model_list:
   # === CPU Server Models (Fallback) ===
   - model_name: mistral:7b
     litellm_params:
-      model: ollama/mistral:7b
+      model: ollama_chat/mistral:7b
       api_base: ${OLLAMA_CPU_URL:-http://localhost:11434}
       timeout: 300
       stream: true
@@ -112,7 +112,7 @@ model_list:
 
   - model_name: phi3:latest
     litellm_params:
-      model: ollama/phi3:latest
+      model: ollama_chat/phi3:latest
       api_base: ${OLLAMA_CPU_URL:-http://localhost:11434}
       timeout: 300
       stream: true
@@ -121,7 +121,7 @@ model_list:
 
   - model_name: gemma2:2b
     litellm_params:
-      model: ollama/gemma2:2b
+      model: ollama_chat/gemma2:2b
       api_base: ${OLLAMA_CPU_URL:-http://localhost:11434}
       timeout: 300
       stream: true
@@ -130,7 +130,7 @@ model_list:
 
   - model_name: sqlcoder:15b
     litellm_params:
-      model: ollama/sqlcoder:15b
+      model: ollama_chat/sqlcoder:15b
       api_base: ${OLLAMA_CPU_URL:-http://localhost:11434}
       timeout: 300
       stream: true
@@ -139,7 +139,7 @@ model_list:
 
   - model_name: deepseek-math:7b
     litellm_params:
-      model: ollama/deepseek-math:7b
+      model: ollama_chat/deepseek-math:7b
       api_base: ${OLLAMA_CPU_URL:-http://localhost:11434}
       timeout: 300
       stream: true

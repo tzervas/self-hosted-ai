@@ -1,6 +1,6 @@
 services:
   ollama-gpu:
-    image: ollama/ollama:0.13.5
+    image: ollama/ollama:0.16.0
     container_name: ollama-gpu-worker
     ports:
       - "${OLLAMA_PORT:-11434}:11434"
@@ -12,6 +12,8 @@ services:
       - OLLAMA_KEEP_ALIVE=${OLLAMA_KEEP_ALIVE:-30m}
       - OLLAMA_GPU_LAYERS=${OLLAMA_GPU_LAYERS:-99}
       - OLLAMA_FLASH_ATTENTION=${OLLAMA_FLASH_ATTENTION:-1}
+      - OLLAMA_KV_CACHE_TYPE=${OLLAMA_KV_CACHE_TYPE:-q8_0}
+      - OLLAMA_GPU_OVERHEAD=${OLLAMA_GPU_OVERHEAD:-536870912}
       - OLLAMA_HOST=${OLLAMA_HOST:-0.0.0.0}
     deploy:
       resources:
