@@ -16,7 +16,7 @@ auth:
 
 persistence:
   enabled: true
-  size: 20Gi
+  size: 2Gi
   storageClass: ""
   accessMode: ReadWriteOnce
 
