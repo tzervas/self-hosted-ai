@@ -5,7 +5,7 @@ replicaCount: 1
 
 image:
   repository: ollama/ollama
-  tag: "0.16.0"
+  tag: "latest"
   pullPolicy: IfNotPresent
 
 # Service configuration
