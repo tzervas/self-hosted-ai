@@ -26,17 +26,22 @@ ingress:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-production
   hosts:
-    - host: llm.homelab.local
+    - host: llm.vectorweight.com
       paths:
         - path: /
           pathType: Prefix
+  tls:
+    - hosts:
+        - llm.vectorweight.com
+      secretName: vectorweight-selfsigned-tls
 
 # Environment variables
 env:
-  OLLAMA_GPU_URL: "http://gpu-worker-ollama.gpu-worker:11434"
-  OLLAMA_CPU_URL: "http://ollama.ollama:11434"
-  REDIS_HOST: "redis-master.self-hosted-ai"
+  OLLAMA_GPU_URL: "http://ollama-gpu.gpu-workloads:11434"
+  OLLAMA_CPU_URL: "http://ollama.ai-services:11434"
+  REDIS_HOST: "redis-master.ai-services"
   REDIS_PORT: "6379"
   # Prisma cache directory (must be writable)
   PRISMA_HOME: "/tmp/prisma"

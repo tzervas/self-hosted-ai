@@ -1,0 +1,57 @@
+# CoreDNS Custom Configuration for vectorweight.com
+# Provides internal DNS resolution for cluster services
+
+# Domain configuration
+domain: vectorweight.com
+
+# Cluster configuration
+cluster:
+  # The IP of the Traefik LoadBalancer service
+  # This will be auto-detected if not specified
+  ingressIP: ""
+  # Fallback static IP if auto-detection fails
+  fallbackIP: "192.168.1.170"
+
+# DNS entries for internal services
+# These map *.vectorweight.com to the Traefik ingress
+dnsEntries:
+  # AI Services
+  - subdomain: ai
+    description: Open WebUI Chat Interface
+    
+  - subdomain: llm
+    description: LiteLLM API Proxy
+    
+  - subdomain: search
+    description: SearXNG Search Engine
+    
+  # Infrastructure
+  - subdomain: argocd
+    description: ArgoCD GitOps Dashboard
+    
+  - subdomain: traefik
+    description: Traefik Ingress Dashboard
+    
+  - subdomain: grafana
+    description: Grafana Monitoring Dashboard
+    
+  - subdomain: prometheus
+    description: Prometheus Metrics
+    
+  # Automation
+  - subdomain: n8n
+    description: N8N Workflow Automation
+    
+  - subdomain: dify
+    description: Dify AI Platform
+    
+  - subdomain: git
+    description: GitLab Source Control
+
+# External DNS fallback (for records not managed internally)
+externalDNS:
+  enabled: true
+  # Use standard DNS servers for external resolution
+  servers:
+    - 8.8.8.8
+    - 8.8.4.4

@@ -15,11 +15,16 @@ ingress:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-production
   hosts:
-    - host: n8n.homelab.local
+    - host: n8n.vectorweight.com
       paths:
         - path: /
           pathType: Prefix
+  tls:
+    - hosts:
+        - n8n.vectorweight.com
+      secretName: vectorweight-selfsigned-tls
 
 # Environment configuration
 env:
@@ -27,6 +32,8 @@ env:
   N8N_HOST: "0.0.0.0"
   N8N_PORT: "5678"
   N8N_PROTOCOL: "https"
+  WEBHOOK_URL: "https://n8n.vectorweight.com/"
+  N8N_EDITOR_BASE_URL: "https://n8n.vectorweight.com/"
   GENERIC_TIMEZONE: "America/New_York"
   # Execution settings
   EXECUTIONS_PROCESS: "main"

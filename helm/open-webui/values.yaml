@@ -15,15 +15,20 @@ ingress:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-production
   hosts:
-    - host: ai.homelab.local
+    - host: ai.vectorweight.com
       paths:
         - path: /
           pathType: Prefix
+  tls:
+    - hosts:
+        - ai.vectorweight.com
+      secretName: vectorweight-selfsigned-tls
 
 # Environment configuration
 env:
-  OLLAMA_BASE_URLS: "http://ollama:11434;http://gpu-worker-ollama.gpu-worker:11434"
+  OLLAMA_BASE_URLS: "http://ollama.ai-services:11434;http://ollama-gpu.gpu-workloads:11434"
   WEBUI_NAME: "Self-Hosted AI Server"
   WEBUI_ADMIN_NAME: "Administrator"
   # CRITICAL: Force env vars to override database
