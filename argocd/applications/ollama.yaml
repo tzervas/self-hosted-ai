@@ -4,22 +4,55 @@ metadata:
   name: ollama
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "5"  # Deploy after GPU operator (wave 3)
+    argocd.argoproj.io/sync-wave: "3"  # Deploy with inference tier
 spec:
   project: default
-  sources:
-    - chart: ollama
-      repoURL: https://helm.otwld.com
-      targetRevision: 1.37.0
-      helm:
-        valueFiles:
-          - values.yaml
-    - repoURL: https://github.com/tzervas/self-hosted-ai
-      targetRevision: main
-      path: argocd/helm/ollama
+  source:
+    repoURL: https://github.com/tzervas/self-hosted-ai.git
+    targetRevision: dev
+    path: helm/ollama
+    helm:
+      values: |
+        # CPU-only Ollama for main server (no GPU)
+        replicaCount: 1
+        
+        image:
+          repository: ollama/ollama
+          tag: "0.16.0"
+        
+        env:
+          OLLAMA_HOST: "0.0.0.0"
+          OLLAMA_ORIGINS: "*"
+          OLLAMA_KEEP_ALIVE: "24h"
+          OLLAMA_KV_CACHE_TYPE: "q8_0"
+          OLLAMA_NUM_PARALLEL: "2"
+        
+        modelsPersistence:
+          enabled: true
+          size: 200Gi
+          storageClass: "longhorn"
+        
+        gpu:
+          enabled: false
+          nvidia:
+            enabled: false
+        
+        resources:
+          requests:
+            cpu: 500m
+            memory: 2Gi
+          limits:
+            cpu: 8000m
+            memory: 32Gi
+        
+        networkPolicy:
+          enabled: true
+          allowedNamespaces:
+            - self-hosted-ai
+            - gpu-worker
   destination:
     server: https://kubernetes.default.svc
-    namespace: ollama
+    namespace: self-hosted-ai
   syncPolicy:
     automated:
       prune: true

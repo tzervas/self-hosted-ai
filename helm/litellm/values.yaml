@@ -34,6 +34,9 @@ env:
   OLLAMA_CPU_URL: "http://ollama.ollama:11434"
   REDIS_HOST: "redis-master.self-hosted-ai"
   REDIS_PORT: "6379"
+  # Prisma cache directory (must be writable)
+  PRISMA_HOME: "/tmp/prisma"
+  HOME: "/tmp"
 
 # Secret references
 secrets:
