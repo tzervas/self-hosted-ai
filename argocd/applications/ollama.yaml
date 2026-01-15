@@ -29,7 +29,7 @@ spec:
         
         modelsPersistence:
           enabled: true
-          size: 200Gi
+          size: 50Gi
           storageClass: "longhorn"
         
         gpu:
