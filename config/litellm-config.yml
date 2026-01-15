@@ -230,6 +230,9 @@ router_settings:
 general_settings:
   master_key: ${LITELLM_MASTER_KEY}
   # Database URL passed via environment variable DATABASE_URL
+  # Disable database persistence to avoid Prisma query engine issues
+  store_model_in_db: false
+  disable_spend_logs: true
   # Connection pool settings (helps prevent connection exhaustion)
   database_connection_pool_limit: 20
   database_connection_timeout: 30

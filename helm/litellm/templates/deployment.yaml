@@ -44,11 +44,13 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.secrets.litellmMasterKey.secretName }}
                   key: {{ .Values.secrets.litellmMasterKey.key }}
+            {{- if .Values.database.enabled }}
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.secrets.databaseUrl.secretName }}
                   key: {{ .Values.secrets.databaseUrl.key }}
+            {{- end }}
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
               value: {{ $value | quote }}

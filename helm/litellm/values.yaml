@@ -11,6 +11,10 @@ image:
 nameOverride: ""
 fullnameOverride: "litellm"
 
+# Database configuration - disabled by default due to Prisma issues
+database:
+  enabled: false
+
 service:
   type: ClusterIP
   port: 4000
@@ -37,6 +41,9 @@ env:
   # Prisma cache directory (must be writable)
   PRISMA_HOME: "/tmp/prisma"
   HOME: "/tmp"
+  # Disable store_model_in_db to avoid Prisma query engine issues
+  STORE_MODEL_IN_DB: "false"
+  DISABLE_SPEND_LOGS: "true"
 
 # Secret references
 secrets:
