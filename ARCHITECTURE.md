@@ -252,6 +252,56 @@ To provide a **secure, private, and fully self-hosted AI infrastructure** that e
 
 ---
 
+### ADR-011: Linkerd for Service Mesh (v0.3.0+)
+
+**Context**: Need service-to-service mTLS and observability without Istio overhead.
+
+**Decision**: Deploy Linkerd v2025.1.2 for automatic mTLS and traffic visualization.
+
+**Rationale**:
+- Lightweight control plane (~200MB vs ~1GB for Istio)
+- Automatic sidecar injection via admission webhooks
+- Low latency overhead (~1ms per request)
+- Integrates with existing Prometheus monitoring
+- Simplified configuration compared to Istio
+
+**Consequences**:
+- Automatic mTLS between all injected pods
+- Sidecar memory overhead per pod (~20-50MB)
+- Certificate rotation managed automatically
+- Adds complexity to troubleshooting (proxy logs)
+
+**Scope**: Injected into ai-services, self-hosted-ai, and gpu-workloads namespaces.
+
+---
+
+### ADR-012: Horizontal + Vertical Scaling (v0.3.0+)
+
+**Context**: Need to scale services based on demand while optimizing resource utilization.
+
+**Decision**: Implement HPA for scaling replicas and VPA for resource optimization.
+
+**Rationale**:
+- HPA scales services 1→3 replicas at 70% CPU/memory utilization
+- VPA recommends optimal resource requests (mode: "Off" for safety)
+- ResourceQuotas prevent runaway consumption
+- Zero-idle runners (scale-to-zero) for CI/CD cost savings
+
+**Consequences**:
+- Requires metrics-server (Kubernetes standard)
+- May cause brief latency spikes during scale-up
+- VPA recommendations improve over time
+- Requires regular monitoring of quota usage
+
+**Tuning Targets**:
+- LiteLLM: 1-3 replicas, 70% CPU threshold
+- Open WebUI: 1-3 replicas, 70% memory threshold
+- Agent Server: 1-5 replicas, aggressive scaling for burst workloads
+- ARC Runners: 0-4 replicas, scale-to-zero when idle
+- GitLab Runners: 0-10 replicas, Kubernetes executor with isolation
+
+---
+
 ## Technology Stack
 
 ### Core Platform
@@ -266,6 +316,8 @@ To provide a **secure, private, and fully self-hosted AI infrastructure** that e
 | Secrets | SealedSecrets | Encrypted secrets in Git |
 | Storage | Longhorn | Distributed block storage |
 | Monitoring | Prometheus + Grafana | Metrics and dashboards |
+| Service Mesh | Linkerd v2025.1.2 | mTLS and observability |
+| Autoscaling | HPA + VPA | Resource scaling and optimization |
 
 ### AI Services
 
@@ -279,22 +331,35 @@ To provide a **secure, private, and fully self-hosted AI infrastructure** that e
 | Automation | n8n | Workflow orchestration |
 | Embeddings | LiteLLM + Ollama | Vector embeddings |
 
-### Development
+### Model Management
+
+| Source | Type | Purpose | Auth |
+|--------|------|---------|------|
+| Ollama Library | LLMs | Public censored models | None |
+| HuggingFace Hub | LLMs, TTS, Audio | Uncensored models | HF_TOKEN (sealed secret) |
+| HuggingFace Hub | Vision, LoRA | Fine-tuning and vision | HF_TOKEN |
+| ComfyUI | Checkpoints, VAE | Image/video generation | GitHub/HF direct URLs |
+
+### Development & CI/CD
 
 | Component | Technology | Purpose |
 |-----------|------------|---------|
-| Source Control | GitLab (self-hosted) | Code repository |
-| CI/CD | GitHub Actions (ARC) | Automated builds |
-| ARC Controller | ghcr.io/actions/arc | Runner orchestration |
-| Scripts | Python 3.12+ / uv | Automation |
+| Source Control | GitLab (self-hosted) | Code repository + mirrors |
+| GitHub Mirroring | CronJob + Python | Sync github.com/tzervas and org repos |
+| CI/CD (GitHub) | GitHub Actions (ARC) | Automated builds and tests |
+| CI/CD (GitLab) | GitLab Runner | GitLab CI pipelines |
+| Runner Controller | ghcr.io/actions/arc | ARC runner orchestration |
+| Runners (GitHub) | ARC scale sets | 3 sets: amd64, gpu, arm64 + org |
+| Runners (GitLab) | Kubernetes executor | Isolated gitlab-runners namespace |
+| Scripts | Python 3.12+ / uv | Automation and model syncing |
 | Agent Framework | Python ADK | AI agent implementation |
 
 ### Infrastructure Topology
 
-| Node | IP Address | Role | Hardware |
-|------|------------|------|----------|
-| homelab | 192.168.1.170 | k3s cluster (single node) | AMD64 server |
-| akula-prime | 192.168.1.99 | GPU workstation (over LAN) | RTX 5080, not k8s node |
+| Node | IP Address | Role | Hardware | Kubernetes |
+|------|------------|------|----------|-----------|
+| homelab | 192.168.1.170 | k3s cluster (single node) | AMD64 server (28c/56t, 120GB RAM) | Control plane + workloads |
+| akula-prime | 192.168.1.99 | GPU workstation (over LAN) | RTX 5080 16GB VRAM, 48GB RAM | None (external service) |
 
 ---
 
@@ -402,22 +467,177 @@ arc-runners-arm64  # QEMU-emulated ARM runners
 
 ---
 
+---
+
+## Resource Management (v0.3.0+)
+
+### Namespace Quotas
+
+All namespaces have ResourceQuotas to prevent runaway resource consumption:
+
+| Namespace | CPU Requests | CPU Limits | Memory Requests | Memory Limits | Purpose |
+|-----------|--------------|-----------|-----------------|---------------|---------|
+| ai-services | 8 | 24 | 48Gi | 64Gi | Primary AI workloads |
+| gpu-workloads | 2 | 16 | 16Gi | 32Gi | GPU-related services |
+| arc-runners | 8 | 20 | 16Gi | 40Gi | GitHub Actions runners (burst) |
+| gitlab-runners | 8 | 16 | 16Gi | 32Gi | GitLab runners |
+| monitoring | 4 | 8 | 8Gi | 16Gi | Prometheus, Grafana, Loki |
+| linkerd | 2 | 4 | 2Gi | 4Gi | Service mesh |
+
+### LimitRanges
+
+Default resource limits ensure pod placement safety:
+
+| Resource | Default Request | Default Limit | Min | Max |
+|----------|-----------------|---------------|-----|-----|
+| CPU | 100m | 1 | 10m | 16 |
+| Memory | 256Mi | 2Gi | 32Mi | 32Gi |
+
+### Autoscaling Policies
+
+**HPA Configuration** (for scale-up services):
+- Target CPU utilization: 70%
+- Target memory utilization: 80%
+- Min replicas: 1
+- Max replicas: 3 (LiteLLM, Open WebUI) or 5 (Agent Server)
+- Scale-down stabilization: 5 minutes (prevent flapping)
+- Scale-up: 15 seconds (rapid response to load)
+
+**VPA Configuration** (for resource optimization):
+- Mode: "Off" (recommendations only, no automatic updates)
+- Min allowed: 100m CPU / 256Mi memory per container
+- Max allowed: 4 CPU / 8Gi memory per container
+- Run VPA in "Auto" mode only after validating recommendations
+
+### Storage Allocation Budget
+
+Total: ~500Gi across Longhorn PVs
+
+| Service | Size | Type |
+|---------|------|------|
+| Ollama GPU models | 150Gi | Persistent |
+| Ollama CPU models | 50Gi | Persistent |
+| ComfyUI outputs | 50Gi | Persistent |
+| Automatic1111 | 100Gi | Persistent |
+| Prometheus metrics | 50Gi | Persistent |
+| Grafana dashboards | 5Gi | Persistent |
+| Open WebUI data | 10Gi | Persistent |
+| PostgreSQL (GitLab) | 50Gi | Persistent |
+| Buffer/Snapshots | 35Gi | Reserved |
+
+---
+
+## Deployment Patterns
+
+### Sync Wave Order (v0.3.0+)
+
+```yaml
+# Wave -2: Foundation
+sealed-secrets     # Encrypted secrets in Git
+
+# Wave -1: Infrastructure
+linkerd-crds       # Service mesh CRDs
+cert-manager       # TLS certificates
+longhorn           # Block storage
+vpa                # Resource recommendations
+
+# Wave 0: Platform
+traefik            # Ingress controller
+gpu-operator       # GPU support
+coredns-custom     # DNS customization
+resource-quotas    # Namespace limits
+
+# Wave 1: Service Mesh & Policy
+linkerd-control-plane    # mTLS and observability
+linkerd-viz              # Service mesh dashboard
+kyverno                  # Pod security policies
+
+# Wave 2: Monitoring
+prometheus               # Metrics collection
+alertmanager            # Alert routing
+
+# Wave 4: Source Control
+gitlab                  # Git server + container registry
+
+# Wave 5: AI Inference Backend
+ollama                  # CPU inference
+ollama-gpu             # GPU inference
+litellm                # OpenAI-compatible API gateway
+
+# Wave 6: User-Facing AI Applications
+open-webui             # Chat interface
+n8n                    # Workflow automation
+searxng                # Web search
+mcp-servers            # AI agent tools
+
+# Wave 7: CI/CD Infrastructure
+arc-controller         # GitHub Actions runner controller
+arc-runners-amd64      # Linux x86_64 runners
+arc-runners-gpu        # GPU-accelerated builds
+arc-runners-arm64      # ARM64 multi-arch builds
+arc-runners-org        # Organization-level runners
+gitlab-runners         # GitLab CI runners
+```
+
+### Deployment Verification Checklist
+
+After deploying v0.3.0 changes:
+
+1. **Linkerd Service Mesh**
+   - [ ] Control plane pods ready in `linkerd` namespace
+   - [ ] Viz dashboard available at `linkerd.vectorweight.com`
+   - [ ] Proxy injection working (check pod logs for sidecar)
+   - [ ] mTLS certificates issued by cert-manager
+   - [ ] Verify: `kubectl logs -n ai-services <pod> -c linkerd-proxy`
+
+2. **Autoscaling**
+   - [ ] HPA controllers active: `kubectl get hpa -A`
+   - [ ] VPA recommender running: `kubectl logs -n kube-system <vpa-recommender>`
+   - [ ] ResourceQuotas enforced: `kubectl get resourcequota -A`
+   - [ ] Test HPA by monitoring: `kubectl get hpa -A -w`
+
+3. **Repository Mirroring**
+   - [ ] GitLab mirror-sync job created: `kubectl get cronjob -n gitlab`
+   - [ ] Manual trigger: `kubectl create job --from=cronjob/gitlab-mirror-sync manual-sync -n gitlab`
+   - [ ] Check GitLab WebUI for mirrored repos under github-tzervas/ and github-vector-weight-technologies/
+
+4. **CI/CD Runners**
+   - [ ] ARC controller ready: `kubectl get pods -n arc-systems`
+   - [ ] Runner scale sets configured: `kubectl get autoscalingrunnerset -n arc-runners`
+   - [ ] GitLab runners registered: `kubectl logs -n gitlab-runners <runner-pod>`
+   - [ ] Test with workflow: Push to GitHub and check runner activation
+
+5. **Models**
+   - [ ] Ollama models available: `ollama list` on GPU worker
+   - [ ] HuggingFace token secret created: `kubectl get secret huggingface-token -n ai-services`
+   - [ ] Download test model: `uv run scripts/sync_models.py download-hf coqui/XTTS-v2`
+
+6. **Test Workflows**
+   - [ ] Service mesh verification: `kubectl apply -f workflows/service_mesh_verification.yaml`
+   - [ ] CI runner validation: `kubectl apply -f workflows/ci_runner_validation.yaml`
+   - [ ] Monitor: `kubectl get workflows -A -w`
+
 ## Future Considerations
 
 ### Planned Enhancements
 
+- [x] Service mesh (Linkerd) - v0.3.0
+- [x] Autoscaling (HPA/VPA) - v0.3.0
+- [x] Repository mirroring - v0.3.0
+- [x] Uncensored models integration - v0.3.0
 - [ ] Multi-node cluster support
 - [ ] External secret store (Vault)
-- [ ] Service mesh (Linkerd)
 - [ ] Advanced RBAC per service
 - [ ] Automated security scanning
+- [ ] PVC resize automation
 
 ### Technology Watch
 
-- **MCP Evolution**: Monitor protocol updates
-- **Ollama**: Track new model support
-- **k3s**: Evaluate upgrade path to full k8s
-- **ArgoCD**: Evaluate ApplicationSets
+- **MCP Evolution**: Monitor protocol updates and tooling
+- **Ollama**: Track new model support and quantization
+- **k3s**: Evaluate upgrade path and new releases
+- **ArgoCD**: Evaluate ApplicationSets for multi-env support
+- **Linkerd**: Monitor for stability updates and new features
 
 ---
 
@@ -438,7 +658,9 @@ arc-runners-arm64  # QEMU-emulated ARM runners
 - API changes must update OPERATIONS.md
 - Security changes must update this document
 - Breaking changes must update CONTRIBUTING.md
+- New ADRs must follow numbering sequence
 
 ---
 
 *This document is the authoritative source for architectural decisions. All development should align with these principles.*
+

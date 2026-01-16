@@ -1,0 +1,219 @@
+# GitLab Repository Mirroring Configuration
+# This job sets up mirroring from GitHub to self-hosted GitLab
+# 
+# Sources to mirror:
+#   - All personal repos from github.com/tzervas (or configured user)
+#   - All repos from github.com/Vector-Weight-Technologies org
+#
+# Sync schedule: Every 6 hours
+# Direction: Pull mirror (GitHub → GitLab)
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: gitlab-mirror-sync
+  namespace: gitlab
+  labels:
+    app.kubernetes.io/name: gitlab-mirror-sync
+    app.kubernetes.io/component: repository-mirroring
+spec:
+  schedule: "0 */6 * * *"  # Every 6 hours
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: mirror-sync
+              image: python:3.12-slim
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  pip install --quiet requests pyyaml
+                  python /scripts/sync-mirrors.py
+              env:
+                - name: GITLAB_URL
+                  value: "https://git.vectorweight.com"
+                - name: GITLAB_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: gitlab-mirror-token
+                      key: token
+                - name: GITHUB_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: github-mirror-token
+                      key: token
+                - name: GITHUB_USER
+                  value: "tzervas"
+                - name: GITHUB_ORG
+                  value: "Vector-Weight-Technologies"
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+          volumes:
+            - name: scripts
+              configMap:
+                name: gitlab-mirror-scripts
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitlab-mirror-scripts
+  namespace: gitlab
+data:
+  sync-mirrors.py: |
+    #!/usr/bin/env python3
+    """
+    GitLab Mirror Sync Script
+    
+    Automatically creates and updates pull mirrors from GitHub to GitLab.
+    Mirrors personal repos and organization repos.
+    """
+    import os
+    import requests
+    import json
+    from urllib.parse import quote
+    
+    GITLAB_URL = os.environ.get("GITLAB_URL", "https://git.vectorweight.com")
+    GITLAB_TOKEN = os.environ["GITLAB_TOKEN"]
+    GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
+    GITHUB_USER = os.environ.get("GITHUB_USER", "tzervas")
+    GITHUB_ORG = os.environ.get("GITHUB_ORG", "Vector-Weight-Technologies")
+    
+    GITLAB_HEADERS = {"PRIVATE-TOKEN": GITLAB_TOKEN}
+    GITHUB_HEADERS = {"Authorization": f"token {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
+    
+    def get_github_repos(owner: str, is_org: bool = False) -> list:
+        """Fetch all repos from GitHub user or org."""
+        repos = []
+        page = 1
+        endpoint = "orgs" if is_org else "users"
+        while True:
+            url = f"https://api.github.com/{endpoint}/{owner}/repos?page={page}&per_page=100"
+            resp = requests.get(url, headers=GITHUB_HEADERS)
+            if resp.status_code != 200:
+                print(f"Error fetching {owner} repos: {resp.status_code}")
+                break
+            data = resp.json()
+            if not data:
+                break
+            repos.extend(data)
+            page += 1
+        return repos
+    
+    def get_gitlab_projects() -> dict:
+        """Get existing GitLab projects as name->id mapping."""
+        projects = {}
+        page = 1
+        while True:
+            url = f"{GITLAB_URL}/api/v4/projects?page={page}&per_page=100&owned=true"
+            resp = requests.get(url, headers=GITLAB_HEADERS)
+            if resp.status_code != 200:
+                break
+            data = resp.json()
+            if not data:
+                break
+            for p in data:
+                projects[p["path_with_namespace"]] = p["id"]
+            page += 1
+        return projects
+    
+    def ensure_group(path: str) -> int:
+        """Ensure GitLab group exists, create if not."""
+        url = f"{GITLAB_URL}/api/v4/groups/{quote(path, safe='')}"
+        resp = requests.get(url, headers=GITLAB_HEADERS)
+        if resp.status_code == 200:
+            return resp.json()["id"]
+        # Create group
+        url = f"{GITLAB_URL}/api/v4/groups"
+        data = {"name": path, "path": path, "visibility": "private"}
+        resp = requests.post(url, headers=GITLAB_HEADERS, json=data)
+        if resp.status_code in (200, 201):
+            return resp.json()["id"]
+        print(f"Failed to create group {path}: {resp.text}")
+        return None
+    
+    def create_mirror(repo: dict, namespace_id: int, namespace_path: str) -> bool:
+        """Create a pull mirror project in GitLab."""
+        url = f"{GITLAB_URL}/api/v4/projects"
+        github_url = repo["clone_url"].replace("https://", f"https://{GITHUB_TOKEN}@")
+        data = {
+            "name": repo["name"],
+            "path": repo["name"],
+            "namespace_id": namespace_id,
+            "import_url": github_url,
+            "mirror": True,
+            "mirror_trigger_builds": True,
+            "visibility": "private" if repo["private"] else "internal",
+            "description": repo.get("description", ""),
+        }
+        resp = requests.post(url, headers=GITLAB_HEADERS, json=data)
+        if resp.status_code in (200, 201):
+            print(f"Created mirror: {namespace_path}/{repo['name']}")
+            return True
+        elif "has already been taken" in resp.text:
+            print(f"Mirror exists: {namespace_path}/{repo['name']}")
+            return True
+        else:
+            print(f"Failed to create {repo['name']}: {resp.text}")
+            return False
+    
+    def update_mirror(project_id: int) -> bool:
+        """Trigger mirror sync for existing project."""
+        url = f"{GITLAB_URL}/api/v4/projects/{project_id}/mirror/pull"
+        resp = requests.post(url, headers=GITLAB_HEADERS)
+        return resp.status_code in (200, 201, 204)
+    
+    def main():
+        print("=== GitLab Mirror Sync ===")
+        existing = get_gitlab_projects()
+        
+        # Mirror personal repos
+        print(f"\nFetching repos from github.com/{GITHUB_USER}...")
+        user_repos = get_github_repos(GITHUB_USER, is_org=False)
+        print(f"Found {len(user_repos)} personal repos")
+        
+        # Ensure personal namespace group
+        user_group_id = ensure_group(f"github-{GITHUB_USER}")
+        if user_group_id:
+            for repo in user_repos:
+                if repo.get("fork"):
+                    continue  # Skip forks
+                path = f"github-{GITHUB_USER}/{repo['name']}"
+                if path in existing:
+                    update_mirror(existing[path])
+                else:
+                    create_mirror(repo, user_group_id, f"github-{GITHUB_USER}")
+        
+        # Mirror org repos
+        print(f"\nFetching repos from github.com/{GITHUB_ORG}...")
+        org_repos = get_github_repos(GITHUB_ORG, is_org=True)
+        print(f"Found {len(org_repos)} org repos")
+        
+        org_group_id = ensure_group(f"github-{GITHUB_ORG.lower()}")
+        if org_group_id:
+            for repo in org_repos:
+                if repo.get("fork"):
+                    continue
+                path = f"github-{GITHUB_ORG.lower()}/{repo['name']}"
+                if path in existing:
+                    update_mirror(existing[path])
+                else:
+                    create_mirror(repo, org_group_id, f"github-{GITHUB_ORG.lower()}")
+        
+        print("\n=== Sync complete ===")
+    
+    if __name__ == "__main__":
+        main()

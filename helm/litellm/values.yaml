@@ -99,6 +99,27 @@ tolerations: []
 
 affinity: {}
 
+# Horizontal Pod Autoscaler - scale based on CPU/memory
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  scaleDownStabilizationWindowSeconds: 300
+  scaleUpStabilizationWindowSeconds: 0
+
+# Vertical Pod Autoscaler - recommend optimal resources
+vpa:
+  enabled: true
+  updateMode: "Off"  # "Off" = recommendations only, "Auto" = automatic updates
+  minAllowed:
+    cpu: 100m
+    memory: 256Mi
+  maxAllowed:
+    cpu: 4
+    memory: 8Gi
+
 # Service account
 serviceAccount:
   create: true

@@ -7,6 +7,7 @@
 #     "httpx>=0.27.0",
 #     "pyyaml>=6.0.0",
 #     "paramiko>=3.4.0",
+#     "huggingface-hub>=0.27.0",
 # ]
 # [tool.uv]
 # exclude-newer = "2026-01-01"
@@ -78,6 +79,14 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
 from rich.table import Table
+
+# HuggingFace Hub integration
+try:
+    from huggingface_hub import snapshot_download, HfApi, login
+except ImportError:
+    snapshot_download = None
+    HfApi = None
+    login = None
 
 app = typer.Typer(
     name="shai-models",
@@ -750,6 +759,213 @@ def verify(
     console.print(table)
     
     if not all_valid:
+        raise typer.Exit(1)
+
+
+@app.command("download-hf")
+def download_huggingface(
+    repo_id: Annotated[
+        str,
+        typer.Argument(help="HuggingFace repo ID (e.g., cognitivecomputations/Wan2.5-14B-Instruct-Uncensored)"),
+    ],
+    output_dir: Annotated[
+        str,
+        typer.Option("--output", "-o", help="Output directory for model"),
+    ] = "/data/models/huggingface",
+    token: Annotated[
+        str | None,
+        typer.Option("--token", "-t", help="HuggingFace API token (or use HF_TOKEN env var)"),
+    ] = None,
+) -> None:
+    """Download a model from HuggingFace Hub.
+    
+    Downloads uncensored models and other specialized models from HuggingFace.
+    Requires HF_TOKEN environment variable or --token for gated models.
+    
+    Examples:
+        # Download Wan2.5 uncensored model
+        shai-models download-hf cognitivecomputations/Wan2.5-14B-Instruct-Uncensored
+        
+        # Download XTTS voice model
+        shai-models download-hf coqui/XTTS-v2
+        
+        # Download with explicit token
+        shai-models download-hf myrepo/mymodel --token YOUR_TOKEN
+    """
+    if not snapshot_download:
+        console.print("[red]Error:[/red] huggingface-hub not installed")
+        console.print("Install with: uv pip install huggingface-hub")
+        raise typer.Exit(1)
+    
+    # Get token from parameter or environment
+    hf_token = token or os.environ.get("HF_TOKEN")
+    
+    if hf_token:
+        login(token=hf_token)
+        console.print("[green]✓[/green] Authenticated with HuggingFace Hub")
+    else:
+        console.print("[yellow]Note:[/yellow] No token provided. Downloads limited to public models.")
+    
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+    
+    console.print(Panel(f"[bold blue]Downloading from HuggingFace Hub[/bold blue]\nRepo: {repo_id}"))
+    
+    try:
+        # Extract model name from repo_id
+        model_name = repo_id.split("/")[-1]
+        local_dir = output_path / model_name
+        
+        console.print(f"Downloading to: {local_dir}")
+        
+        # Download the model
+        snapshot_download(
+            repo_id=repo_id,
+            local_dir=str(local_dir),
+            token=hf_token,
+            cache_dir=str(output_path),
+        )
+        
+        console.print(f"[green]✓[/green] Successfully downloaded {model_name}")
+        console.print(f"Location: {local_dir}")
+        
+    except Exception as e:
+        console.print(f"[red]Error downloading model:[/red] {e}")
+        raise typer.Exit(1)
+
+
+@app.command("sync-hf")
+def sync_huggingface_to_gpu(
+    model_name: Annotated[
+        str,
+        typer.Argument(help="Local model name or HuggingFace repo ID"),
+    ],
+    source_dir: Annotated[
+        str,
+        typer.Option("--source", "-s", help="Source directory"),
+    ] = "/data/models/huggingface",
+    remote_dir: Annotated[
+        str,
+        typer.Option("--remote", "-r", help="Remote directory on GPU worker"),
+    ] = "/data/models/huggingface",
+    dry_run: Annotated[
+        bool,
+        typer.Option("--dry-run", "-n", help="Show what would be transferred"),
+    ] = False,
+) -> None:
+    """Sync HuggingFace models to GPU worker.
+    
+    Transfers downloaded HuggingFace models to the GPU worker (akula-prime)
+    using rsync for efficient transfer.
+    
+    Example:
+        shai-models sync-hf wan2.5-14b-uncensored
+    """
+    source_path = Path(source_dir) / model_name
+    
+    if not source_path.exists():
+        console.print(f"[red]Error:[/red] Model not found: {source_path}")
+        raise typer.Exit(1)
+    
+    console.print(Panel(f"[bold blue]Syncing HuggingFace Model to GPU Worker[/bold blue]\nModel: {model_name}"))
+    
+    config = SyncConfig()
+    remote_path = f"{config.gpu_worker_user}@{config.gpu_worker_host}:{remote_dir}/{model_name}"
+    
+    cmd = ["rsync"] + config.rsync_options
+    
+    if dry_run:
+        cmd.append("--dry-run")
+    
+    cmd.extend([f"{source_path}/", remote_path])
+    
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            console.print(f"[red]rsync error:[/red] {result.stderr}")
+            raise typer.Exit(1)
+        
+        console.print(result.stdout)
+        console.print(f"[green]✓[/green] Model synced to GPU worker")
+        
+    except Exception as e:
+        console.print(f"[red]Sync error:[/red] {e}")
+        raise typer.Exit(1)
+
+
+@app.command("quantize")
+def quantize_model(
+    model_path: Annotated[
+        str,
+        typer.Argument(help="Path to model file or directory"),
+    ],
+    quantization_method: Annotated[
+        str,
+        typer.Option("--method", "-m", help="Quantization method (Q4_K_M, Q5_K_M, Q8_0, etc)"),
+    ] = "Q4_K_M",
+    output_path: Annotated[
+        str | None,
+        typer.Option("--output", "-o", help="Output path (defaults to model_name-quant)"),
+    ] = None,
+) -> None:
+    """Quantize a model for better VRAM efficiency.
+    
+    Reduces model size using llama.cpp quantization, making large models
+    fit in limited VRAM (e.g., 28GB → 8GB with Q4_K_M quantization).
+    
+    Requires: llama-cpp-python installed
+    
+    Examples:
+        shai-models quantize /data/models/wan2.5-14b.gguf --method Q4_K_M
+    """
+    console.print(Panel(f"[bold blue]Quantizing Model[/bold blue]\nMethod: {quantization_method}"))
+    
+    try:
+        from llama_cpp import llama_cpp
+    except ImportError:
+        console.print("[red]Error:[/red] llama-cpp-python not installed")
+        console.print("Install with: pip install llama-cpp-python")
+        raise typer.Exit(1)
+    
+    model_path_obj = Path(model_path)
+    if not model_path_obj.exists():
+        console.print(f"[red]Error:[/red] Model not found: {model_path}")
+        raise typer.Exit(1)
+    
+    if not output_path:
+        stem = model_path_obj.stem
+        output_path = str(model_path_obj.parent / f"{stem}-{quantization_method}.gguf")
+    
+    console.print(f"Input: {model_path}")
+    console.print(f"Output: {output_path}")
+    console.print(f"This may take a while...")
+    
+    try:
+        # Use llama.cpp for quantization
+        cmd = [
+            "llama-quantize",
+            str(model_path),
+            output_path,
+            quantization_method,
+        ]
+        
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            console.print(f"[red]Quantization failed:[/red] {result.stderr}")
+            raise typer.Exit(1)
+        
+        output_size = Path(output_path).stat().st_size
+        console.print(f"[green]✓[/green] Quantized successfully")
+        console.print(f"Output size: {_format_size(output_size)}")
+        
+    except FileNotFoundError:
+        console.print("[red]Error:[/red] llama-quantize command not found")
+        console.print("Install llama.cpp: https://github.com/ggerganov/llama.cpp")
+        raise typer.Exit(1)
+    except Exception as e:
+        console.print(f"[red]Quantization error:[/red] {e}")
         raise typer.Exit(1)
 
 

@@ -1,0 +1,158 @@
+# GitLab Runner Scale Set - Using ARC Controller pattern
+# Unified runner infrastructure sharing the same controller
+# Zero-idle resource consumption with scale-to-zero
+#
+# This deploys GitLab runners alongside ARC runners using
+# the GitLab Kubernetes executor, matching the ARC pattern.
+#
+# Key differences from ARC:
+#   - Uses GitLab runner registration instead of GitHub App
+#   - Runners register with git.vectorweight.com
+#   - Same resource limits and node placement as ARC runners
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gitlab-runners
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"  # Same wave as ARC runners
+  labels:
+    app.kubernetes.io/component: ci-runners
+    app.kubernetes.io/part-of: gitlab
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://charts.gitlab.io
+    chart: gitlab-runner
+    targetRevision: 0.72.0
+    helm:
+      releaseName: gitlab-runner
+      valuesObject:
+        # GitLab instance connection
+        gitlabUrl: "https://git.vectorweight.com"
+        
+        # Runner registration token from secret
+        runnerToken:
+          secret: gitlab-runner-token
+          key: runner-registration-token
+        
+        # Runner configuration
+        concurrent: 4  # Max concurrent jobs per runner
+        checkInterval: 10  # Check for new jobs every 10s
+        
+        # Kubernetes executor configuration
+        runners:
+          # Runner tags for job selection
+          tags: "self-hosted,linux,amd64,kubernetes"
+          
+          # Run untagged jobs
+          runUntagged: true
+          
+          # Protected branches only
+          protected: false
+          
+          # Privileged mode for Docker-in-Docker
+          privileged: true
+          
+          # Namespace for job pods
+          namespace: gitlab-runners
+          
+          # Poll interval when runner is idle
+          pollTimeout: 180
+          outputLimit: 4096
+          
+          # Resource limits for build pods
+          builds:
+            cpuLimit: "4"
+            cpuLimitOverwriteMaxAllowed: "8"
+            memoryLimit: "8Gi"
+            memoryLimitOverwriteMaxAllowed: "16Gi"
+            cpuRequests: "500m"
+            memoryRequests: "2Gi"
+          
+          # Service container limits (for docker-in-docker, etc.)
+          services:
+            cpuLimit: "1"
+            memoryLimit: "2Gi"
+            cpuRequests: "100m"
+            memoryRequests: "256Mi"
+          
+          # Helper container limits
+          helpers:
+            cpuLimit: "500m"
+            memoryLimit: "512Mi"
+            cpuRequests: "100m"
+            memoryRequests: "128Mi"
+          
+          # Cache configuration - use MinIO in GitLab
+          cache:
+            cacheType: s3
+            cachePath: "gitlab-runner-cache"
+            cacheShared: true
+            s3ServerAddress: "minio.gitlab:9000"
+            s3BucketName: "gitlab-runner-cache"
+            s3BucketLocation: "us-east-1"
+            s3CacheInsecure: true
+            secretName: gitlab-minio-secret
+          
+          # Pod labels for network policies
+          podLabels:
+            app.kubernetes.io/name: gitlab-runner-job
+            app.kubernetes.io/component: ci-build
+          
+          # Node selection - same as ARC runners
+          nodeSelector:
+            kubernetes.io/arch: amd64
+          
+          # Security context
+          podSecurityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+        
+        # Runner manager pod resources
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        
+        # Metrics for monitoring
+        metrics:
+          enabled: true
+          portName: metrics
+          port: 9252
+          serviceMonitor:
+            enabled: true
+        
+        # RBAC
+        rbac:
+          create: true
+          clusterWideAccess: false
+        
+        # Service account
+        serviceAccount:
+          create: true
+          name: gitlab-runner
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gitlab-runners
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

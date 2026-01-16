@@ -1,0 +1,46 @@
+# Linkerd CRDs - Custom Resource Definitions
+# Install CRDs before Linkerd control plane
+# Part of the service mesh tier
+#
+# Linkerd provides:
+#   - Automatic mTLS between services
+#   - Traffic metrics and observability
+#   - Load balancing and retries
+#   - Traffic splitting for canary deployments
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: linkerd-crds
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"  # Install before control plane
+  labels:
+    app.kubernetes.io/component: service-mesh
+    app.kubernetes.io/part-of: linkerd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://helm.linkerd.io/edge
+    chart: linkerd-crds
+    targetRevision: 2025.1.2
+    helm:
+      releaseName: linkerd-crds
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: linkerd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - Replace=true  # CRDs need replace strategy
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 1m

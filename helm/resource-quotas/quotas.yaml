@@ -1,0 +1,138 @@
+# Resource Quotas Helm Chart
+# Namespace-level resource limits for homelab cluster
+# Optimized for:
+#   - homelab: Dual E5-2660v4 (28c/56t), 120GB RAM
+#   - Total cluster budget: ~24 CPU cores, 80GB RAM available for workloads
+
+# AI Services namespace - primary AI workloads
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: ai-services-quota
+  namespace: ai-services
+spec:
+  hard:
+    # Compute limits - generous for AI inference
+    requests.cpu: "16"
+    requests.memory: 48Gi
+    limits.cpu: "24"
+    limits.memory: 64Gi
+    # Pod limits
+    pods: "30"
+    # Storage
+    requests.storage: 500Gi
+    persistentvolumeclaims: "20"
+    # Services
+    services: "20"
+    services.loadbalancers: "0"
+    services.nodeports: "5"
+---
+# GPU Workloads namespace - GPU-related services
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: gpu-workloads-quota
+  namespace: gpu-workloads
+spec:
+  hard:
+    # Compute - lighter since GPU is remote
+    requests.cpu: "8"
+    requests.memory: 16Gi
+    limits.cpu: "16"
+    limits.memory: 32Gi
+    # Pods
+    pods: "15"
+    # Storage
+    requests.storage: 300Gi
+    persistentvolumeclaims: "10"
+---
+# Self-hosted AI namespace - infrastructure services
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: self-hosted-ai-quota
+  namespace: self-hosted-ai
+spec:
+  hard:
+    requests.cpu: "8"
+    requests.memory: 16Gi
+    limits.cpu: "12"
+    limits.memory: 24Gi
+    pods: "20"
+    requests.storage: 200Gi
+    persistentvolumeclaims: "15"
+---
+# ARC Runners namespace - CI/CD runners
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: arc-runners-quota
+  namespace: arc-runners
+spec:
+  hard:
+    # Runners can burst but have upper limits
+    requests.cpu: "8"
+    requests.memory: 16Gi
+    limits.cpu: "20"  # Allow burst for parallel builds
+    limits.memory: 40Gi
+    pods: "12"  # Max concurrent runners
+    requests.storage: 100Gi
+---
+# GitLab Runners namespace - GitLab CI runners
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: gitlab-runners-quota
+  namespace: gitlab-runners
+spec:
+  hard:
+    requests.cpu: "8"
+    requests.memory: 16Gi
+    limits.cpu: "16"
+    limits.memory: 32Gi
+    pods: "10"
+    requests.storage: 100Gi
+---
+# Monitoring namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: monitoring-quota
+  namespace: monitoring
+spec:
+  hard:
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.cpu: "8"
+    limits.memory: 16Gi
+    pods: "25"
+    requests.storage: 100Gi
+---
+# Linkerd namespace - service mesh
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: linkerd-quota
+  namespace: linkerd
+spec:
+  hard:
+    requests.cpu: "2"
+    requests.memory: 2Gi
+    limits.cpu: "4"
+    limits.memory: 4Gi
+    pods: "15"
+---
+# Linkerd Viz namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: linkerd-viz-quota
+  namespace: linkerd-viz
+spec:
+  hard:
+    requests.cpu: "1"
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi
+    pods: "10"

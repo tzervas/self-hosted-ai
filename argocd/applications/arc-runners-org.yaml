@@ -1,0 +1,97 @@
+# Actions Runner Scale Set - Vector-Weight-Technologies Organization
+# Self-hosted runners for the GitHub organization
+#
+# Prerequisites:
+#   - GitHub App installed on Vector-Weight-Technologies org
+#   - Secret 'github-app-secret' in arc-runners namespace
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arc-runners-org
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"  # After ARC controller
+  labels:
+    app.kubernetes.io/component: ci-runners
+    app.kubernetes.io/part-of: arc
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/actions/actions-runner-controller-charts
+    chart: gha-runner-scale-set
+    targetRevision: 0.9.3
+    helm:
+      releaseName: arc-runners-org
+      valuesObject:
+        # GitHub organization configuration
+        githubConfigUrl: "https://github.com/Vector-Weight-Technologies"
+        githubConfigSecret: github-app-secret
+
+        # Runner group
+        runnerGroup: "default"
+        
+        # Scaling: Scale to zero when idle
+        minRunners: 0
+        maxRunners: 4
+
+        # Runner pod template - same specs as personal runners
+        template:
+          spec:
+            containers:
+              - name: runner
+                image: ghcr.io/actions/actions-runner:2.321.0
+                command: ["/home/runner/run.sh"]
+                env:
+                  - name: ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT
+                    value: "true"
+                resources:
+                  requests:
+                    cpu: 500m
+                    memory: 2Gi
+                  limits:
+                    cpu: 4000m
+                    memory: 8Gi
+                securityContext:
+                  runAsUser: 1000
+                  runAsGroup: 1000
+                volumeMounts:
+                  - name: work
+                    mountPath: /home/runner/_work
+
+            volumes:
+              - name: work
+                emptyDir:
+                  sizeLimit: 20Gi
+
+            nodeSelector:
+              kubernetes.io/arch: amd64
+
+            tolerations:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+                effect: NoSchedule
+
+        # Same controller
+        controllerServiceAccount:
+          namespace: arc-systems
+          name: gha-runner-scale-set-controller
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arc-runners
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

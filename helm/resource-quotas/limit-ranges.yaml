@@ -1,0 +1,72 @@
+# LimitRange for AI Services
+# Sets default resource requests/limits for pods without explicit configuration
+# Ensures all pods have appropriate resource allocation
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: ai-services-limits
+  namespace: ai-services
+spec:
+  limits:
+    # Default container limits
+    - type: Container
+      default:
+        cpu: "1"
+        memory: 2Gi
+      defaultRequest:
+        cpu: 100m
+        memory: 256Mi
+      max:
+        cpu: "16"
+        memory: 32Gi
+      min:
+        cpu: 10m
+        memory: 32Mi
+    # Pod-level limits
+    - type: Pod
+      max:
+        cpu: "24"
+        memory: 64Gi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: arc-runners-limits
+  namespace: arc-runners
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: "2"
+        memory: 4Gi
+      defaultRequest:
+        cpu: 250m
+        memory: 1Gi
+      max:
+        cpu: "8"
+        memory: 16Gi
+      min:
+        cpu: 50m
+        memory: 128Mi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: gitlab-runners-limits
+  namespace: gitlab-runners
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: "2"
+        memory: 4Gi
+      defaultRequest:
+        cpu: 250m
+        memory: 1Gi
+      max:
+        cpu: "8"
+        memory: 16Gi
+      min:
+        cpu: 50m
+        memory: 128Mi

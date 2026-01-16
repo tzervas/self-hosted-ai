@@ -1,0 +1,83 @@
+# Linkerd Server Authorization Policies
+# Define which services can communicate with each other in the mesh
+# These policies enforce zero-trust networking
+
+apiVersion: policy.linkerd.io/v1beta2
+kind: Server
+metadata:
+  name: litellm
+  namespace: ai-services
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: litellm
+  port: 4000
+  proxyProtocol: HTTP/2
+---
+apiVersion: policy.linkerd.io/v1beta2
+kind: Server
+metadata:
+  name: ollama
+  namespace: ai-services
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ollama
+  port: 11434
+  proxyProtocol: HTTP/1
+---
+apiVersion: policy.linkerd.io/v1beta2
+kind: Server
+metadata:
+  name: open-webui
+  namespace: ai-services
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: open-webui
+  port: 8080
+  proxyProtocol: HTTP/1
+---
+# Authorization: LiteLLM can be accessed by Open WebUI and agent-server
+apiVersion: policy.linkerd.io/v1beta2
+kind: AuthorizationPolicy
+metadata:
+  name: litellm-access
+  namespace: ai-services
+spec:
+  targetRef:
+    group: policy.linkerd.io
+    kind: Server
+    name: litellm
+  requiredAuthenticationRefs:
+    - name: ai-services-mtls
+      kind: MeshTLSAuthentication
+      group: policy.linkerd.io
+---
+# Authorization: Ollama can be accessed by LiteLLM
+apiVersion: policy.linkerd.io/v1beta2
+kind: AuthorizationPolicy
+metadata:
+  name: ollama-access
+  namespace: ai-services
+spec:
+  targetRef:
+    group: policy.linkerd.io
+    kind: Server
+    name: ollama
+  requiredAuthenticationRefs:
+    - name: ai-services-mtls
+      kind: MeshTLSAuthentication
+      group: policy.linkerd.io
+---
+# mTLS authentication for ai-services namespace
+apiVersion: policy.linkerd.io/v1beta2
+kind: MeshTLSAuthentication
+metadata:
+  name: ai-services-mtls
+  namespace: ai-services
+spec:
+  identities:
+    - "*.ai-services.serviceaccount.identity.linkerd.cluster.local"
+    - "*.self-hosted-ai.serviceaccount.identity.linkerd.cluster.local"
+    - "*.gpu-workloads.serviceaccount.identity.linkerd.cluster.local"

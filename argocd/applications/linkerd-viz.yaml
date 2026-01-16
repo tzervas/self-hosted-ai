@@ -1,0 +1,106 @@
+# Linkerd Viz - Observability Dashboard
+# Provides real-time service mesh metrics and traffic visualization
+#
+# Features:
+#   - Service topology and traffic flow
+#   - Per-route metrics (latency, success rate)
+#   - mTLS status across services
+#   - Live traffic tap for debugging
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: linkerd-viz
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"  # After control plane
+  labels:
+    app.kubernetes.io/component: service-mesh
+    app.kubernetes.io/part-of: linkerd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://helm.linkerd.io/edge
+    chart: linkerd-viz
+    targetRevision: 2025.1.2
+    helm:
+      releaseName: linkerd-viz
+      valuesObject:
+        # Use existing Prometheus instead of deploying new one
+        prometheus:
+          enabled: false
+        prometheusUrl: "http://prometheus-kube-prometheus-prometheus.monitoring:9090"
+        
+        # Dashboard configuration
+        dashboard:
+          replicas: 1
+          resources:
+            cpu:
+              request: 50m
+              limit: 250m
+            memory:
+              request: 64Mi
+              limit: 256Mi
+        
+        # Metrics API
+        metricsAPI:
+          replicas: 1
+          resources:
+            cpu:
+              request: 50m
+              limit: 250m
+            memory:
+              request: 64Mi
+              limit: 256Mi
+        
+        # Tap (traffic inspection)
+        tap:
+          replicas: 1
+          resources:
+            cpu:
+              request: 50m
+              limit: 250m
+            memory:
+              request: 64Mi
+              limit: 256Mi
+        
+        # Tap injector
+        tapInjector:
+          replicas: 1
+          resources:
+            cpu:
+              request: 50m
+              limit: 250m
+            memory:
+              request: 64Mi
+              limit: 128Mi
+        
+        # Web dashboard
+        web:
+          replicas: 1
+          resources:
+            cpu:
+              request: 50m
+              limit: 250m
+            memory:
+              request: 64Mi
+              limit: 256Mi
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: linkerd-viz
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

@@ -6,27 +6,40 @@
 global:
   edition: ce
   hosts:
-    domain: homelab.local
+    domain: vectorweight.com
     https: true
     externalIP: ""
     gitlab:
-      name: gitlab.homelab.local
+      name: git.vectorweight.com
     registry:
-      name: registry.homelab.local
+      name: registry.vectorweight.com
     minio:
-      name: minio.homelab.local
+      name: minio.vectorweight.com
     smartcard:
-      name: smartcard.homelab.local
+      name: smartcard.vectorweight.com
   ingress:
     configureCertmanager: false
     class: traefik
     tls:
       enabled: true
-      secretName: gitlab-tls
+      secretName: vectorweight-wildcard-tls
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
-      cert-manager.io/cluster-issuer: letsencrypt-prod
+  # Enable repository mirroring feature
+  appConfig:
+    repositoryMirroring:
+      enabled: true
+      # Sync interval for pull mirrors (every 6 hours)
+      capacityPerWorker: 10
+    # Import sources - enable GitHub import
+    importSources:
+      - github
+      - gitlab
+      - bitbucket
+    # Enable external authorization for mirrors
+    externalAuthorization:
+      enabled: false
 
 # GitLab Rails (main application)
 gitlab:
