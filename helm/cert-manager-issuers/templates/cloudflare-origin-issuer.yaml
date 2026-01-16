@@ -1,0 +1,21 @@
+{{- /*
+Cloudflare API Credentials Secret
+Contains the Global API key or API Token for DNS-01 challenges
+This secret is created by setup-cloudflare.sh and applied separately
+*/ -}}
+{{- if .Values.cloudflare }}
+---
+# Note: The actual secret is created by scripts/setup-cloudflare.sh
+# This template documents the expected secret structure
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: cloudflare-api-credentials
+#   namespace: cert-manager
+# type: Opaque
+# stringData:
+#   api-token: "<CLOUDFLARE_API_TOKEN>"
+#   api-key: "<CLOUDFLARE_GLOBAL_API_KEY>"  
+#   origin-ca-key: "<CLOUDFLARE_ORIGIN_CA_KEY>"
+{{- end }}
+

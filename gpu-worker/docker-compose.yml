@@ -1,6 +1,6 @@
 services:
   ollama-gpu:
-    image: ollama/ollama:0.13.5
+    image: ollama/ollama:0.16.0
     container_name: ollama-gpu-worker
     ports:
       - "${OLLAMA_PORT:-11434}:11434"
@@ -12,6 +12,8 @@ services:
       - OLLAMA_KEEP_ALIVE=${OLLAMA_KEEP_ALIVE:-30m}
       - OLLAMA_GPU_LAYERS=${OLLAMA_GPU_LAYERS:-99}
       - OLLAMA_FLASH_ATTENTION=${OLLAMA_FLASH_ATTENTION:-1}
+      - OLLAMA_KV_CACHE_TYPE=${OLLAMA_KV_CACHE_TYPE:-q8_0}
+      - OLLAMA_GPU_OVERHEAD=${OLLAMA_GPU_OVERHEAD:-536870912}
       - OLLAMA_HOST=${OLLAMA_HOST:-0.0.0.0}
     deploy:
       resources:
@@ -51,7 +53,7 @@ services:
   # ComfyUI - GPU-accelerated image generation
   # Integrates with Open WebUI for text-to-image workflows
   comfyui:
-    image: ghcr.io/ai-dock/comfyui:v2-cuda-12.6.3-ubuntu22.04
+    image: ghcr.io/ai-dock/comfyui:latest
     container_name: comfyui-worker
     ports:
       - "${COMFYUI_PORT:-8188}:8188"
@@ -87,43 +89,47 @@ services:
       retries: 3
       start_period: 60s
     restart: unless-stopped
+    profiles:
+      - image-gen
+      - full
 
   # Automatic1111 Stable Diffusion WebUI - Alternative image generation interface
   # Provides user-friendly web interface with extensive features and extensions
-  automatic1111:
-    image: automatic1111/stable-diffusion-webui:latest
-    container_name: automatic1111-worker
-    ports:
-      - "${AUTOMATIC1111_PORT:-7860}:7860"
-    volumes:
-      # Shared model storage with ComfyUI
-      - ${DATA_PATH:-/data}/models:/app/stable-diffusion-webui/models
-      # A1111-specific outputs and configurations
-      - ${DATA_PATH:-/data}/automatic1111/outputs:/app/stable-diffusion-webui/outputs
-      - ${DATA_PATH:-/data}/automatic1111/configs:/app/stable-diffusion-webui/configs
-      - ${DATA_PATH:-/data}/automatic1111/extensions:/app/stable-diffusion-webui/extensions
-    environment:
-      # A1111 server settings
-      - COMMANDLINE_ARGS=${A1111_CLI_ARGS:---listen --port 7860 --api --medvram --no-half-vae --xformers --enable-insecure-extension-access}
-      - WEBUI_RESTARTING_TIMEOUT=0
-      # Disable authentication for internal access
-      - WEBUI_AUTH=
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7860/"]
-      interval: 60s
-      timeout: 30s
-      retries: 3
-      start_period: 120s
-    restart: unless-stopped
+  # automatic1111:
+  #   image: ghcr.io/automatic1111/stable-diffusion-webui:latest
+  #   container_name: automatic1111-worker
+  #   ports:
+  #     - "${AUTOMATIC1111_PORT:-7860}:7860"
+  #   volumes:
+  #     # Shared model storage with ComfyUI
+  #     - ${DATA_PATH:-/data}/models:/app/stable-diffusion-webui/models
+  #     # A1111-specific outputs and configurations
+  #     - ${DATA_PATH:-/data}/automatic1111/outputs:/app/stable-diffusion-webui/outputs
+  #     - ${DATA_PATH:-/data}/automatic1111/configs:/app/stable-diffusion-webui/configs
+  #     - ${DATA_PATH:-/data}/automatic1111/extensions:/app/stable-diffusion-webui/extensions
+  #   environment:
+  #     # A1111 server settings
+  #     - COMMANDLINE_ARGS=${A1111_CLI_ARGS:---listen --port 7860 --api --medvram --no-half-vae --xformers --enable-insecure-extension-access}
+  #     - WEBUI_RESTARTING_TIMEOUT=0
+  #     # Disable authentication for internal access
+  #     - WEBUI_AUTH=
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [gpu]
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:7860/"]
+  #     interval: 60s
+  #     timeout: 30s
+  #     retries: 3
+  #     start_period: 120s
+  #   restart: unless-stopped
 
-  # Whisper Service - Audio transcription
+  # Whisper Service - Audio transcription (Speech-to-Text)
+  # Uses faster-whisper for GPU-accelerated transcription
   whisper:
     image: onerahmet/openai-whisper-asr-webservice:latest-gpu
     container_name: whisper-worker
@@ -132,7 +138,8 @@ services:
     volumes:
       - ${DATA_PATH:-/data}/whisper:/root/.cache/whisper
     environment:
-      - ASR_MODEL=${WHISPER_MODEL:-large-v3}
+      # Use 'base' model (~2GB VRAM) for balance, or 'large-v3' (~10GB) for accuracy
+      - ASR_MODEL=${WHISPER_MODEL:-base}
       - ASR_ENGINE=faster_whisper
     deploy:
       resources:
@@ -148,6 +155,51 @@ services:
       retries: 3
       start_period: 60s
     restart: unless-stopped
+    profiles:
+      - audio
+      - full
+
+  # =============================================================================
+  # Video Generation - Stable Video Diffusion (Optional, off-peak usage)
+  # =============================================================================
+  # NOTE: Requires 16GB+ VRAM. Use 'video' profile for manual enabling.
+  # Models: SVD-XT (text2video-svd.json workflow in ComfyUI)
+  # This runs through ComfyUI, so ensure comfyui is running first.
+  # Download model: ./scripts/comfyui-setup.sh setup text2video-svd
+  #
+  # For dedicated video generation container (alternative to ComfyUI workflow):
+  # video-gen:
+  #   image: ghcr.io/ai-dock/comfyui:v2-cuda-12.6.3-ubuntu22.04
+  #   container_name: video-gen-worker
+  #   ports:
+  #     - "${VIDEO_GEN_PORT:-8189}:8188"
+  #   volumes:
+  #     - ${DATA_PATH:-/data}/comfyui/models:/opt/ComfyUI/models
+  #     - ${DATA_PATH:-/data}/video-gen/output:/opt/ComfyUI/output
+  #     - ${DATA_PATH:-/data}/video-gen/input:/opt/ComfyUI/input
+  #   environment:
+  #     - COMFYUI_PORT=8188
+  #     - CLI_ARGS=--listen 0.0.0.0 --preview-method auto --lowvram
+  #     - PROVISIONING_SCRIPT=
+  #     - CF_QUICK_TUNNELS=false
+  #     - WEB_ENABLE_AUTH=false
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [gpu]
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8188/system_stats"]
+  #     interval: 60s
+  #     timeout: 30s
+  #     retries: 3
+  #     start_period: 120s
+  #   restart: unless-stopped
+  #   profiles:
+  #     - video
+  #     - off-peak
 
 networks:
   default:

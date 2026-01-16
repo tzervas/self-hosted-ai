@@ -1,0 +1,132 @@
+# Linkerd Control Plane
+# Lightweight service mesh for mTLS and observability
+#
+# Why Linkerd over Istio:
+#   - ~200MB control plane vs ~1GB for Istio
+#   - Simpler configuration and operation
+#   - Lower latency overhead (~1ms per request)
+#   - Sufficient for mTLS and basic traffic management
+#
+# Injected namespaces: self-hosted-ai, ai-services, gpu-workloads
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: linkerd-control-plane
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"  # After CRDs
+  labels:
+    app.kubernetes.io/component: service-mesh
+    app.kubernetes.io/part-of: linkerd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://helm.linkerd.io/edge
+    chart: linkerd-control-plane
+    targetRevision: 2025.1.2
+    helm:
+      releaseName: linkerd-control-plane
+      valuesObject:
+        # Identity configuration - use cert-manager for certificates
+        identity:
+          issuer:
+            scheme: kubernetes.io/tls
+          externalCA: true  # We'll use cert-manager
+        
+        # Proxy configuration - inject into all pods
+        proxy:
+          # Resource limits for sidecar proxies
+          resources:
+            cpu:
+              request: 10m
+              limit: 500m
+            memory:
+              request: 20Mi
+              limit: 250Mi
+          # Enable protocol detection
+          requireIdentityOnInboundPorts: ""
+          # Log level
+          logLevel: warn,linkerd=info
+        
+        # Control plane resources
+        controllerResources:
+          cpu:
+            request: 100m
+            limit: 500m
+          memory:
+            request: 128Mi
+            limit: 512Mi
+        
+        # Destination controller (service discovery)
+        destinationResources:
+          cpu:
+            request: 100m
+            limit: 500m
+          memory:
+            request: 128Mi
+            limit: 512Mi
+        
+        # Identity controller (certificate management)
+        identityResources:
+          cpu:
+            request: 100m
+            limit: 500m
+          memory:
+            request: 64Mi
+            limit: 256Mi
+        
+        # Proxy injector
+        proxyInjectorResources:
+          cpu:
+            request: 100m
+            limit: 500m
+          memory:
+            request: 64Mi
+            limit: 256Mi
+        
+        # Heartbeat (disabled - we use Prometheus)
+        heartbeatResources:
+          cpu:
+            request: 10m
+            limit: 50m
+          memory:
+            request: 16Mi
+            limit: 64Mi
+        
+        # High availability (single node, so disabled)
+        controllerReplicas: 1
+        enablePodAntiAffinity: false
+        enablePodDisruptionBudget: false
+        
+        # Prometheus integration
+        prometheusUrl: "http://prometheus-kube-prometheus-prometheus.monitoring:9090"
+        
+        # Policy controller for authorization policies
+        policyController:
+          resources:
+            cpu:
+              request: 50m
+              limit: 250m
+            memory:
+              request: 64Mi
+              limit: 256Mi
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: linkerd
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

@@ -4,20 +4,21 @@ metadata:
   name: gitlab
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "3"  # Deploy after storage (wave 2)
+    argocd.argoproj.io/sync-wave: "4"  # Deploy after infrastructure
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  source:
-    # Repository: https://charts.gitlab.io (official GitLab Helm charts)
-    # Version: 9.7.1 (latest stable with enterprise features)
-    chart: gitlab
-    repoURL: https://charts.gitlab.io
-    targetRevision: 9.7.1
-    helm:
-      valueFiles:
-        - values.yaml
+  sources:
+    - chart: gitlab
+      repoURL: https://charts.gitlab.io
+      targetRevision: 9.7.1
+      helm:
+        valueFiles:
+          - $values/argocd/helm/gitlab/values.yaml
+    - repoURL: https://github.com/tzervas/self-hosted-ai.git
+      targetRevision: main
+      ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: gitlab

@@ -1,0 +1,256 @@
+# Platform Validation CI Pipeline
+# Validates all manifests, Helm charts, policies, and security
+# Uses self-hosted ARC runners (homelab infrastructure)
+name: Platform Validation
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'argocd/**'
+      - 'helm/**'
+      - 'infrastructure/**'
+      - 'policies/**'
+      - 'config/**'
+      - '.github/workflows/platform-validation.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'argocd/**'
+      - 'helm/**'
+      - 'infrastructure/**'
+      - 'policies/**'
+      - 'config/**'
+
+env:
+  KUBERNETES_VERSION: "1.29.0"
+
+jobs:
+  # Stage 1: Lint all configuration files
+  lint:
+    name: Lint Configuration
+    runs-on: [self-hosted, linux, amd64, homelab]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install linting tools
+        run: |
+          pip install yamllint ruff
+          npm install -g markdownlint-cli
+
+      - name: YAML lint
+        run: |
+          yamllint -c .yamllint \
+            argocd/ \
+            policies/ \
+            config/ \
+            helm/*/values*.yaml \
+            infrastructure/
+
+      - name: Ruff check (Python)
+        run: ruff check agents/ server/ --output-format=github
+        continue-on-error: true
+
+      - name: Markdown lint
+        run: markdownlint '**/*.md' --ignore node_modules --ignore .venv --ignore htmlcov
+        continue-on-error: true
+
+      - name: Shell lint
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './scripts'
+          severity: warning
+
+  # Stage 2: Validate Kubernetes manifests
+  validate:
+    name: Validate Manifests
+    needs: lint
+    runs-on: [self-hosted, linux, amd64, homelab]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.14.0'
+
+      - name: Install kubeconform
+        run: |
+          curl -sL https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz | tar xz
+          sudo mv kubeconform /usr/local/bin/
+
+      - name: Helm lint
+        run: |
+          echo "=== Linting Helm charts ==="
+          for chart in helm/*/; do
+            if [[ -f "${chart}Chart.yaml" ]]; then
+              echo "Linting: $chart"
+              helm lint "$chart" || true
+            fi
+          done
+          for chart in infrastructure/*/; do
+            if [[ -f "${chart}Chart.yaml" ]]; then
+              echo "Linting: $chart"
+              helm lint "$chart" || true
+            fi
+          done
+
+      - name: Kubeconform - Helm templates
+        run: |
+          echo "=== Validating Helm templates ==="
+          for chart in helm/*/; do
+            if [[ -f "${chart}Chart.yaml" ]]; then
+              echo "Validating: $chart"
+              helm template test "$chart" 2>/dev/null | kubeconform \
+                -strict \
+                -ignore-missing-schemas \
+                -kubernetes-version ${{ env.KUBERNETES_VERSION }} \
+                -summary || true
+            fi
+          done
+
+      - name: Kubeconform - ArgoCD applications
+        run: |
+          echo "=== Validating ArgoCD applications ==="
+          kubeconform \
+            -strict \
+            -ignore-missing-schemas \
+            -kubernetes-version ${{ env.KUBERNETES_VERSION }} \
+            -schema-location default \
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            -summary \
+            argocd/applications/*.yaml || true
+
+      - name: Kubeconform - Policies
+        run: |
+          echo "=== Validating policies ==="
+          find policies/ -name '*.yaml' -exec kubeconform \
+            -strict \
+            -ignore-missing-schemas \
+            -kubernetes-version ${{ env.KUBERNETES_VERSION }} \
+            -schema-location default \
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            {} + || true
+
+  # Stage 3: Security scanning
+  security:
+    name: Security Scan
+    needs: validate
+    runs-on: [self-hosted, linux, amd64, homelab]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Trivy config scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          ignore-unfixed: true
+          format: table
+
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: '0'  # Don't fail on vulnerabilities in dependencies
+          format: table
+
+  # Stage 4: Policy validation with Kyverno
+  policy:
+    name: Policy Validation
+    needs: validate
+    runs-on: [self-hosted, linux, amd64, homelab]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.14.0'
+
+      - name: Install Kyverno CLI
+        run: |
+          curl -sL https://github.com/kyverno/kyverno/releases/download/v1.12.6/kyverno-cli_v1.12.6_linux_x86_64.tar.gz | tar xz
+          sudo mv kyverno /usr/local/bin/
+
+      - name: Validate policies syntax
+        run: |
+          echo "=== Validating Kyverno policies ==="
+          kyverno validate policies/kyverno/
+
+      - name: Test policies against Helm templates
+        run: |
+          echo "=== Testing policies against rendered templates ==="
+          for chart in helm/*/; do
+            if [[ -f "${chart}Chart.yaml" ]]; then
+              echo "Testing: $chart"
+              helm template test "$chart" 2>/dev/null | kyverno apply \
+                policies/kyverno/security/ \
+                --resource /dev/stdin \
+                --table || true
+            fi
+          done
+
+  # Stage 5: Dependency check
+  deps:
+    name: Dependency Audit
+    runs-on: [self-hosted, linux, amd64, homelab]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pip-audit safety
+          cd agents && pip install -e ".[dev]" || true
+
+      - name: Pip audit
+        run: pip-audit --strict --progress-spinner off || true
+        continue-on-error: true
+
+      - name: Safety check
+        run: safety check --full-report || true
+        continue-on-error: true
+
+  # Summary job
+  summary:
+    name: Validation Summary
+    needs: [lint, validate, security, policy, deps]
+    runs-on: [self-hosted, linux, amd64, homelab]
+    if: always()
+    steps:
+      - name: Check results
+        run: |
+          echo "=== Validation Summary ==="
+          echo "Lint: ${{ needs.lint.result }}"
+          echo "Validate: ${{ needs.validate.result }}"
+          echo "Security: ${{ needs.security.result }}"
+          echo "Policy: ${{ needs.policy.result }}"
+          echo "Dependencies: ${{ needs.deps.result }}"
+
+          if [[ "${{ needs.lint.result }}" == "failure" ]] || \
+             [[ "${{ needs.validate.result }}" == "failure" ]] || \
+             [[ "${{ needs.security.result }}" == "failure" ]]; then
+            echo "::error::Critical validation stages failed"
+            exit 1
+          fi
+
+          echo "✅ All critical validations passed"

@@ -1,1 +1,81 @@
-0.1.0
+0.3.0
+
+Deployment: January 16, 2026
+Commit: TBD (pending deployment verification)
+
+## Major Changes (0.2.0 → 0.3.0)
+
+### Service Mesh Integration
+- Added Linkerd v2025.1.2 service mesh for mTLS and observability
+- Automatic sidecar proxy injection in ai-services, self-hosted-ai, and gpu-workloads namespaces
+- mTLS certificates managed by cert-manager
+- Linkerd Viz dashboard for traffic visualization
+
+### Autoscaling & Resource Management
+- Implemented Horizontal Pod Autoscaling (HPA) for LiteLLM, Open WebUI, and Agent Server
+  - CPU/memory target thresholds: 70% utilization
+  - Scale range: 1-3 replicas (configurable per service)
+- Added Vertical Pod Autoscaler (VPA) for resource recommendation
+  - Mode: "Off" (recommendations only, safe for production)
+  - Min/max resource bounds enforced
+- Namespace-level ResourceQuotas for controlled resource allocation
+  - ai-services: 48Gi RAM / 24 CPU limit
+  - gpu-workloads: 16Gi RAM / 16 CPU limit
+  - arc-runners: 40Gi RAM / 20 CPU limit (burst-capable)
+  - All quotas enforce minimum viable requests
+
+### Unified CI/CD Infrastructure
+- Unified ARC controller serving both personal and org repositories
+  - arc-runners-amd64: General Linux builds
+  - arc-runners-gpu: GPU-accelerated workloads
+  - arc-runners-arm64: Multi-architecture builds
+  - arc-runners-org: Vector-Weight-Technologies organization
+- All runners configured for scale-to-zero (minRunners: 0)
+  - Zero idle overhead when no jobs running
+  - Immediate spin-up when jobs queued
+- GitLab Runner integration via Kubernetes executor
+  - gitlab-runners namespace (isolated from ARC)
+  - Shared MinIO cache backend with main GitLab instance
+  - Same resource limits as ARC runners
+
+### Repository Mirroring
+- Automated GitHub → GitLab repo mirroring via CronJob
+  - Syncs every 6 hours
+  - Mirrors personal repos from tzervas (@github.com/tzervas)
+  - Mirrors organization repos from Vector-Weight-Technologies
+  - Creates groups: github-tzervas/ and github-vector-weight-technologies/
+  - Supports gated model repos via GitHub PAT (HF_TOKEN for HuggingFace)
+
+### Uncensored Model Integration
+- HuggingFace Hub authentication via sealed secrets
+  - HF_TOKEN stored securely (never exposed to pods)
+- New HuggingFace models added to manifest:
+  - Text: Wan2.5-14B-Uncensored (28GB → Q4_K_M quant 8GB) and Wan2.5-7B-Uncensored
+  - Voice TTS: XTTS-v2 (1.8GB, multilingual, voice cloning), Bark (5GB, expressive)
+  - SFX/Audio: AudioLDM2-Large (3.5GB, text-to-audio), AudioGen-Medium (1.5GB)
+  - Video: Wan Video 1.3B (2.6GB, text/image-to-video)
+  - Upscalers and ControlNets for ComfyUI
+- Model sync script enhancements:
+  - `sync_models.py download-hf` - Download from HuggingFace
+  - `sync_models.py sync-hf` - Transfer to GPU worker
+  - `sync_models.py quantize` - Quantize large models for VRAM fit
+  - Support for llama.cpp quantization (Q4_K_M, Q5_K_M, etc)
+  - Automatic token injection from secrets
+
+### Test Workflows
+- service_mesh_verification.yaml: Validates Linkerd deployment
+  - Proxy injection, mTLS certificates, traffic policies, identity setup
+  - mTLS communication test with temporary workload
+  - Metrics and policy validation
+- ci_runner_validation.yaml: Validates ARC and GitLab runners
+  - Controller and scale set status checks
+  - Runner environment verification
+  - Build simulation and artifact upload
+  - Scale-to-zero verification
+  - Resource quota and HPA/VPA status
+
+### Configuration Updates
+- Updated GitLab Helm values for repository mirroring support
+- Updated LiteLLM, Open WebUI, and Agent Server values with HPA/VPA config
+- Added HPA templates to all autoscalable services
+- Resource limits configured: min 10m CPU / 32Mi RAM, max 16 CPU / 32Gi RAM per container

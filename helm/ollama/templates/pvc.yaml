@@ -1,0 +1,18 @@
+{{- if and .Values.modelsPersistence.enabled (not .Values.modelsPersistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "ollama.modelsPvcName" . }}
+  labels:
+    {{- include "ollama.labels" . | nindent 4 }}
+    app.kubernetes.io/component: models-storage
+spec:
+  accessModes:
+    - {{ .Values.modelsPersistence.accessMode }}
+  {{- if .Values.modelsPersistence.storageClass }}
+  storageClassName: {{ .Values.modelsPersistence.storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.modelsPersistence.size }}
+{{- end }}

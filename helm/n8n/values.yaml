@@ -1,0 +1,74 @@
+replicaCount: 1
+
+image:
+  repository: n8nio/n8n
+  tag: 2.4.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5678
+
+ingress:
+  enabled: true
+  className: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-production
+  hosts:
+    - host: n8n.vectorweight.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - n8n.vectorweight.com
+      secretName: vectorweight-wildcard-tls
+
+# Environment configuration
+env:
+  # Core settings
+  N8N_HOST: "0.0.0.0"
+  N8N_PORT: "5678"
+  N8N_PROTOCOL: "https"
+  WEBHOOK_URL: "https://n8n.vectorweight.com/"
+  N8N_EDITOR_BASE_URL: "https://n8n.vectorweight.com/"
+  GENERIC_TIMEZONE: "America/New_York"
+  # Execution settings
+  EXECUTIONS_PROCESS: "main"
+  EXECUTIONS_DATA_PRUNE: "true"
+  EXECUTIONS_DATA_MAX_AGE: "168"
+  # Binary data (filesystem for large files)
+  N8N_DEFAULT_BINARY_DATA_MODE: "filesystem"
+  N8N_BINARY_DATA_STORAGE_PATH: "/home/node/.n8n/binary-data"
+
+# Secret references
+secretEnv:
+  N8N_ENCRYPTION_KEY:
+    secretName: n8n-secret
+    key: N8N_ENCRYPTION_KEY
+  N8N_BASIC_AUTH_USER:
+    secretName: n8n-secret
+    key: N8N_BASIC_AUTH_USER
+  N8N_BASIC_AUTH_PASSWORD:
+    secretName: n8n-secret
+    key: N8N_BASIC_AUTH_PASSWORD
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: ""
+  accessMode: ReadWriteOnce
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

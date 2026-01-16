@@ -1,0 +1,45 @@
+# Best Practices - Require Labels
+# Audits workloads for standard Kubernetes labels
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-labels
+  annotations:
+    policies.kyverno.io/title: Require Standard Labels
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Requires standard Kubernetes labels on workload resources
+      for better observability and management.
+spec:
+  validationFailureAction: Audit  # Audit mode - don't block, just report
+  background: true
+  rules:
+    - name: require-app-label
+      match:
+        any:
+          - resources:
+              kinds:
+                - Deployment
+                - StatefulSet
+                - DaemonSet
+      validate:
+        message: "The label 'app.kubernetes.io/name' is required"
+        pattern:
+          metadata:
+            labels:
+              app.kubernetes.io/name: "?*"
+
+    - name: require-version-label
+      match:
+        any:
+          - resources:
+              kinds:
+                - Deployment
+                - StatefulSet
+      validate:
+        message: "The label 'app.kubernetes.io/version' is recommended"
+        pattern:
+          metadata:
+            labels:
+              app.kubernetes.io/version: "?*"

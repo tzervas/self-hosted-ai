@@ -2,6 +2,14 @@
 # Comprehensive production-ready multi-modal AI setup
 # Used by bootstrap.sh to ensure required models are available
 # Models are checked against Ollama API before pulling (no re-downloads)
+#
+# Model Sources:
+#   - Ollama: Censored/standard models from Ollama library
+#   - HuggingFace: Uncensored models requiring HF_TOKEN authentication
+#
+# RTX 5080 VRAM Budget: 16GB
+#   - Keep loaded models under 14GB for comfortable inference
+#   - Larger models will be quantized (Q4/Q5) before deployment
 
 # GPU Worker Models (akula-prime)
 # Optimized for RTX 5080 16GB VRAM - Multi-modal capabilities
@@ -154,3 +162,158 @@ cpu_server:
       purpose: long_context
       priority: optional
       capabilities: [long_context, document_processing, analysis]
+
+# =============================================================================
+# HuggingFace Models - Uncensored & Specialized
+# =============================================================================
+# These models require HF_TOKEN authentication for download
+# Source: HuggingFace Hub (not Ollama library)
+# Storage: /data/models/huggingface on GPU worker
+
+huggingface:
+  # Token stored in sealed secret: huggingface-token
+  token_secret: huggingface-token
+  cache_dir: /data/models/huggingface
+  models:
+    # === UNCENSORED TEXT GENERATION ===
+    # Primary uncensored model - Wan2.5 14B (may need Q4 quant for 14GB VRAM)
+    - repo_id: cognitivecomputations/Wan2.5-14B-Instruct-Uncensored
+      name: wan2.5-14b-uncensored
+      size_gb: 28
+      quantization: Q4_K_M  # Reduces to ~8GB for comfortable VRAM fit
+      purpose: uncensored_chat
+      priority: required
+      capabilities: [uncensored_generation, creative_writing, roleplay, unrestricted]
+      notes: "Will be quantized to Q4_K_M before deployment if full precision doesn't fit"
+
+    # Smaller uncensored model - Wan2.5 7B for faster inference
+    - repo_id: cognitivecomputations/Wan2.5-7B-Instruct-Uncensored
+      name: wan2.5-7b-uncensored
+      size_gb: 14
+      quantization: Q5_K_M  # Good quality/size balance
+      purpose: uncensored_chat
+      priority: required
+      capabilities: [uncensored_generation, creative_writing, fast_inference]
+      notes: "Lighter weight option for quick uncensored responses"
+
+    # Alternative uncensored - Dolphin (based on Mistral)
+    - repo_id: cognitivecomputations/dolphin-2.9.3-mistral-7B-32k
+      name: dolphin-mistral-7b
+      size_gb: 14
+      quantization: Q5_K_M
+      purpose: uncensored_chat
+      priority: optional
+      capabilities: [uncensored_generation, long_context, instruction_following]
+
+    # === VOICE GENERATION (TTS) ===
+    # XTTS v2 - High quality multilingual text-to-speech
+    - repo_id: coqui/XTTS-v2
+      name: xtts-v2
+      size_gb: 1.8
+      purpose: voice_generation
+      priority: required
+      capabilities: [text_to_speech, voice_cloning, multilingual, emotional_speech]
+      notes: "Uncensored TTS - no content filtering on generated speech"
+
+    # Bark - Alternative TTS with more expressive output
+    - repo_id: suno/bark
+      name: bark
+      size_gb: 5
+      purpose: voice_generation
+      priority: optional
+      capabilities: [text_to_speech, music_generation, sound_effects, expressive]
+      notes: "Can generate non-speech sounds like laughter, sighing, music"
+
+    # === SOUND EFFECTS (SFX) GENERATION ===
+    # AudioLDM 2 - Text-to-audio generation
+    - repo_id: cvssp/audioldm2-large
+      name: audioldm2-large
+      size_gb: 3.5
+      purpose: sfx_generation
+      priority: required
+      capabilities: [text_to_audio, sound_effects, ambient_sounds, music_generation]
+      notes: "Generate any audio from text descriptions"
+
+    # AudioGen - Meta's audio generation model
+    - repo_id: facebook/audiogen-medium
+      name: audiogen-medium
+      size_gb: 1.5
+      purpose: sfx_generation
+      priority: optional
+      capabilities: [text_to_audio, sound_effects, environmental_sounds]
+
+    # === MUSIC GENERATION ===
+    # MusicGen - High quality music generation
+    - repo_id: facebook/musicgen-large
+      name: musicgen-large
+      size_gb: 3.3
+      purpose: music_generation
+      priority: optional
+      capabilities: [text_to_music, melody_continuation, style_transfer]
+      notes: "Uncensored music generation - any genre/style"
+
+# =============================================================================
+# ComfyUI Models - Image/Video Generation
+# =============================================================================
+# Downloaded directly to ComfyUI model directories on GPU worker
+
+comfyui:
+  base_path: /data/comfyui/models
+  models:
+    # === VIDEO GENERATION ===
+    # Wan Video - Text/Image to video
+    - type: checkpoint
+      name: wan_video_1.3b.safetensors
+      url: https://huggingface.co/Wan-AI/Wan-1.3B/resolve/main/wan_video_1.3b.safetensors
+      path: checkpoints/
+      size_gb: 2.6
+      purpose: video_generation
+      priority: required
+      capabilities: [text_to_video, image_to_video]
+
+    # === IMAGE GENERATION ===
+    # SDXL Base - Primary image generation
+    - type: checkpoint
+      name: sd_xl_base_1.0.safetensors
+      url: https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors
+      path: checkpoints/
+      size_gb: 6.5
+      purpose: image_generation
+      priority: required
+
+    # FLUX.1 Schnell - Fast high quality generation
+    - type: unet
+      name: flux1-schnell.safetensors
+      url: https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/flux1-schnell.safetensors
+      path: unet/
+      size_gb: 23
+      purpose: image_generation
+      priority: optional
+      notes: "Requires offloading for 16GB VRAM"
+
+    # === UPSCALERS ===
+    - type: upscale_models
+      name: RealESRGAN_x4plus.pth
+      url: https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
+      path: upscale_models/
+      size_gb: 0.064
+      purpose: upscaling
+      priority: required
+
+    # === VAE ===
+    - type: vae
+      name: sdxl_vae.safetensors
+      url: https://huggingface.co/stabilityai/sdxl-vae/resolve/main/sdxl_vae.safetensors
+      path: vae/
+      size_gb: 0.335
+      purpose: vae
+      priority: required
+
+    # === CONTROLNET ===
+    - type: controlnet
+      name: control_v11p_sd15_canny.pth
+      url: https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/main/control_v11p_sd15_canny.pth
+      path: controlnet/
+      size_gb: 1.4
+      purpose: controlnet
+      priority: optional

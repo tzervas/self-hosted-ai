@@ -1,2 +1,173 @@
+# ============================================
+# Gitleaks Configuration - Self-Hosted AI Platform
+# ============================================
+# Extends default rules with project-specific patterns
+
 [extend]
 useDefault = true
+
+# -----------------------------
+# Project-Specific Rules
+# -----------------------------
+
+[[rules]]
+id = "vectorweight-api-key"
+description = "VectorWeight/LiteLLM API Key"
+regex = '''(?i)(vectorweight|litellm|vw)[_-]?(api)?[_-]?key["\s:=]+["']?([a-zA-Z0-9_-]{32,})["']?'''
+secretGroup = 3
+tags = ["api", "vectorweight"]
+
+[[rules]]
+id = "n8n-encryption-key"
+description = "n8n Encryption Key"
+regex = '''N8N_ENCRYPTION_KEY["\s:=]+["']?([a-zA-Z0-9+/=]{24,})["']?'''
+secretGroup = 1
+tags = ["n8n", "encryption"]
+
+[[rules]]
+id = "grafana-admin-password"
+description = "Grafana Admin Password"
+regex = '''(?i)grafana[_-]?(admin)?[_-]?password["\s:=]+["']?([^\s"']{8,})["']?'''
+secretGroup = 2
+tags = ["grafana", "password"]
+
+[[rules]]
+id = "postgresql-password"
+description = "PostgreSQL Password"
+regex = '''(?i)(postgres|pg)[_-]?password["\s:=]+["']?([^\s"']{8,})["']?'''
+secretGroup = 2
+tags = ["database", "postgresql"]
+
+[[rules]]
+id = "redis-password"
+description = "Redis Password"
+regex = '''(?i)redis[_-]?password["\s:=]+["']?([^\s"']{8,})["']?'''
+secretGroup = 1
+tags = ["database", "redis"]
+
+[[rules]]
+id = "argocd-admin-password"
+description = "ArgoCD Admin Password"
+regex = '''(?i)argocd[_-]?(admin)?[_-]?password["\s:=]+["']?([^\s"']{8,})["']?'''
+secretGroup = 2
+tags = ["argocd", "password"]
+
+[[rules]]
+id = "openwebui-secret"
+description = "Open WebUI Secret Key"
+regex = '''(?i)(webui|openwebui)[_-]?secret[_-]?key["\s:=]+["']?([a-zA-Z0-9_-]{32,})["']?'''
+secretGroup = 2
+tags = ["openwebui", "secret"]
+
+[[rules]]
+id = "cloudflare-api-key"
+description = "Cloudflare API Key or Token"
+regex = '''(?i)cloudflare[_-]?(api)?[_-]?(key|token)["\s:=]+["']?([a-zA-Z0-9_-]{32,})["']?'''
+secretGroup = 3
+tags = ["cloudflare", "api"]
+
+[[rules]]
+id = "github-token"
+description = "GitHub Personal Access Token or App Token"
+regex = '''(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59}|gho_[a-zA-Z0-9]{36}|ghs_[a-zA-Z0-9]{36})'''
+tags = ["github", "token"]
+
+[[rules]]
+id = "gitlab-token"
+description = "GitLab Personal Access Token"
+regex = '''glpat-[a-zA-Z0-9_-]{20,}'''
+tags = ["gitlab", "token"]
+
+[[rules]]
+id = "sealed-secret-key"
+description = "SealedSecrets Private Key (should never be in repo)"
+regex = '''-----BEGIN RSA PRIVATE KEY-----'''
+tags = ["kubernetes", "sealedsecrets"]
+
+# -----------------------------
+# Allowlist (False Positives)
+# -----------------------------
+
+[allowlist]
+description = "Global allowlist for templates, examples, and K8s secret references"
+
+# Example files and templates
+paths = [
+    '''\.example\.''',
+    '''\.template\.''',
+    '''\.sample\.''',
+    '''_example\.''',
+    '''_template\.''',
+    '''\.env\.example$''',
+    '''env\.example$''',
+    '''docs/.*\.md$''',
+    '''docs/archive/.*''',
+    '''README\.md$''',
+    '''CONTRIBUTING\.md$''',
+    '''QUICKSTART\.md$''',
+    '''QUICK_REFERENCE\.md$''',
+    '''shaihls\.md$''',
+    '''context-refactor/.*''',
+    # Helm templates (contain variable refs, not real secrets)
+    '''helm/.*/templates/.*\.yaml$''',
+    # Helm values files (contain config keys, not actual secrets)
+    '''helm/.*/values\.yaml$''',
+    # Shell scripts (contain variable refs and kubectl commands)
+    '''scripts/.*\.sh$''',
+    # ArgoCD Helm value overrides (contain key names only)
+    '''argocd/helm/.*/values\.yaml$''',
+]
+
+# Placeholder patterns and Kubernetes secret references
+regexes = [
+    # Explicit placeholders
+    '''your[_-]?password[_-]?here''',
+    '''changeme''',
+    '''CHANGE_ME''',
+    '''change-me''',
+    '''<your[_-].*>''',
+    
+    # Template variables
+    '''\$\{.*\}''',
+    '''%%.*%%''',
+    '''\{\{.*\}\}''',
+    
+    # Kubernetes secret references (not actual secrets)
+    '''secretKeyRef''',
+    '''valueFrom:.*secretKeyRef''',
+    '''\.Values\.''',
+    '''secretName:''',
+    
+    # Helm value key names (not actual values)
+    '''PasswordKey:''',
+    '''passwordKey:''',
+    '''adminPasswordKey:''',
+    '''userPasswordKey:''',
+    '''replicationPasswordKey:''',
+    
+    # Scripts generating/managing secrets (not containing actual secrets)
+    '''openssl rand''',
+    '''generate.*password''',
+    '''read -s''',
+    '''Get initial admin password''',
+    '''kubectl.*secret''',
+    
+    # Shell variable references
+    '''\$[A-Z_]+_PASSWORD''',
+    '''\$POSTGRES_PASSWORD''',
+    '''\$REDIS_PASSWORD''',
+    '''\${POSTGRES_PASSWORD''',
+    '''\${REDIS_PASSWORD''',
+    
+    # Helm value templates
+    '''quote \| trim''',
+    '''default ""''',
+    '''required "''',
+    
+    # Dify values (uses placeholder config)
+    '''dify-postgres-password''',
+    '''dify-redis-password''',
+]
+
+# Commits to skip (if any)
+commits = []

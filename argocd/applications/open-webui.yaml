@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: open-webui
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"  # Deploy after inference services
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/tzervas/self-hosted-ai.git
+    targetRevision: main
+    path: helm/open-webui
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ai-services
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

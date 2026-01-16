@@ -16,7 +16,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, amd64, homelab]
     strategy:
       matrix:
         rust: [stable, beta]
@@ -75,7 +75,7 @@ jobs:
           cargo build --release --features python
 
   benchmark:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, amd64, gpu, homelab-gpu]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     steps:

@@ -1,0 +1,51 @@
+# Linkerd cert-manager integration
+# Creates TLS certificates for Linkerd identity using existing cert-manager
+# This allows Linkerd to issue mTLS certificates to proxies
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: linkerd-identity-issuer
+  namespace: linkerd
+spec:
+  secretName: linkerd-identity-issuer
+  duration: 48h
+  renewBefore: 25h
+  issuerRef:
+    name: vectorweight-ca-issuer
+    kind: ClusterIssuer
+  commonName: identity.linkerd.cluster.local
+  dnsNames:
+    - identity.linkerd.cluster.local
+  isCA: true
+  privateKey:
+    algorithm: ECDSA
+  usages:
+    - cert sign
+    - crl sign
+    - server auth
+    - client auth
+---
+# Trust anchor certificate for the entire mesh
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: linkerd-trust-anchor
+  namespace: linkerd
+spec:
+  secretName: linkerd-trust-anchor
+  duration: 8760h  # 1 year
+  renewBefore: 720h  # 30 days
+  issuerRef:
+    name: vectorweight-ca-issuer
+    kind: ClusterIssuer
+  commonName: root.linkerd.cluster.local
+  isCA: true
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  usages:
+    - cert sign
+    - crl sign
+    - server auth
+    - client auth

@@ -1,0 +1,37 @@
+# Resource Quotas for AI Services
+# Prevents runaway resource consumption while allowing burst capacity
+# Designed for single-node homelab with 28c/56t and 120GB RAM
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: resource-quotas
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"  # Apply early
+  labels:
+    app.kubernetes.io/component: resource-management
+    app.kubernetes.io/part-of: cluster-config
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/tzervas/self-hosted-ai.git
+    targetRevision: main
+    path: helm/resource-quotas
+    directory:
+      recurse: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default  # Quotas are applied per-namespace in templates
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 1m

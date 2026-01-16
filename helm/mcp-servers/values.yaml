@@ -1,0 +1,189 @@
+# MCP Servers Configuration
+# =========================
+# Model Context Protocol servers for AI agent tool integration
+
+# Global settings
+global:
+  domain: vectorweight.com
+
+# MCPO Proxy (HTTP bridge for stdio MCP servers)
+mcpoProxy:
+  enabled: true
+  image:
+    repository: ghcr.io/open-webui/mcpo
+    tag: latest
+    pullPolicy: IfNotPresent
+  port: 8000
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  # Servers to run via MCPO
+  servers: []  # Dynamically generated from enabled servers below
+
+# Individual MCP Server Configuration
+servers:
+  # ========================
+  # Context & Memory Servers
+  # ========================
+  
+  memory:
+    enabled: true
+    description: "Persistent context and memory storage for agents"
+    package: "@anthropic/mcp-server-memory"
+    persistence:
+      enabled: true
+      size: 1Gi
+      storageClass: longhorn
+    env: {}
+
+  time:
+    enabled: true
+    description: "Time and date operations with timezone support"
+    package: "mcp-server-time"
+    env:
+      TIMEZONE: "America/New_York"
+
+  sequentialThinking:
+    enabled: true
+    description: "Multi-step reasoning and thought chain management"
+    package: "mcp-server-sequential-thinking"
+    env:
+      MAX_STEPS: "10"
+
+  # ========================
+  # Development Tool Servers
+  # ========================
+
+  filesystem:
+    enabled: true
+    description: "File system operations (read, write, list, search)"
+    package: "@anthropic/mcp-server-filesystem"
+    # Paths the server can access (mounted as volumes)
+    allowedPaths:
+      - /workspace
+      - /tmp/mcp
+    env: {}
+
+  git:
+    enabled: true
+    description: "Git operations (status, diff, log, commit info)"
+    package: "mcp-server-git"
+    env:
+      DEFAULT_REPO_PATH: "/workspace"
+
+  fetch:
+    enabled: true
+    description: "HTTP content fetching and web scraping"
+    package: "@anthropic/mcp-server-fetch"
+    env:
+      USER_AGENT: "MCP-Fetch/1.0 (Self-Hosted-AI)"
+      MAX_RESPONSE_SIZE: "10485760"  # 10MB
+
+  puppeteer:
+    enabled: false  # Requires more resources
+    description: "Browser automation and screenshot capture"
+    package: "@anthropic/mcp-server-puppeteer"
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+    env: {}
+
+  # ========================
+  # Search Servers (No API Keys)
+  # ========================
+
+  duckduckgo:
+    enabled: true
+    description: "DuckDuckGo web search (no API key required)"
+    package: "mcp-server-duckduckgo"
+    env:
+      MAX_RESULTS: "10"
+      SAFE_SEARCH: "moderate"
+
+  # ========================
+  # Service Integration Servers
+  # ========================
+
+  gitlab:
+    enabled: true
+    description: "GitLab API integration for self-hosted instance"
+    package: "mcp-server-gitlab"
+    # Token from Kubernetes secret
+    tokenSecret:
+      name: gitlab-mcp-token
+      key: token
+    env:
+      GITLAB_URL: "https://git.vectorweight.com"
+      # Token injected from secret
+
+  postgres:
+    enabled: true
+    description: "PostgreSQL database operations"
+    package: "mcp-server-postgres"
+    # Connection from Kubernetes secret
+    connectionSecret:
+      name: postgresql-secret
+      key: postgres-password
+    env:
+      POSTGRES_HOST: "postgresql.self-hosted-ai.svc.cluster.local"
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: "litellm"
+      POSTGRES_USER: "litellm"
+      # Password injected from secret
+      READ_ONLY: "true"  # Safety: read-only by default
+
+  kubernetes:
+    enabled: true
+    description: "Kubernetes cluster operations (read-only)"
+    package: "mcp-server-kubernetes"
+    # Uses ServiceAccount for auth
+    serviceAccount:
+      create: true
+      name: mcp-kubernetes-reader
+    env:
+      READ_ONLY: "true"
+      ALLOWED_NAMESPACES: "self-hosted-ai,monitoring,automation"
+
+# Ingress configuration (optional, for direct external access)
+ingress:
+  enabled: false  # Internal service by default
+  className: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+  host: mcp.vectorweight.com
+  tls:
+    enabled: true
+    secretName: vectorweight-wildcard-tls
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8000
+
+# Pod configuration
+podAnnotations: {}
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false  # Some servers need write access
+  capabilities:
+    drop:
+      - ALL
+
+# Node selection
+nodeSelector: {}
+tolerations: []
+affinity: {}

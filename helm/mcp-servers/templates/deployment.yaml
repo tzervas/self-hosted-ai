@@ -1,0 +1,133 @@
+{{- if .Values.mcpoProxy.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mcp-servers.fullname" . }}
+  labels:
+    {{- include "mcp-servers.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.mcpoProxy.replicas }}
+  selector:
+    matchLabels:
+      {{- include "mcp-servers.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "mcp-servers.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.servers.kubernetes.enabled }}
+      serviceAccountName: {{ include "mcp-servers.serviceAccountName" . }}
+      {{- end }}
+      containers:
+        - name: mcpo-proxy
+          image: "{{ .Values.mcpoProxy.image.repository }}:{{ .Values.mcpoProxy.image.tag }}"
+          imagePullPolicy: {{ .Values.mcpoProxy.image.pullPolicy }}
+          args:
+            - "--config"
+            - "/etc/mcpo/mcpo-config.json"
+            - "--port"
+            - "{{ .Values.mcpoProxy.port }}"
+          ports:
+            - name: http
+              containerPort: {{ .Values.mcpoProxy.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.mcpoProxy.resources | nindent 12 }}
+          env:
+            {{- if .Values.servers.time.enabled }}
+            - name: TIMEZONE
+              value: {{ .Values.servers.time.env.TIMEZONE | quote }}
+            {{- end }}
+            {{- if .Values.servers.gitlab.enabled }}
+            - name: GITLAB_URL
+              value: {{ .Values.servers.gitlab.env.GITLAB_URL | quote }}
+            - name: GITLAB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.servers.gitlab.tokenSecret.name }}
+                  key: {{ .Values.servers.gitlab.tokenSecret.key }}
+            {{- end }}
+            {{- if .Values.servers.postgres.enabled }}
+            - name: POSTGRES_HOST
+              value: {{ .Values.servers.postgres.env.POSTGRES_HOST | quote }}
+            - name: POSTGRES_PORT
+              value: {{ .Values.servers.postgres.env.POSTGRES_PORT | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.servers.postgres.env.POSTGRES_DB | quote }}
+            - name: POSTGRES_USER
+              value: {{ .Values.servers.postgres.env.POSTGRES_USER | quote }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.servers.postgres.connectionSecret.name }}
+                  key: {{ .Values.servers.postgres.connectionSecret.key }}
+            {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/mcpo
+              readOnly: true
+            {{- if .Values.servers.filesystem.enabled }}
+            - name: workspace
+              mountPath: /workspace
+            - name: tmp
+              mountPath: /tmp/mcp
+            {{- end }}
+            {{- if .Values.servers.memory.enabled }}
+            {{- if .Values.servers.memory.persistence.enabled }}
+            - name: memory-data
+              mountPath: /data/memory
+            {{- end }}
+            {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "mcp-servers.fullname" . }}-config
+        {{- if .Values.servers.filesystem.enabled }}
+        - name: workspace
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        {{- end }}
+        {{- if and .Values.servers.memory.enabled .Values.servers.memory.persistence.enabled }}
+        - name: memory-data
+          persistentVolumeClaim:
+            claimName: {{ include "mcp-servers.fullname" . }}-memory
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

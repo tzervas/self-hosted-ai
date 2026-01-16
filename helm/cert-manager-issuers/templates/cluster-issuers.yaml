@@ -1,0 +1,102 @@
+{{- /*
+ClusterIssuers for TLS certificate management
+- Cloudflare DNS-01: For wildcard and production certificates
+- Cloudflare Origin CA: For origin server certificates (trusted by CF edge)
+- Let's Encrypt: Backup/alternative issuer
+*/ -}}
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-cloudflare
+  annotations:
+    description: "Let's Encrypt with Cloudflare DNS-01 challenge"
+spec:
+  acme:
+    server: {{ .Values.letsencrypt.servers.production }}
+    email: {{ .Values.cloudflare.email }}
+    privateKeySecretRef:
+      name: letsencrypt-cloudflare-account-key
+    solvers:
+      - dns01:
+          cloudflare:
+            email: {{ .Values.cloudflare.email }}
+            # Use apiKeySecretRef for Global API Key (not apiTokenSecretRef)
+            apiKeySecretRef:
+              name: {{ .Values.dns01.credentialsSecretName }}
+              key: api-key
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-cloudflare-staging
+  annotations:
+    description: "Let's Encrypt Staging with Cloudflare DNS-01 (for testing)"
+spec:
+  acme:
+    server: {{ .Values.letsencrypt.servers.staging }}
+    email: {{ .Values.cloudflare.email }}
+    privateKeySecretRef:
+      name: letsencrypt-cloudflare-staging-account-key
+    solvers:
+      - dns01:
+          cloudflare:
+            email: {{ .Values.cloudflare.email }}
+            # Use apiKeySecretRef for Global API Key (not apiTokenSecretRef)
+            apiKeySecretRef:
+              name: {{ .Values.dns01.credentialsSecretName }}
+              key: api-key
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production
+  annotations:
+    description: "Let's Encrypt Production with HTTP-01 challenge (backup)"
+spec:
+  acme:
+    server: {{ .Values.letsencrypt.servers.production }}
+    email: {{ .Values.letsencrypt.email }}
+    privateKeySecretRef:
+      name: letsencrypt-production-account-key
+    solvers:
+      - http01:
+          ingress:
+            class: traefik
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+  annotations:
+    description: "Let's Encrypt Staging with HTTP-01 (for testing)"
+spec:
+  acme:
+    server: {{ .Values.letsencrypt.servers.staging }}
+    email: {{ .Values.letsencrypt.email }}
+    privateKeySecretRef:
+      name: letsencrypt-staging-account-key
+    solvers:
+      - http01:
+          ingress:
+            class: traefik
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: self-signed
+  annotations:
+    description: "Self-signed certificates for internal/testing use"
+spec:
+  selfSigned: {}
+{{- if .Values.certificates.rootCA.enabled }}
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: vectorweight-ca-issuer
+  annotations:
+    description: "Internal CA issuer using VectorWeight Root CA"
+spec:
+  ca:
+    secretName: {{ .Values.certificates.rootCA.secretName }}
+{{- end }}

@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "searxng.fullname" . }}
+  labels:
+    {{- include "searxng.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "searxng.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "searxng.selectorLabels" . | nindent 8 }}
+    spec:
+      initContainers:
+        - name: init-config
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              cat > /etc/searxng/settings.yml << 'EOF'
+              use_default_settings: true
+              general:
+                instance_name: "SearXNG"
+                debug: false
+              search:
+                safe_search: 0
+                autocomplete: "google"
+                default_lang: "en"
+              server:
+                port: 8080
+                bind_address: "0.0.0.0"
+                secret_key: "${SEARXNG_SECRET}"
+                image_proxy: true
+              outgoing:
+                request_timeout: 3.0
+                pool_connections: 100
+                pool_maxsize: 10
+              engines:
+                - name: google
+                  engine: google
+                  shortcut: g
+                - name: duckduckgo
+                  engine: duckduckgo
+                  shortcut: ddg
+                - name: wikipedia
+                  engine: wikipedia
+                  shortcut: wp
+              EOF
+              chmod 644 /etc/searxng/settings.yml
+          env:
+            - name: SEARXNG_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: secret-key
+          volumeMounts:
+            - name: config
+              mountPath: /etc/searxng
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: SEARXNG_BASE_URL
+              value: {{ .Values.env.SEARXNG_BASE_URL | quote }}
+            - name: SEARXNG_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: secret-key
+          volumeMounts:
+            - name: config
+              mountPath: /etc/searxng
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: config
+          emptyDir: {}

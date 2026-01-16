@@ -1,0 +1,9 @@
+# LiteLLM Helm Chart
+# Deploys LiteLLM proxy as a unified API gateway for Ollama models
+
+apiVersion: v2
+name: litellm
+description: LiteLLM Proxy - Unified API Gateway for LLM inference
+type: application
+version: 1.0.0
+appVersion: "1.80.11"

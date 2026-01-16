@@ -1,0 +1,45 @@
+replicaCount: 1
+
+image:
+  repository: searxng/searxng
+  tag: 2026.1.11-cf74e1d9e
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-production
+  hosts:
+    - host: search.vectorweight.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - search.vectorweight.com
+      secretName: search-vectorweight-tls
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+persistence:
+  enabled: true
+  size: 1Gi
+  storageClass: ""
+
+env:
+  SEARXNG_BASE_URL: "http://searxng:8080"
+
+secretName: searxng-secret

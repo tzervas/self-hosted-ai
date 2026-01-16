@@ -1,0 +1,105 @@
+# Actions Runner Scale Set - Linux AMD64 Standard Runners
+# General CI/CD workloads on x86_64 architecture
+#
+# Cluster Topology:
+#   - homelab (192.168.1.170): k3s cluster, runs all services and CI runners
+#   - akula-prime (192.168.1.99): GPU workstation, serves RTX 5080 over LAN
+#
+# Prerequisites:
+#   - GitHub App created with required permissions
+#   - Secret 'github-app-secret' in arc-runners namespace containing:
+#     - github_app_id
+#     - github_app_installation_id  
+#     - github_app_private_key
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arc-runners-amd64
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"  # After ARC controller
+  labels:
+    app.kubernetes.io/component: ci-runners
+    app.kubernetes.io/part-of: arc
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/actions/actions-runner-controller-charts
+    chart: gha-runner-scale-set
+    targetRevision: 0.9.3
+    helm:
+      releaseName: arc-runners-amd64
+      valuesObject:
+        # GitHub configuration - organization level
+        githubConfigUrl: "https://github.com/tzervas"
+        githubConfigSecret: github-app-secret
+
+        # Runner group (create in GitHub org settings > Actions > Runner groups)
+        runnerGroup: "default"
+        
+        # Scaling: Scale to zero when idle for minimal resource usage
+        minRunners: 0
+        maxRunners: 4
+
+        # Runner pod template
+        template:
+          spec:
+            containers:
+              - name: runner
+                image: ghcr.io/actions/actions-runner:2.321.0
+                command: ["/home/runner/run.sh"]
+                env:
+                  - name: ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT
+                    value: "true"
+                resources:
+                  requests:
+                    cpu: 500m
+                    memory: 2Gi
+                  limits:
+                    cpu: 4000m
+                    memory: 8Gi
+                securityContext:
+                  runAsUser: 1000
+                  runAsGroup: 1000
+                volumeMounts:
+                  - name: work
+                    mountPath: /home/runner/_work
+
+            volumes:
+              - name: work
+                emptyDir:
+                  sizeLimit: 20Gi
+
+            # Run on homelab node (k3s cluster)
+            nodeSelector:
+              kubernetes.io/arch: amd64
+
+            tolerations:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+                effect: NoSchedule
+
+        # Controller reference
+        controllerServiceAccount:
+          namespace: arc-systems
+          name: gha-runner-scale-set-controller
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arc-runners
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

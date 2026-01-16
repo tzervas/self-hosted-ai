@@ -1,0 +1,121 @@
+# Actions Runner Scale Set - Linux ARM64 Emulated Runners
+# ARM64 workloads via QEMU emulation on amd64 host
+#
+# Architecture:
+#   - Runs on homelab (192.168.1.170) k3s cluster (amd64)
+#   - Uses QEMU binfmt_misc for ARM64 binary emulation
+#   - Primarily for multi-arch Docker builds via buildx
+#
+# Prerequisites:
+#   - GitHub App created with required permissions
+#   - Secret 'github-app-secret' in arc-runners namespace
+#   - QEMU binfmt handlers registered on host node
+#
+# Note: Emulated ARM64 is ~5-10x slower than native, use sparingly
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arc-runners-arm64
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"  # After ARC controller
+  labels:
+    app.kubernetes.io/component: ci-runners
+    app.kubernetes.io/part-of: arc
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/actions/actions-runner-controller-charts
+    chart: gha-runner-scale-set
+    targetRevision: 0.9.3
+    helm:
+      releaseName: arc-runners-arm64
+      valuesObject:
+        # GitHub configuration
+        githubConfigUrl: "https://github.com/tzervas"
+        githubConfigSecret: github-app-secret
+
+        # Runner group
+        runnerGroup: "default"
+        
+        # Scaling: Scale to zero - ARM builds are infrequent
+        minRunners: 0
+        maxRunners: 2
+
+        # Runner pod template with QEMU emulation
+        template:
+          spec:
+            # Init container to register QEMU binfmt handlers
+            initContainers:
+              - name: qemu-setup
+                image: tonistiigi/binfmt:latest
+                args: ["--install", "arm64"]
+                securityContext:
+                  privileged: true
+
+            containers:
+              - name: runner
+                # Use ARM64 runner image - will run via QEMU
+                image: ghcr.io/actions/actions-runner:2.321.0
+                command: ["/home/runner/run.sh"]
+                env:
+                  - name: ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT
+                    value: "true"
+                  - name: DOCKER_DEFAULT_PLATFORM
+                    value: "linux/arm64"
+                  # Flag that this is emulated
+                  - name: RUNNER_ARCH_EMULATED
+                    value: "true"
+                resources:
+                  # Higher resources for emulation overhead
+                  requests:
+                    cpu: 1000m
+                    memory: 4Gi
+                  limits:
+                    cpu: 8000m
+                    memory: 16Gi
+                securityContext:
+                  runAsUser: 1000
+                  runAsGroup: 1000
+                volumeMounts:
+                  - name: work
+                    mountPath: /home/runner/_work
+
+            volumes:
+              - name: work
+                emptyDir:
+                  sizeLimit: 30Gi
+
+            # Run on homelab cluster (amd64 host with QEMU)
+            nodeSelector:
+              kubernetes.io/arch: amd64
+
+            tolerations:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+                effect: NoSchedule
+
+        # Controller reference
+        controllerServiceAccount:
+          namespace: arc-systems
+          name: gha-runner-scale-set-controller
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arc-runners
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

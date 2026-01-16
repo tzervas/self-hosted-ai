@@ -1,0 +1,32 @@
+# Linkerd namespace annotations
+# Apply these to namespaces that should have proxy injection
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: self-hosted-ai
+  annotations:
+    linkerd.io/inject: enabled
+    config.linkerd.io/proxy-log-level: warn,linkerd=info
+  labels:
+    linkerd.io/is-control-plane: "false"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ai-services
+  annotations:
+    linkerd.io/inject: enabled
+    config.linkerd.io/proxy-log-level: warn,linkerd=info
+  labels:
+    linkerd.io/is-control-plane: "false"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gpu-workloads
+  annotations:
+    linkerd.io/inject: enabled
+    config.linkerd.io/proxy-log-level: warn,linkerd=info
+  labels:
+    linkerd.io/is-control-plane: "false"

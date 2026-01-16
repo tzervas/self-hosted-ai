@@ -1,0 +1,100 @@
+# Ollama deployment configuration
+# This chart deploys Ollama with shared model storage
+
+replicaCount: 1
+
+image:
+  repository: ollama/ollama
+  tag: "0.5.4"
+  pullPolicy: IfNotPresent
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 11434
+  # For GPU worker, use NodePort to expose to other nodes
+  nodePort: null
+
+# Environment configuration
+env:
+  OLLAMA_HOST: "0.0.0.0"
+  OLLAMA_ORIGINS: "*"
+  OLLAMA_KEEP_ALIVE: "24h"
+  # KV cache optimization for memory efficiency
+  OLLAMA_KV_CACHE_TYPE: "q8_0"
+  # GPU memory overhead (512MB)
+  OLLAMA_GPU_OVERHEAD: "536870912"
+  # Number of parallel model instances
+  OLLAMA_NUM_PARALLEL: "2"
+  # Flash attention for better performance
+  OLLAMA_FLASH_ATTENTION: "1"
+
+# Models persistence - shared across services
+modelsPersistence:
+  enabled: true
+  # Use a separate PVC for models that can be shared
+  existingClaim: ""
+  size: 200Gi
+  storageClass: "longhorn"
+  accessMode: ReadWriteOnce
+  mountPath: /root/.ollama
+
+# GPU configuration (for GPU worker only)
+gpu:
+  enabled: false
+  # NVIDIA GPU request
+  nvidia:
+    enabled: false
+    count: 1
+
+# Resource limits
+resources:
+  requests:
+    cpu: 500m
+    memory: 2Gi
+  limits:
+    cpu: 8000m
+    memory: 32Gi
+
+# Security context
+securityContext:
+  runAsUser: 0
+  runAsGroup: 0
+
+# Pod security context
+podSecurityContext:
+  fsGroup: 0
+
+# Probes
+livenessProbe:
+  httpGet:
+    path: /api/version
+    port: http
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /api/version
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Node selection
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Network policy for secure communication
+networkPolicy:
+  enabled: true
+  # Allow ingress from these namespaces
+  allowedNamespaces:
+    - self-hosted-ai
+    - gpu-worker
+  # Specific pod selectors that can access Ollama
+  allowedPodLabels: {}

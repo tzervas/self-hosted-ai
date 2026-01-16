@@ -1,0 +1,105 @@
+# Pod Security Baseline Policy
+# Enforces basic security requirements for all workloads
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: pod-security-baseline
+  annotations:
+    policies.kyverno.io/title: Pod Security Baseline
+    policies.kyverno.io/category: Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/description: >-
+      Enforces baseline security settings for pods including non-root execution,
+      disallowing privileged containers, and blocking the :latest tag.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    # Rule 1: Require containers to run as non-root
+    - name: require-run-as-non-root
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kyverno
+                - gpu-workloads
+                - longhorn-system
+                - argocd
+      validate:
+        message: "Containers must set securityContext.runAsNonRoot=true"
+        pattern:
+          spec:
+            securityContext:
+              runAsNonRoot: true
+
+    # Rule 2: Disallow privileged containers
+    - name: disallow-privileged-containers
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kyverno
+                - gpu-workloads
+                - longhorn-system
+      validate:
+        message: "Privileged containers are not allowed"
+        pattern:
+          spec:
+            containers:
+              - securityContext:
+                  privileged: "!true"
+            =(initContainers):
+              - securityContext:
+                  privileged: "!true"
+
+    # Rule 3: Disallow :latest image tag
+    - name: disallow-latest-tag
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Using ':latest' tag is not allowed. Pin image versions for reproducibility."
+        pattern:
+          spec:
+            containers:
+              - image: "!*:latest"
+            =(initContainers):
+              - image: "!*:latest"
+
+    # Rule 4: Require resource limits
+    - name: require-resource-limits
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kyverno
+                - argocd
+      validate:
+        message: "CPU and memory limits are required for all containers"
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  limits:
+                    memory: "?*"
+                    cpu: "?*"

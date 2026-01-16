@@ -1,0 +1,77 @@
+# Vertical Pod Autoscaler (VPA)
+# Automatically adjusts resource requests/limits based on actual usage
+# Prevents over-provisioning while ensuring pods have adequate resources
+#
+# Mode: "Off" - Only provides recommendations (safe for production)
+# Can be changed to "Auto" for automatic updates
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vpa
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"  # Early in deployment
+  labels:
+    app.kubernetes.io/component: autoscaling
+    app.kubernetes.io/part-of: resource-management
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://kubernetes.github.io/autoscaler
+    chart: vpa
+    targetRevision: 9.9.0
+    helm:
+      releaseName: vpa
+      valuesObject:
+        # Recommender - analyzes resource usage
+        recommender:
+          enabled: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+        
+        # Updater - applies recommendations (disabled for safety)
+        updater:
+          enabled: false  # Enable when ready for auto-scaling
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+        
+        # Admission Controller - injects recommendations
+        admissionController:
+          enabled: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 1m

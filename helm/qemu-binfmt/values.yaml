@@ -1,0 +1,20 @@
+# QEMU binfmt configuration
+image:
+  repository: tonistiigi/binfmt
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Architectures to enable emulation for
+architectures:
+  - arm64
+  - arm
+  - riscv64
+
+# Node selector - only run on amd64 nodes
+nodeSelector:
+  kubernetes.io/arch: amd64
+
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule

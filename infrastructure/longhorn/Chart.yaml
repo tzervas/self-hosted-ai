@@ -1,0 +1,9 @@
+apiVersion: v2
+name: longhorn-config
+description: Longhorn storage configuration for homelab
+type: application
+version: 1.0.0
+appVersion: "1.7.0"
+
+# This chart provides custom StorageClasses and RecurringJobs
+# The Longhorn operator itself is installed via ArgoCD application

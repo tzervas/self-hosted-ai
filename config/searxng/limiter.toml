@@ -1,17 +1,29 @@
 # SearXNG rate limiter configuration
+# See: https://docs.searxng.org/admin/botdetection.html
+
+[botdetection]
+ipv4_prefix = 32
+ipv6_prefix = 48
+
+trusted_proxies = [
+    '127.0.0.0/8',
+    '::1',
+    '192.168.0.0/16',
+    '172.16.0.0/12',
+    '10.0.0.0/8',
+]
+
 [botdetection.ip_limit]
-# Number of requests allowed per IP per time window
-link_token = true
-# Request limit per IP
-request_limit = 100
-# Time window in seconds  
-time_window = 60
+filter_link_local = false
+link_token = false
 
 [botdetection.ip_lists]
-# Pass-through IPs (internal network)
+block_ip = []
+
 pass_ip = [
-    "192.168.1.0/24",
-    "10.0.0.0/8",
-    "172.16.0.0/12",
-    "127.0.0.1"
+    '192.168.0.0/16',
+    '10.0.0.0/8',
+    '172.16.0.0/12',
 ]
+
+pass_searxng_org = true

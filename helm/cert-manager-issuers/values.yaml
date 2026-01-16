@@ -1,0 +1,112 @@
+# cert-manager ClusterIssuers and Certificates for vectorweight.com
+# Uses Cloudflare for DNS-01 challenges and Origin CA certificates
+
+# Domain configuration
+domain: vectorweight.com
+
+# Cloudflare configuration
+cloudflare:
+  # Email associated with Cloudflare account
+  email: tzervas@vectorweight.com
+  
+  # Secret name containing Cloudflare API credentials
+  apiTokenSecretName: cloudflare-api-credentials
+  
+  # Use Cloudflare Origin CA for origin certificates (trusted by CF edge)
+  originCA:
+    enabled: true
+    secretName: cloudflare-origin-ca-key
+
+# Let's Encrypt configuration (backup/alternative)
+letsencrypt:
+  # Email for Let's Encrypt notifications (certificate expiry, etc.)
+  email: tzervas@vectorweight.com
+  
+  # Use staging server for testing (set to false for production)
+  staging: false
+  
+  # ACME server URLs
+  servers:
+    production: https://acme-v02.api.letsencrypt.org/directory
+    staging: https://acme-staging-v02.api.letsencrypt.org/directory
+
+# Certificates to create
+certificates:
+  # Root CA for internal certificates
+  rootCA:
+    enabled: true
+    name: vectorweight-root-ca
+    secretName: vectorweight-root-ca
+    commonName: "VectorWeight Root CA"
+  
+  # Wildcard certificate for all AI services
+  wildcard:
+    enabled: true
+    name: vectorweight-wildcard-tls
+    secretName: vectorweight-wildcard-tls
+    dnsNames:
+      - "*.vectorweight.com"
+      - "vectorweight.com"
+    # Wildcard requires DNS-01 challenge
+    issuer: letsencrypt-dns
+  
+  # Individual service certificates (HTTP-01 challenge)
+  services:
+    - name: ai-vectorweight-tls
+      host: ai.vectorweight.com
+      namespace: ai-services
+      
+    - name: llm-vectorweight-tls
+      host: llm.vectorweight.com
+      namespace: ai-services
+      
+    - name: argocd-vectorweight-tls
+      host: argocd.vectorweight.com
+      namespace: argocd
+      
+    - name: traefik-vectorweight-tls
+      host: traefik.vectorweight.com
+      namespace: traefik
+      
+    - name: n8n-vectorweight-tls
+      host: n8n.vectorweight.com
+      namespace: automation
+      
+    - name: search-vectorweight-tls
+      host: search.vectorweight.com
+      namespace: ai-services
+      
+    - name: dify-vectorweight-tls
+      host: dify.vectorweight.com
+      namespace: dify
+      
+    - name: gitlab-vectorweight-tls
+      host: git.vectorweight.com
+      namespace: gitlab
+      
+    - name: grafana-vectorweight-tls
+      host: grafana.vectorweight.com
+      namespace: monitoring
+      
+    - name: prometheus-vectorweight-tls
+      host: prometheus.vectorweight.com
+      namespace: monitoring
+
+# DNS provider configuration (for DNS-01 challenges)
+# Required for wildcard certificates
+dns01:
+  provider: cloudflare
+  # Secret containing Cloudflare API credentials
+  credentialsSecretName: cloudflare-api-credentials
+  # API token key name in the secret
+  apiTokenKey: api-token
+
+# Origin CA configuration
+# Cloudflare Origin CA issues certificates trusted by Cloudflare's edge
+# These are ideal for origin servers behind Cloudflare proxy
+originCA:
+  enabled: true
+  # 15 year validity (max for Origin CA)
+  duration: 87600h
+  # Renew 30 days before expiry
+  renewBefore: 720h

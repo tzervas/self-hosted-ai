@@ -1,0 +1,34 @@
+# yamllint configuration
+# Kubernetes-aware YAML linting
+
+extends: default
+
+rules:
+  line-length:
+    max: 150
+    level: warning
+  truthy:
+    allowed-values: ['true', 'false', 'yes', 'no']
+  comments:
+    min-spaces-from-content: 1
+  document-start: disable
+  indentation:
+    spaces: 2
+    indent-sequences: consistent
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 0
+  braces:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+  colons:
+    max-spaces-after: -1
+
+ignore: |
+  charts/*/templates/
+  helm/*/templates/
+  .git/
+  node_modules/
+  .venv/
+  venv/
+  htmlcov/

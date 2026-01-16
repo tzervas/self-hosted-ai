@@ -15,8 +15,59 @@ spec:
     targetRevision: v25.10.1
     helm:
       values: |
-        # Inline Helm values for the gpu-operator chart.
-        # Add any custom configuration here instead of referencing a local values.yaml file.
+        # NVIDIA GPU Operator for RTX 5080 with Time-Slicing
+        # Chart: nvidia/gpu-operator
+        # Version: 25.10.x
+        # Target Hardware: RTX 5080 (16GB GDDR7 VRAM, Blackwell architecture)
+        #
+        # Configuration Rationale:
+        # - Driver installation enabled for RTX 5080 compatibility
+        # - Time-slicing enabled to share GPU across multiple workloads
+        # - MIG disabled (not supported on RTX 5080)
+        # - Containerd runtime configured for k3s compatibility
+
+        driver:
+          enabled: true  # Required for RTX 5080 - installs NVIDIA drivers on host
+
+        toolkit:
+          enabled: true
+          env:
+            - name: CONTAINERD_CONFIG
+              value: /var/lib/rancher/k3s/agent/etc/containerd/config.toml
+            - name: CONTAINERD_SOCKET
+              value: /run/k3s/containerd/containerd.sock
+
+        devicePlugin:
+          enabled: true
+
+        dcgmExporter:
+          enabled: true
+
+        gfd:
+          enabled: true
+
+        migManager:
+          enabled: false  # RTX 5080 does not support MIG (Multi-Instance GPU)
+
+        validator:
+          enabled: true
+          env:
+            - name: WITH_WORKLOAD
+              value: "true"
+
+        cdi:
+          enabled: true
+          default: true
+
+        # Time-slicing configuration for 4 virtual GPUs
+        operator:
+          defaultRuntime: containerd
+
+        devicePlugin:
+          config:
+            name: time-slicing-config
+            create: false
+            default: rtx-5080
   destination:
     server: https://kubernetes.default.svc
     namespace: gpu-operator

@@ -1,0 +1,39 @@
+# Longhorn StorageClass: longhorn-homelab (default)
+# 2 replicas with best-effort data locality for general workloads
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.storageClasses.homelab.name }}
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "{{ .Values.storageClasses.homelab.isDefault }}"
+  labels:
+    {{- include "longhorn-config.labels" . | nindent 4 }}
+parameters:
+  numberOfReplicas: "{{ .Values.storageClasses.homelab.numberOfReplicas }}"
+  dataLocality: {{ .Values.storageClasses.homelab.dataLocality }}
+  fsType: {{ .Values.storageClasses.homelab.fsType }}
+  staleReplicaTimeout: "30"
+provisioner: driver.longhorn.io
+reclaimPolicy: {{ .Values.storageClasses.homelab.reclaimPolicy }}
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: {{ .Values.storageClasses.homelab.allowVolumeExpansion }}
+---
+# Longhorn StorageClass: longhorn-gpu-local
+# Single replica with strict-local data locality for GPU workloads
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.storageClasses.gpuLocal.name }}
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "{{ .Values.storageClasses.gpuLocal.isDefault }}"
+  labels:
+    {{- include "longhorn-config.labels" . | nindent 4 }}
+parameters:
+  numberOfReplicas: "{{ .Values.storageClasses.gpuLocal.numberOfReplicas }}"
+  dataLocality: {{ .Values.storageClasses.gpuLocal.dataLocality }}
+  fsType: {{ .Values.storageClasses.gpuLocal.fsType }}
+  staleReplicaTimeout: "30"
+provisioner: driver.longhorn.io
+reclaimPolicy: {{ .Values.storageClasses.gpuLocal.reclaimPolicy }}
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: {{ .Values.storageClasses.gpuLocal.allowVolumeExpansion }}

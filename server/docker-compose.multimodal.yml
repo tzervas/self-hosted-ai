@@ -124,13 +124,13 @@ services:
   
   # LiteLLM Proxy - Unified API gateway for all models with GPU queue
   litellm:
-    image: ghcr.io/berriai/litellm:v1.52.4
+    image: ghcr.io/berriai/litellm:v1.80.11-stable
     container_name: litellm-proxy
     ports:
       - "${LITELLM_PORT:-4000}:4000"
       - "${LITELLM_METRICS_PORT:-9091}:9090"
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-litellm}:${POSTGRES_PASSWORD}@postgres:5432/litellm
+      - "DATABASE_URL=postgresql://${POSTGRES_USER:-litellm}:${POSTGRES_PASSWORD}@postgres:5432/litellm"
       - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY}
       - OLLAMA_CPU_URL=http://ollama-cpu:11434
       - OLLAMA_GPU_URL=http://${GPU_WORKER_HOST:-192.168.1.99}:11434
@@ -142,7 +142,7 @@ services:
       - LANGFUSE_HOST=${LANGFUSE_HOST:-https://cloud.langfuse.com}
     volumes:
       - ../config/litellm-config.yml:/app/config.yaml:ro
-    command: --config /app/config.yaml --port 4000 --detailed_debug false
+    command: --config /app/config.yaml --port 4000
     depends_on:
       - postgres
       - redis
@@ -159,43 +159,43 @@ services:
 
   # Automatic1111 Stable Diffusion WebUI - GPU-based image generation
   # Alternative to ComfyUI with user-friendly interface and extensive extensions
-  automatic1111:
-    image: automatic1111/stable-diffusion-webui:latest
-    container_name: automatic1111-server
-    ports:
-      - "${AUTOMATIC1111_PORT:-7860}:7860"
-    volumes:
-      # Shared model storage (mount from host or shared volume)
-      - ${DATA_PATH:-/data}/models:/app/stable-diffusion-webui/models
-      # A1111-specific outputs and configurations
-      - ${DATA_PATH:-/data}/automatic1111/outputs:/app/stable-diffusion-webui/outputs
-      - ${DATA_PATH:-/data}/automatic1111/configs:/app/stable-diffusion-webui/configs
-      - ${DATA_PATH:-/data}/automatic1111/extensions:/app/stable-diffusion-webui/extensions
-    environment:
-      # A1111 server settings optimized for server deployment
-      - COMMANDLINE_ARGS=${A1111_CLI_ARGS:---listen --port 7860 --api --medvram --no-half-vae --xformers --enable-insecure-extension-access --skip-torch-cuda-test}
-      - WEBUI_RESTARTING_TIMEOUT=0
-      # Disable authentication for internal access
-      - WEBUI_AUTH=
-      # GPU optimization
-      - TORCH_COMMAND=cache
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7860/"]
-      interval: 60s
-      timeout: 30s
-      retries: 3
-      start_period: 180s
-    restart: unless-stopped
-    profiles:
-      - full
-      - image-generation
+  # automatic1111:
+  #   image: ghcr.io/automatic1111/stable-diffusion-webui:latest
+  #   container_name: automatic1111-server
+  #   ports:
+  #     - "${AUTOMATIC1111_PORT:-7860}:7860"
+  #   volumes:
+  #     # Shared model storage (mount from host or shared volume)
+  #     - ${DATA_PATH:-/data}/models:/app/stable-diffusion-webui/models
+  #     # A1111-specific outputs and configurations
+  #     - ${DATA_PATH:-/data}/automatic1111/outputs:/app/stable-diffusion-webui/outputs
+  #     - ${DATA_PATH:-/data}/automatic1111/configs:/app/stable-diffusion-webui/configs
+  #     - ${DATA_PATH:-/data}/automatic1111/extensions:/app/stable-diffusion-webui/extensions
+  #   environment:
+  #     # A1111 server settings optimized for server deployment
+  #     - COMMANDLINE_ARGS=${A1111_CLI_ARGS:---listen --port 7860 --api --medvram --no-half-vae --xformers --enable-insecure-extension-access --skip-torch-cuda-test}
+  #     - WEBUI_RESTARTING_TIMEOUT=0
+  #     # Disable authentication for internal access
+  #     - WEBUI_AUTH=
+  #     # GPU optimization
+  #     - TORCH_COMMAND=cache
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #         - driver: nvidia
+  #           count: 1
+  #           capabilities: [gpu]
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:7860/"]
+  #     interval: 60s
+  #     timeout: 30s
+  #     retries: 3
+  #     start_period: 180s
+  #   restart: unless-stopped
+  #   profiles:
+  #     - full
+  #     - image-generation
 
   # Image Generation Router - Routes requests between ComfyUI and A1111
   # Provides intelligent load balancing and backend selection
@@ -209,9 +209,9 @@ services:
     environment:
       # Backend URLs (will be updated when deployed)
       - COMFYUI_URL=http://comfyui:8188
-      - AUTOMATIC1111_URL=http://automatic1111:7860
-    depends_on:
-      - automatic1111
+      # - AUTOMATIC1111_URL=http://automatic1111:7860
+    # depends_on:
+    #   - automatic1111
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s

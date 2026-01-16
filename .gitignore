@@ -1,54 +1,194 @@
-# Environment files with secrets
+# ============================================
+# Self-Hosted AI Platform - .gitignore
+# ============================================
+
+# -----------------------------
+# Local Configuration Overrides
+# -----------------------------
+# Use *.local.yaml for personal/environment-specific config
+*.local.yaml
+*.local.yml
+*.local.json
+*.local.toml
+local/
+
+# Credentials document (generated, contains secrets)
+ADMIN_CREDENTIALS.local.md
+*-credentials.local.md
+
+# -----------------------------
+# Environment & Secrets
+# -----------------------------
 .env
-.env.local
-.env.production
+.env.*
+!.env.example
+!.env.template
 *.env.secret
 */.env
+.env.secrets
 
-# Keep example env files
-!.env.example
-!*/.env.example
+# Plaintext credentials (NEVER commit)
+CREDENTIALS.yaml
+CREDENTIALS.yml
+*credentials*.yaml
+*credentials*.yml
+!*credentials.example.yaml
 
-# Sensitive data
+# Sensitive data files
 secrets/
 *.key
 *.pem
 *.crt
+*.p12
+*.pfx
 id_rsa*
 *.secret
+*.secrets
 
-# OS files
+# ArgoCD raw secrets (sealed secrets ARE safe)
+argocd/secrets/*.yaml
+!argocd/secrets/sealed/
+!argocd/secrets/*.example.yaml
+
+# Helm secret values
+**/values-secret.yaml
+**/values.secret.yaml
+**/values-local.yaml
+helm/**/secrets/
+
+# Kubeconfig and cluster credentials
+kubeconfig*
+*.kubeconfig
+cluster-credentials/
+
+# -----------------------------
+# API Keys & Tokens
+# -----------------------------
+*.token
+*.apikey
+api-keys/
+tokens/
+
+# -----------------------------
+# OS Files
+# -----------------------------
 .DS_Store
+.DS_Store?
+._*
 Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# IDE
+# -----------------------------
+# IDE & Editor
+# -----------------------------
 .idea/
 .vscode/
 *.swp
 *.swo
+*~
+.project
+.settings/
+*.sublime-*
 
-# Build artifacts
+# -----------------------------
+# Build Artifacts
+# -----------------------------
 dist/
 build/
+out/
 *.tar.gz
 *.zip
+*.tgz
 
+# -----------------------------
 # Docker
+# -----------------------------
 .docker/
+docker-compose.override.yml
+docker-compose.local.yml
 
-# Logs
-*.log
-logs/
-
+# -----------------------------
 # Python
+# -----------------------------
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
 .venv/
 venv/
+.env/
+env/
+*.egg-info/
+*.egg
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
 
+# uv specific
+.python-version
+uv.lock
+
+# -----------------------------
 # Rust
+# -----------------------------
 target/
 Cargo.lock
+**/*.rs.bk
 
-# Node
+# -----------------------------
+# Node.js
+# -----------------------------
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+.yarn/
+
+# -----------------------------
+# Logs & Temporary Files
+# -----------------------------
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# -----------------------------
+# Testing & Coverage
+# -----------------------------
+coverage/
+.coverage.*
+*.cover
+htmlcov/
+
+# -----------------------------
+# Documentation (generated)
+# -----------------------------
+site/
+docs/_build/
+.docusaurus/
+
+# -----------------------------
+# Backup Files
+# -----------------------------
+*.backup
+*.bak
+*~
+
+# -----------------------------
+# Model Files (large binaries)
+# -----------------------------
+*.gguf
+*.bin
+*.safetensors
+models/
+!models/.gitkeep

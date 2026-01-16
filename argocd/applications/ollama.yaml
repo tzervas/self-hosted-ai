@@ -4,21 +4,58 @@ metadata:
   name: ollama
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "5"  # Deploy after GPU operator (wave 3)
+    argocd.argoproj.io/sync-wave: "5"  # Deploy with AI inference tier
 spec:
   project: default
   source:
-    # Repository: https://otwld.github.io/helm-charts (migrated from helm.otwld.com)
-    # Version: 1.37.0 (latest with GPU support and security improvements)
-    chart: ollama
-    repoURL: https://otwld.github.io/helm-charts
-    targetRevision: 1.37.0
+    repoURL: https://github.com/tzervas/self-hosted-ai.git
+    targetRevision: main
+    path: helm/ollama
     helm:
-      valueFiles:
-        - values.yaml
+      values: |
+        # CPU-only Ollama for homelab server (no GPU)
+        replicaCount: 1
+
+        image:
+          repository: ollama/ollama
+          tag: "0.5.4"  # Pin version, never use :latest
+
+        env:
+          OLLAMA_HOST: "0.0.0.0"
+          OLLAMA_ORIGINS: "*"
+          OLLAMA_KEEP_ALIVE: "24h"
+          OLLAMA_KV_CACHE_TYPE: "q8_0"
+          OLLAMA_NUM_PARALLEL: "2"
+
+        modelsPersistence:
+          enabled: true
+          size: 50Gi
+          storageClass: "longhorn-homelab"
+
+        gpu:
+          enabled: false
+          nvidia:
+            enabled: false
+
+        resources:
+          requests:
+            cpu: 500m
+            memory: 2Gi
+          limits:
+            cpu: 8000m
+            memory: 32Gi
+
+        nodeSelector:
+          kubernetes.io/hostname: homelab
+
+        networkPolicy:
+          enabled: true
+          allowedNamespaces:
+            - ai-services
+            - gpu-worker
   destination:
     server: https://kubernetes.default.svc
-    namespace: ollama
+    namespace: ai-services
   syncPolicy:
     automated:
       prune: true

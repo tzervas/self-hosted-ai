@@ -1,0 +1,6 @@
+apiVersion: v2
+name: postgresql
+description: PostgreSQL - Relational Database
+type: application
+version: 1.0.0
+appVersion: "16"

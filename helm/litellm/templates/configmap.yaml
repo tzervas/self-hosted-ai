@@ -1,0 +1,102 @@
+{{- if .Values.config.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.config.configMapName }}
+  labels:
+    {{- include "litellm.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    # LiteLLM Proxy Configuration
+    # Auto-generated from helm chart
+    
+    model_list:
+      # GPU Worker Models (High Priority)
+      - model_name: qwen2.5-coder:14b
+        litellm_params:
+          model: ollama_chat/qwen2.5-coder:14b
+          api_base: {{ .Values.env.OLLAMA_GPU_URL | quote }}
+          timeout: 300
+          stream: true
+        model_info:
+          mode: chat
+          supports_function_calling: true
+      
+      - model_name: phi4:latest
+        litellm_params:
+          model: ollama_chat/phi4:latest
+          api_base: {{ .Values.env.OLLAMA_GPU_URL | quote }}
+          timeout: 300
+          stream: true
+        model_info:
+          mode: chat
+          supports_function_calling: true
+      
+      - model_name: llama3.1:8b
+        litellm_params:
+          model: ollama_chat/llama3.1:8b
+          api_base: {{ .Values.env.OLLAMA_GPU_URL | quote }}
+          timeout: 300
+          stream: true
+        model_info:
+          mode: chat
+          supports_function_calling: true
+      
+      - model_name: llava:13b
+        litellm_params:
+          model: ollama_chat/llava:13b
+          api_base: {{ .Values.env.OLLAMA_GPU_URL | quote }}
+          timeout: 300
+          stream: true
+        model_info:
+          mode: chat
+          supports_vision: true
+      
+      # CPU Fallback Models
+      - model_name: mistral:7b
+        litellm_params:
+          model: ollama_chat/mistral:7b
+          api_base: {{ .Values.env.OLLAMA_CPU_URL | quote }}
+          timeout: 300
+          stream: true
+        model_info:
+          mode: chat
+      
+      # Embedding Models (keep ollama/ prefix)
+      - model_name: nomic-embed-text
+        litellm_params:
+          model: ollama/nomic-embed-text
+          api_base: {{ .Values.env.OLLAMA_CPU_URL | quote }}
+          timeout: 60
+        model_info:
+          mode: embedding
+    
+    router_settings:
+      routing_strategy: least-busy
+      enable_fallbacks: true
+      fallbacks:
+        - qwen2.5-coder:14b: [mistral:7b]
+        - llama3.1:8b: [mistral:7b]
+      num_retries: 3
+      retry_after: 5
+      timeout: 300
+      cache: true
+      cache_params:
+        type: redis
+        host: {{ .Values.env.REDIS_HOST | quote }}
+        port: {{ .Values.env.REDIS_PORT }}
+        ttl: 3600
+    
+    general_settings:
+      database_connection_pool_limit: 20
+      database_connection_timeout: 30
+      json_logs: true
+      health_check_interval: 30
+    
+    litellm_settings:
+      enable_request_priority: true
+      success_callback:
+        - prometheus
+      failure_callback:
+        - prometheus
+{{- end }}

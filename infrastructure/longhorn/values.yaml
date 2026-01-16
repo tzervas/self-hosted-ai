@@ -1,0 +1,47 @@
+# Longhorn storage configuration values
+# These values configure StorageClasses and backup policies for the homelab
+
+# StorageClass configurations
+storageClasses:
+  homelab:
+    name: longhorn-homelab
+    isDefault: true
+    numberOfReplicas: 2
+    dataLocality: best-effort
+    fsType: ext4
+    reclaimPolicy: Retain
+    allowVolumeExpansion: true
+
+  gpuLocal:
+    name: longhorn-gpu-local
+    isDefault: false
+    numberOfReplicas: 1
+    dataLocality: strict-local
+    fsType: ext4
+    reclaimPolicy: Retain
+    allowVolumeExpansion: true
+
+# Recurring snapshot configuration
+recurringJobs:
+  dailySnapshot:
+    name: daily-snapshot
+    cron: "0 2 * * *"
+    task: snapshot
+    retain: 7
+    concurrency: 2
+    labels:
+      backup-type: daily
+
+  weeklyBackup:
+    name: weekly-backup
+    cron: "0 3 * * 0"
+    task: backup
+    retain: 4
+    concurrency: 1
+    labels:
+      backup-type: weekly
+
+# Default volume labels
+defaultLabels:
+  environment: homelab
+  managed-by: argocd

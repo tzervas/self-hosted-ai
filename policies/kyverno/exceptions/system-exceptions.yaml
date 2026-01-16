@@ -1,0 +1,69 @@
+# Policy Exceptions for System Namespaces
+# Allows system workloads to bypass certain security policies
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: system-namespace-exception
+  namespace: kyverno
+spec:
+  exceptions:
+    - policyName: pod-security-baseline
+      ruleNames:
+        - require-run-as-non-root
+        - disallow-privileged-containers
+        - require-resource-limits
+  match:
+    any:
+      - resources:
+          namespaces:
+            - kube-system
+            - kyverno
+            - longhorn-system
+            - gpu-workloads
+          kinds:
+            - Pod
+---
+# Exception for GPU workloads namespace
+# GPU pods require privileged access for NVIDIA drivers
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: gpu-workloads-exception
+  namespace: kyverno
+spec:
+  exceptions:
+    - policyName: pod-security-baseline
+      ruleNames:
+        - require-run-as-non-root
+        - disallow-privileged-containers
+  match:
+    any:
+      - resources:
+          namespaces:
+            - gpu-workloads
+          kinds:
+            - Pod
+          selector:
+            matchLabels:
+              nvidia.com/gpu: "true"
+---
+# Exception for ArgoCD namespace
+# ArgoCD components need specific privileges
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: argocd-exception
+  namespace: kyverno
+spec:
+  exceptions:
+    - policyName: pod-security-baseline
+      ruleNames:
+        - require-run-as-non-root
+        - require-resource-limits
+  match:
+    any:
+      - resources:
+          namespaces:
+            - argocd
+          kinds:
+            - Pod
