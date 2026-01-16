@@ -23,9 +23,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://helm.linkerd.io/edge
+    repoURL: https://helm.linkerd.io
     chart: linkerd-crds
-    targetRevision: 2025.1.2
+    targetRevision: "1.8.*"  # Use stable channel instead of edge
     helm:
       releaseName: linkerd-crds
   destination:
