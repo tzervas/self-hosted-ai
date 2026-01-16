@@ -4,16 +4,16 @@ metadata:
   name: searxng
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "4"  # Deploy before Open WebUI
+    argocd.argoproj.io/sync-wave: "6"  # Deploy with user-facing apps
 spec:
   project: default
   source:
     repoURL: https://github.com/tzervas/self-hosted-ai.git
-    targetRevision: dev
+    targetRevision: main
     path: helm/searxng
   destination:
     server: https://kubernetes.default.svc
-    namespace: self-hosted-ai
+    namespace: ai-services
   syncPolicy:
     automated:
       prune: true

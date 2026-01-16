@@ -1,0 +1,14 @@
+apiVersion: v2
+name: mcp-servers
+description: Model Context Protocol servers for AI agent tool integration
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - mcp
+  - ai
+  - tools
+  - agents
+maintainers:
+  - name: VectorWeight
+    email: admin@vectorweight.com

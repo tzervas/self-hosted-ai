@@ -1,0 +1,60 @@
+# QEMU binfmt DaemonSet
+# Registers QEMU handlers on each node for multi-arch emulation
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      # Run once on node boot and exit
+      restartPolicy: Always
+      initContainers:
+        - name: binfmt-register
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --install
+            {{- range .Values.architectures }}
+            - {{ . }}
+            {{- end }}
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: binfmt-misc
+              mountPath: /proc/sys/fs/binfmt_misc
+      containers:
+        # Pause container to keep DaemonSet running
+        - name: pause
+          image: gcr.io/google_containers/pause:3.9
+          resources:
+            requests:
+              cpu: 1m
+              memory: 1Mi
+            limits:
+              cpu: 10m
+              memory: 10Mi
+      volumes:
+        - name: binfmt-misc
+          hostPath:
+            path: /proc/sys/fs/binfmt_misc
+            type: Directory

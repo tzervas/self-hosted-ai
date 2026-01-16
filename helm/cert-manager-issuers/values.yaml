@@ -32,6 +32,13 @@ letsencrypt:
 
 # Certificates to create
 certificates:
+  # Root CA for internal certificates
+  rootCA:
+    enabled: true
+    name: vectorweight-root-ca
+    secretName: vectorweight-root-ca
+    commonName: "VectorWeight Root CA"
+  
   # Wildcard certificate for all AI services
   wildcard:
     enabled: true

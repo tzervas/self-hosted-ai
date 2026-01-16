@@ -52,9 +52,11 @@ spec:
         ingressRoute:
           dashboard:
             enabled: true
-            matchRule: Host(`traefik.homelab.local`)
+            matchRule: Host(`traefik.vectorweight.com`)
             entryPoints:
               - websecure
+            tls:
+              secretName: traefik-vectorweight-tls
         
         # Kubernetes CRD provider
         providers:
@@ -70,18 +72,15 @@ spec:
         tlsOptions:
           default:
             minVersion: VersionTLS12
-            sniStrict: true
+            sniStrict: false
         
-        # Let's Encrypt certificate resolver
-        certificatesResolvers:
-          letsencrypt:
-            acme:
-              email: admin@homelab.local
-              storage: /data/acme.json
-              httpChallenge:
-                entryPoint: web
+        # TLS stores for default certificate
+        tlsStore:
+          default:
+            defaultCertificate:
+              secretName: vectorweight-wildcard-tls
         
-        # Persistence for ACME certificates
+        # Persistence for ACME certificates (still needed for backup)
         persistence:
           enabled: true
           size: 1Gi

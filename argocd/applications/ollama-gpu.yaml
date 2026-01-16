@@ -1,0 +1,77 @@
+# Ollama GPU Worker - akula-prime (RTX 5080)
+# This deployment runs on the GPU node with strict-local storage
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ollama-gpu
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"  # Deploy with AI inference tier
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/tzervas/self-hosted-ai.git
+    targetRevision: main
+    path: helm/ollama
+    helm:
+      releaseName: ollama-gpu
+      values: |
+        # GPU Ollama for akula-prime (RTX 5080 16GB VRAM)
+        replicaCount: 1
+
+        image:
+          repository: ollama/ollama
+          tag: "0.5.4"  # Pin version, never use :latest
+
+        env:
+          OLLAMA_HOST: "0.0.0.0"
+          OLLAMA_ORIGINS: "*"
+          OLLAMA_KEEP_ALIVE: "24h"
+          OLLAMA_KV_CACHE_TYPE: "q8_0"
+          OLLAMA_GPU_OVERHEAD: "536870912"  # 512MB GPU memory overhead
+          OLLAMA_NUM_PARALLEL: "4"  # More parallel with GPU
+          OLLAMA_FLASH_ATTENTION: "1"  # Flash attention for performance
+
+        modelsPersistence:
+          enabled: true
+          size: 150Gi
+          storageClass: "longhorn-gpu-local"  # Single replica, strict-local
+
+        gpu:
+          enabled: true
+          nvidia:
+            enabled: true
+            count: 1
+
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 8Gi
+          limits:
+            cpu: 16000m
+            memory: 64Gi
+
+        # Pin to GPU node
+        nodeSelector:
+          kubernetes.io/hostname: akula-prime
+          nvidia.com/gpu.present: "true"
+
+        tolerations:
+          - key: nvidia.com/gpu
+            operator: Exists
+            effect: NoSchedule
+
+        networkPolicy:
+          enabled: true
+          allowedNamespaces:
+            - ai-services
+            - default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gpu-workloads
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

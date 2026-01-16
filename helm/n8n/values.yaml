@@ -24,7 +24,7 @@ ingress:
   tls:
     - hosts:
         - n8n.vectorweight.com
-      secretName: vectorweight-selfsigned-tls
+      secretName: vectorweight-wildcard-tls
 
 # Environment configuration
 env:

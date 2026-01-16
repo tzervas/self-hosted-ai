@@ -1,15 +1,16 @@
 # App-of-Apps Root Application
 # This application manages all child applications in the cluster
 # Sync waves ensure proper deployment order:
-#   -2: Namespaces and secret infrastructure (SealedSecrets)
-#   -1: ConfigMaps and base secrets
+#   -2: Secret infrastructure (SealedSecrets)
+#   -1: Storage infrastructure (Longhorn)
 #    0: Databases (PostgreSQL, Redis)
-#    1: GPU infrastructure (GPU Operator)
-#    2: Monitoring stack (Prometheus, Grafana)
-#    3: Core services (GitLab)
-#    4: AI platforms (Dify)
+#    1: GPU infrastructure (GPU Operator, Traefik)
+#    2: Policy enforcement (Kyverno)
+#    3: Monitoring stack (Prometheus, Grafana)
+#    4: Source control (GitLab)
 #    5: AI inference (Ollama, LiteLLM)
-#    6: User-facing applications (Open WebUI, n8n)
+#    6: User-facing applications (Open WebUI, n8n, SearXNG)
+#    7: CI/CD runners (ARC, GitLab Runner)
 
 apiVersion: argoproj.io/v1alpha1
 kind: Application

@@ -1,0 +1,39 @@
+# Longhorn RecurringJob: daily-snapshot
+# Takes daily snapshots at 2 AM, retains 7 days
+apiVersion: longhorn.io/v1beta2
+kind: RecurringJob
+metadata:
+  name: {{ .Values.recurringJobs.dailySnapshot.name }}
+  namespace: longhorn-system
+  labels:
+    {{- include "longhorn-config.labels" . | nindent 4 }}
+    {{- with .Values.recurringJobs.dailySnapshot.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  cron: {{ .Values.recurringJobs.dailySnapshot.cron | quote }}
+  task: {{ .Values.recurringJobs.dailySnapshot.task }}
+  retain: {{ .Values.recurringJobs.dailySnapshot.retain }}
+  concurrency: {{ .Values.recurringJobs.dailySnapshot.concurrency }}
+  groups:
+    - default
+---
+# Longhorn RecurringJob: weekly-backup
+# Takes weekly backups on Sunday at 3 AM, retains 4 weeks
+apiVersion: longhorn.io/v1beta2
+kind: RecurringJob
+metadata:
+  name: {{ .Values.recurringJobs.weeklyBackup.name }}
+  namespace: longhorn-system
+  labels:
+    {{- include "longhorn-config.labels" . | nindent 4 }}
+    {{- with .Values.recurringJobs.weeklyBackup.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  cron: {{ .Values.recurringJobs.weeklyBackup.cron | quote }}
+  task: {{ .Values.recurringJobs.weeklyBackup.task }}
+  retain: {{ .Values.recurringJobs.weeklyBackup.retain }}
+  concurrency: {{ .Values.recurringJobs.weeklyBackup.concurrency }}
+  groups:
+    - default

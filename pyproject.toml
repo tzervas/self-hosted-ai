@@ -1,24 +1,249 @@
-[tool.black]
-line-length = 100
-target-version = ['py311']
-include = '\\.pyi?$'
-extend-exclude = '''
-/(
-    \\.git
-  | \\.mypy_cache
-  | \\.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
+[project]
+name = "self-hosted-ai"
 
-[tool.isort]
-profile = "black"
-line_length = 100
-skip_gitignore = true
-known_first_party = ["agents"]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      - task --list    cmds:    desc: Show available tasks  default:  # Help      - echo "Deployment initiated. Monitor with - task argocd:status"      - task: argocd:bootstrap      - task: storage:setup    cmds:    desc: Full deployment (storage + argocd + apps)  deploy:  # Full deployment      - rm -rf htmlcov/ .coverage      - find . -type d -name .mypy_cache -exec rm -rf {} + 2>/dev/null || true      - find . -type d -name .ruff_cache -exec rm -rf {} + 2>/dev/null || true      - find . -type d -name .pytest_cache -exec rm -rf {} + 2>/dev/null || true      - find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true    cmds:    desc: Clean build artifacts and caches  clean:  # Cleanup operations      - ./scripts/setup-arc-github-app.sh    cmds:    desc: Setup GitHub App for ARC  runners:setup:      - kubectl get autoscalingrunnerset -n arc-runners      - kubectl get pods -n arc-runners    cmds:    desc: Check ARC runner status  runners:status:  # CI/CD runner operations      - echo "Backup saved to sealed-secrets-backup-$(date +%Y%m%d).yaml"      - kubectl get secret -n kube-system -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml > sealed-secrets-backup-$(date +%Y%m%d).yaml    cmds:    desc: Backup SealedSecrets keys  secrets:backup:          --dry-run=client -o yaml | kubeseal -o yaml        kubectl create secret generic {{.CLI_ARGS}} \      - |    cmds:    desc: Seal a secret (usage - task secrets:seal -- secret-name key=value)  secrets:seal:  # Secret management        done          fi              policies/kyverno/security/ --resource /dev/stdin --table || true            helm template test "$chart" 2>/dev/null | kyverno apply \            echo "Testing: $chart"          if [[ -f "${chart}Chart.yaml" ]]; then        for chart in helm/*/; do      - |    cmds:    desc: Test policies against Helm templates  policy:test:      - kubectl get clusterpolicyreport      - kubectl get policyreport -A    cmds:    desc: View Kyverno policy reports  policy:reports:  # Policy operations      - kubectl get pods -A    cmds:    desc: List all pods across namespaces  cluster:pods:      - kubectl get nodes -o wide      - kubectl cluster-info    cmds:    desc: Display cluster information  cluster:info:  # Cluster operations      - kubectl -n longhorn-system get volumes.longhorn.io    cmds:    desc: Check Longhorn volume status  storage:status:      - sudo ./scripts/setup-storage.sh    cmds:    desc: Setup btrfs storage for Longhorn  storage:setup:  # Storage operations      - kubectl -n {{.ARGOCD_NAMESPACE}} get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d && echo    cmds:    desc: Get ArgoCD admin password  argocd:password:      - argocd app sync root-apps --prune    cmds:    desc: Sync all ArgoCD applications  argocd:sync:      - kubectl get applications -n {{.ARGOCD_NAMESPACE}}    cmds:    desc: Check ArgoCD application status  argocd:status:      - ./scripts/bootstrap-argocd.sh    cmds:    desc: Bootstrap ArgoCD and deploy root app  argocd:bootstrap:  # ArgoCD operations      - detect-secrets scan --baseline .secrets.baseline    cmds:    desc: Detect secrets in codebase  security:secrets:      - trivy config . --severity HIGH,CRITICAL    cmds:    desc: Run Trivy config scan  security:trivy:  # Security scanning    deps: [validate:helm, validate:manifests, validate:policies]    desc: Run all validation checks  validate:all:      - kyverno validate policies/kyverno/    cmds:    desc: Validate Kyverno policies  validate:policies:          -summary argocd/applications/*.yaml          -kubernetes-version {{.KUBERNETES_VERSION}} \        kubeconform -strict -ignore-missing-schemas \      - |    cmds:    desc: Validate Kubernetes manifests with kubeconform  validate:manifests:        done          fi            helm lint "$chart"            echo "Linting: $chart"          if [[ -f "${chart}Chart.yaml" ]]; then        for chart in helm/*/; do      - |    cmds:    desc: Lint all Helm charts  validate:helm:  # Kubernetes validation      - pre-commit run --all-files || pre-commit run --all-files    cmds:    desc: Run pre-commit hooks with auto-fix  lint:fix:      - pre-commit run --all-files    cmds:    desc: Run all pre-commit hooks  lint:  # Pre-commit hooks    silent: false      - pre-commit install --hook-type commit-msg      - pre-commit install      - pip install pre-commit ruff yamllint    cmds:    desc: Setup local development environment  setup:dev:  # Development setuptasks:  GIT_BRANCH: "main"  GIT_REPO_URL: "https://github.com/tzervas/self-hosted-ai.git"  ARGOCD_NAMESPACE: "argocd"  KUBERNETES_VERSION: "1.29.0"vars:version: '3'version = "1.0.0"
+description = "Self-hosted AI Kubernetes platform"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Self-Hosted AI Team"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+exclude = [
+    ".git",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "htmlcov",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+    "ARG",  # flake8-unused-arguments
+    "SIM",  # flake8-simplify
+    "N",    # pep8-naming
+    "S",    # flake8-bandit (security)
+]
+ignore = [
+    "E501",  # line length handled by formatter
+    "B008",  # do not perform function calls in argument defaults
+    "S101",  # use of assert detected
+    "S104",  # possible binding to all interfaces
+    "S108",  # probable insecure usage of temp file/directory
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["agents", "self_hosted_ai"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/**/*.py" = ["S101", "S105", "S106", "ARG"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
 
 [tool.mypy]
 python_version = "3.11"
@@ -37,42 +262,6 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "tests.*"
 ignore_errors = true
-
-[tool.ruff]
-line-length = 100
-target-version = "py311"
-select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "C",   # flake8-comprehensions
-    "B",   # flake8-bugbear
-    "UP",  # pyupgrade
-    "N",   # pep8-naming
-    "SIM", # flake8-simplify
-    "S",   # flake8-bandit (security)
-]
-ignore = [
-    "E501",  # line too long (handled by black)
-    "B008",  # do not perform function calls in argument defaults
-    "S101",  # use of assert detected
-    "S104",  # possible binding to all interfaces
-    "S108",  # probable insecure usage of temp file/directory
-]
-exclude = [
-    ".git",
-    ".mypy_cache",
-    ".ruff_cache",
-    ".venv",
-    "__pycache__",
-    "build",
-    "dist",
-]
-
-[tool.ruff.per-file-ignores]
-"__init__.py" = ["F401"]  # Allow unused imports in __init__.py
-"tests/**/*.py" = ["S101", "S105", "S106"]  # Allow asserts and hardcoded passwords in tests
 
 [tool.bandit]
 exclude_dirs = ["tests", ".venv", "build", "dist"]

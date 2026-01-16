@@ -1,0 +1,435 @@
+# https://taskfile.dev
+# Task automation for self-hosted-ai platform
+
+version: '3'
+
+vars:
+  KUBERNETES_VERSION: "1.29.0"
+  ARGOCD_NAMESPACE: "argocd"
+  GIT_REPO_URL: "https://github.com/tzervas/self-hosted-ai.git"
+  GIT_BRANCH: "main"
+  DOMAIN: "vectorweight.com"
+
+tasks:
+  # ==========================================================================
+  # FULL BOOTSTRAP - Complete cluster setup from scratch
+  # ==========================================================================
+  
+  bootstrap:full:
+    desc: "🚀 Complete clean bootstrap of the entire cluster"
+    cmds:
+      - echo "┌─────────────────────────────────────────────────────────────────────────────┐"
+      - echo "│                    SELF-HOSTED AI - FULL BOOTSTRAP                          │"
+      - echo "└─────────────────────────────────────────────────────────────────────────────┘"
+      - task: bootstrap:secrets
+      - task: bootstrap:cloudflare
+      - task: bootstrap:dns
+      - task: storage:setup
+      - task: argocd:bootstrap
+      - task: bootstrap:wait
+      - task: bootstrap:models
+      - task: bootstrap:verify
+      - echo ""
+      - echo "✅ Bootstrap complete! Access services at:"
+      - echo "   - AI Chat: https://ai.{{.DOMAIN}}"
+      - echo "   - LLM API: https://llm.{{.DOMAIN}}"
+      - echo "   - ArgoCD:  https://argocd.{{.DOMAIN}}"
+      - echo "   - Grafana: https://grafana.{{.DOMAIN}}"
+
+  bootstrap:secrets:
+    desc: "🔐 Generate and apply fresh secrets"
+    cmds:
+      - echo "Generating fresh secrets..."
+      - ./scripts/generate-secrets.sh --namespace ai-services
+      - echo "Secrets generated and applied!"
+
+  bootstrap:cloudflare:
+    desc: "☁️ Configure Cloudflare API credentials for TLS"
+    cmds:
+      - echo "Setting up Cloudflare integration..."
+      - ./scripts/setup-cloudflare.sh
+      - echo "Cloudflare integration complete!"
+
+  bootstrap:dns:
+    desc: "🌐 Configure DNS for vectorweight.com"
+    cmds:
+      - echo "Setting up DNS configuration..."
+      - ./scripts/setup-dns.sh
+      - echo "DNS configuration complete!"
+
+  bootstrap:wait:
+    desc: "⏳ Wait for cluster to become healthy"
+    cmds:
+      - echo "Waiting for cluster to become healthy..."
+      - ./scripts/verify-cluster-health.sh --wait --max-wait 600
+
+  bootstrap:models:
+    desc: "🤖 Preload AI models from manifest"
+    cmds:
+      - echo "Preloading required AI models..."
+      - ./scripts/preload-models.sh --required-only
+      - echo "Model preloading complete!"
+
+  bootstrap:verify:
+    desc: "✅ Verify cluster health after bootstrap"
+    cmds:
+      - ./scripts/verify-cluster-health.sh --verbose
+
+  # ==========================================================================
+  # DEVELOPMENT SETUP
+  # ==========================================================================
+
+  setup:dev:
+    desc: Setup local development environment
+    cmds:
+      - pip install pre-commit ruff yamllint
+      - pre-commit install
+      - pre-commit install --hook-type commit-msg
+    silent: false
+
+  # Pre-commit hooks
+  lint:
+    desc: Run all pre-commit hooks
+    cmds:
+      - pre-commit run --all-files
+
+  lint:fix:
+    desc: Run pre-commit hooks with auto-fix
+    cmds:
+      - pre-commit run --all-files || pre-commit run --all-files
+
+  # ==========================================================================
+  # VALIDATION
+  # ==========================================================================
+
+  validate:helm:
+    desc: Lint all Helm charts
+    cmds:
+      - |
+        for chart in helm/*/; do
+          if [[ -f "${chart}Chart.yaml" ]]; then
+            echo "Linting: $chart"
+            helm lint "$chart"
+          fi
+        done
+
+  validate:manifests:
+    desc: Validate Kubernetes manifests with kubeconform
+    cmds:
+      - |
+        kubeconform -strict -ignore-missing-schemas \
+          -kubernetes-version {{.KUBERNETES_VERSION}} \
+          -summary argocd/applications/*.yaml
+
+  validate:policies:
+    desc: Validate Kyverno policies
+    cmds:
+      - kyverno validate policies/kyverno/
+
+  validate:all:
+    desc: Run all validation checks
+    deps: [validate:helm, validate:manifests, validate:policies]
+
+  # ==========================================================================
+  # SECURITY
+  # ==========================================================================
+
+  security:trivy:
+    desc: Run Trivy config scan
+    cmds:
+      - trivy config . --severity HIGH,CRITICAL
+
+  security:secrets:
+    desc: Detect secrets in codebase
+    cmds:
+      - detect-secrets scan --baseline .secrets.baseline
+
+  # ==========================================================================
+  # ARGOCD OPERATIONS
+  # ==========================================================================
+
+  argocd:bootstrap:
+    desc: Bootstrap ArgoCD and deploy root app
+    cmds:
+      - ./scripts/bootstrap-argocd.sh
+
+  argocd:status:
+    desc: Check ArgoCD application status
+    cmds:
+      - kubectl get applications -n {{.ARGOCD_NAMESPACE}} -o wide
+
+  argocd:sync:
+    desc: Sync all ArgoCD applications
+    cmds:
+      - argocd app sync root-apps --prune
+
+  argocd:sync:app:
+    desc: "Sync a specific app (usage: task argocd:sync:app -- app-name)"
+    cmds:
+      - argocd app sync {{.CLI_ARGS}}
+
+  argocd:password:
+    desc: Get ArgoCD admin password
+    cmds:
+      - kubectl -n {{.ARGOCD_NAMESPACE}} get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d && echo
+
+  argocd:dashboard:
+    desc: Open ArgoCD dashboard (port-forward)
+    cmds:
+      - echo "Opening ArgoCD dashboard at https://localhost:8080"
+      - echo "Username: admin"
+      - echo "Password: $(kubectl -n {{.ARGOCD_NAMESPACE}} get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d)"
+      - kubectl port-forward svc/argocd-server -n {{.ARGOCD_NAMESPACE}} 8080:443
+
+  # ==========================================================================
+  # STORAGE
+  # ==========================================================================
+
+  storage:setup:
+    desc: Setup btrfs storage for Longhorn
+    cmds:
+      - sudo ./scripts/setup-storage.sh
+
+  storage:status:
+    desc: Check Longhorn volume status
+    cmds:
+      - kubectl -n longhorn-system get volumes.longhorn.io
+
+  # ==========================================================================
+  # CLUSTER OPERATIONS
+  # ==========================================================================
+
+  cluster:info:
+    desc: Display cluster information
+    cmds:
+      - kubectl cluster-info
+      - kubectl get nodes -o wide
+
+  cluster:pods:
+    desc: List all pods across namespaces
+    cmds:
+      - kubectl get pods -A
+
+  cluster:health:
+    desc: Run cluster health verification
+    cmds:
+      - ./scripts/verify-cluster-health.sh
+
+  cluster:health:wait:
+    desc: Wait for cluster to become healthy
+    cmds:
+      - ./scripts/verify-cluster-health.sh --wait
+
+  # ==========================================================================
+  # DNS & CERTIFICATES & CLOUDFLARE
+  # ==========================================================================
+
+  cloudflare:setup:
+    desc: "☁️ Setup Cloudflare integration for TLS certificates"
+    cmds:
+      - ./scripts/setup-cloudflare.sh
+
+  cloudflare:verify:
+    desc: "Verify Cloudflare API connection"
+    cmds:
+      - |
+        ZONE_CHECK=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name={{.DOMAIN}}" \
+          -H "X-Auth-Email: admin@vectorweight.com" \
+          -H "X-Auth-Key: $(cat ~/Documents/.secret/cf-global-cpi-key 2>/dev/null || cat ~/Documents/.secret/cf-global-api-key)" \
+          -H "Content-Type: application/json")
+        if echo "$ZONE_CHECK" | grep -q '"success":true'; then
+          echo "✅ Cloudflare API connection verified!"
+          echo "$ZONE_CHECK" | jq '.result[0] | {id, name, status, name_servers}'
+        else
+          echo "❌ Failed to connect to Cloudflare API"
+          echo "$ZONE_CHECK" | jq '.errors'
+        fi
+
+  cloudflare:dns:
+    desc: "List Cloudflare DNS records"
+    cmds:
+      - |
+        ZONE_ID=$(cat .cloudflare-zone-id 2>/dev/null)
+        if [[ -z "$ZONE_ID" ]]; then
+          echo "Run 'task cloudflare:setup' first to get zone ID"
+          exit 1
+        fi
+        curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
+          -H "X-Auth-Email: admin@vectorweight.com" \
+          -H "X-Auth-Key: $(cat ~/Documents/.secret/cf-global-cpi-key 2>/dev/null || cat ~/Documents/.secret/cf-global-api-key)" \
+          -H "Content-Type: application/json" | jq '.result[] | {type, name, content}'
+
+  dns:setup:
+    desc: Configure DNS for vectorweight.com
+    cmds:
+      - ./scripts/setup-dns.sh
+
+  dns:hosts:
+    desc: Update /etc/hosts only
+    cmds:
+      - ./scripts/setup-dns.sh --hosts-only
+
+  certs:status:
+    desc: Check certificate status
+    cmds:
+      - kubectl get certificates -A
+      - kubectl get certificaterequests -A
+
+  certs:issuers:
+    desc: Check ClusterIssuers status
+    cmds:
+      - kubectl get clusterissuers
+
+  certs:wildcard:
+    desc: "Check wildcard certificate status"
+    cmds:
+      - kubectl get certificate -n cert-manager vectorweight-wildcard-tls -o yaml 2>/dev/null | head -50 || echo "Wildcard cert not found"
+
+  certs:challenges:
+    desc: "Check active certificate challenges"
+    cmds:
+      - kubectl get challenges -A
+      - kubectl get orders -A
+
+  # ==========================================================================
+  # AI MODELS
+  # ==========================================================================
+
+  models:preload:
+    desc: "Preload all required AI models"
+    cmds:
+      - ./scripts/preload-models.sh --required-only
+
+  models:preload:all:
+    desc: "Preload all AI models (including optional)"
+    cmds:
+      - ./scripts/preload-models.sh --all
+
+  models:preload:gpu:
+    desc: "Preload GPU models only"
+    cmds:
+      - ./scripts/preload-models.sh --gpu-only
+
+  models:preload:cpu:
+    desc: "Preload CPU models only"
+    cmds:
+      - ./scripts/preload-models.sh --cpu-only
+
+  models:list:
+    desc: "List models on Ollama instances"
+    cmds:
+      - echo "=== GPU Ollama Models ==="
+      - kubectl exec -n gpu-workloads deployment/ollama-gpu -- ollama list 2>/dev/null || echo "GPU Ollama not available"
+      - echo ""
+      - echo "=== CPU Ollama Models ==="
+      - kubectl exec -n ai-services deployment/ollama -- ollama list 2>/dev/null || echo "CPU Ollama not available"
+
+  # ==========================================================================
+  # POLICY OPERATIONS
+  # ==========================================================================
+
+  policy:reports:
+    desc: View Kyverno policy reports
+    cmds:
+      - kubectl get policyreport -A
+      - kubectl get clusterpolicyreport
+
+  policy:test:
+    desc: Test policies against Helm templates
+    cmds:
+      - |
+        for chart in helm/*/; do
+          if [[ -f "${chart}Chart.yaml" ]]; then
+            echo "Testing: $chart"
+            helm template test "$chart" 2>/dev/null | kyverno apply \
+              policies/kyverno/security/ --resource /dev/stdin --table || true
+          fi
+        done
+
+  # ==========================================================================
+  # SECRET MANAGEMENT
+  # ==========================================================================
+
+  secrets:generate:
+    desc: Generate fresh secrets
+    cmds:
+      - ./scripts/generate-secrets.sh
+
+  secrets:seal:
+    desc: "Seal a secret (usage: task secrets:seal -- secret-name key=value)"
+    cmds:
+      - |
+        kubectl create secret generic {{.CLI_ARGS}} \
+          --dry-run=client -o yaml | kubeseal -o yaml
+
+  secrets:backup:
+    desc: Backup SealedSecrets keys
+    cmds:
+      - kubectl get secret -n kube-system -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml > sealed-secrets-backup-$(date +%Y%m%d).yaml
+      - echo "Backup saved to sealed-secrets-backup-$(date +%Y%m%d).yaml"
+
+  # ==========================================================================
+  # CI/CD RUNNERS
+  # ==========================================================================
+
+  runners:status:
+    desc: Check ARC runner status
+    cmds:
+      - kubectl get pods -n arc-runners
+      - kubectl get autoscalingrunnerset -n arc-runners
+
+  runners:setup:
+    desc: Setup GitHub App for ARC
+    cmds:
+      - ./scripts/setup-arc-github-app.sh
+
+  # ==========================================================================
+  # MONITORING
+  # ==========================================================================
+
+  monitoring:grafana:
+    desc: Open Grafana dashboard (port-forward)
+    cmds:
+      - echo "Opening Grafana at http://localhost:3000"
+      - echo "Username: admin"
+      - echo "Password: $(kubectl get secret -n monitoring prometheus-grafana -o jsonpath='{.data.admin-password}' | base64 -d 2>/dev/null || echo 'prom-operator')"
+      - kubectl port-forward svc/prometheus-grafana -n monitoring 3000:80
+
+  monitoring:prometheus:
+    desc: Open Prometheus dashboard (port-forward)
+    cmds:
+      - echo "Opening Prometheus at http://localhost:9090"
+      - kubectl port-forward svc/prometheus-kube-prometheus-prometheus -n monitoring 9090:9090
+
+  # ==========================================================================
+  # CLEANUP
+  # ==========================================================================
+
+  clean:
+    desc: Clean build artifacts and caches
+    cmds:
+      - find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+      - find . -type d -name .pytest_cache -exec rm -rf {} + 2>/dev/null || true
+      - find . -type d -name .ruff_cache -exec rm -rf {} + 2>/dev/null || true
+      - find . -type d -name .mypy_cache -exec rm -rf {} + 2>/dev/null || true
+      - rm -rf htmlcov/ .coverage
+
+  # ==========================================================================
+  # LEGACY / COMPATIBILITY
+  # ==========================================================================
+
+  deploy:
+    desc: Full deployment (storage + argocd + apps)
+    cmds:
+      - task: storage:setup
+      - task: argocd:bootstrap
+      - echo "Deployment initiated. Monitor with: task argocd:status"
+
+  # ==========================================================================
+  # HELP
+  # ==========================================================================
+
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list

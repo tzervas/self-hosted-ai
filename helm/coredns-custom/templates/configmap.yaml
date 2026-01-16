@@ -1,0 +1,39 @@
+{{- /*
+CoreDNS ConfigMap override for vectorweight.com internal DNS
+This creates a ConfigMap that k3s CoreDNS will import
+*/ -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: coredns-custom
+    app.kubernetes.io/part-of: self-hosted-ai
+data:
+  vectorweight.server: |
+    # Custom DNS zone for vectorweight.com
+    # Routes internal traffic to Traefik ingress controller
+    {{ .Values.domain }}:53 {
+        errors
+        log
+        
+        # Internal service resolution via hosts file
+        hosts {
+            {{- $ip := .Values.cluster.ingressIP | default .Values.cluster.fallbackIP }}
+            {{- range .Values.dnsEntries }}
+            {{ $ip }} {{ .subdomain }}.{{ $.Values.domain }}
+            {{- end }}
+            # Root domain
+            {{ $ip }} {{ .Values.domain }}
+            
+            fallthrough
+        }
+        
+        # Forward to upstream for external resolution
+        forward . {{ range .Values.externalDNS.servers }}{{ . }} {{ end }}{
+            policy sequential
+        }
+        
+        cache 30
+    }

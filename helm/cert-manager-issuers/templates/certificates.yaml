@@ -1,0 +1,82 @@
+{{- /*
+Wildcard certificate using Cloudflare DNS-01 challenge
+This covers all *.vectorweight.com subdomains
+*/ -}}
+{{- if .Values.certificates.rootCA.enabled }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.certificates.rootCA.name }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    description: "Root CA certificate for {{ .Values.domain }}"
+spec:
+  secretName: {{ .Values.certificates.rootCA.secretName }}
+  issuerRef:
+    name: self-signed
+    kind: ClusterIssuer
+  isCA: true
+  commonName: {{ .Values.certificates.rootCA.commonName }}
+  dnsNames:
+    - {{ .Values.certificates.rootCA.commonName }}
+{{- end }}
+{{- if .Values.certificates.wildcard.enabled }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.certificates.wildcard.name }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    description: "Wildcard certificate for {{ .Values.domain }}"
+spec:
+  secretName: {{ .Values.certificates.wildcard.secretName }}
+  issuerRef:
+    name: vectorweight-ca-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    {{- range .Values.certificates.wildcard.dnsNames }}
+    - {{ . | quote }}
+    {{- end }}
+  # Allow certificate secret to be copied to other namespaces
+  secretTemplate:
+    annotations:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "ai-services,automation,monitoring,traefik,argocd,dify,gitlab,gpu-workloads"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "ai-services,automation,monitoring,traefik,argocd,dify,gitlab,gpu-workloads"
+{{- end }}
+---
+{{- /*
+Individual service certificates using Cloudflare DNS-01 challenge
+Fallback if wildcard is not working or for specific requirements
+*/ -}}
+{{- range .Values.certificates.services }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Release.Namespace }}
+  annotations:
+    description: "Certificate for {{ .host }}"
+spec:
+  secretName: {{ .name }}
+  issuerRef:
+    {{- if $.Values.letsencrypt.staging }}
+    name: letsencrypt-cloudflare-staging
+    {{- else }}
+    name: letsencrypt-cloudflare
+    {{- end }}
+    kind: ClusterIssuer
+  dnsNames:
+    - {{ .host }}
+  # Copy secret to the service namespace using reflector
+  secretTemplate:
+    annotations:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "{{ .namespace }}"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "{{ .namespace }}"
+{{- end }}

@@ -5,4 +5,4 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   defaultCertificate:
-    secretName: vectorweight-selfsigned-tls
+    secretName: vectorweight-wildcard-tls

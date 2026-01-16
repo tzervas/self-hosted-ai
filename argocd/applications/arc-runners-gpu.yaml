@@ -1,0 +1,115 @@
+# Actions Runner Scale Set - GPU-Capable Runners
+# Runners for ML/AI workloads that access GPU over LAN
+#
+# Architecture:
+#   - Runners execute on homelab (192.168.1.170) k3s cluster
+#   - GPU inference via akula-prime (192.168.1.99) Ollama API over LAN
+#   - NO direct GPU scheduling - GPU is accessed via HTTP API
+#
+# GPU Access:
+#   - Ollama GPU: http://192.168.1.99:11434
+#   - ComfyUI: http://192.168.1.99:8188
+#
+# Prerequisites:
+#   - GitHub App created with required permissions
+#   - Secret 'github-app-secret' in arc-runners namespace
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arc-runners-gpu
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"  # After ARC controller
+  labels:
+    app.kubernetes.io/component: ci-runners
+    app.kubernetes.io/part-of: arc
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/actions/actions-runner-controller-charts
+    chart: gha-runner-scale-set
+    targetRevision: 0.9.3
+    helm:
+      releaseName: arc-runners-gpu
+      valuesObject:
+        # GitHub configuration
+        githubConfigUrl: "https://github.com/tzervas"
+        githubConfigSecret: github-app-secret
+
+        # Runner group for GPU workloads
+        runnerGroup: "default"
+
+        # Scaling: Scale to zero when idle
+        minRunners: 0
+        maxRunners: 2
+
+        # Runner pod template - runs on homelab, accesses GPU over LAN
+        template:
+          spec:
+            containers:
+              - name: runner
+                image: ghcr.io/actions/actions-runner:2.321.0
+                command: ["/home/runner/run.sh"]
+                env:
+                  - name: ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT
+                    value: "true"
+                  # GPU endpoints for LAN access
+                  - name: OLLAMA_GPU_HOST
+                    value: "http://192.168.1.99:11434"
+                  - name: COMFYUI_HOST
+                    value: "http://192.168.1.99:8188"
+                  - name: GPU_WORKER_IP
+                    value: "192.168.1.99"
+                resources:
+                  # No GPU resources - GPU is accessed over network
+                  requests:
+                    cpu: 1000m
+                    memory: 4Gi
+                  limits:
+                    cpu: 8000m
+                    memory: 16Gi
+                securityContext:
+                  runAsUser: 1000
+                  runAsGroup: 1000
+                volumeMounts:
+                  - name: work
+                    mountPath: /home/runner/_work
+
+            volumes:
+              - name: work
+                emptyDir:
+                  sizeLimit: 50Gi
+
+            # Run on homelab cluster node (NOT akula-prime)
+            nodeSelector:
+              kubernetes.io/arch: amd64
+
+            tolerations:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+                effect: NoSchedule
+
+        # Controller reference
+        controllerServiceAccount:
+          namespace: arc-systems
+          name: gha-runner-scale-set-controller
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arc-runners
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
