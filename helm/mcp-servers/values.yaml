@@ -114,7 +114,7 @@ servers:
   # ========================
 
   gitlab:
-    enabled: true
+    enabled: false  # Disabled: requires gitlab-mcp-token secret
     description: "GitLab API integration for self-hosted instance"
     package: "mcp-server-gitlab"
     # Token from Kubernetes secret
@@ -126,7 +126,7 @@ servers:
       # Token injected from secret
 
   postgres:
-    enabled: true
+    enabled: false  # Disabled: PostgreSQL is in ai-services namespace
     description: "PostgreSQL database operations"
     package: "mcp-server-postgres"
     # Connection from Kubernetes secret
@@ -134,7 +134,7 @@ servers:
       name: postgresql-secret
       key: postgres-password
     env:
-      POSTGRES_HOST: "postgresql.self-hosted-ai.svc.cluster.local"
+      POSTGRES_HOST: "postgresql.ai-services.svc.cluster.local"
       POSTGRES_PORT: "5432"
       POSTGRES_DB: "litellm"
       POSTGRES_USER: "litellm"
