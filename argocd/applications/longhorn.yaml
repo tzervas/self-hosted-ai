@@ -68,7 +68,7 @@ spec:
 
     # Source 2: Custom StorageClasses and RecurringJobs from local chart
     - repoURL: https://github.com/tzervas/self-hosted-ai.git
-      targetRevision: main
+      targetRevision: dev
       path: infrastructure/longhorn
 
   destination:

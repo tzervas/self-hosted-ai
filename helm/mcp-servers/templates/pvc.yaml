@@ -1,0 +1,15 @@
+{{- if and .Values.servers.memory.enabled .Values.servers.memory.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "mcp-servers.fullname" . }}-memory
+  labels:
+    {{- include "mcp-servers.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.servers.memory.persistence.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.servers.memory.persistence.size }}
+{{- end }}

@@ -71,7 +71,7 @@ spec:
 
     # Source 2: Custom policies from local directory
     - repoURL: https://github.com/tzervas/self-hosted-ai.git
-      targetRevision: main
+      targetRevision: dev
       path: policies/kyverno
 
   destination:

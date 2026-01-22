@@ -24,7 +24,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/tzervas/self-hosted-ai.git
-    targetRevision: main
+    targetRevision: dev
     path: helm/qemu-binfmt
   destination:
     server: https://kubernetes.default.svc

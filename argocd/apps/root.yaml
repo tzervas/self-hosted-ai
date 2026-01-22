@@ -23,7 +23,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/tzervas/self-hosted-ai.git
-    targetRevision: main
+    targetRevision: dev
     path: argocd/applications
     directory:
       recurse: false
