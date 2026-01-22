@@ -8,7 +8,7 @@ data:
   # MCPO configuration for enabled MCP servers
   mcpo-config.json: |
     {
-      "servers": [
+      "mcpServers": {
         {{- $first := true }}
         {{- if .Values.servers.filesystem.enabled }}
         {{- if not $first }},{{ end }}{{- $first = false }}
