@@ -17,7 +17,7 @@ spec:
         valueFiles:
           - values.yaml
     - repoURL: https://github.com/tzervas/self-hosted-ai
-      targetRevision: dev
+      targetRevision: main
       path: argocd/helm/prometheus
   destination:
     server: https://kubernetes.default.svc

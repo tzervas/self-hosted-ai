@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/tzervas/self-hosted-ai
-    targetRevision: dev
+    targetRevision: main
     path: argocd/helm/gpu-operator
     kustomize:
       commonLabels:

@@ -176,45 +176,34 @@ huggingface:
   cache_dir: /data/models/huggingface
   models:
     # === UNCENSORED TEXT GENERATION ===
-    # Primary uncensored model - Dolphin (based on Mistral, 32k context)
+    # Primary uncensored model - Wan2.5 14B (may need Q4 quant for 14GB VRAM)
+    - repo_id: cognitivecomputations/Wan2.5-14B-Instruct-Uncensored
+      name: wan2.5-14b-uncensored
+      size_gb: 28
+      quantization: Q4_K_M  # Reduces to ~8GB for comfortable VRAM fit
+      purpose: uncensored_chat
+      priority: required
+      capabilities: [uncensored_generation, creative_writing, roleplay, unrestricted]
+      notes: "Will be quantized to Q4_K_M before deployment if full precision doesn't fit"
+
+    # Smaller uncensored model - Wan2.5 7B for faster inference
+    - repo_id: cognitivecomputations/Wan2.5-7B-Instruct-Uncensored
+      name: wan2.5-7b-uncensored
+      size_gb: 14
+      quantization: Q5_K_M  # Good quality/size balance
+      purpose: uncensored_chat
+      priority: required
+      capabilities: [uncensored_generation, creative_writing, fast_inference]
+      notes: "Lighter weight option for quick uncensored responses"
+
+    # Alternative uncensored - Dolphin (based on Mistral)
     - repo_id: cognitivecomputations/dolphin-2.9.3-mistral-7B-32k
       name: dolphin-mistral-7b
       size_gb: 14
-      quantization: Q5_K_M  # Optional: reduces to ~4GB
-      purpose: uncensored_chat
-      priority: required
-      capabilities: [uncensored_generation, long_context, instruction_following, creative_writing]
-      notes: "Primary uncensored model - downloaded and ready"
-
-    # Wan2.2 for multimodal video generation (text/image to video)
-    - repo_id: Wan-AI/Wan-2.2-1.3B
-      name: wan-2.2-1.3b
-      size_gb: 2.6
-      quantization: FP16  # Can quantize to INT8 (1.3GB) if needed
-      purpose: text_to_video
-      priority: required
-      capabilities: [text_to_video, image_to_video, video_generation]
-      notes: "Small efficient video model - fits in VRAM alongside other models"
-
-    # Alternative larger uncensored - WizardLM
-    - repo_id: cognitivecomputations/WizardLM-2-8x22B-GGUF
-      name: wizardlm-2-8x22b
-      size_gb: 140
-      quantization: Q4_K_M  # Reduces to ~48GB
+      quantization: Q5_K_M
       purpose: uncensored_chat
       priority: optional
-      capabilities: [uncensored_generation, expert_reasoning, creative_writing]
-      notes: "Very large model - CPU only, requires significant RAM"
-
-    # === SPEECH-TO-TEXT (STT) ===
-    # Whisper Large v3 Turbo - Fast accurate transcription
-    - repo_id: openai/whisper-large-v3-turbo
-      name: whisper-large-v3-turbo
-      size_gb: 1.5
-      purpose: speech_to_text
-      priority: required
-      capabilities: [speech_to_text, transcription, multilingual, timestamp_extraction]
-      notes: "Optimized turbo version - 8x faster than large-v3 with same quality"
+      capabilities: [uncensored_generation, long_context, instruction_following]
 
     # === VOICE GENERATION (TTS) ===
     # XTTS v2 - High quality multilingual text-to-speech
@@ -254,15 +243,6 @@ huggingface:
       capabilities: [text_to_audio, sound_effects, environmental_sounds]
 
     # === MUSIC GENERATION ===
-    # Riffusion - Stable Diffusion fine-tuned for music spectrograms
-    - repo_id: riffusion/riffusion-model-v1
-      name: riffusion-v1
-      size_gb: 2.0
-      purpose: music_generation
-      priority: required
-      capabilities: [text_to_music, spectrogram_generation, music_variations]
-      notes: "Fast music generation via visual spectrograms - creative results"
-
     # MusicGen - High quality music generation
     - repo_id: facebook/musicgen-large
       name: musicgen-large
@@ -270,7 +250,7 @@ huggingface:
       purpose: music_generation
       priority: optional
       capabilities: [text_to_music, melody_continuation, style_transfer]
-      notes: "High fidelity music generation - any genre/style"
+      notes: "Uncensored music generation - any genre/style"
 
 # =============================================================================
 # ComfyUI Models - Image/Video Generation
@@ -281,27 +261,15 @@ comfyui:
   base_path: /data/comfyui/models
   models:
     # === VIDEO GENERATION ===
-    # WanVideo 2.2 - Improved text/image to video (1.3B params)
+    # Wan Video - Text/Image to video
     - type: checkpoint
-      name: wan_video_2.2_1.3b.safetensors
-      url: https://huggingface.co/Wan-AI/WanVideo-2.2-1.3B/resolve/main/wan_video_2.2_1.3b.safetensors
+      name: wan_video_1.3b.safetensors
+      url: https://huggingface.co/Wan-AI/Wan-1.3B/resolve/main/wan_video_1.3b.safetensors
       path: checkpoints/
       size_gb: 2.6
       purpose: video_generation
       priority: required
-      capabilities: [text_to_video, image_to_video, high_quality]
-      notes: "Latest WanVideo - improved temporal consistency and motion"
-
-    # Stable Video Diffusion - Image to video (high quality)
-    - type: checkpoint
-      name: svd_xt_1_1.safetensors
-      url: https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt-1-1/resolve/main/svd_xt_1_1.safetensors
-      path: checkpoints/
-      size_gb: 4.7
-      purpose: video_generation
-      priority: required
-      capabilities: [image_to_video, motion_control, high_quality]
-      notes: "Stable Video Diffusion XT 1.1 - 25 frames, excellent quality"
+      capabilities: [text_to_video, image_to_video]
 
     # === IMAGE GENERATION ===
     # SDXL Base - Primary image generation
@@ -341,29 +309,7 @@ comfyui:
       purpose: vae
       priority: required
 
-    # === MOTION MODULES (AnimateDiff) ===
-    - type: animatediff
-      name: animatediff_lightning_4step.safetensors
-      url: https://huggingface.co/ByteDance/AnimateDiff-Lightning/resolve/main/animatediff_lightning_4step_diffusers.safetensors
-      path: animatediff/
-      size_gb: 1.5
-      purpose: animation
-      priority: required
-      capabilities: [image_animation, fast_inference, motion_generation]
-      notes: "4-step AnimateDiff Lightning - very fast animation generation"
-
-    - type: animatediff
-      name: animatediff_lightning_8step.safetensors
-      url: https://huggingface.co/ByteDance/AnimateDiff-Lightning/resolve/main/animatediff_lightning_8step_diffusers.safetensors
-      path: animatediff/
-      size_gb: 1.5
-      purpose: animation
-      priority: optional
-      capabilities: [image_animation, high_quality, motion_generation]
-      notes: "8-step version - better quality, slightly slower"
-
-    # === CONTROLNET (Multi-Purpose) ===
-    # Canny Edge Detection ControlNet
+    # === CONTROLNET ===
     - type: controlnet
       name: control_v11p_sd15_canny.pth
       url: https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/main/control_v11p_sd15_canny.pth
@@ -371,45 +317,3 @@ comfyui:
       size_gb: 1.4
       purpose: controlnet
       priority: optional
-      capabilities: [edge_guided_generation, precise_composition]
-
-    # Depth-Aware ControlNet for SDXL
-    - type: controlnet
-      name: controlnet-depth-sdxl
-      url: https://huggingface.co/diffusers/controlnet-depth-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors
-      path: controlnet/
-      size_gb: 2.5
-      purpose: controlnet
-      priority: optional
-      capabilities: [depth_aware_generation, spatial_consistency, 3d_guidance]
-      notes: "SDXL-specific depth control for better spatial composition"
-
-    # Tile ControlNet for Seamless Upscaling
-    - type: controlnet
-      name: control_v11f1e_sd15_tile.pth
-      url: https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/main/control_v11f1e_sd15_tile.pth
-      path: controlnet/
-      size_gb: 1.4
-      purpose: controlnet
-      priority: optional
-      capabilities: [seamless_upscaling, tile_consistency, artifact_reduction]
-
-    - type: controlnet
-      name: control_v11f1e_sd15_tile.pth
-      url: https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/main/control_v11f1e_sd15_tile.pth
-      path: controlnet/
-      size_gb: 1.4
-      purpose: controlnet
-      priority: required
-      capabilities: [upscaling, detail_enhancement, video_consistency]
-      notes: "Tile ControlNet - essential for video frame consistency"
-
-    - type: controlnet
-      name: controlnet_depth_sdxl.safetensors
-      url: https://huggingface.co/diffusers/controlnet-depth-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors
-      path: controlnet/
-      size_gb: 2.5
-      purpose: controlnet
-      priority: optional
-      capabilities: [depth_control, 3d_consistency, video_generation]
-      notes: "SDXL depth ControlNet for better 3D understanding"

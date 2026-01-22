@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/tzervas/self-hosted-ai.git
-    targetRevision: dev
+    targetRevision: main
     path: helm/coredns-custom
   destination:
     server: https://kubernetes.default.svc
