@@ -34,7 +34,7 @@ spec:
   syncPolicy:
     automated:
       # CRITICAL: Never auto-prune the root app to prevent accidental deletion
-      prune: false
+      prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
