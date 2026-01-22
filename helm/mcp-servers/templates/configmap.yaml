@@ -12,8 +12,7 @@ data:
         {{- $first := true }}
         {{- if .Values.servers.filesystem.enabled }}
         {{- if not $first }},{{ end }}{{- $first = false }}
-        {
-          "name": "filesystem",
+        "filesystem": {
           "description": {{ .Values.servers.filesystem.description | quote }},
           "command": "npx",
           "args": ["-y", {{ .Values.servers.filesystem.package | quote }}, {{- range .Values.servers.filesystem.allowedPaths }}{{ . | quote }},{{- end }}""]
@@ -21,8 +20,7 @@ data:
         {{- end }}
         {{- if .Values.servers.git.enabled }}
         {{- if not $first }},{{ end }}{{- $first = false }}
-        {
-          "name": "git",
+        "git": {
           "description": {{ .Values.servers.git.description | quote }},
           "command": "npx",
           "args": ["-y", {{ .Values.servers.git.package | quote }}]
@@ -30,8 +28,7 @@ data:
         {{- end }}
         {{- if .Values.servers.fetch.enabled }}
         {{- if not $first }},{{ end }}{{- $first = false }}
-        {
-          "name": "fetch",
+        "fetch": {
           "description": {{ .Values.servers.fetch.description | quote }},
           "command": "npx",
           "args": ["-y", {{ .Values.servers.fetch.package | quote }}]
@@ -39,8 +36,7 @@ data:
         {{- end }}
         {{- if .Values.servers.memory.enabled }}
         {{- if not $first }},{{ end }}{{- $first = false }}
-        {
-          "name": "memory",
+        "memory": {
           "description": {{ .Values.servers.memory.description | quote }},
           "command": "npx",
           "args": ["-y", {{ .Values.servers.memory.package | quote }}]
@@ -48,8 +44,7 @@ data:
         {{- end }}
         {{- if .Values.servers.time.enabled }}
         {{- if not $first }},{{ end }}{{- $first = false }}
-        {
-          "name": "time",
+        "time": {
           "description": {{ .Values.servers.time.description | quote }},
           "command": "uvx",
           "args": [{{ .Values.servers.time.package | quote }}]
@@ -57,8 +52,7 @@ data:
         {{- end }}
         {{- if .Values.servers.duckduckgo.enabled }}
         {{- if not $first }},{{ end }}{{- $first = false }}
-        {
-          "name": "duckduckgo",
+        "duckduckgo": {
           "description": {{ .Values.servers.duckduckgo.description | quote }},
           "command": "uvx",
           "args": [{{ .Values.servers.duckduckgo.package | quote }}]
@@ -66,12 +60,11 @@ data:
         {{- end }}
         {{- if .Values.servers.sequentialThinking.enabled }}
         {{- if not $first }},{{ end }}{{- $first = false }}
-        {
-          "name": "sequential-thinking",
+        "sequential-thinking": {
           "description": {{ .Values.servers.sequentialThinking.description | quote }},
           "command": "npx",
           "args": ["-y", {{ .Values.servers.sequentialThinking.package | quote }}]
         }
         {{- end }}
-      ]
+      }
     }
