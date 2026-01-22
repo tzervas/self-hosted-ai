@@ -55,7 +55,7 @@ ORIGIN_CA_KEY_FILE="${SECRET_DIR}/cf-origin-ca-key"
 
 # Try alternate naming (typo in original: cpi vs api)
 if [[ ! -f "$GLOBAL_API_KEY_FILE" ]]; then
-    GLOBAL_API_KEY_FILE="${SECRET_DIR}/cf-global-cpi-key"
+    GLOBAL_API_KEY_FILE="${SECRET_DIR}/cf-global-api-key"
 fi
 
 if [[ ! -f "$GLOBAL_API_KEY_FILE" ]]; then
