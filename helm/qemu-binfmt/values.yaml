@@ -1,4 +1,7 @@
 # QEMU binfmt configuration
+# Set enabled: false to disable ARM/multi-arch emulation
+enabled: false  # Disabled by default - enable only if needed for multi-arch builds
+
 image:
   repository: tonistiigi/binfmt
   tag: latest

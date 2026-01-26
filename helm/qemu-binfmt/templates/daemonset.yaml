@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 # QEMU binfmt DaemonSet
 # Registers QEMU handlers on each node for multi-arch emulation
 apiVersion: apps/v1
@@ -58,3 +59,4 @@ spec:
           hostPath:
             path: /proc/sys/fs/binfmt_misc
             type: Directory
+{{- end }}

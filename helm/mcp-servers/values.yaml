@@ -42,14 +42,14 @@ servers:
     env: {}
 
   time:
-    enabled: true
+    enabled: false  # Disabled: package not found on npm registry
     description: "Time and date operations with timezone support"
     package: "mcp-server-time"
     env:
       TIMEZONE: "America/New_York"
 
   sequentialThinking:
-    enabled: true
+    enabled: false  # Disabled: package does not exist on npm registry
     description: "Multi-step reasoning and thought chain management"
     package: "mcp-server-sequential-thinking"
     env:
@@ -102,7 +102,7 @@ servers:
   # ========================
 
   duckduckgo:
-    enabled: true
+    enabled: false  # Disabled: uvx cache permission issues
     description: "DuckDuckGo web search (no API key required)"
     package: "mcp-server-duckduckgo"
     env:
