@@ -65,12 +65,22 @@ securityContext:
 podSecurityContext:
   fsGroup: 0
 
-# Probes
+# Probes - startup probe allows long model loading time
+startupProbe:
+  httpGet:
+    path: /api/version
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 60  # 60 * 10s = 10 min max startup (model loading)
+  successThreshold: 1
+
 livenessProbe:
   httpGet:
     path: /api/version
     port: http
-  initialDelaySeconds: 60
+  initialDelaySeconds: 10  # Reduced - startup probe handles slow starts
   periodSeconds: 30
   timeoutSeconds: 10
   failureThreshold: 3
@@ -79,7 +89,7 @@ readinessProbe:
   httpGet:
     path: /api/version
     port: http
-  initialDelaySeconds: 30
+  initialDelaySeconds: 5  # Reduced - startup probe handles slow starts
   periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 3

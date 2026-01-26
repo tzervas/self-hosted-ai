@@ -71,6 +71,42 @@ resources:
     cpu: 2000m
     memory: 4Gi
 
+# Health probes for deployment orchestration
+probes:
+  # Startup probe - allows slow container startup before liveness kicks in
+  startup:
+    enabled: true
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30  # 30 * 10s = 5 min max startup time
+    successThreshold: 1
+  # Liveness probe - restart container if unhealthy
+  liveness:
+    enabled: true
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 3
+    successThreshold: 1
+  # Readiness probe - remove from service if not ready
+  readiness:
+    enabled: true
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+
 # Horizontal Pod Autoscaler - scale based on CPU/memory
 autoscaling:
   enabled: true
