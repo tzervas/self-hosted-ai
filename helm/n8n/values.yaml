@@ -58,7 +58,7 @@ secretEnv:
 persistence:
   enabled: true
   size: 10Gi
-  storageClass: ""
+  storageClass: "longhorn"
   accessMode: ReadWriteOnce
 
 resources:

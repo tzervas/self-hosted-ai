@@ -37,7 +37,7 @@ resources:
 persistence:
   enabled: true
   size: 1Gi
-  storageClass: ""
+  storageClass: "longhorn"
 
 env:
   SEARXNG_BASE_URL: "http://searxng:8080"
