@@ -62,8 +62,8 @@ keycloak:
     enabled: true
     image:
       registry: docker.io
-      repository: bitnami/postgresql
-      tag: "16.6.0-debian-12-r8"
+      repository: bitnamilegacy/postgresql
+      tag: "16.4.0-debian-12-r2"
       pullPolicy: IfNotPresent
     auth:
       existingSecret: keycloak-db-secret
