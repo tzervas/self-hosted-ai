@@ -192,6 +192,14 @@ serviceAccount:
 networkPolicy:
   enabled: true
 
+# Disable bundled nginx-ingress (using Traefik instead)
+nginx-ingress:
+  enabled: false
+
+# Disable cert-manager (using external)
+certmanager:
+  install: false
+
 # Prometheus monitoring
 prometheus:
   install: false  # Using external Prometheus
