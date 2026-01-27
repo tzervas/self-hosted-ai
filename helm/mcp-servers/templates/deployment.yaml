@@ -41,14 +41,12 @@ spec:
               containerPort: {{ .Values.mcpoProxy.port }}
               protocol: TCP
           livenessProbe:
-            httpGet:
-              path: /health
+            tcpSocket:
               port: http
             initialDelaySeconds: 10
             periodSeconds: 30
           readinessProbe:
-            httpGet:
-              path: /health
+            tcpSocket:
               port: http
             initialDelaySeconds: 5
             periodSeconds: 10
