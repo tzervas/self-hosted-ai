@@ -12,6 +12,8 @@
 global:
   security:
     allowInsecureImages: true
+  # PostgreSQL global image override (for subchart)
+  imageRegistry: docker.io
 
 keycloak:
   # Use bitnami legacy images (free but archived)
@@ -60,8 +62,9 @@ keycloak:
     enabled: true
     image:
       registry: docker.io
-      repository: bitnamilegacy/postgresql
-      tag: "16.4.0-debian-12-r2"
+      repository: bitnami/postgresql
+      tag: "16.6.0-debian-12-r8"
+      pullPolicy: IfNotPresent
     auth:
       existingSecret: keycloak-db-secret
       secretKeys:
