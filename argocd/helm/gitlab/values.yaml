@@ -5,6 +5,9 @@
 
 global:
   edition: ce
+  # Skip upgrade check for fresh installs
+  upgradeCheck:
+    enabled: false
   hosts:
     domain: vectorweight.com
     https: true
