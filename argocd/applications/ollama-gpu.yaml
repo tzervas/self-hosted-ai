@@ -34,8 +34,7 @@ spec:
 
         modelsPersistence:
           enabled: true
-          size: 150Gi
-          storageClass: "longhorn-gpu-local"  # Single replica, strict-local
+          existingClaim: "shared-models"  # NFS share from homelab
 
         gpu:
           enabled: true
