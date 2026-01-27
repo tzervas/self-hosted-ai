@@ -1,7 +1,7 @@
 # GitLab Helm Values - Homelab Configuration
 # Chart: gitlab/gitlab
 # Repository: https://charts.gitlab.io/
-# Version: 8.x.x
+# Version: 9.7.1 (GitLab 18.x - requires PostgreSQL 16+)
 
 global:
   edition: ce
@@ -67,12 +67,12 @@ gitlab:
         cpu: 1
         memory: 2Gi
 
-# PostgreSQL
+# PostgreSQL (GitLab 18+ requires PostgreSQL 16+)
 postgresql:
   image:
-    registry: registry1.dso.mil
-    repository: ironbank/opensource/postgres/postgresql15
-    tag: "15.6"
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: "16.6.0"
   persistence:
     enabled: true
     size: 50Gi
@@ -147,6 +147,9 @@ registry:
     limits:
       cpu: 500m
       memory: 1Gi
+  # Registry database metadata (uses main PostgreSQL 16 instance)
+  database:
+    enabled: true
 
 # GitLab Runner
 gitlab-runner:
