@@ -9,6 +9,12 @@
 # Chart: bitnami/keycloak v24.4.0
 
 keycloak:
+  # Use bitnami legacy images (free but archived)
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/keycloak
+    tag: "24.0.5-debian-12-r3"
+
   # Production mode
   production: true
 
@@ -47,6 +53,10 @@ keycloak:
   # PostgreSQL database
   postgresql:
     enabled: true
+    image:
+      registry: docker.io
+      repository: bitnamilegacy/postgresql
+      tag: "16.4.0-debian-12-r2"
     auth:
       existingSecret: keycloak-db-secret
       secretKeys:
