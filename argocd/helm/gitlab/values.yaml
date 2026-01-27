@@ -196,10 +196,6 @@ networkPolicy:
 nginx-ingress:
   enabled: false
 
-# Disable cert-manager (using external)
-certmanager:
-  install: false
-
 # Prometheus monitoring
 prometheus:
   install: false  # Using external Prometheus
