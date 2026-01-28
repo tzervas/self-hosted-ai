@@ -46,9 +46,18 @@ spec:
               containerPort: 11434
               protocol: TCP
           env:
+            # Force IPv4 binding using pod IP from downward API
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: OLLAMA_HOST
+              value: "$(POD_IP):11434"
             {{- range $key, $value := .Values.env }}
+            {{- if ne $key "OLLAMA_HOST" }}
             - name: {{ $key }}
               value: {{ $value | quote }}
+            {{- end }}
             {{- end }}
           volumeMounts:
             {{- if .Values.modelsPersistence.enabled }}
