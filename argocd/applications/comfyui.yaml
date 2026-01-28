@@ -1,0 +1,69 @@
+# ComfyUI - Image and Video Generation
+# Runs on akula-prime GPU node with local storage
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: comfyui
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"  # Deploy after Ollama GPU
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/tzervas/self-hosted-ai.git
+    targetRevision: main
+    path: helm/gpu-worker
+    helm:
+      releaseName: comfyui
+      values: |
+        # Only deploy ComfyUI (disable other components)
+        ollama:
+          gpu:
+            enabled: false
+
+        automatic1111:
+          enabled: false
+
+        tts:
+          enabled: false
+
+        audio:
+          enabled: false
+
+        comfyui:
+          enabled: true
+          image:
+            repository: ghcr.io/ai-dock/comfyui
+            tag: latest
+            pullPolicy: IfNotPresent
+          service:
+            type: ClusterIP
+            port: 8188
+          env:
+            - name: CLI_ARGS
+              value: "--listen 0.0.0.0 --port 8188"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+          nodeSelector:
+            kubernetes.io/hostname: akula-prime
+          tolerations:
+            - key: nvidia.com/gpu
+              operator: Exists
+              effect: NoSchedule
+          resources:
+            requests:
+              memory: "4Gi"
+              cpu: "1000m"
+            limits:
+              memory: "16Gi"
+              cpu: "4000m"
+              nvidia.com/gpu: "1"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gpu-workloads
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -34,7 +34,7 @@ spec:
 
         modelsPersistence:
           enabled: true
-          existingClaim: "shared-models"  # NFS share from homelab
+          existingClaim: "akula-prime-models"  # Local storage on GPU node (faster than NFS)
 
         gpu:
           enabled: true

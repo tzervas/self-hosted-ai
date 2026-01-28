@@ -127,3 +127,63 @@ automatic1111:
       nvidia.com/gpu: 1
       memory: "24Gi"
       cpu: "6000m"
+
+# TTS Server (XTTS-v2) configuration
+tts:
+  enabled: true
+  image:
+    repository: ghcr.io/coqui-ai/tts
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5002
+    annotations: {}
+  env:
+    - name: USE_CUDA
+      value: "true"
+    - name: COQUI_TOS_AGREED
+      value: "1"
+  nodeSelector:
+    kubernetes.io/hostname: akula-prime
+  tolerations:
+    - key: "nvidia.com/gpu"
+      operator: "Exists"
+      effect: "NoSchedule"
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "500m"
+    limits:
+      memory: "8Gi"
+      cpu: "2000m"
+
+# Audio Generation Server (AudioLDM2/MusicGen) configuration
+audio:
+  enabled: true
+  image:
+    repository: ghcr.io/huggingface/text-generation-inference
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5004
+    annotations: {}
+  env:
+    - name: MODEL_ID
+      value: "facebook/musicgen-small"
+    - name: AUDIO_MODEL
+      value: "audioldm2-large"
+  nodeSelector:
+    kubernetes.io/hostname: akula-prime
+  tolerations:
+    - key: "nvidia.com/gpu"
+      operator: "Exists"
+      effect: "NoSchedule"
+  resources:
+    requests:
+      memory: "4Gi"
+      cpu: "1000m"
+    limits:
+      memory: "12Gi"
+      cpu: "4000m"

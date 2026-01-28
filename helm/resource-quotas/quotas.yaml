@@ -28,7 +28,7 @@ spec:
     services.loadbalancers: "0"
     services.nodeports: "5"
 ---
-# GPU Workloads namespace - GPU-related services
+# GPU Workloads namespace - GPU-related services on akula-prime (48GB RAM, RTX 5080 16GB)
 apiVersion: v1
 kind: ResourceQuota
 metadata:
@@ -36,16 +36,16 @@ metadata:
   namespace: gpu-workloads
 spec:
   hard:
-    # Compute - lighter since GPU is remote
-    requests.cpu: "8"
-    requests.memory: 16Gi
-    limits.cpu: "16"
-    limits.memory: 32Gi
-    # Pods
-    pods: "15"
+    # Compute - akula-prime has Intel 14700K + 48GB RAM
+    requests.cpu: "16"
+    requests.memory: 32Gi
+    limits.cpu: "24"
+    limits.memory: 80Gi  # Allow for GPU services + system overhead
+    # Pods - Ollama, ComfyUI, TTS, Audio
+    pods: "20"
     # Storage
-    requests.storage: 300Gi
-    persistentvolumeclaims: "10"
+    requests.storage: 500Gi
+    persistentvolumeclaims: "15"
 ---
 # Self-hosted AI namespace - infrastructure services
 apiVersion: v1

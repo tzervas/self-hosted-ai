@@ -1,0 +1,68 @@
+# Audio Server (AudioLDM/MusicGen) - Sound Effects and Music Generation
+# Runs on akula-prime GPU node for fast inference
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: audio-server
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"  # Deploy after Ollama GPU
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/tzervas/self-hosted-ai.git
+    targetRevision: main
+    path: helm/gpu-worker
+    helm:
+      releaseName: audio-server
+      values: |
+        # Only deploy Audio (disable other components)
+        ollama:
+          gpu:
+            enabled: false
+
+        comfyui:
+          enabled: false
+
+        automatic1111:
+          enabled: false
+
+        tts:
+          enabled: false
+
+        audio:
+          enabled: true
+          image:
+            repository: python
+            tag: 3.11-slim
+            pullPolicy: IfNotPresent
+          service:
+            type: ClusterIP
+            port: 5004
+          env:
+            - name: HF_HOME
+              value: "/models/huggingface"
+            - name: TORCH_HOME
+              value: "/models/torch"
+          nodeSelector:
+            kubernetes.io/hostname: akula-prime
+          tolerations:
+            - key: nvidia.com/gpu
+              operator: Exists
+              effect: NoSchedule
+          resources:
+            requests:
+              memory: "4Gi"
+              cpu: "1000m"
+            limits:
+              memory: "12Gi"
+              cpu: "4000m"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gpu-workloads
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
