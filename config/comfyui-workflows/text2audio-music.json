@@ -1,0 +1,107 @@
+{
+  "last_node_id": 5,
+  "last_link_id": 4,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "TextInput",
+      "pos": [100, 200],
+      "size": {"0": 450, "1": 100},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [1],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "text": "epic orchestral music, cinematic, dramatic, building tension, full orchestra"
+      },
+      "widgets_values": ["epic orchestral music, cinematic, dramatic, building tension, full orchestra"]
+    },
+    {
+      "id": 2,
+      "type": "MusicGenLoader",
+      "pos": [100, 380],
+      "size": {"0": 315, "1": 82},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "MUSICGEN_MODEL",
+          "type": "MUSICGEN_MODEL",
+          "links": [2],
+          "slot_index": 0
+        }
+      ],
+      "properties": {},
+      "widgets_values": ["facebook/musicgen-large", "cuda"]
+    },
+    {
+      "id": 3,
+      "type": "MusicGenGenerate",
+      "pos": [550, 250],
+      "size": {"0": 350, "1": 180},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MUSICGEN_MODEL",
+          "link": 2
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [3],
+          "slot_index": 0
+        }
+      ],
+      "properties": {},
+      "widgets_values": [10.0, 3.0, 250, 32000, 42, true]
+    },
+    {
+      "id": 4,
+      "type": "SaveAudio",
+      "pos": [950, 280],
+      "size": {"0": 315, "1": 82},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 3
+        }
+      ],
+      "properties": {},
+      "widgets_values": ["music_output", "wav"]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 3, 1, "STRING"],
+    [2, 2, 0, 3, 0, "MUSICGEN_MODEL"],
+    [3, 3, 0, 4, 0, "AUDIO"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "workflow_name": "Text to Music - MusicGen",
+    "description": "Generate music from text descriptions using MusicGen"
+  },
+  "version": 0.4
+}

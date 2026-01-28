@@ -85,7 +85,7 @@ servers:
       MAX_RESPONSE_SIZE: "10485760"  # 10MB
 
   puppeteer:
-    enabled: false  # Requires more resources
+    enabled: true  # Enabled for browser automation and interactive testing
     description: "Browser automation and screenshot capture"
     package: "@anthropic/mcp-server-puppeteer"
     resources:
@@ -94,8 +94,11 @@ servers:
         memory: 512Mi
       limits:
         cpu: 1000m
-        memory: 1Gi
-    env: {}
+        memory: 2Gi
+    env:
+      PUPPETEER_HEADLESS: "true"
+      PUPPETEER_NO_SANDBOX: "true"
+      PUPPETEER_DISABLE_DEV_SHM_USAGE: "true"
 
   # ========================
   # Search Servers (No API Keys)

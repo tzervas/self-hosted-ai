@@ -1,0 +1,348 @@
+{
+  "name": "Unified Multimodal Content Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "content/create-unified",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 400],
+      "webhookId": "unified-content"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Initialize unified content creation request\nconst input = $input.first();\nconst concept = input.json.body.concept;\nconst style = input.json.body.style || 'cinematic';\nconst duration = input.json.body.duration || 10; // seconds\nconst includeVoice = input.json.body.include_voice !== false;\nconst includeSfx = input.json.body.include_sfx !== false;\nconst includeMusic = input.json.body.include_music !== false;\nconst outputFormat = input.json.body.output_format || 'mp4';\n\nif (!concept || concept.length === 0) {\n  throw new Error('Concept description is required');\n}\n\nreturn {\n  json: {\n    concept: concept,\n    style: style,\n    duration: Math.min(duration, 60),\n    include_voice: includeVoice,\n    include_sfx: includeSfx,\n    include_music: includeMusic,\n    output_format: outputFormat,\n    request_id: 'unified_' + Date.now(),\n    pipeline_status: {\n      script: 'pending',\n      image: 'pending',\n      video: 'pending',\n      voice: includeVoice ? 'pending' : 'skipped',\n      sfx: includeSfx ? 'pending' : 'skipped',\n      music: includeMusic ? 'pending' : 'skipped',\n      merge: 'pending'\n    },\n    outputs: {}\n  }\n};"
+      },
+      "id": "init-pipeline",
+      "name": "Initialize Pipeline",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://litellm:4000/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.LITELLM_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'qwen2.5-coder:14b', messages: [{ role: 'system', content: 'You are a creative director AI. Generate detailed content specifications for multimedia production. Output valid JSON only.' }, { role: 'user', content: 'Create a ' + $json.duration + '-second ' + $json.style + ' video concept based on: \"' + $json.concept + '\"\\n\\nProvide JSON with these fields:\\n- title: catchy title\\n- image_prompt: detailed prompt for generating the main visual (for SDXL)\\n- video_prompt: prompt for animating the image\\n- narration: voice-over script (if any)\\n- sfx_prompts: array of sound effect descriptions with timestamps\\n- music_prompt: background music description\\n- mood: overall mood\\n- color_palette: suggested colors' }], temperature: 0.8, max_tokens: 2000 }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "generate-script",
+      "name": "Generate Creative Script",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [690, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse creative script and prepare parallel generation tasks\nconst state = $('Initialize Pipeline').first().json;\nconst llmResponse = $input.first().json.choices[0].message.content;\n\n// Extract JSON from response\nlet script;\ntry {\n  const jsonMatch = llmResponse.match(/\\{[\\s\\S]*\\}/);\n  script = JSON.parse(jsonMatch ? jsonMatch[0] : llmResponse);\n} catch (e) {\n  script = {\n    title: 'Generated Content',\n    image_prompt: state.concept + ', ' + state.style + ' style, high quality, detailed',\n    video_prompt: state.concept,\n    narration: '',\n    sfx_prompts: [{ time: 0, description: 'ambient sound' }],\n    music_prompt: state.style + ' background music',\n    mood: 'dynamic',\n    color_palette: ['#2196F3', '#FF9800', '#4CAF50']\n  };\n}\n\nreturn {\n  json: {\n    ...state,\n    script: script,\n    pipeline_status: {\n      ...state.pipeline_status,\n      script: 'completed'\n    }\n  }\n};"
+      },
+      "id": "parse-script",
+      "name": "Parse Script",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [910, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://comfyui:8188/prompt",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ prompt: { workflow: 'txt2img-sdxl', positive_prompt: $json.script.image_prompt, negative_prompt: 'blurry, low quality, distorted', width: 1024, height: 576, steps: 30 }, client_id: 'unified-image-' + Date.now() }) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "generate-image",
+      "name": "Generate Base Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1130, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://tts-server:5002/api/tts",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ text: $json.script.narration || 'No narration provided.', speaker_wav: 'en_speaker_0', language: 'en' }) }}",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "generate-voice",
+      "name": "Generate Voice",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1130, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://audio-server:5004/api/audioldm",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ prompt: ($json.script.sfx_prompts || []).map(s => s.description).join(', '), duration: Math.min($json.duration, 10), num_inference_steps: 30 }) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "generate-sfx",
+      "name": "Generate SFX",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1130, 600]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://audio-server:5004/api/musicgen",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ prompt: $json.script.music_prompt || ($json.style + ' instrumental background music'), duration: $json.duration }) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "generate-music",
+      "name": "Generate Music",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1130, 800]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge all generation results\nconst state = $('Parse Script').first().json;\n\n// Collect outputs from parallel nodes (handle missing nodes gracefully)\nconst imageResult = $('Generate Base Image').first()?.json || { prompt_id: null };\nconst voiceResult = state.include_voice ? ($('Generate Voice').first()?.json || {}) : { skipped: true };\nconst sfxResult = state.include_sfx ? ($('Generate SFX').first()?.json || {}) : { skipped: true };\nconst musicResult = state.include_music ? ($('Generate Music').first()?.json || {}) : { skipped: true };\n\nreturn {\n  json: {\n    ...state,\n    outputs: {\n      image_prompt_id: imageResult.prompt_id,\n      voice: voiceResult,\n      sfx: sfxResult,\n      music: musicResult\n    },\n    pipeline_status: {\n      ...state.pipeline_status,\n      image: imageResult.prompt_id ? 'queued' : 'failed',\n      voice: voiceResult.skipped ? 'skipped' : (voiceResult.audio_url ? 'completed' : 'processing'),\n      sfx: sfxResult.skipped ? 'skipped' : (sfxResult.audio_url ? 'completed' : 'processing'),\n      music: musicResult.skipped ? 'skipped' : (musicResult.audio_url ? 'completed' : 'processing')\n    }\n  }\n};"
+      },
+      "id": "merge-generations",
+      "name": "Merge Generations",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1350, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://comfyui:8188/prompt",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ prompt: { workflow: 'text2video-wan', source_image_prompt_id: $json.outputs.image_prompt_id, video_prompt: $json.script.video_prompt || $json.concept, frames: Math.min($json.duration * 8, 120), width: 512, height: 288 }, client_id: 'unified-video-' + Date.now() }) }}",
+        "options": {
+          "timeout": 900000
+        }
+      },
+      "id": "generate-video",
+      "name": "Generate Video from Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1570, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Finalize unified content result\nconst state = $('Merge Generations').first().json;\nconst videoResult = $input.first().json;\n\nconst finalOutput = {\n  success: true,\n  request_id: state.request_id,\n  title: state.script.title || 'Untitled',\n  concept: state.concept,\n  style: state.style,\n  duration: state.duration,\n  \n  creative_script: state.script,\n  \n  assets: {\n    video: {\n      prompt_id: videoResult.prompt_id,\n      status: 'queued',\n      message: 'Video generation queued. Check status at /content/status/' + videoResult.prompt_id\n    },\n    image: {\n      prompt_id: state.outputs.image_prompt_id,\n      status: 'queued'\n    },\n    voice: state.outputs.voice.skipped ? null : {\n      audio_url: state.outputs.voice.audio_url,\n      status: 'completed'\n    },\n    sfx: state.outputs.sfx.skipped ? null : {\n      audio_url: state.outputs.sfx.audio_url,\n      status: 'completed'\n    },\n    music: state.outputs.music.skipped ? null : {\n      audio_url: state.outputs.music.audio_url,\n      status: 'completed'\n    }\n  },\n  \n  pipeline_status: {\n    ...state.pipeline_status,\n    video: 'queued',\n    merge: 'pending'\n  },\n  \n  next_steps: [\n    'Poll video status until complete',\n    'Download all assets',\n    'Use FFmpeg to merge video + audio tracks',\n    'Or use the /content/merge endpoint with all asset URLs'\n  ]\n};\n\nreturn { json: finalOutput };"
+      },
+      "id": "finalize-output",
+      "name": "Finalize Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1790, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2010, 400]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Initialize Pipeline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize Pipeline": {
+      "main": [
+        [
+          {
+            "node": "Generate Creative Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Creative Script": {
+      "main": [
+        [
+          {
+            "node": "Parse Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Script": {
+      "main": [
+        [
+          {
+            "node": "Generate Base Image",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Voice",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate SFX",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Music",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Base Image": {
+      "main": [
+        [
+          {
+            "node": "Merge Generations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Voice": {
+      "main": [
+        [
+          {
+            "node": "Merge Generations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate SFX": {
+      "main": [
+        [
+          {
+            "node": "Merge Generations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Music": {
+      "main": [
+        [
+          {
+            "node": "Merge Generations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Generations": {
+      "main": [
+        [
+          {
+            "node": "Generate Video from Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Video from Image": {
+      "main": [
+        [
+          {
+            "node": "Finalize Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finalize Output": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "instanceId": "self-hosted-ai"
+  },
+  "tags": [
+    {
+      "name": "multimodal"
+    },
+    {
+      "name": "unified"
+    },
+    {
+      "name": "video"
+    },
+    {
+      "name": "audio"
+    },
+    {
+      "name": "voice"
+    },
+    {
+      "name": "sfx"
+    }
+  ]
+}

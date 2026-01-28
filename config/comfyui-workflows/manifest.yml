@@ -212,7 +212,85 @@ workflows:
           size_gb: 9.5
 
   # =============================================================================
-  # Audio Workflows
+  # Audio Generation Workflows
+  # =============================================================================
+  text2audio-tts:
+    name: "Text to Speech - XTTS v2"
+    file: text2audio-tts.json
+    description: "Generate natural speech from text with voice cloning support"
+    priority: optional
+    tags: [audio, tts, voice, speech]
+    requirements:
+      vram_min_gb: 4
+      custom_nodes:
+        - ComfyUI-XTTS
+      models:
+        - type: tts
+          name: xtts_v2
+          path: tts_models/
+          size_gb: 1.8
+
+  text2audio-sfx:
+    name: "Text to Sound Effects - AudioLDM2"
+    file: text2audio-sfx.json
+    description: "Generate sound effects from text descriptions"
+    priority: optional
+    tags: [audio, sfx, sound, effects]
+    requirements:
+      vram_min_gb: 6
+      custom_nodes:
+        - ComfyUI-AudioLDM
+      models:
+        - type: audio
+          name: audioldm2-large
+          path: audio_models/
+          size_gb: 3.5
+
+  text2audio-music:
+    name: "Text to Music - MusicGen"
+    file: text2audio-music.json
+    description: "Generate music from text descriptions"
+    priority: optional
+    tags: [audio, music, generation]
+    requirements:
+      vram_min_gb: 6
+      custom_nodes:
+        - ComfyUI-MusicGen
+      models:
+        - type: audio
+          name: musicgen-large
+          path: audio_models/
+          size_gb: 3.3
+
+  video-with-audio:
+    name: "Unified Video with Audio"
+    file: video-with-audio.json
+    description: "Complete pipeline: Generate image, animate to video, add ambient SFX and background music"
+    priority: optional
+    tags: [video, audio, sfx, music, multimodal, unified, agentic]
+    requirements:
+      vram_min_gb: 16
+      custom_nodes:
+        - VideoHelperSuite
+        - ComfyUI-AudioLDM
+        - ComfyUI-MusicGen
+        - ComfyUI-SVD
+      models:
+        - type: checkpoint
+          name: sd_xl_base_1.0.safetensors
+          path: checkpoints/
+        - type: checkpoint
+          name: svd_xt_1_1.safetensors
+          path: checkpoints/
+        - type: audio
+          name: audioldm2-large
+          path: audio_models/
+        - type: audio
+          name: musicgen-medium
+          path: audio_models/
+
+  # =============================================================================
+  # Audio Input Workflows
   # =============================================================================
   audio2img:
     name: "Audio to Image"

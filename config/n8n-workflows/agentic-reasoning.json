@@ -1,0 +1,393 @@
+{
+  "name": "Agentic Reasoning Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agent/reason",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "agentic-reason"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Initialize agent state\nconst input = $input.first();\nconst task = input.json.body.task;\nconst maxSteps = input.json.body.max_steps || 5;\nconst model = input.json.body.model || 'qwen2.5-coder:14b';\n\nconst systemPrompt = `You are an intelligent agent that breaks down tasks into steps and executes them.\nYou have access to these tools:\n- search: Search the web for information\n- generate_image: Generate an image from a prompt\n- generate_code: Generate code for a task\n- analyze_image: Analyze an image and describe it\n- generate_audio: Generate speech or sound effects\n\nFor each step, respond with JSON:\n{\n  \"thought\": \"your reasoning\",\n  \"action\": \"tool_name\" or \"final_answer\",\n  \"action_input\": \"input for the tool or final response\",\n  \"confidence\": 0.0-1.0\n}\n\nIf action is \"final_answer\", action_input should be your complete response.`;\n\nreturn {\n  json: {\n    task: task,\n    model: model,\n    max_steps: maxSteps,\n    current_step: 0,\n    system_prompt: systemPrompt,\n    history: [],\n    status: 'running'\n  }\n};"
+      },
+      "id": "init-agent",
+      "name": "Initialize Agent",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://litellm:4000/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.LITELLM_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: $json.model, messages: [{ role: 'system', content: $json.system_prompt }, { role: 'user', content: 'Task: ' + $json.task + '\\n\\nPrevious steps:\\n' + JSON.stringify($json.history) + '\\n\\nWhat is your next step?' }], temperature: 0.7, max_tokens: 2000 }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "llm-reasoning",
+      "name": "LLM Reasoning Step",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse LLM response and determine next action\nconst state = $('Initialize Agent').first().json;\nconst llmResponse = $input.first().json.choices[0].message.content;\n\n// Try to parse JSON from response\nlet parsed;\ntry {\n  // Extract JSON from response (may be wrapped in markdown)\n  const jsonMatch = llmResponse.match(/\\{[\\s\\S]*\\}/);\n  parsed = JSON.parse(jsonMatch ? jsonMatch[0] : llmResponse);\n} catch (e) {\n  parsed = {\n    thought: llmResponse,\n    action: 'final_answer',\n    action_input: llmResponse,\n    confidence: 0.5\n  };\n}\n\nconst newHistory = [...state.history, {\n  step: state.current_step + 1,\n  thought: parsed.thought,\n  action: parsed.action,\n  action_input: parsed.action_input,\n  confidence: parsed.confidence\n}];\n\nreturn {\n  json: {\n    ...state,\n    current_step: state.current_step + 1,\n    history: newHistory,\n    current_action: parsed.action,\n    current_input: parsed.action_input,\n    is_final: parsed.action === 'final_answer',\n    should_continue: parsed.action !== 'final_answer' && state.current_step < state.max_steps - 1\n  }\n};"
+      },
+      "id": "parse-response",
+      "name": "Parse Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [910, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "is-final",
+              "leftValue": "={{ $json.is_final }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-final",
+      "name": "Is Final Answer?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1130, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.current_action }}",
+              "operation": "equals",
+              "value2": "search"
+            }
+          ]
+        }
+      },
+      "id": "switch-action",
+      "name": "Route Action",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1350, 400]
+    },
+    {
+      "parameters": {
+        "url": "=http://searxng:8080/search?q={{ encodeURIComponent($json.current_input) }}&format=json",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "tool-search",
+      "name": "Tool: Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1570, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://comfyui:8188/prompt",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ prompt: { workflow: 'txt2img-sdxl', positive_prompt: $json.current_input } }) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "tool-image",
+      "name": "Tool: Generate Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1570, 350]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://litellm:4000/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.LITELLM_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'qwen2.5-coder:14b', messages: [{ role: 'system', content: 'You are a code generation assistant. Generate clean, well-documented code.' }, { role: 'user', content: $json.current_input }], temperature: 0.3 }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "tool-code",
+      "name": "Tool: Generate Code",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1570, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge tool result back into state\nconst state = $('Parse Response').first().json;\nconst toolResult = $input.first().json;\n\nconst updatedHistory = [...state.history];\nupdatedHistory[updatedHistory.length - 1].result = JSON.stringify(toolResult).slice(0, 2000);\n\nreturn {\n  json: {\n    ...state,\n    history: updatedHistory,\n    last_tool_result: toolResult\n  }\n};"
+      },
+      "id": "merge-result",
+      "name": "Merge Tool Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1790, 350]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "should-continue",
+              "leftValue": "={{ $json.should_continue }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-continue",
+      "name": "Continue Loop?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2010, 350]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, task: $json.task, steps_taken: $json.current_step, final_answer: $json.current_input, reasoning_chain: $json.history, model: $json.model }) }}",
+        "options": {}
+      },
+      "id": "respond-final",
+      "name": "Respond Final",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1350, 200]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Initialize Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize Agent": {
+      "main": [
+        [
+          {
+            "node": "LLM Reasoning Step",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Reasoning Step": {
+      "main": [
+        [
+          {
+            "node": "Parse Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Response": {
+      "main": [
+        [
+          {
+            "node": "Is Final Answer?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Final Answer?": {
+      "main": [
+        [
+          {
+            "node": "Respond Final",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Route Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Action": {
+      "main": [
+        [
+          {
+            "node": "Tool: Search",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tool: Generate Image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tool: Generate Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool: Search": {
+      "main": [
+        [
+          {
+            "node": "Merge Tool Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool: Generate Image": {
+      "main": [
+        [
+          {
+            "node": "Merge Tool Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool: Generate Code": {
+      "main": [
+        [
+          {
+            "node": "Merge Tool Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Tool Result": {
+      "main": [
+        [
+          {
+            "node": "Continue Loop?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continue Loop?": {
+      "main": [
+        [
+          {
+            "node": "LLM Reasoning Step",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "instanceId": "self-hosted-ai"
+  },
+  "tags": [
+    {
+      "name": "agentic"
+    },
+    {
+      "name": "reasoning"
+    },
+    {
+      "name": "multi-step"
+    }
+  ]
+}

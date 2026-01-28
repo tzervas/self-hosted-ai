@@ -1,0 +1,148 @@
+{
+  "name": "Vision Analysis Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vision/analyze",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "vision-analyze"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare vision analysis request\nconst input = $input.first();\nconst imageUrl = input.json.body.image_url;\nconst imageBase64 = input.json.body.image_base64;\nconst prompt = input.json.body.prompt || 'Describe this image in detail.';\nconst model = input.json.body.model || 'llava:13b';\nconst tasks = input.json.body.tasks || ['describe']; // describe, ocr, objects, caption\n\nif (!imageUrl && !imageBase64) {\n  throw new Error('Either image_url or image_base64 is required');\n}\n\nreturn {\n  json: {\n    image_url: imageUrl,\n    image_base64: imageBase64,\n    prompt: prompt,\n    model: model,\n    tasks: tasks,\n    request_id: 'vision_' + Date.now()\n  }\n};"
+      },
+      "id": "prepare-request",
+      "name": "Prepare Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://litellm:4000/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.LITELLM_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: $json.model, messages: [{ role: 'user', content: [{ type: 'text', text: $json.prompt }, { type: 'image_url', image_url: { url: $json.image_url || ('data:image/jpeg;base64,' + $json.image_base64) } }] }], max_tokens: 2000, temperature: 0.3 }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "vision-analysis",
+      "name": "Vision Analysis (LLaVA)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process vision analysis result\nconst input = $input.first();\nconst request = $('Prepare Request').first().json;\nconst response = input.json.choices[0].message.content;\n\n// Try to extract structured data if tasks include specific analyses\nlet structuredOutput = {\n  description: response\n};\n\nif (request.tasks.includes('objects')) {\n  // Extract object mentions from response\n  const objectPattern = /(?:contains|shows|depicts|features|includes|has)\\s+([^.]+)/gi;\n  const matches = response.matchAll(objectPattern);\n  structuredOutput.detected_objects = [...matches].map(m => m[1].trim());\n}\n\nif (request.tasks.includes('ocr')) {\n  // Extract any quoted text as potential OCR\n  const textPattern = /[\"']([^\"']+)[\"']/g;\n  const textMatches = response.matchAll(textPattern);\n  structuredOutput.extracted_text = [...textMatches].map(m => m[1]);\n}\n\nreturn {\n  json: {\n    success: true,\n    request_id: request.request_id,\n    model: request.model,\n    tasks: request.tasks,\n    analysis: response,\n    structured: structuredOutput,\n    tokens_used: input.json.usage?.total_tokens || 0\n  }\n};"
+      },
+      "id": "process-result",
+      "name": "Process Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [910, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1130, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Request": {
+      "main": [
+        [
+          {
+            "node": "Vision Analysis (LLaVA)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vision Analysis (LLaVA)": {
+      "main": [
+        [
+          {
+            "node": "Process Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Result": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "instanceId": "self-hosted-ai"
+  },
+  "tags": [
+    {
+      "name": "vision"
+    },
+    {
+      "name": "analysis"
+    },
+    {
+      "name": "multimodal"
+    }
+  ]
+}
