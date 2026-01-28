@@ -41,11 +41,14 @@ spec:
         - name: tts
           image: "{{ .Values.tts.image.repository }}:{{ .Values.tts.image.tag }}"
           imagePullPolicy: {{ .Values.tts.image.pullPolicy }}
+          command: ["tts-server"]
           args:
             - "--model_name"
             - "tts_models/multilingual/multi-dataset/xtts_v2"
             - "--use_cuda"
             - "true"
+            - "--port"
+            - "5002"
           ports:
             - name: http
               containerPort: 5002
