@@ -31,7 +31,7 @@ spec:
           enabled: false
 
         audio:
-          enabled: true
+          enabled: false  # Disabled until proper AudioCraft/AudioLDM2 image is available
           image:
             repository: python
             tag: 3.11-slim
