@@ -30,6 +30,9 @@ spec:
         tts:
           enabled: false
 
+        video:
+          enabled: false
+
         audio:
           enabled: true
           image:
