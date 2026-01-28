@@ -118,8 +118,9 @@ autoscaling:
   scaleUpStabilizationWindowSeconds: 0
 
 # Vertical Pod Autoscaler - recommend optimal resources
+# NOTE: Requires VPA CRD to be installed (not installed in this cluster)
 vpa:
-  enabled: true
+  enabled: false
   updateMode: "Off"  # "Off" = recommendations only, "Auto" = automatic updates
   minAllowed:
     cpu: 100m
