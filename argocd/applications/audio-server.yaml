@@ -36,6 +36,8 @@ spec:
             repository: ghcr.io/tzervas/audio-server
             tag: "1.1.0"
             pullPolicy: IfNotPresent
+          imagePullSecrets:
+            - name: ghcr-secret
           service:
             type: ClusterIP
             port: 5004

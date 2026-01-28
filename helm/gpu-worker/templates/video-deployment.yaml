@@ -33,6 +33,10 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.video.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: video
           image: "{{ .Values.video.image.repository }}:{{ .Values.video.image.tag }}"
