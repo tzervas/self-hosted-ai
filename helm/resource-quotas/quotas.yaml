@@ -29,6 +29,7 @@ spec:
     services.nodeports: "5"
 ---
 # GPU Workloads namespace - GPU-related services on akula-prime (48GB RAM, RTX 5080 16GB)
+# Limits are over-provisioned as not all services hit max simultaneously
 apiVersion: v1
 kind: ResourceQuota
 metadata:
@@ -37,10 +38,10 @@ metadata:
 spec:
   hard:
     # Compute - akula-prime has Intel 14700K + 48GB RAM
-    requests.cpu: "16"
-    requests.memory: 32Gi
-    limits.cpu: "24"
-    limits.memory: 80Gi  # Allow for GPU services + system overhead
+    requests.cpu: "20"
+    requests.memory: 40Gi
+    limits.cpu: "32"
+    limits.memory: 128Gi  # Over-provisioned: allows burst but not all services peak at once
     # Pods - Ollama, ComfyUI, TTS, Audio
     pods: "20"
     # Storage
