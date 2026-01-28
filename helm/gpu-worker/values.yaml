@@ -2,6 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# Create local storage PV/PVC for akula-prime (only needed once)
+createLocalStorage: false
+
 # Ollama GPU configuration
 ollama:
   gpu:

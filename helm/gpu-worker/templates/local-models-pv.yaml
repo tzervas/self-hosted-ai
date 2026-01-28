@@ -1,3 +1,4 @@
+{{- if .Values.createLocalStorage }}
 # Local storage for GPU models on akula-prime
 # Faster than NFS for GPU inference workloads
 apiVersion: v1
@@ -48,3 +49,4 @@ metadata:
   name: local-storage
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
+{{- end }}
