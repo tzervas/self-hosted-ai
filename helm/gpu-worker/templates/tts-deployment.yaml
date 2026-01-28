@@ -33,39 +33,19 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      initContainers:
-        - name: download-models
-          image: curlimages/curl:latest
-          command:
-            - /bin/sh
-            - -c
-            - |
-              echo "Checking for XTTS model..."
-              if [ ! -f /models/tts/xtts_v2/config.json ]; then
-                echo "Downloading XTTS v2 model..."
-                mkdir -p /models/tts/xtts_v2
-                cd /models/tts/xtts_v2
-                curl -L -o config.json "https://huggingface.co/coqui/XTTS-v2/resolve/main/config.json"
-                curl -L -o model.pth "https://huggingface.co/coqui/XTTS-v2/resolve/main/model.pth"
-                curl -L -o vocab.json "https://huggingface.co/coqui/XTTS-v2/resolve/main/vocab.json"
-                echo "XTTS v2 model downloaded."
-              else
-                echo "XTTS v2 model already exists."
-              fi
-          resources:
-            requests:
-              cpu: 100m
-              memory: 256Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
-          volumeMounts:
-            - name: models
-              mountPath: /models
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 0
       containers:
         - name: tts
           image: "{{ .Values.tts.image.repository }}:{{ .Values.tts.image.tag }}"
           imagePullPolicy: {{ .Values.tts.image.pullPolicy }}
+          args:
+            - "--model_name"
+            - "tts_models/multilingual/multi-dataset/xtts_v2"
+            - "--use_cuda"
+            - "true"
           ports:
             - name: http
               containerPort: 5002
@@ -75,37 +55,30 @@ spec:
               value: "all"
             - name: CUDA_VISIBLE_DEVICES
               value: "0"
-            - name: TTS_MODEL_PATH
-              value: "/models/tts"
             {{- range .Values.tts.env }}
             - name: {{ .name }}
               value: {{ .value | quote }}
             {{- end }}
           volumeMounts:
-            - name: models
-              mountPath: /models
-            - name: outputs
-              mountPath: /outputs
+            - name: cache
+              mountPath: /root/.local/share
           startupProbe:
-            httpGet:
-              path: /health
+            tcpSocket:
               port: http
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 30
+            failureThreshold: 60
             successThreshold: 1
           livenessProbe:
-            httpGet:
-              path: /health
+            tcpSocket:
               port: http
             initialDelaySeconds: 10
             periodSeconds: 30
             timeoutSeconds: 10
             failureThreshold: 3
           readinessProbe:
-            httpGet:
-              path: /health
+            tcpSocket:
               port: http
             initialDelaySeconds: 10
             periodSeconds: 10
@@ -114,9 +87,7 @@ spec:
           resources:
             {{- toYaml .Values.tts.resources | nindent 12 }}
       volumes:
-        - name: models
-          persistentVolumeClaim:
-            claimName: akula-prime-models
-        - name: outputs
-          emptyDir: {}
+        - name: cache
+          emptyDir:
+            sizeLimit: 10Gi
 {{- end }}
