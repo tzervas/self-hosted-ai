@@ -161,22 +161,22 @@ tts:
       memory: "8Gi"
       cpu: "2000m"
 
-# Audio Generation Server (AudioLDM2/MusicGen) configuration
+# Audio Generation Server (AudioLDM2/MusicGen/Bark) configuration
 audio:
   enabled: true
   image:
-    repository: ghcr.io/huggingface/text-generation-inference
-    tag: latest
+    repository: ghcr.io/tzervas/audio-server
+    tag: "1.1.0"
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
     port: 5004
     annotations: {}
   env:
-    - name: MODEL_ID
-      value: "facebook/musicgen-small"
-    - name: AUDIO_MODEL
-      value: "audioldm2-large"
+    - name: HF_HOME
+      value: "/models/huggingface"
+    - name: TORCH_HOME
+      value: "/models/torch"
   nodeSelector:
     kubernetes.io/hostname: akula-prime
   tolerations:
@@ -189,4 +189,34 @@ audio:
       cpu: "1000m"
     limits:
       memory: "12Gi"
+      cpu: "4000m"
+
+# Video Generation Server (AnimateDiff-Lightning/SVD) configuration
+video:
+  enabled: true
+  image:
+    repository: ghcr.io/tzervas/video-server
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5005
+    annotations: {}
+  env:
+    - name: HF_HOME
+      value: "/models/huggingface"
+    - name: TORCH_HOME
+      value: "/models/torch"
+  nodeSelector:
+    kubernetes.io/hostname: akula-prime
+  tolerations:
+    - key: "nvidia.com/gpu"
+      operator: "Exists"
+      effect: "NoSchedule"
+  resources:
+    requests:
+      memory: "6Gi"
+      cpu: "1000m"
+    limits:
+      memory: "14Gi"
       cpu: "4000m"

@@ -18,7 +18,7 @@ spec:
   resources:
     requests:
       storage: 500Gi  # Large storage for models
-  {{- if .Values.global.storageClass }}
+  {{- if and .Values.global .Values.global.storageClass }}
   storageClassName: {{ .Values.global.storageClass }}
   {{- end }}
 {{- end }}
