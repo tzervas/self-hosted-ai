@@ -44,7 +44,7 @@ spec:
           command: ["tts-server"]
           args:
             - "--model_name"
-            - "tts_models/multilingual/multi-dataset/xtts_v2"
+            - "tts_models/en/ljspeech/tacotron2-DDC"
             - "--use_cuda"
             - "false"
             - "--port"
