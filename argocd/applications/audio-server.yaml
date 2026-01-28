@@ -1,5 +1,5 @@
-# Audio Server (AudioLDM/MusicGen) - Sound Effects and Music Generation
-# Runs on akula-prime GPU node for fast inference
+# Audio Server (AudioLDM2/MusicGen/Bark) - SFX, Music, and Voice Generation
+# Runs on akula-prime GPU node for high-quality audio generation
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -31,10 +31,10 @@ spec:
           enabled: false
 
         audio:
-          enabled: false  # Disabled until proper AudioCraft/AudioLDM2 image is available
+          enabled: true
           image:
-            repository: python
-            tag: 3.11-slim
+            repository: ghcr.io/tzervas/audio-server
+            tag: "1.1.0"
             pullPolicy: IfNotPresent
           service:
             type: ClusterIP
