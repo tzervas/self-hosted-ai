@@ -46,7 +46,7 @@ spec:
             - "--model_name"
             - "tts_models/multilingual/multi-dataset/xtts_v2"
             - "--use_cuda"
-            - "true"
+            - "false"
             - "--port"
             - "5002"
           ports:
