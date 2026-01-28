@@ -89,7 +89,7 @@ spec:
       volumes:
         - name: models
           persistentVolumeClaim:
-            claimName: shared-models
+            claimName: akula-prime-models
         - name: outputs
           emptyDir: {}
 {{- end }}

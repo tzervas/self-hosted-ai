@@ -52,6 +52,13 @@ spec:
               else
                 echo "XTTS v2 model already exists."
               fi
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
           volumeMounts:
             - name: models
               mountPath: /models
@@ -109,7 +116,7 @@ spec:
       volumes:
         - name: models
           persistentVolumeClaim:
-            claimName: shared-models
+            claimName: akula-prime-models
         - name: outputs
           emptyDir: {}
 {{- end }}
