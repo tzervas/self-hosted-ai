@@ -199,3 +199,4 @@ models/
 # Demo environment for restaurant IT AI use cases
 # Not tracked in remote - local development only
 AI_USE_TECH_DEMO/
+.rag_index/
