@@ -44,6 +44,20 @@ env:
   ENABLE_IMAGE_GENERATION: "true"
   IMAGE_GENERATION_ENGINE: "comfyui"
   COMFYUI_BASE_URL: "http://comfyui.gpu-worker:8188"
+  # ========================================
+  # GitLab OAuth/OIDC Configuration
+  # ========================================
+  WEBUI_URL: "https://ai.vectorweight.com"
+  ENABLE_OAUTH_SIGNUP: "true"
+  OAUTH_PROVIDER_NAME: "GitLab"
+  OPENID_PROVIDER_URL: "http://192.168.1.170/.well-known/openid-configuration"
+  OAUTH_SCOPES: "openid profile email read_user"
+  OAUTH_USERNAME_CLAIM: "nickname"
+  OAUTH_EMAIL_CLAIM: "email"
+  # Allow both OAuth and local login
+  ENABLE_LOGIN_FORM: "true"
+  # Merge accounts by email (existing admin stays admin)
+  OAUTH_MERGE_ACCOUNTS_BY_EMAIL: "true"
 
 # Secret references
 secretEnv:
@@ -56,6 +70,13 @@ secretEnv:
   WEBUI_ADMIN_PASSWORD:
     secretName: webui-secret
     key: admin-password
+  # GitLab OAuth credentials (from sealed secret)
+  OAUTH_CLIENT_ID:
+    secretName: gitlab-oauth-secret
+    key: client-id
+  OAUTH_CLIENT_SECRET:
+    secretName: gitlab-oauth-secret
+    key: client-secret
 
 persistence:
   enabled: true
