@@ -50,7 +50,8 @@ env:
   WEBUI_URL: "https://ai.vectorweight.com"
   ENABLE_OAUTH_SIGNUP: "true"
   OAUTH_PROVIDER_NAME: "GitLab"
-  OPENID_PROVIDER_URL: "http://192.168.1.170/.well-known/openid-configuration"
+  # GitLab on Docker at port 8929 (avoids Traefik conflict on port 80)
+  OPENID_PROVIDER_URL: "http://192.168.1.170:8929/.well-known/openid-configuration"
   OAUTH_SCOPES: "openid profile email read_user"
   OAUTH_USERNAME_CLAIM: "nickname"
   OAUTH_EMAIL_CLAIM: "email"

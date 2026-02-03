@@ -1,0 +1,18 @@
+# ArgoCD GitLab OAuth Secret
+# GitLab is running on Docker at http://192.168.1.170:8929
+# OAuth App: ArgoCD
+# Redirect URI: https://argocd.vectorweight.com/auth/callback
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: argocd-gitlab-oauth
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-gitlab-oauth
+    app.kubernetes.io/component: authentication
+    app.kubernetes.io/part-of: argocd
+type: Opaque
+stringData:
+  clientId: "908936ffe3aafe72f7cf94dabd1df85e34fcc2f97dfb9991745cc5aa3cb14fc0"
+  clientSecret: "2f9a134c510508488136b02c0b1f5a09cf8ec5b24562910055dc2117ff65df9924ce4a83dc42282bac58dd66c3c37ada3d6708c7b34e7d1e1e404e6c2ecc03cd"
