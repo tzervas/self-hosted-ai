@@ -79,8 +79,8 @@ postgresql:
     tag: "16.6.0"
   persistence:
     enabled: true
-    size: 50Gi
-    storageClass: longhorn
+    size: 5Gi
+    storageClass: longhorn-homelab
   resources:
     requests:
       cpu: 500m
@@ -97,8 +97,8 @@ redis:
     tag: "7.2.4"
   persistence:
     enabled: true
-    size: 10Gi
-    storageClass: longhorn
+    size: 2Gi
+    storageClass: longhorn-homelab
   resources:
     requests:
       cpu: 200m
@@ -111,8 +111,8 @@ redis:
 gitaly:
   persistence:
     enabled: true
-    size: 100Gi
-    storageClass: longhorn
+    size: 10Gi
+    storageClass: longhorn-homelab
   resources:
     requests:
       cpu: 500m
@@ -125,7 +125,7 @@ gitaly:
 minio:
   persistence:
     enabled: true
-    size: 50Gi
+    size: 5Gi
     storageClass: longhorn
   resources:
     requests:
@@ -142,8 +142,8 @@ registry:
     key: config
   persistence:
     enabled: true
-    size: 50Gi
-    storageClass: longhorn
+    size: 5Gi
+    storageClass: longhorn-homelab
   resources:
     requests:
       cpu: 200m
@@ -237,8 +237,8 @@ backup:
         backup.velero.io/backup-volumes: ""
   persistence:
     enabled: true
-    size: 100Gi
-    storageClass: longhorn
+    size: 10Gi
+    storageClass: longhorn-homelab
 
 # Resource limits
 resources:
