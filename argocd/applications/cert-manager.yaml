@@ -44,9 +44,9 @@ spec:
         
         # Prometheus metrics
         prometheus:
-          enabled: true
+          enabled: false
           servicemonitor:
-            enabled: true
+            enabled: false
             namespace: cert-manager
         
         # Pod security
