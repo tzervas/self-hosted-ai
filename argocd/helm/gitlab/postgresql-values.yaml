@@ -1,0 +1,37 @@
+# External PostgreSQL for GitLab
+# Deployed as a separate Helm release to avoid GitLab chart bundled image issues
+# Using Bitnami PostgreSQL chart with default image (no semver tag required)
+
+auth:
+  enablePostgresUser: true
+  postgresPassword: ""  # Will be auto-generated if empty
+  username: gitlab
+  password: ""  # Will be auto-generated if empty
+  database: gitlabhq_production
+  existingSecret: ""
+  secretKeys:
+    adminPasswordKey: postgres-password
+    userPasswordKey: password
+
+primary:
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: longhorn-homelab
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2
+      memory: 2Gi
+
+# Disable read replicas for homelab
+readReplicas:
+  replicaCount: 0
+
+# Export metrics for monitoring
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false

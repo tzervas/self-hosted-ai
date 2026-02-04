@@ -30,6 +30,24 @@ global:
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
+  # External PostgreSQL connection (bundled PostgreSQL disabled below)
+  # Service name: gitlab-postgresql (from Bitnami PostgreSQL chart release)
+  psql:
+    host: gitlab-postgresql
+    port: 5432
+    username: gitlab
+    database: gitlabhq_production
+    password:
+      secret: gitlab-postgresql
+      key: password
+  # External Redis connection (bundled Redis disabled below)
+  # Service name: gitlab-redis-master (from Bitnami Redis chart release)
+  redis:
+    host: gitlab-redis-master
+    port: 6379
+    password:
+      secret: gitlab-redis
+      key: redis-password
   # Enable repository mirroring feature
   appConfig:
     repositoryMirroring:
@@ -71,40 +89,15 @@ gitlab:
         cpu: 1
         memory: 2Gi
 
-# PostgreSQL - GitLab chart 9.7.1 defaults to bitnamilegacy/postgresql:16.6.0
-# which doesn't exist anymore. Use bitnami/postgresql:latest instead
+# PostgreSQL - Disable bundled PostgreSQL (using external psql defined in global)
+# GitLab chart 9.7.1 defaults to bitnamilegacy/postgresql:16.6.0 which doesn't exist
 postgresql:
-  image:
-    repository: bitnami/postgresql
-    tag: "latest"
-  persistence:
-    enabled: true
-    size: 5Gi
-    storageClass: longhorn-homelab
-  resources:
-    requests:
-      cpu: 500m
-      memory: 1Gi
-    limits:
-      cpu: 1
-      memory: 2Gi
+  install: false
 
-# Redis - GitLab chart bundled redis, using defaults
+# Redis - Disable bundled Redis (using external redis defined in global)
+# GitLab chart 9.7.1 defaults to bitnami/redis:7.4 which doesn't exist
 redis:
-  image:
-    repository: bitnami/redis
-    tag: "latest"
-  persistence:
-    enabled: true
-    size: 2Gi
-    storageClass: longhorn-homelab
-  resources:
-    requests:
-      cpu: 200m
-      memory: 256Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
+  install: false
 
 # Gitaly (Git repository storage)
 gitaly:
