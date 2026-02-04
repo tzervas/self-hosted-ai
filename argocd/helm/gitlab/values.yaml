@@ -72,11 +72,8 @@ gitlab:
         memory: 2Gi
 
 # PostgreSQL (GitLab 18+ requires PostgreSQL 16+)
+# Using chart defaults - don't pin to specific tag that may be removed
 postgresql:
-  image:
-    registry: docker.io
-    repository: bitnami/postgresql
-    tag: "16.6.0"
   persistence:
     enabled: true
     size: 5Gi
@@ -89,12 +86,8 @@ postgresql:
       cpu: 1
       memory: 2Gi
 
-# Redis
+# Redis - using chart defaults, don't override images
 redis:
-  image:
-    registry: registry1.dso.mil
-    repository: ironbank/opensource/redis/redis7
-    tag: "7.2.4"
   persistence:
     enabled: true
     size: 2Gi
