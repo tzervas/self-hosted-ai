@@ -45,7 +45,8 @@ global:
   redis:
     host: gitlab-redis-master
     port: 6379
-    password:
+    auth:
+      enabled: true
       secret: gitlab-redis
       key: redis-password
   # Enable repository mirroring feature
