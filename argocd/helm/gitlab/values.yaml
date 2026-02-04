@@ -72,11 +72,11 @@ gitlab:
         memory: 2Gi
 
 # PostgreSQL - GitLab chart 9.7.1 defaults to bitnamilegacy/postgresql:16.6.0
-# which doesn't exist anymore. Use bitnami/postgresql:17 instead (compatible)
+# which doesn't exist anymore. Use bitnami/postgresql:latest instead
 postgresql:
   image:
     repository: bitnami/postgresql
-    tag: "17"
+    tag: "latest"
   persistence:
     enabled: true
     size: 5Gi
@@ -93,7 +93,7 @@ postgresql:
 redis:
   image:
     repository: bitnami/redis
-    tag: "7.4"
+    tag: "latest"
   persistence:
     enabled: true
     size: 2Gi
