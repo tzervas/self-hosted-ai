@@ -151,6 +151,8 @@ registry:
 # GitLab Runner
 gitlab-runner:
   install: true
+  # Trust internal CA certificate
+  certsSecretName: gitlab-runner-certs
   runners:
     privileged: true
     cache:
