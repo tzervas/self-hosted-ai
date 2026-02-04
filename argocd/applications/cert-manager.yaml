@@ -49,17 +49,19 @@ spec:
             enabled: false
             namespace: cert-manager
         
-        # Pod security
+        # Pod security (pod-level only)
         podSecurityContext:
           runAsNonRoot: true
           fsGroup: 1001
         
-        securityContext:
+        # Container-level security context
+        containerSecurityContext:
           allowPrivilegeEscalation: false
           runAsNonRoot: true
           capabilities:
             drop:
               - ALL
+          readOnlyRootFilesystem: true
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager
