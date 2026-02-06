@@ -200,3 +200,7 @@ models/
 # Not tracked in remote - local development only
 AI_USE_TECH_DEMO/
 .rag_index/
+# Claude Code local settings
+.claude/*.local.*
+.claude/agent-memory-local/
+plans/

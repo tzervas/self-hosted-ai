@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "defaultMode": "default",
+    "allow": [
+      "Bash(task *)",
+      "Bash(uv run *)",
+      "Bash(kubectl *)",
+      "Bash(helm *)",
+      "Bash(argocd *)",
+      "Bash(git *)",
+      "Bash(pytest *)",
+      "Read(agents/**)",
+      "Read(argocd/**)",
+      "Read(helm/**)",
+      "Read(scripts/**)",
+      "Read(tests/**)",
+      "Read(config/**)",
+      "Read(pyproject.toml)",
+      "Read(Taskfile.yaml)",
+      "Edit(agents/**)",
+      "Edit(argocd/**)",
+      "Edit(helm/**)",
+      "Edit(scripts/**)",
+      "Edit(tests/**)",
+      "Write(docs/**)",
+      "Write(reports/**)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(./secrets/**)",
+      "Read(**/*sealed-secret*)",
+      "Read(ADMIN_CREDENTIALS.local.md)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(rm -rf *)",
+      "Bash(kubectl delete *)",
+      "Bash(kubectl drain *)",
+      "Bash(helm delete *)",
+      "Bash(git push --force *)",
+      "Bash(git push * main)",
+      "Bash(argocd app delete *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"☸️ self-hosted-ai Infrastructure Initialized\"; echo \"• Cluster: $(kubectl config current-context)\"; echo \"• ArgoCD: $(kubectl get pods -n argocd 2>/dev/null | grep -c Running || echo \"not detected\") pods running\"'"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash(kubectl apply *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"🔍 Validating K8s manifest...\"; kubectl apply --dry-run=client -f \"$@\" 2>&1 | head -10' _ "
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(helm install *|helm upgrade *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"🔍 Running Helm lint...\"; cd /home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai && task validate:helm'"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(git commit *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"🔍 Running pre-commit hooks...\"; cd /home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai && pre-commit run --all-files 2>&1 | tail -20 || echo \"⚠️ Pre-commit checks failed (see output)\"'"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(git push *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"🚀 Pre-push validation...\"; cd /home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai && task validate:manifests && uv run pytest tests/ -x'"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(kubectl delete *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"⚠️ Destructive operation detected! Confirm resource deletion.\"'"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(argocd app sync *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"🔄 Triggering ArgoCD sync...\"'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash(kubectl apply *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"📊 Monitoring rollout...\"; kubectl get pods -A | tail -15'"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(helm install *|helm upgrade *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"📊 Helm release status:\"; helm list -A | tail -10'"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(uv run pytest *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"✅ Tests complete, check coverage in htmlcov/\"'"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"👋 Session ended. Cluster status: $(kubectl get nodes --no-headers 2>/dev/null | wc -l || echo 0) nodes\"'"
+          }
+        ]
+      }
+    ]
+  },
+  "env": {
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
+    "UV_SYSTEM_PYTHON": "1"
+  },
+  "model": "claude-sonnet-4-5-20250929",
+  "outputStyle": "Explanatory",
+  "respectGitignore": true,
+  "enableAllProjectMcpServers": true,
+  "plansDirectory": "./plans",
+  "attribution": {
+    "commit": "Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>",
+    "pr": "🤖 Generated with Claude Code"
+  },
+  "showTurnDuration": true
+}
