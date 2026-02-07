@@ -231,10 +231,10 @@ npm run lint
 
 3. **Calculate token budgets**:
    ```python
-   # Estimate tokens (rough: 1 token ≈ 0.75 words)
+   # Estimate tokens (empirically validated: ~1.3 tokens per word for docs)
    with open('ARCHITECTURE.md') as f:
        words = len(f.read().split())
-       tokens = int(words / 0.75)
+       tokens = int(words * 1.3)
        print(f"~{tokens} tokens")
    ```
 

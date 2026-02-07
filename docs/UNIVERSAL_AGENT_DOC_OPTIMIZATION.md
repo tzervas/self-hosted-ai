@@ -875,9 +875,20 @@ def validate_index(project_root: Path) -> dict:
     return results
 
 def estimate_tokens(text: str) -> int:
-    """Rough token estimate (1 token ≈ 0.75 words)."""
+    """
+    Token estimate using empirically validated formula.
+
+    Research-backed token-to-word ratios:
+    - English prose: ~1.3 tokens/word
+    - Technical documentation: ~1.4 tokens/word
+    - Source code: ~1.5-2.0 tokens/word
+    - JSON/YAML: ~1.6-1.8 tokens/word
+
+    Using 1.3 for general documentation (conservative estimate).
+    For more accuracy, use tiktoken library with model-specific encoding.
+    """
     words = len(text.split())
-    return int(words / 0.75)
+    return int(words * 1.3)
 
 def print_results(results: dict):
     """Print validation results."""

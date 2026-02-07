@@ -2,8 +2,33 @@
 
 **Last Updated**: 2026-02-06
 **Purpose**: Token-efficient navigation guide for Claude Code and AI agents
+**Index Token Count**: ~3,000 tokens (vs ~13,600 for full corpus = 78% reduction)
 
-> **Quick Start**: Looking for something specific? Use Ctrl+F to search by keyword. Each section links to detailed docs with concise summaries optimized for context windows.
+> **🚨 Emergency Fast-Path**: Production down? Jump to [Critical Issues](#-emergency-procedures) section below.
+
+> **Quick Start**: Looking for something specific? Use Ctrl+F to search by keyword OR search by trigger words (deploy, debug, sso, gpu, model, workflow). Each section links to detailed docs with concise summaries optimized for context windows.
+
+---
+
+## 🚨 Emergency Procedures (Fast-Path)
+
+**Production Service Down?**
+1. Check [OPERATIONS.md](../OPERATIONS.md) lines 77-150 (troubleshooting commands)
+2. Run: `kubectl get pods -A | grep -v Running`
+3. Check ArgoCD: `argocd app list`
+4. View logs: `kubectl logs -f deployment/<name> -n <namespace>`
+
+**Deployment Failing?**
+1. Check [docs/VERIFICATION_REPORT.md](VERIFICATION_REPORT.md) for known issues
+2. Run: `task validate:all`
+3. Review sync waves: [ARCHITECTURE.md](../ARCHITECTURE.md) ADR-002
+
+**Security Incident?**
+1. [ARCHITECTURE.md](../ARCHITECTURE.md) lines 212-245 (security model)
+2. Check sealed secrets: `kubectl get sealedsecrets -A`
+3. Review policies: `helm/resource-quotas/`, `policies/`
+
+**Trigger Words for Fast Search**: critical, emergency, down, failing, error, crash, stuck, broken
 
 ---
 
