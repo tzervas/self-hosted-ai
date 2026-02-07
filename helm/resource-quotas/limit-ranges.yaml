@@ -70,3 +70,117 @@ spec:
       min:
         cpu: 50m
         memory: 128Mi
+---
+# LimitRange for monitoring namespace
+# Ensures Prometheus stack pods (node-exporter, admission jobs) get default resources
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: monitoring-limits
+  namespace: monitoring
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 500m
+        memory: 512Mi
+      defaultRequest:
+        cpu: 50m
+        memory: 64Mi
+      max:
+        cpu: "4"
+        memory: 8Gi
+      min:
+        cpu: 10m
+        memory: 32Mi
+---
+# LimitRange for linkerd namespace
+# Ensures sp-validator and other control plane containers get default resources
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: linkerd-limits
+  namespace: linkerd
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 500m
+        memory: 256Mi
+      defaultRequest:
+        cpu: 10m
+        memory: 32Mi
+      max:
+        cpu: "2"
+        memory: 2Gi
+      min:
+        cpu: 10m
+        memory: 16Mi
+---
+# LimitRange for linkerd-viz namespace
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: linkerd-viz-limits
+  namespace: linkerd-viz
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 250m
+        memory: 256Mi
+      defaultRequest:
+        cpu: 10m
+        memory: 32Mi
+      max:
+        cpu: "1"
+        memory: 1Gi
+      min:
+        cpu: 10m
+        memory: 16Mi
+---
+# LimitRange for self-hosted-ai namespace
+# Ensures hello-root and other infrastructure pods get default resources
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: self-hosted-ai-limits
+  namespace: self-hosted-ai
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 500m
+        memory: 512Mi
+      defaultRequest:
+        cpu: 50m
+        memory: 64Mi
+      max:
+        cpu: "4"
+        memory: 8Gi
+      min:
+        cpu: 10m
+        memory: 32Mi
+---
+# LimitRange for gpu-workloads namespace
+# Generous defaults for GPU services (Ollama, ComfyUI, TTS, etc.)
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: gpu-workloads-limits
+  namespace: gpu-workloads
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: "1"
+        memory: 4Gi
+      defaultRequest:
+        cpu: 250m
+        memory: 1Gi
+      max:
+        cpu: "16"
+        memory: 64Gi
+      min:
+        cpu: 10m
+        memory: 32Mi

@@ -44,8 +44,8 @@ spec:
     limits.memory: 128Gi  # Over-provisioned: allows burst but not all services peak at once
     # Pods - Ollama, ComfyUI, TTS, Audio
     pods: "20"
-    # Storage
-    requests.storage: 500Gi
+    # Storage - 600Gi to accommodate Ollama models + ComfyUI checkpoints
+    requests.storage: 600Gi
     persistentvolumeclaims: "15"
 ---
 # Self-hosted AI namespace - infrastructure services

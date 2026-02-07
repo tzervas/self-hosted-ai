@@ -45,15 +45,14 @@ env:
   IMAGE_GENERATION_ENGINE: "comfyui"
   COMFYUI_BASE_URL: "http://comfyui.gpu-worker:8188"
   # ========================================
-  # GitLab OAuth/OIDC Configuration
+  # Keycloak OIDC Configuration
   # ========================================
   WEBUI_URL: "https://ai.vectorweight.com"
   ENABLE_OAUTH_SIGNUP: "true"
-  OAUTH_PROVIDER_NAME: "GitLab"
-  # GitLab on Docker at port 8929 (avoids Traefik conflict on port 80)
-  OPENID_PROVIDER_URL: "http://192.168.1.170:8929/.well-known/openid-configuration"
-  OAUTH_SCOPES: "openid profile email read_user"
-  OAUTH_USERNAME_CLAIM: "nickname"
+  OAUTH_PROVIDER_NAME: "Keycloak"
+  OPENID_PROVIDER_URL: "https://auth.vectorweight.com/realms/vectorweight/.well-known/openid-configuration"
+  OAUTH_SCOPES: "openid profile email"
+  OAUTH_USERNAME_CLAIM: "preferred_username"
   OAUTH_EMAIL_CLAIM: "email"
   # Allow both OAuth and local login
   ENABLE_LOGIN_FORM: "true"
@@ -71,12 +70,12 @@ secretEnv:
   WEBUI_ADMIN_PASSWORD:
     secretName: webui-secret
     key: admin-password
-  # GitLab OAuth credentials (from sealed secret)
+  # Keycloak OIDC credentials (from sealed secret)
   OAUTH_CLIENT_ID:
-    secretName: gitlab-oauth-secret
+    secretName: keycloak-oidc-secret
     key: client-id
   OAUTH_CLIENT_SECRET:
-    secretName: gitlab-oauth-secret
+    secretName: keycloak-oidc-secret
     key: client-secret
 
 persistence:
@@ -88,7 +87,7 @@ persistence:
 resources:
   requests:
     cpu: 250m
-    memory: 512Mi
+    memory: 768Mi  # v0.7.2 uses ~640MB RSS; 768Mi keeps HPA utilization ~83%
   limits:
     cpu: 2000m
     memory: 4Gi
@@ -133,9 +132,9 @@ probes:
 autoscaling:
   enabled: true
   minReplicas: 1
-  maxReplicas: 3
+  maxReplicas: 1  # Capped at 1: PVC is RWO, Multi-Attach errors with >1 replica
   targetCPUUtilizationPercentage: 70
-  targetMemoryUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 90  # Raised from 80% to avoid scaling storm
   scaleDownStabilizationWindowSeconds: 300
   scaleUpStabilizationWindowSeconds: 0
 
