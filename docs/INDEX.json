@@ -1,0 +1,373 @@
+{
+  "metadata": {
+    "generated": "2026-02-07T01:06:40.817477",
+    "source_file": "docs/INDEX.md",
+    "version": "1.0",
+    "index_hash": "2154834f4684f348674b226ed54759149c7729e3a81012677c403e5cbc52fb7a"
+  },
+  "navigation_matrix": {
+    "by_persona": [
+      {
+        "persona": "New Developer",
+        "start_here": "[README.md](../README.md) → [ARCHITECTURE.md](../ARCHITECTURE.md) → [CONTRIBUTING.md](../CONTRIBUTING.md)",
+        "then_read": "[docs/DEPLOYMENT.md](DEPLOYMENT.md)"
+      },
+      {
+        "persona": "Platform Operator",
+        "start_here": "[OPERATIONS.md](../OPERATIONS.md) → [ARCHITECTURE.md](../ARCHITECTURE.md)",
+        "then_read": "[docs/VERIFICATION_REPORT.md](VERIFICATION_REPORT.md)"
+      },
+      {
+        "persona": "AI Agent",
+        "start_here": "This INDEX → [CLAUDE.md](../CLAUDE.md) → [ARCHITECTURE.md](../ARCHITECTURE.md)",
+        "then_read": "Context-specific docs below"
+      },
+      {
+        "persona": "Security Auditor",
+        "start_here": "[ARCHITECTURE.md](../ARCHITECTURE.md) ADR-006 → [implementation-guide.md](../implementation-guide.md) Security section",
+        "then_read": "Sealed secrets in `argocd/sealed-secrets/`"
+      },
+      {
+        "persona": "Troubleshooter",
+        "start_here": "[OPERATIONS.md](../OPERATIONS.md) → [docs/VERIFICATION_REPORT.md](VERIFICATION_REPORT.md)",
+        "then_read": "Service-specific logs in `helm/*/`"
+      }
+    ],
+    "by_task": [
+      {
+        "task": "Deploy New Service",
+        "primary_docs": "[ARCHITECTURE.md](../ARCHITECTURE.md) ADR-002 (GitOps)",
+        "supporting_files": "`argocd/applications/*.yaml`, `helm/*/`",
+        "cli_tools": "`kubectl apply`, `argocd app sync`"
+      },
+      {
+        "task": "Configure SSO",
+        "primary_docs": "[GITLAB_ACCESS_INSTRUCTIONS.md](../GITLAB_ACCESS_INSTRUCTIONS.md)",
+        "supporting_files": "`scripts/setup-keycloak-*.sh`, `argocd/sealed-secrets/*-oidc-secret.yaml`",
+        "cli_tools": "`scripts/setup-keycloak-realm.sh`"
+      },
+      {
+        "task": "Add AI Model",
+        "primary_docs": "[config/models-manifest.yml](../config/models-manifest.yml)",
+        "supporting_files": "`helm/ollama/values.yaml`",
+        "cli_tools": "`scripts/sync_models.py`"
+      },
+      {
+        "task": "Create Workflow",
+        "primary_docs": "[workflows/README.md](../workflows/README.md)",
+        "supporting_files": "`config/n8n-workflows/*.json`",
+        "cli_tools": "n8n UI at `https://n8n.vectorweight.com`"
+      },
+      {
+        "task": "Debug Deployment",
+        "primary_docs": "[OPERATIONS.md](../OPERATIONS.md) Troubleshooting",
+        "supporting_files": "[docs/VERIFICATION_REPORT.md](VERIFICATION_REPORT.md)",
+        "cli_tools": "`kubectl logs`, `argocd app get`"
+      },
+      {
+        "task": "Rotate Secrets",
+        "primary_docs": "[ARCHITECTURE.md](../ARCHITECTURE.md) ADR-006",
+        "supporting_files": "`argocd/sealed-secrets/`",
+        "cli_tools": "`scripts/secrets_manager.py rotate`"
+      },
+      {
+        "task": "Scale Resources",
+        "primary_docs": "[helm/resource-quotas/](../helm/resource-quotas/)",
+        "supporting_files": "`helm/*/values.yaml` (resources sections)",
+        "cli_tools": "`kubectl top`, `kubectl scale`"
+      },
+      {
+        "task": "Monitor Cluster",
+        "primary_docs": "[OPERATIONS.md](../OPERATIONS.md)",
+        "supporting_files": "Grafana dashboards",
+        "cli_tools": "`https://grafana.vectorweight.com`"
+      }
+    ],
+    "by_urgency": []
+  },
+  "documents": [
+    {
+      "filename": "ARCHITECTURE.md",
+      "path": "../ARCHITECTURE.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/../ARCHITECTURE.md",
+      "purpose": "Privacy-first, self-hosted AI infrastructure without external dependencies",
+      "claimed_tokens": 3833,
+      "actual_tokens": 3833,
+      "token_variance": 0.0,
+      "content_hash": "c381d95c41fa633c17bd78a431da29b83239bd4269b93dc203bdeef360177230",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: Before any architectural decision or major feature"
+      ],
+      "when_to_read": "Before any architectural decision or major feature",
+      "exists": true
+    },
+    {
+      "filename": "OPERATIONS.md",
+      "path": "../OPERATIONS.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/../OPERATIONS.md",
+      "purpose": "Daily ops runbook and service access",
+      "claimed_tokens": 1528,
+      "actual_tokens": 1528,
+      "token_variance": 0.0,
+      "content_hash": "1ce37df85b5211171f3042649cc269e1892396e8bc31a81c532242bd9fe16ddc",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: First day on platform, debugging, ops tasks"
+      ],
+      "when_to_read": "First day on platform, debugging, ops tasks",
+      "exists": true
+    },
+    {
+      "filename": "README.md",
+      "path": "../README.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/../README.md",
+      "purpose": "Project overview and quick start",
+      "claimed_tokens": 449,
+      "actual_tokens": 449,
+      "token_variance": 0.0,
+      "content_hash": "d19631eaeebf84ab7ce466f33543abbea45fd2c250efd559298d3bd4a02a6a4a",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: First time exploring project"
+      ],
+      "when_to_read": "First time exploring project",
+      "exists": true
+    },
+    {
+      "filename": "CONTRIBUTING.md",
+      "path": "../CONTRIBUTING.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/../CONTRIBUTING.md",
+      "purpose": "Git workflow and contribution standards",
+      "claimed_tokens": 1808,
+      "actual_tokens": 1808,
+      "token_variance": 0.0,
+      "content_hash": "77f4403f8d826368dc72a22ca2bdcaf6a3c06c452e707e6df5003b03c0b25a45",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: Before contributing code"
+      ],
+      "when_to_read": "Before contributing code",
+      "exists": true
+    },
+    {
+      "filename": "implementation-guide.md",
+      "path": "../implementation-guide.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/../implementation-guide.md",
+      "purpose": "Deep R&D implementation patterns and guardrails",
+      "claimed_tokens": 3000,
+      "actual_tokens": 2918,
+      "token_variance": 0.027333333333333334,
+      "content_hash": "da1e47651c5bbc953eda6f67ec7bfd158327078d2b92dbf6b3e7a3827d478628",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: Advanced implementation, infrastructure design decisions"
+      ],
+      "when_to_read": "Advanced implementation, infrastructure design decisions",
+      "exists": true
+    },
+    {
+      "filename": "GITLAB_ACCESS_INSTRUCTIONS.md",
+      "path": "../GITLAB_ACCESS_INSTRUCTIONS.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/../GITLAB_ACCESS_INSTRUCTIONS.md",
+      "purpose": "GitLab deployment with SSO integration",
+      "claimed_tokens": 919,
+      "actual_tokens": 919,
+      "token_variance": 0.0,
+      "content_hash": "5ea6150e36d55e08a7ff39a407f48e5e64eff395dba6b833e451bd887778772f",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: Setting up GitLab, configuring SSO"
+      ],
+      "when_to_read": "Setting up GitLab, configuring SSO",
+      "exists": true
+    },
+    {
+      "filename": "DEPLOYMENT.md",
+      "path": "DEPLOYMENT.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/DEPLOYMENT.md",
+      "purpose": "Complete deployment procedures for k3s cluster",
+      "claimed_tokens": 1259,
+      "actual_tokens": 1259,
+      "token_variance": 0.0,
+      "content_hash": "ab8b9d807900464fad79d639712d7c0438cbc19599c8c4283cc07ecf6e462223",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: Initial deployment, adding nodes, troubleshooting deploy"
+      ],
+      "when_to_read": "Initial deployment, adding nodes, troubleshooting deploy",
+      "exists": true
+    },
+    {
+      "filename": "VERIFICATION_REPORT.md",
+      "path": "VERIFICATION_REPORT.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/VERIFICATION_REPORT.md",
+      "purpose": "Cluster validation results and known issues",
+      "claimed_tokens": 1552,
+      "actual_tokens": 1552,
+      "token_variance": 0.0,
+      "content_hash": "65c81f6f74a16b8b85c42b8656df1a64f7029142b85383d267eadb0175f7e349",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: After deployment, debugging, health checks"
+      ],
+      "when_to_read": "After deployment, debugging, health checks",
+      "exists": true
+    },
+    {
+      "filename": "API_RATE_LIMITS_REPORT.md",
+      "path": "API_RATE_LIMITS_REPORT.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/API_RATE_LIMITS_REPORT.md",
+      "purpose": "Comprehensive API rate limit analysis across all services",
+      "claimed_tokens": 4971,
+      "actual_tokens": 4971,
+      "token_variance": 0.0,
+      "content_hash": "d99988383ef946830eec8b3312a50b9a67b1b32b8d4162139eaee22f4eccca93",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: Planning API usage, debugging rate limit errors"
+      ],
+      "when_to_read": "Planning API usage, debugging rate limit errors",
+      "exists": true
+    },
+    {
+      "filename": "CLAUDE_OPTIMIZATION_GUIDE.md",
+      "path": "CLAUDE_OPTIMIZATION_GUIDE.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/CLAUDE_OPTIMIZATION_GUIDE.md",
+      "purpose": "Claude Code-specific implementation guide",
+      "claimed_tokens": 2614,
+      "actual_tokens": 2614,
+      "token_variance": 0.0,
+      "content_hash": "2d76d0ca78e1763e5d61cb7a562441ad58114dc8162b006e5170827c9c256cd6",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: Replicating optimization in other Claude projects"
+      ],
+      "when_to_read": "Replicating optimization in other Claude projects",
+      "exists": true
+    },
+    {
+      "filename": "UNIVERSAL_AGENT_DOC_OPTIMIZATION.md",
+      "path": "UNIVERSAL_AGENT_DOC_OPTIMIZATION.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/UNIVERSAL_AGENT_DOC_OPTIMIZATION.md",
+      "purpose": "Framework-agnostic doc optimization for ANY AI agent system",
+      "claimed_tokens": 6280,
+      "actual_tokens": 6280,
+      "token_variance": 0.0,
+      "content_hash": "8c8d4f7abe2be3ead6d1a1f42b466789d4ed982752c97bdd81a76646c2fc953a",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: Applying optimization to non-Claude agent systems"
+      ],
+      "when_to_read": "Applying optimization to non-Claude agent systems",
+      "exists": true
+    },
+    {
+      "filename": "DEVELOPMENT_ROADMAP.md",
+      "path": "DEVELOPMENT_ROADMAP.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/DEVELOPMENT_ROADMAP.md",
+      "purpose": "12-week phased development plan",
+      "claimed_tokens": 4420,
+      "actual_tokens": 4420,
+      "token_variance": 0.0,
+      "content_hash": "29dfcc3c9b924ed580d7e03383b729c024b87cab14ae941e41d8ff47c175f7b9",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: Planning work, understanding priorities, tracking progress"
+      ],
+      "when_to_read": "Planning work, understanding priorities, tracking progress",
+      "exists": true
+    },
+    {
+      "filename": "DOCUMENTATION_SYSTEM_REVIEW.md",
+      "path": "DOCUMENTATION_SYSTEM_REVIEW.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/DOCUMENTATION_SYSTEM_REVIEW.md",
+      "purpose": "Production-readiness assessment of doc system",
+      "claimed_tokens": 2018,
+      "actual_tokens": 2018,
+      "token_variance": 0.0,
+      "content_hash": "7d02c53d2eb60dddbf852e8c404557d9f186df7c28a81be34122076da542b39d",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: Assessing doc system quality, planning improvements"
+      ],
+      "when_to_read": "Assessing doc system quality, planning improvements",
+      "exists": true
+    }
+  ],
+  "quick_references": {
+    "commands": [],
+    "endpoints": [],
+    "sync_waves": [
+      {
+        "wave": "**-2**",
+        "services": "sealed-secrets-controller",
+        "purpose": "Foundation for secret decryption"
+      },
+      {
+        "wave": "**-1**",
+        "services": "cert-manager, Longhorn, Linkerd CRDs",
+        "purpose": "Infrastructure dependencies"
+      },
+      {
+        "wave": "**0**",
+        "services": "Traefik, GPU operator, resource-quotas, cert-manager-issuers",
+        "purpose": "Networking and policies"
+      },
+      {
+        "wave": "**1**",
+        "services": "Linkerd control plane, Kyverno policies",
+        "purpose": "Service mesh and governance"
+      },
+      {
+        "wave": "**2**",
+        "services": "Prometheus, Grafana",
+        "purpose": "Observability"
+      },
+      {
+        "wave": "**5**",
+        "services": "Ollama (CPU/GPU), LiteLLM, PostgreSQL, Redis, Keycloak",
+        "purpose": "AI backend services"
+      },
+      {
+        "wave": "**6**",
+        "services": "Open WebUI, n8n, SearXNG",
+        "purpose": "AI frontend and workflows"
+      },
+      {
+        "wave": "**7**",
+        "services": "GitLab, Actions Runner Controller (ARC)",
+        "purpose": "CI/CD and automation"
+      }
+    ],
+    "namespaces": []
+  },
+  "emergency_procedures": {
+    "production_service_down": [
+      "Check [OPERATIONS.md](../OPERATIONS.md) lines 77-150 (troubleshooting commands)",
+      "Run: `kubectl get pods -A | grep -v Running`",
+      "Check ArgoCD: `argocd app list`",
+      "View logs: `kubectl logs -f deployment/<name> -n <namespace>`"
+    ],
+    "deployment_failing": [
+      "Check [docs/VERIFICATION_REPORT.md](VERIFICATION_REPORT.md) for known issues",
+      "Run: `task validate:all`",
+      "Review sync waves: [ARCHITECTURE.md](../ARCHITECTURE.md) ADR-002"
+    ],
+    "security_incident": [
+      "[ARCHITECTURE.md](../ARCHITECTURE.md) lines 212-245 (security model)",
+      "Check sealed secrets: `kubectl get sealedsecrets -A`",
+      "Review policies: `helm/resource-quotas/`, `policies/`"
+    ]
+  },
+  "statistics": {
+    "total_documents": 13,
+    "total_claimed_tokens": 34651,
+    "total_actual_tokens": 34569,
+    "token_accuracy": 0.9976335459294104,
+    "documents_indexed": 13,
+    "documents_in_project": 92,
+    "index_coverage": 0.14130434782608695,
+    "missing_documents": 79
+  }
+}

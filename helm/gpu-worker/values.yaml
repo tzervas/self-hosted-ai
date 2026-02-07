@@ -56,8 +56,9 @@ ollama:
         cpu: "8000m"
 
 # ComfyUI configuration
+# NOTE: Disabled due to single GPU constraint. Requires GPU time-slicing to run alongside ollama-gpu.
 comfyui:
-  enabled: true
+  enabled: false
   image:
     repository: ghcr.io/yolandawu/comfyui
     tag: latest
@@ -93,8 +94,9 @@ comfyui:
       cpu: "4000m"
 
 # Automatic1111 Stable Diffusion WebUI configuration
+# NOTE: Disabled due to single GPU constraint. Requires GPU time-slicing to run alongside ollama-gpu.
 automatic1111:
-  enabled: true
+  enabled: false
   image:
     repository: automatic1111/stable-diffusion-webui
     tag: latest

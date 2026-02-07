@@ -2,6 +2,23 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🗺️ Quick Start for AI Agents
+
+**IMPORTANT**: Before exploring this codebase, read [`docs/INDEX.md`](docs/INDEX.md) first!
+
+The INDEX provides:
+- **Token-efficient summaries** of all documentation (~3k tokens vs 13k+ for full corpus)
+- **Navigation matrices** by persona (developer/operator/agent) and task (deploy/debug/configure)
+- **Codebase structure map** with file counts and directory purposes
+- **Quick references** for sync waves, namespaces, dependencies, commands, URLs
+
+**Navigation Pattern**:
+1. Read [`docs/INDEX.md`](docs/INDEX.md) for context (3 minutes, ~3k tokens)
+2. Jump to specific docs using INDEX's "By Task" matrix
+3. Use full docs (ARCHITECTURE, OPERATIONS, etc.) only when task requires deep dive
+
+---
+
 ## Project Constitution
 
 This is a **Self-Hosted AI Platform** providing secure, private AI infrastructure without reliance on external services.
@@ -188,23 +205,27 @@ task security:trivy
 
 ## File Organization
 
+**Comprehensive Structure**: See [`docs/INDEX.md`](docs/INDEX.md) → "Codebase Structure Map" section
+
+**Quick Overview**:
 ```
 self-hosted-ai/
-├── agents/                  # Python agent framework
-│   ├── core/               # Base classes, task, workflow
-│   └── specialized/        # Research, dev, review, testing, docs agents
-├── agent-server/           # FastAPI server for agent orchestration
-├── rust-agents/            # Rust high-performance agent runtime
+├── docs/INDEX.md           # 🔥 START HERE - Complete navigation guide
+├── agents/                 # Python agent framework (runtime task execution)
+├── .claude/agents/         # Claude sub-agents (AI-powered workflows)
 ├── argocd/                 # ArgoCD applications and helm configs
-│   └── applications/       # Individual app manifests
+│   ├── applications/       # Individual app manifests (sync wave metadata)
+│   └── sealed-secrets/     # Encrypted secrets (safe for Git)
 ├── helm/                   # Helm charts for K8s services
-├── scripts/                # Automation scripts (shell + Python via uv)
-├── policies/               # Kyverno and network policies
-├── workflows/              # n8n workflow definitions
-├── config/                 # Configuration files (LiteLLM, models, etc.)
-├── docs/                   # Documentation and archives
-└── tests/                  # pytest test suite
+├── scripts/                # Automation scripts (Python via uv)
+├── config/                 # Configuration files (LiteLLM, models, workflows)
+├── docs/                   # Documentation (INDEX, DEPLOYMENT, reports)
+├── ARCHITECTURE.md         # System design authority (ADRs, principles)
+├── OPERATIONS.md           # Daily ops runbook
+└── CONTRIBUTING.md         # Git workflow and standards
 ```
+
+**File Counts**: See INDEX.md → "File Count Summary" (30 ArgoCD apps, 20 Helm charts, 15 sealed secrets, etc.)
 
 ---
 
@@ -461,3 +482,150 @@ Deploy litellm with monitoring
 ---
 
 Everything automated, parallelized, and right-sized for speed and cost.
+
+---
+
+## 📚 Documentation System (Token Optimization)
+
+### Overview
+
+This project uses a **hierarchical documentation system** optimized for AI agent token efficiency:
+
+```
+docs/INDEX.md (3k tokens)
+    ↓
+Summaries + Navigation
+    ↓
+Full Docs (10k+ tokens) - Read selectively based on task
+```
+
+### Key Files
+
+| File | Tokens | Purpose | When to Read |
+|------|--------|---------|--------------|
+| [`docs/INDEX.md`](docs/INDEX.md) | ~3,000 | Navigation hub, summaries, codebase map | **Always read first** |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | ~1,500 | System design, ADRs, principles | Before architectural decisions |
+| [`OPERATIONS.md`](OPERATIONS.md) | ~800 | Daily ops, service endpoints, troubleshooting | For operations tasks |
+| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | ~1,200 | Deployment procedures | For fresh deployments |
+| [`implementation-guide.md`](implementation-guide.md) | ~3,000 | Deep R&D patterns, advanced config | For infrastructure design |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | ~500 | Git workflow, commit standards | Before contributing code |
+
+**Total Corpus**: ~13,600 tokens (well within 200k context window)
+
+### Efficient Navigation Pattern
+
+**For AI Agents** (Recommended Workflow):
+
+1. **Context Build** (5 min, ~3k tokens):
+   ```
+   Read docs/INDEX.md
+   → Get summaries of all docs
+   → Understand codebase structure
+   → Identify relevant docs for current task
+   ```
+
+2. **Task-Specific Deep Dive** (as needed):
+   ```
+   Use INDEX's "By Task" matrix
+   → Jump directly to relevant section
+   → Read only necessary full docs
+   ```
+
+3. **Selective Loading**:
+   - ✅ Always: `docs/INDEX.md` (navigation)
+   - ✅ For architecture: `ARCHITECTURE.md` (ADRs)
+   - ✅ For operations: `OPERATIONS.md` (runbook)
+   - ❌ Don't load all docs upfront (waste tokens)
+
+**Example Task Flows**:
+
+| Task | Read Order | Tokens Used |
+|------|------------|-------------|
+| **Deploy new service** | INDEX → DEPLOYMENT → ARCHITECTURE (ADR-002) | ~5,700 |
+| **Debug service** | INDEX → OPERATIONS → VERIFICATION_REPORT | ~4,800 |
+| **Add AI model** | INDEX → config/models-manifest.yml | ~3,200 |
+| **Configure SSO** | INDEX → GITLAB_ACCESS_INSTRUCTIONS | ~3,700 |
+| **Contribute code** | INDEX → CONTRIBUTING → ARCHITECTURE (principles) | ~5,000 |
+
+### Auto Memory Integration
+
+**Project Memory**: `~/.claude/projects/<hash>/memory/MEMORY.md`
+- Automatically loaded into Claude's system prompt
+- Contains learnings, patterns, common mistakes
+- Updated after completing tasks
+- **Max 200 lines** (auto-truncated)
+
+**Key Memory Patterns**:
+```markdown
+## Quick Navigation
+Always start with docs/INDEX.md
+
+## Common Patterns
+- Before code: Read INDEX → Find relevant docs → Check ARCHITECTURE ADRs
+- Deployment: Modify Helm chart → Commit to dev → ArgoCD auto-syncs
+- Debugging: Check VERIFICATION_REPORT → Use OPERATIONS commands → View logs
+
+## Mistakes to Avoid
+- ❌ Don't read all docs at once
+- ❌ Don't commit to main branch
+- ❌ Don't bypass validation hooks
+```
+
+### RAG Index (Semantic Search)
+
+**File**: `scripts/rag_index.py`
+**Purpose**: Generate embeddings for semantic doc search
+**Usage**:
+```bash
+uv run scripts/rag_index.py generate    # Create index
+uv run scripts/rag_index.py search "keycloak sso setup"  # Semantic search
+```
+
+**Integration**: Enables AI agents to find relevant docs without loading entire corpus
+
+### Maintenance Automation
+
+**Pre-commit Hook** (planned):
+```bash
+# Validates doc links in INDEX.md
+.git/hooks/pre-commit → scripts/validate_docs_index.py
+```
+
+**CI Job** (planned):
+```yaml
+# Regenerates INDEX.md on doc changes
+on:
+  push:
+    paths:
+      - 'docs/**'
+      - '*.md'
+jobs:
+  update-index:
+    run: scripts/update_docs_index.py
+```
+
+### Token Budget Tracking
+
+| Component | Current Tokens | Budget | Status |
+|-----------|----------------|--------|--------|
+| INDEX.md | 3,000 | 5,000 | ✅ Within budget |
+| Core Docs | 3,400 | 5,000 | ✅ Within budget |
+| Deployment Docs | 4,200 | 6,000 | ✅ Within budget |
+| Specialized Docs | 3,000 | 4,000 | ✅ Within budget |
+| **Total Corpus** | **13,600** | **20,000** | ✅ Efficient |
+
+**Optimization Guidelines**:
+- INDEX summaries: Max 100 tokens per doc
+- New docs: Add summary to INDEX, don't duplicate content
+- Large docs: Split into sections, add cross-references
+- Archive old docs: Move to `docs/archive/` when obsolete
+
+### For Other Claude Instances
+
+**Transfer Document**: [`docs/CLAUDE_OPTIMIZATION_GUIDE.md`](docs/CLAUDE_OPTIMIZATION_GUIDE.md) (see below)
+
+This guide documents the optimization strategy for replication in other projects.
+
+---
+
+**End of Documentation System Section**
