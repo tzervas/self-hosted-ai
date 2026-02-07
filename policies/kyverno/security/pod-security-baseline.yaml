@@ -32,6 +32,7 @@ spec:
                 - longhorn-system
                 - argocd
                 - gitlab
+                - auth
       validate:
         message: "Containers must set securityContext.runAsNonRoot=true"
         pattern:
@@ -55,6 +56,7 @@ spec:
                 - gpu-workloads
                 - longhorn-system
                 - gitlab
+                - auth
       validate:
         message: "Privileged containers are not allowed"
         pattern:
@@ -78,6 +80,7 @@ spec:
           - resources:
               namespaces:
                 - gitlab
+                - auth
       validate:
         message: "Using ':latest' tag is not allowed. Pin image versions for reproducibility."
         pattern:
@@ -101,6 +104,7 @@ spec:
                 - kube-system
                 - kyverno
                 - argocd
+                - auth
       validate:
         message: "CPU and memory limits are required for all containers"
         pattern:
