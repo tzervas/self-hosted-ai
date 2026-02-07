@@ -1,0 +1,32 @@
+# NVIDIA GPU Time-Slicing Configuration
+# Creates 4 virtual GPUs from single RTX 5080 16GB
+#
+# This enables 4 concurrent workloads to share the GPU with time-based scheduling.
+# Each virtual GPU gets ~4GB VRAM (16GB / 4 = 4GB per slice)
+#
+# Apply with: kubectl apply -f config/gpu-time-slicing-config.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: time-slicing-config
+  namespace: gpu-operator
+data:
+  time-slicing-config: |
+    version: v1
+    sharing:
+      timeSlicing:
+        replicas: 4  # Create 4 virtual GPUs
+        renameByDefault: true
+        failRequestsGreaterThanOne: true
+---
+# Patch the ClusterPolicy to enable time-slicing
+apiVersion: nvidia.com/v1
+kind: ClusterPolicy
+metadata:
+  name: gpu-cluster-policy
+spec:
+  devicePlugin:
+    config:
+      name: time-slicing-config  # Reference the ConfigMap above
+      default: "all"  # Apply to all GPUs

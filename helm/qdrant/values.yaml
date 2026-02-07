@@ -1,0 +1,80 @@
+# Qdrant Vector Database Configuration
+# Enables RAG (Retrieval-Augmented Generation) for Open WebUI
+
+replicaCount: 1
+
+image:
+  repository: qdrant/qdrant
+  tag: "v1.7.4"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  ports:
+    http: 6333
+    grpc: 6334
+
+persistence:
+  enabled: true
+  storageClass: longhorn
+  size: 20Gi
+  accessMode: ReadWriteOnce
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+
+# Qdrant configuration
+config:
+  # Storage configuration
+  storage:
+    # Use disk for vectors (more capacity)
+    on_disk_payload: true
+    # Performance optimization
+    wal_capacity_mb: 32
+    wal_segments_ahead: 3
+
+  # Collection settings
+  collection:
+    # Default vector size (matches sentence-transformers)
+    vector_size: 384
+    # Distance metric
+    distance: Cosine
+    # Enable indexing
+    hnsw_config:
+      m: 16  # Number of neighbors per layer
+      ef_construct: 100  # Quality of index construction
+
+# Network policy
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            app: open-webui
+      ports:
+      - protocol: TCP
+        port: 6333
+      - protocol: TCP
+        port: 6334
+
+# Node affinity - prefer homelab node (more RAM)
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      preference:
+        matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - homelab
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: false  # Single replica, no PDB needed

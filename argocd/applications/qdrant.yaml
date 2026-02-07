@@ -1,0 +1,74 @@
+# Qdrant Vector Database for RAG
+# Enables Retrieval-Augmented Generation with document knowledge bases
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qdrant
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"  # Deploy with AI backend tier
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/tzervas/self-hosted-ai.git
+    targetRevision: main
+    path: helm/qdrant
+    helm:
+      releaseName: qdrant
+      values: |
+        replicaCount: 1
+
+        persistence:
+          enabled: true
+          storageClass: longhorn
+          size: 20Gi
+
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+
+        # Network policy - allow Open WebUI access
+        networkPolicy:
+          enabled: true
+          ingress:
+          - from:
+            - podSelector:
+                matchLabels:
+                  app.kubernetes.io/name: open-webui
+            ports:
+            - protocol: TCP
+              port: 6333
+
+        # Prefer homelab node (more RAM available)
+        affinity:
+          nodeAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                  - homelab
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ai-services
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
