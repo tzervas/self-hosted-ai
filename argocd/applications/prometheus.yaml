@@ -16,6 +16,7 @@ spec:
       helm:
         valueFiles:
           - values.yaml
+        skipCrds: true  # CRDs installed manually to avoid annotation size issues
     - repoURL: https://github.com/tzervas/self-hosted-ai
       targetRevision: main
       path: argocd/helm/prometheus
@@ -31,6 +32,7 @@ spec:
       - CreateNamespace=true
       - PrunePropagationPolicy=foreground
       - PruneLast=true
+      - ServerSideApply=true  # Use SSA to avoid large annotation sizes
     retry:
       limit: 5
       backoff:

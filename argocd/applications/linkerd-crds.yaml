@@ -31,10 +31,21 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: linkerd
+  ignoreDifferences:
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      name: grpcroutes.gateway.networking.k8s.io
+      jsonPointers:
+        - /spec/versions
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      name: httproutes.gateway.networking.k8s.io
+      jsonPointers:
+        - /spec/versions
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+    # Note: Auto-sync disabled due to Gateway API CRD version migration issue
+    # CRDs are manually managed via Helm (linkerd-edge/linkerd-crds:2025.1.2)
+    # Gateway API CRDs (grpcroutes, httproutes) have v1/v1alpha2 version conflicts
     syncOptions:
       - CreateNamespace=true
       - Replace=true  # CRDs need replace strategy
