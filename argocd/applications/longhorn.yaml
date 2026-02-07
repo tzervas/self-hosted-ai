@@ -42,12 +42,17 @@ spec:
             # Node drain policy
             nodeDrainPolicy: block-for-eviction
 
-          # Ingress for Longhorn UI (accessible via Traefik)
+          # Ingress for Longhorn UI (accessible via Traefik, behind Keycloak)
           ingress:
             enabled: true
             ingressClassName: traefik
-            host: longhorn.homelab.local
-            tls: false
+            host: longhorn.vectorweight.com
+            tls: true
+            tlsSecret: vectorweight-wildcard-tls
+            annotations:
+              traefik.ingress.kubernetes.io/router.entrypoints: websecure
+              traefik.ingress.kubernetes.io/router.tls: "true"
+              traefik.ingress.kubernetes.io/router.middlewares: automation-longhorn-forward-auth@kubernetescrd
 
           # Resource limits for Longhorn components
           longhornManager:

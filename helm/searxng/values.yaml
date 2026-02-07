@@ -15,6 +15,7 @@ ingress:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: automation-searxng-forward-auth@kubernetescrd
     cert-manager.io/cluster-issuer: letsencrypt-production
   hosts:
     - host: search.vectorweight.com
@@ -24,7 +25,7 @@ ingress:
   tls:
     - hosts:
         - search.vectorweight.com
-      secretName: search-vectorweight-tls
+      secretName: vectorweight-wildcard-tls
 
 resources:
   requests:

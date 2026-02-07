@@ -117,9 +117,9 @@ keycloak:
 # ==============================================
 # Required Secrets (create before deployment)
 # ==============================================
-# 1. Keycloak Admin:
+# 1. Keycloak Admin (dev: ChangeMe123):
 #    kubectl create secret generic keycloak-admin-secret -n auth \
-#      --from-literal=admin-password=$(openssl rand -base64 24)
+#      --from-literal=admin-password=ChangeMe123
 #
 # 2. Keycloak Database:
 #    kubectl create secret generic keycloak-db-secret -n auth \

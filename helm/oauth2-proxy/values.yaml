@@ -35,6 +35,7 @@ config:
   cookieSecret: "ZGV2LWNvb2tpZS1zZWNyZXQtY2hhbmdlLW1lISEh"
 
 # OIDC client credentials from K8s secret
+# Uses a single OIDC client for the proxy itself
 secretEnv:
   OAUTH2_PROXY_CLIENT_ID:
     secretName: n8n-oidc-secret
@@ -46,6 +47,19 @@ secretEnv:
 service:
   type: ClusterIP
   port: 4180
+
+# Services protected by oauth2-proxy forward-auth.
+# Each generates a Traefik ForwardAuth middleware named "<name>-forward-auth".
+# Reference in ingress annotations as:
+#   traefik.ingress.kubernetes.io/router.middlewares: <namespace>-<name>-forward-auth@kubernetescrd
+protectedServices:
+  - name: n8n
+  - name: searxng
+  - name: litellm
+  - name: traefik-dashboard
+  - name: dify
+  - name: prometheus
+  - name: longhorn
 
 resources:
   requests:

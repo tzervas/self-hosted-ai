@@ -19,7 +19,7 @@ set -euo pipefail
 
 KEYCLOAK_URL="https://auth.vectorweight.com"
 ADMIN_USER="admin"
-ADMIN_PASSWORD="${1:-password}"
+ADMIN_PASSWORD="${1:-ChangeMe123}"
 REALM="vectorweight"
 
 # Parse arguments
@@ -134,6 +134,12 @@ create_oidc_client "open-webui" "https://ai.vectorweight.com/oauth/oidc/callback
 create_oidc_client "grafana" "https://grafana.vectorweight.com/login/generic_oauth" "Grafana"
 create_oidc_client "gitlab" "https://git.vectorweight.com/users/auth/openid_connect/callback" "GitLab"
 create_oidc_client "n8n" "https://n8n.vectorweight.com/oauth2/callback" "n8n (oauth2-proxy)"
+create_oidc_client "searxng" "https://search.vectorweight.com/oauth2/callback" "SearXNG (oauth2-proxy)"
+create_oidc_client "litellm" "https://llm.vectorweight.com/oauth2/callback" "LiteLLM (oauth2-proxy)"
+create_oidc_client "traefik" "https://traefik.vectorweight.com/oauth2/callback" "Traefik (oauth2-proxy)"
+create_oidc_client "dify" "https://dify.vectorweight.com/oauth2/callback" "Dify (oauth2-proxy)"
+create_oidc_client "prometheus" "https://prometheus.vectorweight.com/oauth2/callback" "Prometheus (oauth2-proxy)"
+create_oidc_client "longhorn" "https://longhorn.vectorweight.com/oauth2/callback" "Longhorn (oauth2-proxy)"
 
 # 4. Retrieve client secrets
 echo "[4/6] Retrieving client secrets..."
@@ -156,6 +162,12 @@ OPENWEBUI_SECRET=$(get_client_secret "open-webui")
 GRAFANA_SECRET=$(get_client_secret "grafana")
 GITLAB_SECRET=$(get_client_secret "gitlab")
 N8N_SECRET=$(get_client_secret "n8n")
+SEARXNG_SECRET=$(get_client_secret "searxng")
+LITELLM_SECRET=$(get_client_secret "litellm")
+TRAEFIK_SECRET=$(get_client_secret "traefik")
+DIFY_SECRET=$(get_client_secret "dify")
+PROMETHEUS_SECRET=$(get_client_secret "prometheus")
+LONGHORN_SECRET=$(get_client_secret "longhorn")
 
 # 5. Create admin user in realm
 echo "[5/6] Creating admin user in '${REALM}' realm..."
@@ -179,11 +191,11 @@ else
       "lastName": "User",
       "credentials": [{
         "type": "password",
-        "value": "password",
-        "temporary": true
+        "value": "ChangeMe123",
+        "temporary": false
       }]
     }'
-  echo "  Admin user created (password: 'password', must change on first login)."
+  echo "  Admin user created (password: 'ChangeMe123')."
 fi
 
 # 6. Create K8s secrets in service namespaces
@@ -209,16 +221,52 @@ kubectl create secret generic n8n-oidc-secret -n automation \
   --from-literal=client-secret="$N8N_SECRET" \
   --dry-run=client -o yaml | kubectl apply -f -
 
+kubectl create secret generic searxng-oidc-secret -n ai-services \
+  --from-literal=client-id=searxng \
+  --from-literal=client-secret="$SEARXNG_SECRET" \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl create secret generic litellm-oidc-secret -n ai-services \
+  --from-literal=client-id=litellm \
+  --from-literal=client-secret="$LITELLM_SECRET" \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl create secret generic traefik-oidc-secret -n traefik \
+  --from-literal=client-id=traefik \
+  --from-literal=client-secret="$TRAEFIK_SECRET" \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl create secret generic dify-oidc-secret -n dify \
+  --from-literal=client-id=dify \
+  --from-literal=client-secret="$DIFY_SECRET" \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl create secret generic prometheus-oidc-secret -n monitoring \
+  --from-literal=client-id=prometheus \
+  --from-literal=client-secret="$PROMETHEUS_SECRET" \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl create secret generic longhorn-oidc-secret -n longhorn-system \
+  --from-literal=client-id=longhorn \
+  --from-literal=client-secret="$LONGHORN_SECRET" \
+  --dry-run=client -o yaml | kubectl apply -f -
+
 echo ""
 echo "=============================================="
 echo "  Setup Complete!"
 echo "=============================================="
 echo ""
 echo "Client secrets created in cluster:"
-echo "  - keycloak-oidc-secret  (ai-services)"
-echo "  - grafana-oidc-secret   (monitoring)"
-echo "  - gitlab-oidc-secret    (gitlab)"
-echo "  - n8n-oidc-secret       (automation)"
+echo "  - keycloak-oidc-secret   (ai-services)"
+echo "  - grafana-oidc-secret    (monitoring)"
+echo "  - gitlab-oidc-secret     (gitlab)"
+echo "  - n8n-oidc-secret        (automation)"
+echo "  - searxng-oidc-secret    (ai-services)"
+echo "  - litellm-oidc-secret    (ai-services)"
+echo "  - traefik-oidc-secret    (traefik)"
+echo "  - dify-oidc-secret       (dify)"
+echo "  - prometheus-oidc-secret  (monitoring)"
+echo "  - longhorn-oidc-secret   (longhorn-system)"
 echo ""
 echo "OIDC Discovery URL:"
 echo "  ${KEYCLOAK_URL}/realms/${REALM}/.well-known/openid-configuration"

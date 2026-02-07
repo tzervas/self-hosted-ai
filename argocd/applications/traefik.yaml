@@ -55,8 +55,11 @@ spec:
             matchRule: Host(`traefik.vectorweight.com`)
             entryPoints:
               - websecure
+            middlewares:
+              - name: traefik-dashboard-forward-auth
+                namespace: automation
             tls:
-              secretName: traefik-vectorweight-tls
+              secretName: vectorweight-wildcard-tls
         
         # Kubernetes CRD provider
         providers:
