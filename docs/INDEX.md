@@ -206,6 +206,221 @@
 **Generated**: Automated report
 **When to Read**: Planning API usage, debugging rate limit errors
 
+
+### Documentation System Docs
+
+#### [DEPLOYMENT.md](DEPLOYMENT.md) (1,259 tokens)
+**Purpose**: Complete deployment procedures for k3s cluster
+**Key Sections**:
+- Architecture Overview (lines 5-30): Network topology
+- Prerequisites (lines 32-42): K8s, ArgoCD, tools
+- Fresh Deployment (lines 44-): Bootstrap steps
+- GPU Worker Setup: Standalone Docker deployment
+
+**Dependencies**: [ARCHITECTURE.md](../ARCHITECTURE.md)
+**When to Read**: Initial deployment, adding nodes, troubleshooting deploy
+
+#### [VERIFICATION_REPORT.md](VERIFICATION_REPORT.md) (1,552 tokens)
+**Purpose**: Cluster validation results and known issues
+**Key Sections**:
+- Enhancements Made (lines 12-74): Recent changes
+- Verification Results (lines 76-): Service health, model tests
+- Known Issues: Current limitations
+
+**Dependencies**: [OPERATIONS.md](../OPERATIONS.md)
+**When to Read**: After deployment, debugging, health checks
+
+#### [API_RATE_LIMITS_REPORT.md](API_RATE_LIMITS_REPORT.md) (4,971 tokens)
+**Purpose**: Comprehensive API rate limit analysis across all services
+**Key Sections**:
+- Service-by-service rate limit documentation
+- Request/response patterns
+- Optimization strategies
+
+**Dependencies**: None
+**When to Read**: Planning API usage, debugging rate limit errors
+
+#### [CLAUDE_OPTIMIZATION_GUIDE.md](CLAUDE_OPTIMIZATION_GUIDE.md) (2,614 tokens)
+**Purpose**: Claude Code-specific implementation guide
+**Key Sections**:
+- Implementation steps (~2 hours)
+- ROI analysis (81% token savings)
+- Templates (INDEX.md, MEMORY.md)
+- Validation scripts
+
+**Dependencies**: This INDEX.md
+**When to Read**: Replicating optimization in other Claude projects
+
+#### [UNIVERSAL_AGENT_DOC_OPTIMIZATION.md](UNIVERSAL_AGENT_DOC_OPTIMIZATION.md) (6,280 tokens)
+**Purpose**: Framework-agnostic doc optimization for ANY AI agent system
+**Key Sections**:
+- Universal principles (hierarchical indexing, lazy evaluation)
+- Platform integrations (Claude, GPT, Gemini, LangChain, AutoGen, CrewAI)
+- Pseudocode implementations
+- Migration guide
+
+**Dependencies**: Conceptual foundation for this INDEX
+**When to Read**: Applying optimization to non-Claude agent systems
+
+#### [DEVELOPMENT_ROADMAP.md](DEVELOPMENT_ROADMAP.md) (4,420 tokens)
+**Purpose**: 12-week phased development plan
+**Key Sections**:
+- Current State Assessment: What's done, what's broken
+- Phase 1-6 (lines 50-): Detailed tasks per phase
+- Git Workflow Enforcement: Branch protection rules
+- Success Metrics: Per-phase targets
+
+**Dependencies**: [ARCHITECTURE.md](../ARCHITECTURE.md), [OPERATIONS.md](../OPERATIONS.md)
+**When to Read**: Planning work, understanding priorities, tracking progress
+
+#### [DOCUMENTATION_SYSTEM_REVIEW.md](DOCUMENTATION_SYSTEM_REVIEW.md) (2,018 tokens)
+**Purpose**: Production-readiness assessment of doc system
+**Key Sections**:
+- System Health (lines 10-40): Token accuracy, automation
+- Validation Results (lines 50-): Coverage, link integrity
+- Recommendations (lines 200-): Action plans
+
+**Dependencies**: All doc system files
+**When to Read**: Assessing doc system quality, planning improvements
+
+---
+
+## 🤖 Claude Code Integration Docs
+
+### Claude Agents (Sub-Agents)
+
+#### [.claude/agents/k8s-validator.md](../.claude/agents/k8s-validator.md) (182 tokens)
+**Purpose**: Fast Kubernetes manifest validator (Haiku model)
+**Tools**: Bash, Read, Grep
+**Use Case**: Validate manifests, dry-run checks before `kubectl apply`
+**Invocation**: Automatic via hooks in `.claude/settings.json`
+
+#### [.claude/agents/python-test-runner.md](../.claude/agents/python-test-runner.md) (163 tokens)
+**Purpose**: Fast Python test runner (Haiku model)
+**Tools**: Bash, Read
+**Use Case**: Run pytest, report failures before `git push`
+**Invocation**: Automatic via pre-push hooks
+
+#### [.claude/agents/argocd-sync-monitor.md](../.claude/agents/argocd-sync-monitor.md) (276 tokens)
+**Purpose**: ArgoCD deployment monitor (Sonnet model)
+**Tools**: Bash, Read, Grep
+**Use Case**: Monitor ArgoCD sync, troubleshoot deployment issues
+**Invocation**: Manual or automatic after ArgoCD sync
+
+---
+
+## 📦 Component Documentation
+
+### Python Agents Framework
+
+#### [agents/README.md](../agents/README.md) (347 tokens)
+**Purpose**: Python agent framework overview
+**Key Sections**:
+- Core agents (base classes, task, workflow)
+- Specialized agents (research, dev, review, testing, docs)
+
+**Dependencies**: None
+**When to Read**: Understanding Python agents, extending framework
+
+### Automation Scripts
+
+#### [scripts/README.md](../scripts/README.md) (1,206 tokens)
+**Purpose**: Python automation scripts documentation
+**Key Sections**:
+- Bootstrap scripts (cluster setup)
+- Validation scripts (health checks)
+- Secret management (SealedSecrets generation)
+- Model sync (Ollama model management)
+
+**Dependencies**: None
+**When to Read**: Running automation, understanding scripts
+
+### Workflow Automation
+
+#### [workflows/README.md](../workflows/README.md) (175 tokens)
+**Purpose**: n8n workflow documentation
+**Key Sections**:
+- Available workflows in `config/n8n-workflows/`
+- Import/export procedures
+
+**Dependencies**: None
+**When to Read**: Creating/modifying n8n workflows
+
+### Helm Charts
+
+#### [helm/README.md](../helm/README.md) (458 tokens)
+**Purpose**: Helm charts overview
+**Key Sections**:
+- Chart structure
+- Value overrides
+- ArgoCD integration
+
+**Dependencies**: [ARCHITECTURE.md](../ARCHITECTURE.md) ADR-002
+**When to Read**: Modifying Helm charts, adding services
+
+### MCP Servers
+
+#### [helm/mcp-servers/README.md](../helm/mcp-servers/README.md) (776 tokens)
+**Purpose**: Model Context Protocol servers documentation
+**Key Sections**:
+- Available MCP servers (filesystem, git, fetch, memory, etc.)
+- Configuration
+- MCPO proxy setup
+
+**Dependencies**: [ARCHITECTURE.md](../ARCHITECTURE.md) ADR-005
+**When to Read**: Configuring MCP tools, adding new servers
+
+### Licenses
+
+#### [third-party-licenses/README.md](../third-party-licenses/README.md) (135 tokens)
+**Purpose**: Third-party license information
+**Key Sections**: License files for dependencies
+
+**Dependencies**: None
+**When to Read**: Compliance, attributions
+
+---
+
+## 🧪 Demo & Research
+
+#### [AI_USE_TECH_DEMO/README.md](../AI_USE_TECH_DEMO/README.md) (~300 tokens est.)
+**Purpose**: AI use case demonstration project
+**When to Read**: Understanding demo capabilities
+
+#### [AI_USE_TECH_DEMO/docs/DEMO_GUIDE.md](../AI_USE_TECH_DEMO/docs/DEMO_GUIDE.md) (~500 tokens est.)
+**Purpose**: Demo walkthrough guide
+**When to Read**: Running demos
+
+#### [AI_USE_TECH_DEMO/prelim-research.md](../AI_USE_TECH_DEMO/prelim-research.md) (~200 tokens est.)
+**Purpose**: Preliminary research notes
+**When to Read**: Historical context
+
+---
+
+## 📚 Archive (Historical Reference)
+
+These docs are archived but kept for historical reference. Not actively maintained.
+
+**Location**: `docs/archive/`
+
+| Document | Purpose | Note |
+|----------|---------|------|
+| CONTEXT_SUMMARY.md | Historical context | Superseded by ARCHITECTURE.md |
+| CLUSTER_DEPLOYMENT_READINESS.md | Old deployment guide | See DEPLOYMENT.md |
+| CONTEXT_GATHERING_COMPLETE.md | Old context notes | Historical |
+| QUICK_REFERENCE.md | Old quick ref | See INDEX.md |
+| QUICKSTART.md | Old quickstart | See DEPLOYMENT.md |
+| PRODUCTION_FEATURES.md | Old features list | See README.md |
+| DEPLOYMENT.md (archived) | Old deployment | See docs/DEPLOYMENT.md |
+| implementation-guide.md (archived) | Old guide | See implementation-guide.md (root) |
+| legacy-scripts/README.md | Old scripts | See scripts/README.md |
+| self-hosted-ai-*.md | Old context docs | Historical |
+| UPGRADE_SUMMARY.md | Migration notes | Docker→K8s migration complete |
+
+**When to Read**: Never (unless researching history)
+
+
+
 ---
 
 ## 📁 Codebase Structure Map

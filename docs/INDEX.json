@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated": "2026-02-07T00:53:44.565470",
+    "generated": "2026-02-07T01:06:40.817477",
     "source_file": "docs/INDEX.md",
     "version": "1.0",
-    "index_hash": "79925c34907ed704fb340e9947f5e6c35a4e4de1fbb6f1e91cdac5cb1d919ae2"
+    "index_hash": "2154834f4684f348674b226ed54759149c7729e3a81012677c403e5cbc52fb7a"
   },
   "navigation_matrix": {
     "by_persona": [
@@ -181,6 +181,118 @@
       ],
       "when_to_read": "Setting up GitLab, configuring SSO",
       "exists": true
+    },
+    {
+      "filename": "DEPLOYMENT.md",
+      "path": "DEPLOYMENT.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/DEPLOYMENT.md",
+      "purpose": "Complete deployment procedures for k3s cluster",
+      "claimed_tokens": 1259,
+      "actual_tokens": 1259,
+      "token_variance": 0.0,
+      "content_hash": "ab8b9d807900464fad79d639712d7c0438cbc19599c8c4283cc07ecf6e462223",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: Initial deployment, adding nodes, troubleshooting deploy"
+      ],
+      "when_to_read": "Initial deployment, adding nodes, troubleshooting deploy",
+      "exists": true
+    },
+    {
+      "filename": "VERIFICATION_REPORT.md",
+      "path": "VERIFICATION_REPORT.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/VERIFICATION_REPORT.md",
+      "purpose": "Cluster validation results and known issues",
+      "claimed_tokens": 1552,
+      "actual_tokens": 1552,
+      "token_variance": 0.0,
+      "content_hash": "65c81f6f74a16b8b85c42b8656df1a64f7029142b85383d267eadb0175f7e349",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: After deployment, debugging, health checks"
+      ],
+      "when_to_read": "After deployment, debugging, health checks",
+      "exists": true
+    },
+    {
+      "filename": "API_RATE_LIMITS_REPORT.md",
+      "path": "API_RATE_LIMITS_REPORT.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/API_RATE_LIMITS_REPORT.md",
+      "purpose": "Comprehensive API rate limit analysis across all services",
+      "claimed_tokens": 4971,
+      "actual_tokens": 4971,
+      "token_variance": 0.0,
+      "content_hash": "d99988383ef946830eec8b3312a50b9a67b1b32b8d4162139eaee22f4eccca93",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: Planning API usage, debugging rate limit errors"
+      ],
+      "when_to_read": "Planning API usage, debugging rate limit errors",
+      "exists": true
+    },
+    {
+      "filename": "CLAUDE_OPTIMIZATION_GUIDE.md",
+      "path": "CLAUDE_OPTIMIZATION_GUIDE.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/CLAUDE_OPTIMIZATION_GUIDE.md",
+      "purpose": "Claude Code-specific implementation guide",
+      "claimed_tokens": 2614,
+      "actual_tokens": 2614,
+      "token_variance": 0.0,
+      "content_hash": "2d76d0ca78e1763e5d61cb7a562441ad58114dc8162b006e5170827c9c256cd6",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: Replicating optimization in other Claude projects"
+      ],
+      "when_to_read": "Replicating optimization in other Claude projects",
+      "exists": true
+    },
+    {
+      "filename": "UNIVERSAL_AGENT_DOC_OPTIMIZATION.md",
+      "path": "UNIVERSAL_AGENT_DOC_OPTIMIZATION.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/UNIVERSAL_AGENT_DOC_OPTIMIZATION.md",
+      "purpose": "Framework-agnostic doc optimization for ANY AI agent system",
+      "claimed_tokens": 6280,
+      "actual_tokens": 6280,
+      "token_variance": 0.0,
+      "content_hash": "8c8d4f7abe2be3ead6d1a1f42b466789d4ed982752c97bdd81a76646c2fc953a",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: Applying optimization to non-Claude agent systems"
+      ],
+      "when_to_read": "Applying optimization to non-Claude agent systems",
+      "exists": true
+    },
+    {
+      "filename": "DEVELOPMENT_ROADMAP.md",
+      "path": "DEVELOPMENT_ROADMAP.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/DEVELOPMENT_ROADMAP.md",
+      "purpose": "12-week phased development plan",
+      "claimed_tokens": 4420,
+      "actual_tokens": 4420,
+      "token_variance": 0.0,
+      "content_hash": "29dfcc3c9b924ed580d7e03383b729c024b87cab14ae941e41d8ff47c175f7b9",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: Planning work, understanding priorities, tracking progress"
+      ],
+      "when_to_read": "Planning work, understanding priorities, tracking progress",
+      "exists": true
+    },
+    {
+      "filename": "DOCUMENTATION_SYSTEM_REVIEW.md",
+      "path": "DOCUMENTATION_SYSTEM_REVIEW.md",
+      "full_path": "/home/kang/Documents/projects/github/homelab-cluster/self-hosted-ai/docs/DOCUMENTATION_SYSTEM_REVIEW.md",
+      "purpose": "Production-readiness assessment of doc system",
+      "claimed_tokens": 2018,
+      "actual_tokens": 2018,
+      "token_variance": 0.0,
+      "content_hash": "7d02c53d2eb60dddbf852e8c404557d9f186df7c28a81be34122076da542b39d",
+      "key_sections": [],
+      "dependencies": [
+        "When to Read**: Assessing doc system quality, planning improvements"
+      ],
+      "when_to_read": "Assessing doc system quality, planning improvements",
+      "exists": true
     }
   ],
   "quick_references": {
@@ -249,13 +361,13 @@
     ]
   },
   "statistics": {
-    "total_documents": 6,
-    "total_claimed_tokens": 11537,
-    "total_actual_tokens": 11455,
-    "token_accuracy": 0.9928924330415186,
-    "documents_indexed": 6,
-    "documents_in_project": 91,
-    "index_coverage": 0.06593406593406594,
-    "missing_documents": 85
+    "total_documents": 13,
+    "total_claimed_tokens": 34651,
+    "total_actual_tokens": 34569,
+    "token_accuracy": 0.9976335459294104,
+    "documents_indexed": 13,
+    "documents_in_project": 92,
+    "index_coverage": 0.14130434782608695,
+    "missing_documents": 79
   }
 }
