@@ -18,6 +18,7 @@ spec:
     chart: gha-runner-scale-set-controller
     targetRevision: 0.9.3
     helm:
+      skipCrds: true  # CRDs managed manually to avoid annotation size issues
       valuesObject:
         # Resource limits for controller
         replicaCount: 1
@@ -45,6 +46,7 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true  # Avoid annotation size limit issues
     retry:
       limit: 5
       backoff:
