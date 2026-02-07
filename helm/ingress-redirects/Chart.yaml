@@ -1,0 +1,5 @@
+apiVersion: v2
+name: ingress-redirects
+description: Traefik redirect middleware for root domain to ai subdomain
+version: 0.1.0
+type: application

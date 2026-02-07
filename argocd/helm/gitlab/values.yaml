@@ -63,6 +63,16 @@ global:
     # Enable external authorization for mirrors
     externalAuthorization:
       enabled: false
+    # Keycloak SSO via OmniAuth OpenID Connect
+    omniauth:
+      enabled: true
+      allowSingleSignOn:
+        - openid_connect
+      autoSignInWithProvider: ""
+      blockAutoCreatedUsers: false
+      providers:
+        - secret: gitlab-oidc-provider
+          key: provider
 
 # GitLab Rails (main application)
 gitlab:
@@ -215,9 +225,9 @@ smtp:
 ldap:
   enabled: false
 
-# OAuth configuration (optional)
+# OAuth configuration
 oauth:
-  enabled: false
+  enabled: true
 
 # Backup configuration
 backup:

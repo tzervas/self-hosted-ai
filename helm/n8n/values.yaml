@@ -15,6 +15,7 @@ ingress:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: automation-n8n-forward-auth@kubernetescrd
     cert-manager.io/cluster-issuer: letsencrypt-production
   hosts:
     - host: n8n.vectorweight.com
