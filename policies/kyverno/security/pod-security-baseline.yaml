@@ -31,6 +31,7 @@ spec:
                 - gpu-workloads
                 - longhorn-system
                 - argocd
+                - gitlab
       validate:
         message: "Containers must set securityContext.runAsNonRoot=true"
         pattern:
@@ -53,6 +54,7 @@ spec:
                 - kyverno
                 - gpu-workloads
                 - longhorn-system
+                - gitlab
       validate:
         message: "Privileged containers are not allowed"
         pattern:
@@ -71,6 +73,11 @@ spec:
           - resources:
               kinds:
                 - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - gitlab
       validate:
         message: "Using ':latest' tag is not allowed. Pin image versions for reproducibility."
         pattern:

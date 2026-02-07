@@ -1,0 +1,25 @@
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: gitlab-namespace-exception
+  namespace: kyverno
+spec:
+  exceptions:
+  - policyName: pod-security-baseline
+    ruleNames:
+    - autogen-require-run-as-non-root
+    - autogen-disallow-latest-tag
+    - require-run-as-non-root
+    - disallow-latest-tag
+    - autogen-disallow-privileged-containers
+    - disallow-privileged-containers
+  background: true
+  match:
+    any:
+    - resources:
+        kinds:
+        - Pod
+        - Deployment
+        - StatefulSet
+        namespaces:
+        - gitlab
