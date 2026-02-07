@@ -1,0 +1,9 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-root-to-ai
+spec:
+  redirectRegex:
+    regex: "^https://vectorweight\\.com/(.*)"
+    replacement: "https://ai.vectorweight.com/${1}"
+    permanent: true

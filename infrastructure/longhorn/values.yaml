@@ -6,7 +6,7 @@ storageClasses:
   homelab:
     name: longhorn-homelab
     isDefault: true
-    numberOfReplicas: 2
+    numberOfReplicas: 1  # Single-node homelab - no replication needed
     dataLocality: best-effort
     fsType: ext4
     reclaimPolicy: Retain

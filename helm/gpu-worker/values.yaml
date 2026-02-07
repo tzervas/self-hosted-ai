@@ -2,6 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# Create local storage PV/PVC for akula-prime (only needed once)
+createLocalStorage: false
+
 # Ollama GPU configuration
 ollama:
   gpu:
@@ -127,3 +130,93 @@ automatic1111:
       nvidia.com/gpu: 1
       memory: "24Gi"
       cpu: "6000m"
+
+# TTS Server (XTTS-v2) configuration
+tts:
+  enabled: true
+  image:
+    repository: ghcr.io/coqui-ai/tts
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5002
+    annotations: {}
+  env:
+    - name: USE_CUDA
+      value: "true"
+    - name: COQUI_TOS_AGREED
+      value: "1"
+  nodeSelector:
+    kubernetes.io/hostname: akula-prime
+  tolerations:
+    - key: "nvidia.com/gpu"
+      operator: "Exists"
+      effect: "NoSchedule"
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "500m"
+    limits:
+      memory: "8Gi"
+      cpu: "2000m"
+
+# Audio Generation Server (AudioLDM2/MusicGen/Bark) configuration
+audio:
+  enabled: false  # Disabled by default; enable explicitly in ArgoCD app
+  image:
+    repository: ghcr.io/tzervas/audio-server
+    tag: "1.1.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5004
+    annotations: {}
+  env:
+    - name: HF_HOME
+      value: "/models/huggingface"
+    - name: TORCH_HOME
+      value: "/models/torch"
+  nodeSelector:
+    kubernetes.io/hostname: akula-prime
+  tolerations:
+    - key: "nvidia.com/gpu"
+      operator: "Exists"
+      effect: "NoSchedule"
+  resources:
+    requests:
+      memory: "4Gi"
+      cpu: "1000m"
+    limits:
+      memory: "12Gi"
+      cpu: "4000m"
+
+# Video Generation Server (AnimateDiff-Lightning/SVD) configuration
+video:
+  enabled: false  # Disabled by default; enable explicitly in ArgoCD app
+  image:
+    repository: ghcr.io/tzervas/video-server
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5005
+    annotations: {}
+  env:
+    - name: HF_HOME
+      value: "/models/huggingface"
+    - name: TORCH_HOME
+      value: "/models/torch"
+  nodeSelector:
+    kubernetes.io/hostname: akula-prime
+  tolerations:
+    - key: "nvidia.com/gpu"
+      operator: "Exists"
+      effect: "NoSchedule"
+  resources:
+    requests:
+      memory: "6Gi"
+      cpu: "1000m"
+    limits:
+      memory: "14Gi"
+      cpu: "4000m"

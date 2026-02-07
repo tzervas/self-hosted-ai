@@ -30,7 +30,7 @@ spec:
         modelsPersistence:
           enabled: true
           size: 50Gi
-          storageClass: "longhorn-homelab"
+          storageClass: "longhorn"
 
         gpu:
           enabled: false
@@ -52,7 +52,9 @@ spec:
           enabled: true
           allowedNamespaces:
             - ai-services
-            - gpu-worker
+            - self-hosted-ai
+            - gpu-workloads
+            - default
   destination:
     server: https://kubernetes.default.svc
     namespace: ai-services

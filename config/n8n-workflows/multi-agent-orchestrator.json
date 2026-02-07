@@ -1,0 +1,264 @@
+{
+  "name": "Multi-Agent Orchestration Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agents/orchestrate",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "multi-agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Initialize multi-agent orchestration\nconst input = $input.first();\nconst task = input.json.body.task;\nconst agents = input.json.body.agents || ['planner', 'executor', 'reviewer'];\nconst maxIterations = input.json.body.max_iterations || 3;\nconst coordinationMode = input.json.body.mode || 'sequential'; // sequential, parallel, hierarchical\n\nconst agentPrompts = {\n  planner: {\n    role: 'Strategic Planner',\n    prompt: 'You are a strategic planning agent. Break down complex tasks into actionable steps. Identify dependencies and potential blockers. Output a structured plan with clear milestones.'\n  },\n  executor: {\n    role: 'Task Executor',\n    prompt: 'You are an execution agent. Take plans and implement them step by step. Report progress and any issues encountered. Focus on delivering concrete results.'\n  },\n  reviewer: {\n    role: 'Quality Reviewer',\n    prompt: 'You are a quality review agent. Analyze work products for correctness, completeness, and quality. Provide constructive feedback and identify areas for improvement.'\n  },\n  researcher: {\n    role: 'Research Specialist',\n    prompt: 'You are a research agent. Gather relevant information, analyze sources, and synthesize findings. Provide well-sourced and accurate research summaries.'\n  },\n  coder: {\n    role: 'Code Developer',\n    prompt: 'You are a coding agent. Write clean, efficient, and well-documented code. Follow best practices and ensure code quality.'\n  },\n  critic: {\n    role: 'Critical Analyst',\n    prompt: 'You are a critical analysis agent. Challenge assumptions, identify weaknesses, and propose alternatives. Provide balanced critique.'\n  }\n};\n\n// Build agent configurations\nconst configuredAgents = agents.map(agentName => ({\n  name: agentName,\n  ...agentPrompts[agentName] || { role: agentName, prompt: `You are a ${agentName} agent.` }\n}));\n\nreturn {\n  json: {\n    task: task,\n    agents: configuredAgents,\n    mode: coordinationMode,\n    max_iterations: maxIterations,\n    current_iteration: 0,\n    conversation_history: [],\n    agent_outputs: {},\n    status: 'initializing',\n    request_id: 'orchestrate_' + Date.now()\n  }\n};"
+      },
+      "id": "init-orchestration",
+      "name": "Initialize Orchestration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.mode }}",
+              "operation": "equals",
+              "value2": "sequential"
+            }
+          ]
+        }
+      },
+      "id": "switch-mode",
+      "name": "Route by Mode",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Sequential agent execution\nconst state = $input.first().json;\nconst currentAgentIndex = state.conversation_history.length;\n\nif (currentAgentIndex >= state.agents.length) {\n  return {\n    json: {\n      ...state,\n      status: 'completed',\n      is_complete: true\n    }\n  };\n}\n\nconst currentAgent = state.agents[currentAgentIndex];\nconst previousOutputs = state.conversation_history.map(h => \n  `[${h.agent}]: ${h.output}`\n).join('\\n\\n');\n\nreturn {\n  json: {\n    ...state,\n    current_agent: currentAgent,\n    context: previousOutputs,\n    status: 'running_agent',\n    is_complete: false\n  }\n};"
+      },
+      "id": "sequential-prep",
+      "name": "Prepare Sequential",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [910, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://litellm:4000/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.LITELLM_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'qwen2.5-coder:14b', messages: [{ role: 'system', content: $json.current_agent.prompt }, { role: 'user', content: 'Task: ' + $json.task + ($json.context ? '\\n\\nPrevious agent outputs:\\n' + $json.context : '') + '\\n\\nProvide your contribution as ' + $json.current_agent.role + '.' }], temperature: 0.7, max_tokens: 3000 }) }}",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "run-agent",
+      "name": "Run Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1130, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge agent output into state\nconst state = $('Prepare Sequential').first().json;\nconst agentResponse = $input.first().json.choices[0].message.content;\n\nconst newHistory = [...state.conversation_history, {\n  agent: state.current_agent.name,\n  role: state.current_agent.role,\n  output: agentResponse,\n  timestamp: new Date().toISOString()\n}];\n\nconst newAgentOutputs = {\n  ...state.agent_outputs,\n  [state.current_agent.name]: agentResponse\n};\n\nreturn {\n  json: {\n    ...state,\n    conversation_history: newHistory,\n    agent_outputs: newAgentOutputs,\n    current_iteration: state.current_iteration + 1\n  }\n};"
+      },
+      "id": "merge-output",
+      "name": "Merge Agent Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1350, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "more-agents",
+              "leftValue": "={{ $json.conversation_history.length < $json.agents.length }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-more-agents",
+      "name": "More Agents?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1570, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Finalize orchestration result\nconst state = $input.first().json;\n\n// Generate summary from all agent outputs\nconst summary = Object.entries(state.agent_outputs)\n  .map(([agent, output]) => `## ${agent.charAt(0).toUpperCase() + agent.slice(1)} Output\\n${output}`)\n  .join('\\n\\n---\\n\\n');\n\nreturn {\n  json: {\n    success: true,\n    request_id: state.request_id,\n    task: state.task,\n    mode: state.mode,\n    agents_used: state.agents.map(a => a.name),\n    iterations: state.current_iteration,\n    agent_outputs: state.agent_outputs,\n    conversation_history: state.conversation_history,\n    combined_summary: summary,\n    status: 'completed'\n  }\n};"
+      },
+      "id": "finalize",
+      "name": "Finalize Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1790, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2010, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Initialize Orchestration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize Orchestration": {
+      "main": [
+        [
+          {
+            "node": "Route by Mode",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Mode": {
+      "main": [
+        [
+          {
+            "node": "Prepare Sequential",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Sequential": {
+      "main": [
+        [
+          {
+            "node": "Run Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge Agent Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Agent Output": {
+      "main": [
+        [
+          {
+            "node": "More Agents?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "More Agents?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Sequential",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Finalize Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finalize Result": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "instanceId": "self-hosted-ai"
+  },
+  "tags": [
+    {
+      "name": "multi-agent"
+    },
+    {
+      "name": "orchestration"
+    },
+    {
+      "name": "agentic"
+    }
+  ]
+}

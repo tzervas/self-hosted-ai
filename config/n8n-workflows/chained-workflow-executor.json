@@ -1,0 +1,403 @@
+{
+  "name": "Chained Workflow Executor",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "workflow/execute-chain",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "workflow-chain"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Initialize chained workflow execution\nconst input = $input.first();\nconst steps = input.json.body.steps; // Array of workflow step definitions\nconst context = input.json.body.initial_context || {};\nconst stopOnError = input.json.body.stop_on_error !== false;\nconst timeout = input.json.body.timeout || 600; // seconds\n\nif (!steps || !Array.isArray(steps) || steps.length === 0) {\n  throw new Error('Steps array is required with at least one workflow step');\n}\n\n// Validate step structure\nfor (const step of steps) {\n  if (!step.type) {\n    throw new Error('Each step must have a type (llm, image, video, audio, http, transform)');\n  }\n}\n\nreturn {\n  json: {\n    steps: steps,\n    current_step: 0,\n    context: context,\n    results: [],\n    stop_on_error: stopOnError,\n    timeout_seconds: timeout,\n    request_id: 'chain_' + Date.now(),\n    status: 'running',\n    started_at: new Date().toISOString()\n  }\n};"
+      },
+      "id": "init-chain",
+      "name": "Initialize Chain",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare current step for execution\nconst state = $input.first().json;\nconst currentStep = state.steps[state.current_step];\nconst prevResult = state.results.length > 0 ? state.results[state.results.length - 1] : null;\n\n// Template replacement for dynamic values\nlet stepConfig = JSON.stringify(currentStep);\n\n// Replace {{context.key}} with actual values\nfor (const [key, value] of Object.entries(state.context)) {\n  stepConfig = stepConfig.replace(new RegExp(`\\\\{\\\\{context\\\\.${key}\\\\}\\\\}`, 'g'), String(value));\n}\n\n// Replace {{prev.key}} with previous step results\nif (prevResult && prevResult.output) {\n  for (const [key, value] of Object.entries(prevResult.output)) {\n    stepConfig = stepConfig.replace(new RegExp(`\\\\{\\\\{prev\\\\.${key}\\\\}\\\\}`, 'g'), String(value));\n  }\n}\n\n// Replace {{results[n].key}} with specific step results\nfor (let i = 0; i < state.results.length; i++) {\n  const result = state.results[i];\n  if (result.output) {\n    for (const [key, value] of Object.entries(result.output)) {\n      stepConfig = stepConfig.replace(new RegExp(`\\\\{\\\\{results\\\\[${i}\\\\]\\\\.${key}\\\\}\\\\}`, 'g'), String(value));\n    }\n  }\n}\n\nconst processedStep = JSON.parse(stepConfig);\n\nreturn {\n  json: {\n    ...state,\n    current_step_config: processedStep,\n    step_started_at: new Date().toISOString()\n  }\n};"
+      },
+      "id": "prepare-step",
+      "name": "Prepare Step",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.current_step_config.type }}",
+              "operation": "equals",
+              "value2": "llm"
+            }
+          ]
+        }
+      },
+      "id": "switch-step-type",
+      "name": "Route by Step Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [910, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://litellm:4000/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.LITELLM_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: $json.current_step_config.model || 'qwen2.5-coder:14b', messages: [{ role: 'system', content: $json.current_step_config.system_prompt || 'You are a helpful assistant.' }, { role: 'user', content: $json.current_step_config.prompt }], temperature: $json.current_step_config.temperature || 0.7, max_tokens: $json.current_step_config.max_tokens || 2000 }) }}",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "execute-llm",
+      "name": "Execute LLM Step",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1130, 100]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://comfyui:8188/prompt",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ prompt: { workflow: $json.current_step_config.workflow || 'txt2img-sdxl', positive_prompt: $json.current_step_config.prompt }, client_id: 'chain-image-' + Date.now() }) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "execute-image",
+      "name": "Execute Image Step",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1130, 250]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://comfyui:8188/prompt",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ prompt: { workflow: $json.current_step_config.workflow || 'text2video-wan', video_prompt: $json.current_step_config.prompt, frames: $json.current_step_config.frames || 24 }, client_id: 'chain-video-' + Date.now() }) }}",
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "id": "execute-video",
+      "name": "Execute Video Step",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1130, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.current_step_config.audio_type === 'tts' ? 'http://tts-server:5002/api/tts' : 'http://audio-server:5004/api/audioldm' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.current_step_config.audio_type === 'tts' ? { text: $json.current_step_config.text, speaker_wav: $json.current_step_config.voice || 'en_speaker_0' } : { prompt: $json.current_step_config.prompt, duration: $json.current_step_config.duration || 5 }) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "execute-audio",
+      "name": "Execute Audio Step",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1130, 550]
+    },
+    {
+      "parameters": {
+        "method": "={{ $json.current_step_config.method || 'GET' }}",
+        "url": "={{ $json.current_step_config.url }}",
+        "sendBody": "={{ !!$json.current_step_config.body }}",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.current_step_config.body || {}) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "execute-http",
+      "name": "Execute HTTP Step",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1130, 700]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process step result and update state\nconst state = $('Prepare Step').first().json;\nconst stepResult = $input.first().json;\nconst stepConfig = state.current_step_config;\n\n// Extract output based on step type\nlet output = {};\nlet success = true;\nlet error = null;\n\nswitch (stepConfig.type) {\n  case 'llm':\n    output = {\n      text: stepResult.choices?.[0]?.message?.content || stepResult,\n      tokens: stepResult.usage?.total_tokens || 0\n    };\n    break;\n  case 'image':\n  case 'video':\n    output = {\n      prompt_id: stepResult.prompt_id,\n      status: 'queued'\n    };\n    break;\n  case 'audio':\n    output = {\n      audio_url: stepResult.audio_url,\n      audio_base64: stepResult.audio_base64\n    };\n    break;\n  case 'http':\n    output = stepResult;\n    break;\n  case 'transform':\n    // Transform step processes data without external call\n    try {\n      const transformFn = new Function('data', 'context', stepConfig.transform_code || 'return data');\n      output = transformFn(state.results[state.results.length - 1]?.output || {}, state.context);\n    } catch (e) {\n      success = false;\n      error = e.message;\n    }\n    break;\n  default:\n    output = stepResult;\n}\n\nconst stepRecord = {\n  step_index: state.current_step,\n  step_name: stepConfig.name || `Step ${state.current_step + 1}`,\n  type: stepConfig.type,\n  success: success,\n  error: error,\n  output: output,\n  duration_ms: Date.now() - new Date(state.step_started_at).getTime()\n};\n\nconst newResults = [...state.results, stepRecord];\nconst isComplete = state.current_step >= state.steps.length - 1;\nconst shouldStop = !success && state.stop_on_error;\n\nreturn {\n  json: {\n    ...state,\n    current_step: state.current_step + 1,\n    results: newResults,\n    status: shouldStop ? 'error' : (isComplete ? 'completed' : 'running'),\n    is_complete: isComplete || shouldStop,\n    should_continue: !isComplete && !shouldStop\n  }\n};"
+      },
+      "id": "process-result",
+      "name": "Process Step Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1350, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "should-continue",
+              "leftValue": "={{ $json.should_continue }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-continue",
+      "name": "Continue Chain?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1570, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Finalize chain execution result\nconst state = $input.first().json;\n\nconst totalDuration = state.results.reduce((sum, r) => sum + (r.duration_ms || 0), 0);\nconst successfulSteps = state.results.filter(r => r.success).length;\n\nreturn {\n  json: {\n    success: state.status === 'completed',\n    request_id: state.request_id,\n    status: state.status,\n    total_steps: state.steps.length,\n    completed_steps: state.results.length,\n    successful_steps: successfulSteps,\n    total_duration_ms: totalDuration,\n    started_at: state.started_at,\n    completed_at: new Date().toISOString(),\n    results: state.results,\n    final_output: state.results.length > 0 ? state.results[state.results.length - 1].output : null,\n    context: state.context\n  }\n};"
+      },
+      "id": "finalize",
+      "name": "Finalize Chain",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1790, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2010, 400]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Initialize Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize Chain": {
+      "main": [
+        [
+          {
+            "node": "Prepare Step",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Step": {
+      "main": [
+        [
+          {
+            "node": "Route by Step Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Step Type": {
+      "main": [
+        [
+          {
+            "node": "Execute LLM Step",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Image Step",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Video Step",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Audio Step",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute HTTP Step",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute LLM Step": {
+      "main": [
+        [
+          {
+            "node": "Process Step Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Image Step": {
+      "main": [
+        [
+          {
+            "node": "Process Step Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Video Step": {
+      "main": [
+        [
+          {
+            "node": "Process Step Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Audio Step": {
+      "main": [
+        [
+          {
+            "node": "Process Step Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute HTTP Step": {
+      "main": [
+        [
+          {
+            "node": "Process Step Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Step Result": {
+      "main": [
+        [
+          {
+            "node": "Continue Chain?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continue Chain?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Step",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Finalize Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finalize Chain": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "instanceId": "self-hosted-ai"
+  },
+  "tags": [
+    {
+      "name": "chained"
+    },
+    {
+      "name": "workflow"
+    },
+    {
+      "name": "orchestration"
+    },
+    {
+      "name": "multi-step"
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "last_node_id": 6,
+  "last_link_id": 5,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "TextInput",
+      "pos": [100, 200],
+      "size": {"0": 400, "1": 100},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [1],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "text": "explosion sound effect, cinematic, deep bass rumble"
+      },
+      "widgets_values": ["explosion sound effect, cinematic, deep bass rumble"]
+    },
+    {
+      "id": 2,
+      "type": "AudioLDM2Loader",
+      "pos": [100, 350],
+      "size": {"0": 315, "1": 82},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "AUDIOLDM_MODEL",
+          "type": "AUDIOLDM_MODEL",
+          "links": [2],
+          "slot_index": 0
+        }
+      ],
+      "properties": {},
+      "widgets_values": ["audioldm2-large", "cuda"]
+    },
+    {
+      "id": 3,
+      "type": "AudioLDM2Generate",
+      "pos": [550, 250],
+      "size": {"0": 350, "1": 200},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "AUDIOLDM_MODEL",
+          "link": 2
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "link": 1
+        },
+        {
+          "name": "negative_prompt",
+          "type": "STRING",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [4],
+          "slot_index": 0
+        }
+      ],
+      "properties": {},
+      "widgets_values": [5.0, 7.5, 50, 16000, 42]
+    },
+    {
+      "id": 4,
+      "type": "TextInput",
+      "pos": [100, 500],
+      "size": {"0": 400, "1": 80},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [3],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "text": "low quality, distorted, noise, static, hum"
+      },
+      "widgets_values": ["low quality, distorted, noise, static, hum"]
+    },
+    {
+      "id": 5,
+      "type": "SaveAudio",
+      "pos": [950, 280],
+      "size": {"0": 315, "1": 82},
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 4
+        }
+      ],
+      "properties": {},
+      "widgets_values": ["sfx_output", "wav"]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 3, 1, "STRING"],
+    [2, 2, 0, 3, 0, "AUDIOLDM_MODEL"],
+    [3, 4, 0, 3, 2, "STRING"],
+    [4, 3, 0, 5, 0, "AUDIO"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "workflow_name": "Text to Audio - Sound Effects",
+    "description": "Generate sound effects from text descriptions using AudioLDM2"
+  },
+  "version": 0.4
+}

@@ -1,6 +1,0 @@
-apiVersion: v2
-name: qemu-binfmt
-description: QEMU binfmt handlers for multi-arch emulation
-type: application
-version: 1.0.0
-appVersion: "latest"

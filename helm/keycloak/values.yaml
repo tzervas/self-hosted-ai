@@ -1,0 +1,129 @@
+# Keycloak SSO Configuration for Self-Hosted AI
+# ==============================================
+# Provides centralized authentication for:
+# - Open WebUI (AI Chat)
+# - n8n (Workflow Automation)
+# - ArgoCD (GitOps)
+# - Grafana (Monitoring)
+#
+# Chart: bitnami/keycloak v24.4.0
+
+# Allow legacy/non-standard images
+global:
+  security:
+    allowInsecureImages: true
+  # PostgreSQL global image override (for subchart)
+  imageRegistry: docker.io
+
+keycloak:
+  # Use bitnami legacy images (free but archived)
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/keycloak
+    tag: "24.0.5-debian-12-r3"
+
+  # Production mode
+  production: true
+
+  # Admin credentials from secret
+  auth:
+    adminUser: admin
+    existingSecret: keycloak-admin-secret
+    passwordSecretKey: admin-password
+
+  # Proxy configuration for running behind Traefik
+  proxy: edge
+
+  # HTTP relative path
+  httpRelativePath: "/"
+
+  # Service configuration
+  service:
+    type: ClusterIP
+    ports:
+      http: 8080
+
+  # Ingress
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hostname: auth.vectorweight.com
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+    tls: true
+    extraTls:
+      - hosts:
+          - auth.vectorweight.com
+        secretName: vectorweight-wildcard-tls
+
+  # PostgreSQL database
+  postgresql:
+    enabled: true
+    image:
+      registry: docker.io
+      repository: bitnamilegacy/postgresql
+      tag: "16.4.0-debian-12-r2"
+      pullPolicy: IfNotPresent
+    auth:
+      existingSecret: keycloak-db-secret
+      secretKeys:
+        adminPasswordKey: postgres-password
+        userPasswordKey: password
+    primary:
+      persistence:
+        enabled: true
+        size: 8Gi
+        storageClass: longhorn
+
+  # Resources - keep light for homelab
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1536Mi
+
+  # Health probes
+  startupProbe:
+    enabled: true
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 30
+    timeoutSeconds: 10
+
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+
+  # Extra environment variables
+  extraEnvVars:
+    - name: KC_HOSTNAME
+      value: "auth.vectorweight.com"
+    - name: KC_HOSTNAME_STRICT
+      value: "false"
+    - name: KC_HOSTNAME_STRICT_HTTPS
+      value: "true"
+
+# ==============================================
+# Required Secrets (create before deployment)
+# ==============================================
+# 1. Keycloak Admin (dev: ChangeMe123):
+#    kubectl create secret generic keycloak-admin-secret -n auth \
+#      --from-literal=admin-password=ChangeMe123
+#
+# 2. Keycloak Database:
+#    kubectl create secret generic keycloak-db-secret -n auth \
+#      --from-literal=postgres-password=$(openssl rand -hex 16) \
+#      --from-literal=password=$(openssl rand -hex 16)
+#
+# Or run: ./scripts/setup-keycloak-secrets.sh

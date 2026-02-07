@@ -26,6 +26,7 @@ ingress:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: automation-litellm-forward-auth@kubernetescrd
     cert-manager.io/cluster-issuer: letsencrypt-production
   hosts:
     - host: llm.vectorweight.com
@@ -75,22 +76,34 @@ resources:
     cpu: 2000m
     memory: 4Gi
 
-# Health checks
+# Health checks - startup probe handles slow initialization
+startupProbe:
+  httpGet:
+    path: /health/liveliness
+    port: 4000
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 5
+  failureThreshold: 30  # 30 * 5s = 2.5 min max startup
+  successThreshold: 1
+
 livenessProbe:
   httpGet:
     path: /health/liveliness
     port: 4000
-  initialDelaySeconds: 30
+  initialDelaySeconds: 10  # Reduced - startup probe handles slow starts
   periodSeconds: 30
   timeoutSeconds: 10
+  failureThreshold: 3
 
 readinessProbe:
   httpGet:
     path: /health/readiness
     port: 4000
-  initialDelaySeconds: 15
+  initialDelaySeconds: 5  # Reduced - startup probe handles slow starts
   periodSeconds: 10
   timeoutSeconds: 5
+  failureThreshold: 3
 
 # Pod configuration
 nodeSelector: {}
@@ -110,8 +123,9 @@ autoscaling:
   scaleUpStabilizationWindowSeconds: 0
 
 # Vertical Pod Autoscaler - recommend optimal resources
+# NOTE: Requires VPA CRD to be installed (not installed in this cluster)
 vpa:
-  enabled: true
+  enabled: false
   updateMode: "Off"  # "Off" = recommendations only, "Auto" = automatic updates
   minAllowed:
     cpu: 100m

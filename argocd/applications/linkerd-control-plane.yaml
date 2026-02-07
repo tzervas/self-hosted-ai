@@ -104,6 +104,15 @@ spec:
         # Prometheus integration
         prometheusUrl: "http://prometheus-kube-prometheus-prometheus.monitoring:9090"
         
+        # SP Validator (service profile validator webhook)
+        spValidatorResources:
+          cpu:
+            request: 10m
+            limit: 250m
+          memory:
+            request: 32Mi
+            limit: 128Mi
+
         # Policy controller for authorization policies
         policyController:
           resources:

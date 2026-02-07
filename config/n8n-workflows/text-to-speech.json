@@ -1,0 +1,207 @@
+{
+  "name": "Text to Speech Generation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tts/generate",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "tts-generate"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare TTS request\nconst input = $input.first();\nconst text = input.json.body.text;\nconst voice = input.json.body.voice || 'en_speaker_0';\nconst language = input.json.body.language || 'en';\nconst model = input.json.body.model || 'xtts-v2';\nconst speed = input.json.body.speed || 1.0;\nconst outputFormat = input.json.body.format || 'wav';\n\n// Validate text length\nif (!text || text.length === 0) {\n  throw new Error('Text is required for TTS generation');\n}\n\nif (text.length > 10000) {\n  throw new Error('Text exceeds maximum length of 10000 characters');\n}\n\nreturn {\n  json: {\n    text: text,\n    voice: voice,\n    language: language,\n    model: model,\n    speed: speed,\n    format: outputFormat,\n    request_id: 'tts_' + Date.now()\n  }\n};"
+      },
+      "id": "prepare-request",
+      "name": "Prepare TTS Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.model }}",
+              "operation": "equals",
+              "value2": "xtts-v2"
+            }
+          ]
+        }
+      },
+      "id": "switch-model",
+      "name": "Route by Model",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://tts-server:5002/api/tts",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ text: $json.text, speaker_wav: $json.voice, language: $json.language, speed: $json.speed }) }}",
+        "options": {
+          "timeout": 180000,
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "xtts-generate",
+      "name": "XTTS-v2 Generate",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [910, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://bark-server:5003/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ text: $json.text, voice_preset: $json.voice, text_temp: 0.7, waveform_temp: 0.7 }) }}",
+        "options": {
+          "timeout": 300000,
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "bark-generate",
+      "name": "Bark Generate",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [910, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process audio result\nconst input = $input.first();\nconst request = $('Prepare TTS Request').first().json;\n\nlet audioData;\nlet contentType;\n\nif (input.json.body) {\n  audioData = input.json.body;\n  contentType = input.json.headers['content-type'] || 'audio/wav';\n} else {\n  audioData = input.json;\n  contentType = 'audio/wav';\n}\n\nreturn {\n  json: {\n    success: true,\n    request_id: request.request_id,\n    model: request.model,\n    text_length: request.text.length,\n    voice: request.voice,\n    language: request.language,\n    format: request.format,\n    audio_url: audioData.audio_url || null,\n    audio_base64: audioData.audio_base64 || null,\n    duration_seconds: audioData.duration || null,\n    content_type: contentType\n  }\n};"
+      },
+      "id": "process-audio",
+      "name": "Process Audio Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1130, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1350, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare TTS Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare TTS Request": {
+      "main": [
+        [
+          {
+            "node": "Route by Model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Model": {
+      "main": [
+        [
+          {
+            "node": "XTTS-v2 Generate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Bark Generate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "XTTS-v2 Generate": {
+      "main": [
+        [
+          {
+            "node": "Process Audio Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bark Generate": {
+      "main": [
+        [
+          {
+            "node": "Process Audio Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Audio Result": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "instanceId": "self-hosted-ai"
+  },
+  "tags": [
+    {
+      "name": "tts"
+    },
+    {
+      "name": "audio"
+    },
+    {
+      "name": "voice"
+    }
+  ]
+}

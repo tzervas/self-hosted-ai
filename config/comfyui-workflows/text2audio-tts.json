@@ -1,0 +1,132 @@
+{
+  "last_node_id": 8,
+  "last_link_id": 7,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "TextInput",
+      "pos": [100, 200],
+      "size": {"0": 400, "1": 200},
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [1],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "text": "Hello, this is a test of the text to speech system."
+      },
+      "widgets_values": ["Hello, this is a test of the text to speech system."]
+    },
+    {
+      "id": 2,
+      "type": "XTTSLoader",
+      "pos": [100, 450],
+      "size": {"0": 315, "1": 82},
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "XTTS_MODEL",
+          "type": "XTTS_MODEL",
+          "links": [2],
+          "slot_index": 0
+        }
+      ],
+      "properties": {},
+      "widgets_values": ["xtts_v2", "cuda"]
+    },
+    {
+      "id": 3,
+      "type": "XTTSSpeakerEmbedding",
+      "pos": [100, 580],
+      "size": {"0": 315, "1": 82},
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "SPEAKER_EMBEDDING",
+          "type": "SPEAKER_EMBEDDING",
+          "links": [3],
+          "slot_index": 0
+        }
+      ],
+      "properties": {},
+      "widgets_values": ["default_en", "en"]
+    },
+    {
+      "id": 4,
+      "type": "XTTSGenerate",
+      "pos": [550, 300],
+      "size": {"0": 315, "1": 150},
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "XTTS_MODEL",
+          "link": 2
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 1
+        },
+        {
+          "name": "speaker",
+          "type": "SPEAKER_EMBEDDING",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [4],
+          "slot_index": 0
+        }
+      ],
+      "properties": {},
+      "widgets_values": ["en", 1.0, 0.7, 50, true]
+    },
+    {
+      "id": 5,
+      "type": "SaveAudio",
+      "pos": [900, 300],
+      "size": {"0": 315, "1": 82},
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 4
+        }
+      ],
+      "properties": {},
+      "widgets_values": ["tts_output", "wav"]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 4, 1, "STRING"],
+    [2, 2, 0, 4, 0, "XTTS_MODEL"],
+    [3, 3, 0, 4, 2, "SPEAKER_EMBEDDING"],
+    [4, 4, 0, 5, 0, "AUDIO"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "workflow_name": "Text to Speech - XTTS v2",
+    "description": "Generate natural speech from text using XTTS v2 model with voice cloning support"
+  },
+  "version": 0.4
+}

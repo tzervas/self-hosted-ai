@@ -1,0 +1,200 @@
+{
+  "name": "Audio SFX and Music Generation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "audio/generate",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "audio-generate"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare audio generation request\nconst input = $input.first();\nconst prompt = input.json.body.prompt;\nconst type = input.json.body.type || 'sfx'; // sfx, music, ambient\nconst duration = input.json.body.duration || 5.0; // seconds\nconst model = input.json.body.model || 'audioldm2';\nconst guidanceScale = input.json.body.guidance_scale || 7.5;\nconst numInferenceSteps = input.json.body.num_inference_steps || 50;\n\nif (!prompt || prompt.length === 0) {\n  throw new Error('Prompt is required for audio generation');\n}\n\nreturn {\n  json: {\n    prompt: prompt,\n    type: type,\n    duration: Math.min(duration, 30), // Cap at 30 seconds\n    model: model,\n    guidance_scale: guidanceScale,\n    num_inference_steps: numInferenceSteps,\n    request_id: 'audio_' + Date.now(),\n    negative_prompt: input.json.body.negative_prompt || 'low quality, distorted, noise'\n  }\n};"
+      },
+      "id": "prepare-request",
+      "name": "Prepare Audio Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.type }}",
+              "operation": "equals",
+              "value2": "music"
+            }
+          ]
+        }
+      },
+      "id": "switch-type",
+      "name": "Route by Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://audio-server:5004/api/musicgen",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ prompt: $json.prompt, duration: $json.duration, guidance_scale: $json.guidance_scale, model_id: 'facebook/musicgen-large' }) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "musicgen",
+      "name": "MusicGen Generate",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [910, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://audio-server:5004/api/audioldm",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ prompt: $json.prompt, negative_prompt: $json.negative_prompt, duration: $json.duration, num_inference_steps: $json.num_inference_steps, guidance_scale: $json.guidance_scale }) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "audioldm",
+      "name": "AudioLDM2 Generate",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [910, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process audio generation result\nconst input = $input.first();\nconst request = $('Prepare Audio Request').first().json;\n\nreturn {\n  json: {\n    success: true,\n    request_id: request.request_id,\n    type: request.type,\n    model: request.model,\n    prompt: request.prompt,\n    duration_requested: request.duration,\n    audio_url: input.json.audio_url || null,\n    audio_base64: input.json.audio_base64 || null,\n    sample_rate: input.json.sample_rate || 16000,\n    format: 'wav'\n  }\n};"
+      },
+      "id": "process-result",
+      "name": "Process Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1130, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1350, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Audio Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Audio Request": {
+      "main": [
+        [
+          {
+            "node": "Route by Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Type": {
+      "main": [
+        [
+          {
+            "node": "MusicGen Generate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AudioLDM2 Generate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MusicGen Generate": {
+      "main": [
+        [
+          {
+            "node": "Process Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AudioLDM2 Generate": {
+      "main": [
+        [
+          {
+            "node": "Process Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Result": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "instanceId": "self-hosted-ai"
+  },
+  "tags": [
+    {
+      "name": "audio"
+    },
+    {
+      "name": "sfx"
+    },
+    {
+      "name": "music"
+    },
+    {
+      "name": "generation"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+# External Redis for GitLab
+# Deployed as a separate Helm release to avoid GitLab chart bundled image issues
+# Using Bitnami Redis chart with default image (no semver tag required)
+
+architecture: standalone
+
+auth:
+  enabled: true
+  password: ""  # Will be auto-generated if empty
+  existingSecret: ""
+  existingSecretPasswordKey: password
+
+master:
+  persistence:
+    enabled: true
+    size: 2Gi
+    storageClass: longhorn-homelab
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Disable replica for homelab (standalone mode)
+replica:
+  replicaCount: 0
+
+# Export metrics for monitoring
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false

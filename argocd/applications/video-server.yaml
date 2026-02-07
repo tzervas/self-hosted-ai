@@ -1,0 +1,73 @@
+# Video Server (AnimateDiff-Lightning/SVD) - Text-to-Video and Image-to-Video Generation
+# Runs on akula-prime GPU node for high-quality video generation
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: video-server
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"  # Deploy after Ollama GPU
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/tzervas/self-hosted-ai.git
+    targetRevision: main
+    path: helm/gpu-worker
+    helm:
+      releaseName: video-server
+      values: |
+        # Only deploy Video (disable other components)
+        ollama:
+          gpu:
+            enabled: false
+
+        comfyui:
+          enabled: false
+
+        automatic1111:
+          enabled: false
+
+        tts:
+          enabled: false
+
+        audio:
+          enabled: false
+
+        video:
+          enabled: true
+          image:
+            repository: ghcr.io/tzervas/video-server
+            tag: "1.0.0"
+            pullPolicy: IfNotPresent
+          imagePullSecrets:
+            - name: ghcr-secret
+          service:
+            type: ClusterIP
+            port: 5005
+          env:
+            - name: HF_HOME
+              value: "/models/huggingface"
+            - name: TORCH_HOME
+              value: "/models/torch"
+          nodeSelector:
+            kubernetes.io/hostname: akula-prime
+          tolerations:
+            - key: nvidia.com/gpu
+              operator: Exists
+              effect: NoSchedule
+          resources:
+            requests:
+              memory: "6Gi"
+              cpu: "1000m"
+            limits:
+              memory: "14Gi"
+              cpu: "4000m"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gpu-workloads
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

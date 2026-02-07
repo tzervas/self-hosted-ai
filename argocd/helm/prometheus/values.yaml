@@ -34,16 +34,17 @@ server:
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
-      cert-manager.io/cluster-issuer: letsencrypt-prod
+      traefik.ingress.kubernetes.io/router.middlewares: automation-prometheus-forward-auth@kubernetescrd
+      cert-manager.io/cluster-issuer: letsencrypt-production
     hosts:
-      - host: prometheus.homelab.local
+      - host: prometheus.vectorweight.com
         paths:
           - path: /
             pathType: Prefix
     tls:
-      - secretName: prometheus-tls
+      - secretName: vectorweight-wildcard-tls
         hosts:
-          - prometheus.homelab.local
+          - prometheus.vectorweight.com
   configMapReload:
     prometheus:
       enabled: true
@@ -84,16 +85,17 @@ alertmanager:
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
-      cert-manager.io/cluster-issuer: letsencrypt-prod
+      traefik.ingress.kubernetes.io/router.middlewares: automation-prometheus-forward-auth@kubernetescrd
+      cert-manager.io/cluster-issuer: letsencrypt-production
     hosts:
-      - host: alertmanager.homelab.local
+      - host: alertmanager.vectorweight.com
         paths:
           - path: /
             pathType: Prefix
     tls:
-      - secretName: alertmanager-tls
+      - secretName: vectorweight-wildcard-tls
         hosts:
-          - alertmanager.homelab.local
+          - alertmanager.vectorweight.com
 
 # Pushgateway configuration
 pushgateway:
@@ -204,3 +206,25 @@ tolerations: []
 
 # Affinity
 affinity: {}
+
+# Grafana configuration (kube-prometheus-stack sub-chart)
+grafana:
+  adminPassword: ChangeMe123
+
+  grafana.ini:
+    server:
+      root_url: https://grafana.vectorweight.com
+    auth.generic_oauth:
+      enabled: true
+      name: Keycloak
+      allow_sign_up: true
+      client_id: grafana
+      client_secret: ${GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}
+      scopes: openid email profile
+      auth_url: https://auth.vectorweight.com/realms/vectorweight/protocol/openid-connect/auth
+      token_url: https://auth.vectorweight.com/realms/vectorweight/protocol/openid-connect/token
+      api_url: https://auth.vectorweight.com/realms/vectorweight/protocol/openid-connect/userinfo
+      role_attribute_path: "contains(realm_access.roles[*], 'admin') && 'Admin' || 'Viewer'"
+      signout_redirect_url: https://auth.vectorweight.com/realms/vectorweight/protocol/openid-connect/logout?post_logout_redirect_uri=https%3A%2F%2Fgrafana.vectorweight.com%2Flogin
+
+  envFromSecret: grafana-oidc-secret

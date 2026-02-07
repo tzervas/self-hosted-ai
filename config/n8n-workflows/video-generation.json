@@ -1,0 +1,257 @@
+{
+  "name": "Video Generation Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "video/generate",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "video-generate"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare video generation request\nconst input = $input.first();\nconst prompt = input.json.body.prompt;\nconst model = input.json.body.model || 'wan'; // wan, svd, cogvideo\nconst frames = input.json.body.frames || 24;\nconst fps = input.json.body.fps || 8;\nconst width = input.json.body.width || 512;\nconst height = input.json.body.height || 512;\nconst guidanceScale = input.json.body.guidance_scale || 7.5;\nconst sourceImage = input.json.body.source_image || null; // For img2vid\n\nif (!prompt || prompt.length === 0) {\n  throw new Error('Prompt is required for video generation');\n}\n\n// Build ComfyUI workflow based on model\nlet workflowName;\nswitch(model) {\n  case 'svd':\n    workflowName = 'text2video-svd';\n    break;\n  case 'wan':\n  default:\n    workflowName = 'text2video-wan';\n    break;\n}\n\nreturn {\n  json: {\n    prompt: prompt,\n    model: model,\n    workflow: workflowName,\n    frames: Math.min(frames, 120),\n    fps: fps,\n    width: width,\n    height: height,\n    guidance_scale: guidanceScale,\n    source_image: sourceImage,\n    request_id: 'video_' + Date.now(),\n    negative_prompt: input.json.body.negative_prompt || 'blurry, low quality, distorted, artifacts'\n  }\n};"
+      },
+      "id": "prepare-request",
+      "name": "Prepare Video Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://comfyui:8188/prompt",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ prompt: { '3': { class_type: 'CLIPTextEncode', inputs: { text: $json.prompt, clip: ['4', 0] } }, '4': { class_type: 'CheckpointLoaderSimple', inputs: { ckpt_name: $json.model === 'svd' ? 'svd_xt_1_1.safetensors' : 'wan_1.3B_exp_e9.safetensors' } }, '5': { class_type: 'EmptyLatentImage', inputs: { width: $json.width, height: $json.height, batch_size: $json.frames } }, '6': { class_type: 'KSampler', inputs: { seed: Math.floor(Math.random() * 1000000), steps: 20, cfg: $json.guidance_scale, sampler_name: 'euler_ancestral', scheduler: 'normal', denoise: 1, model: ['4', 0], positive: ['3', 0], negative: ['7', 0], latent_image: ['5', 0] } }, '7': { class_type: 'CLIPTextEncode', inputs: { text: $json.negative_prompt, clip: ['4', 0] } }, '8': { class_type: 'VAEDecode', inputs: { samples: ['6', 0], vae: ['4', 2] } }, '9': { class_type: 'VHS_VideoCombine', inputs: { images: ['8', 0], frame_rate: $json.fps, loop_count: 0, filename_prefix: 'video_' + $json.request_id, format: 'video/h264-mp4', save_output: true } } }, client_id: 'n8n-video-' + Date.now() }) }}",
+        "options": {
+          "timeout": 900000
+        }
+      },
+      "id": "queue-comfyui",
+      "name": "Queue ComfyUI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "seconds"
+      },
+      "id": "wait-initial",
+      "name": "Wait Initial",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [910, 300]
+    },
+    {
+      "parameters": {
+        "url": "=http://comfyui:8188/history/{{ $('Queue ComfyUI').item.json.prompt_id }}",
+        "options": {}
+      },
+      "id": "check-status",
+      "name": "Check Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1130, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "is-complete",
+              "leftValue": "={{ Object.keys($json).length > 0 && Object.values($json)[0]?.status?.completed === true }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-complete",
+      "name": "Is Complete?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1350, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract video output info\nconst input = $input.first();\nconst request = $('Prepare Video Request').first().json;\nconst history = Object.values(input.json)[0];\n\nlet videoUrl = null;\nlet outputs = [];\n\nif (history && history.outputs) {\n  for (const [nodeId, output] of Object.entries(history.outputs)) {\n    if (output.gifs || output.videos) {\n      const files = output.gifs || output.videos;\n      for (const file of files) {\n        outputs.push({\n          filename: file.filename,\n          subfolder: file.subfolder || '',\n          type: file.type || 'output'\n        });\n        videoUrl = `http://comfyui:8188/view?filename=${file.filename}&subfolder=${file.subfolder || ''}&type=${file.type || 'output'}`;\n      }\n    }\n  }\n}\n\nreturn {\n  json: {\n    success: true,\n    request_id: request.request_id,\n    model: request.model,\n    prompt: request.prompt,\n    frames: request.frames,\n    fps: request.fps,\n    resolution: `${request.width}x${request.height}`,\n    video_url: videoUrl,\n    outputs: outputs,\n    status: 'completed'\n  }\n};"
+      },
+      "id": "extract-result",
+      "name": "Extract Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1570, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Still processing - return pending status\nconst request = $('Prepare Video Request').first().json;\nconst promptId = $('Queue ComfyUI').first().json.prompt_id;\n\nreturn {\n  json: {\n    success: true,\n    status: 'processing',\n    request_id: request.request_id,\n    prompt_id: promptId,\n    message: 'Video generation in progress. Poll /video/status/' + promptId + ' for updates.',\n    estimated_time: request.frames * 2 + ' seconds'\n  }\n};"
+      },
+      "id": "pending-result",
+      "name": "Pending Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1570, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "respond-success",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1790, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "respond-pending",
+      "name": "Respond Pending",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1790, 400]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Video Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Video Request": {
+      "main": [
+        [
+          {
+            "node": "Queue ComfyUI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Queue ComfyUI": {
+      "main": [
+        [
+          {
+            "node": "Wait Initial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Initial": {
+      "main": [
+        [
+          {
+            "node": "Check Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Status": {
+      "main": [
+        [
+          {
+            "node": "Is Complete?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Complete?": {
+      "main": [
+        [
+          {
+            "node": "Extract Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Pending Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Result": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pending Result": {
+      "main": [
+        [
+          {
+            "node": "Respond Pending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "instanceId": "self-hosted-ai"
+  },
+  "tags": [
+    {
+      "name": "video"
+    },
+    {
+      "name": "generation"
+    },
+    {
+      "name": "comfyui"
+    }
+  ]
+}

@@ -92,6 +92,18 @@ certificates:
       host: prometheus.vectorweight.com
       namespace: monitoring
 
+    - name: alertmanager-vectorweight-tls
+      host: alertmanager.vectorweight.com
+      namespace: monitoring
+
+    - name: mcp-vectorweight-tls
+      host: mcp.vectorweight.com
+      namespace: ai-services
+
+    - name: longhorn-vectorweight-tls
+      host: longhorn.vectorweight.com
+      namespace: longhorn-system
+
 # DNS provider configuration (for DNS-01 challenges)
 # Required for wildcard certificates
 dns01:

@@ -1,7 +1,11 @@
 # GitLab Helm Values - Homelab Configuration
 # Chart: gitlab/gitlab
 # Repository: https://charts.gitlab.io/
-# Version: 8.x.x
+# Version: 9.7.1 (GitLab 18.x - requires PostgreSQL 16+)
+
+# Skip upgrade check for fresh installs
+upgradeCheck:
+  enabled: false
 
 global:
   edition: ce
@@ -26,6 +30,25 @@ global:
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
+  # External PostgreSQL connection (bundled PostgreSQL disabled below)
+  # Service name: gitlab-postgresql (from Bitnami PostgreSQL chart release)
+  psql:
+    host: gitlab-postgresql
+    port: 5432
+    username: gitlab
+    database: gitlabhq_production
+    password:
+      secret: gitlab-postgresql
+      key: password
+  # External Redis connection (bundled Redis disabled below)
+  # Service name: gitlab-redis-master (from Bitnami Redis chart release)
+  redis:
+    host: gitlab-redis-master
+    port: 6379
+    auth:
+      enabled: true
+      secret: gitlab-redis
+      key: redis-password
   # Enable repository mirroring feature
   appConfig:
     repositoryMirroring:
@@ -40,6 +63,16 @@ global:
     # Enable external authorization for mirrors
     externalAuthorization:
       enabled: false
+    # Keycloak SSO via OmniAuth OpenID Connect
+    omniauth:
+      enabled: true
+      allowSingleSignOn:
+        - openid_connect
+      autoSignInWithProvider: ""
+      blockAutoCreatedUsers: false
+      providers:
+        - secret: gitlab-oidc-provider
+          key: provider
 
 # GitLab Rails (main application)
 gitlab:
@@ -67,48 +100,22 @@ gitlab:
         cpu: 1
         memory: 2Gi
 
-# PostgreSQL
+# PostgreSQL - Disable bundled PostgreSQL (using external psql defined in global)
+# GitLab chart 9.7.1 defaults to bitnamilegacy/postgresql:16.6.0 which doesn't exist
 postgresql:
-  image:
-    registry: registry1.dso.mil
-    repository: ironbank/opensource/postgres/postgresql15
-    tag: "15.6"
-  persistence:
-    enabled: true
-    size: 50Gi
-    storageClass: longhorn
-  resources:
-    requests:
-      cpu: 500m
-      memory: 1Gi
-    limits:
-      cpu: 1
-      memory: 2Gi
+  install: false
 
-# Redis
+# Redis - Disable bundled Redis (using external redis defined in global)
+# GitLab chart 9.7.1 defaults to bitnami/redis:7.4 which doesn't exist
 redis:
-  image:
-    registry: registry1.dso.mil
-    repository: ironbank/opensource/redis/redis7
-    tag: "7.2.4"
-  persistence:
-    enabled: true
-    size: 10Gi
-    storageClass: longhorn
-  resources:
-    requests:
-      cpu: 200m
-      memory: 256Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
+  install: false
 
 # Gitaly (Git repository storage)
 gitaly:
   persistence:
     enabled: true
-    size: 100Gi
-    storageClass: longhorn
+    size: 10Gi
+    storageClass: longhorn-homelab
   resources:
     requests:
       cpu: 500m
@@ -121,7 +128,7 @@ gitaly:
 minio:
   persistence:
     enabled: true
-    size: 50Gi
+    size: 5Gi
     storageClass: longhorn
   resources:
     requests:
@@ -138,8 +145,8 @@ registry:
     key: config
   persistence:
     enabled: true
-    size: 50Gi
-    storageClass: longhorn
+    size: 5Gi
+    storageClass: longhorn-homelab
   resources:
     requests:
       cpu: 200m
@@ -147,10 +154,15 @@ registry:
     limits:
       cpu: 500m
       memory: 1Gi
+  # Registry database metadata (uses main PostgreSQL 16 instance)
+  database:
+    enabled: true
 
 # GitLab Runner
 gitlab-runner:
   install: true
+  # Trust internal CA certificate
+  certsSecretName: gitlab-runner-certs
   runners:
     privileged: true
     cache:
@@ -189,6 +201,10 @@ serviceAccount:
 networkPolicy:
   enabled: true
 
+# Disable bundled nginx-ingress (using Traefik instead)
+nginx-ingress:
+  enabled: false
+
 # Prometheus monitoring
 prometheus:
   install: false  # Using external Prometheus
@@ -209,9 +225,9 @@ smtp:
 ldap:
   enabled: false
 
-# OAuth configuration (optional)
+# OAuth configuration
 oauth:
-  enabled: false
+  enabled: true
 
 # Backup configuration
 backup:
@@ -226,8 +242,8 @@ backup:
         backup.velero.io/backup-volumes: ""
   persistence:
     enabled: true
-    size: 100Gi
-    storageClass: longhorn
+    size: 10Gi
+    storageClass: longhorn-homelab
 
 # Resource limits
 resources:

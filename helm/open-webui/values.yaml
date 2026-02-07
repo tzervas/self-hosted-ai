@@ -44,6 +44,20 @@ env:
   ENABLE_IMAGE_GENERATION: "true"
   IMAGE_GENERATION_ENGINE: "comfyui"
   COMFYUI_BASE_URL: "http://comfyui.gpu-worker:8188"
+  # ========================================
+  # Keycloak OIDC Configuration
+  # ========================================
+  WEBUI_URL: "https://ai.vectorweight.com"
+  ENABLE_OAUTH_SIGNUP: "true"
+  OAUTH_PROVIDER_NAME: "Keycloak"
+  OPENID_PROVIDER_URL: "https://auth.vectorweight.com/realms/vectorweight/.well-known/openid-configuration"
+  OAUTH_SCOPES: "openid profile email"
+  OAUTH_USERNAME_CLAIM: "preferred_username"
+  OAUTH_EMAIL_CLAIM: "email"
+  # Allow both OAuth and local login
+  ENABLE_LOGIN_FORM: "true"
+  # Merge accounts by email (existing admin stays admin)
+  OAUTH_MERGE_ACCOUNTS_BY_EMAIL: "true"
 
 # Secret references
 secretEnv:
@@ -56,34 +70,78 @@ secretEnv:
   WEBUI_ADMIN_PASSWORD:
     secretName: webui-secret
     key: admin-password
+  # Keycloak OIDC credentials (from sealed secret)
+  OAUTH_CLIENT_ID:
+    secretName: keycloak-oidc-secret
+    key: client-id
+  OAUTH_CLIENT_SECRET:
+    secretName: keycloak-oidc-secret
+    key: client-secret
 
 persistence:
   enabled: true
   size: 2Gi
-  storageClass: ""
+  storageClass: "longhorn"
   accessMode: ReadWriteOnce
 
 resources:
   requests:
     cpu: 250m
-    memory: 512Mi
+    memory: 768Mi  # v0.7.2 uses ~640MB RSS; 768Mi keeps HPA utilization ~83%
   limits:
     cpu: 2000m
     memory: 4Gi
+
+# Health probes for deployment orchestration
+probes:
+  # Startup probe - allows slow container startup before liveness kicks in
+  startup:
+    enabled: true
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30  # 30 * 10s = 5 min max startup time
+    successThreshold: 1
+  # Liveness probe - restart container if unhealthy
+  liveness:
+    enabled: true
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 3
+    successThreshold: 1
+  # Readiness probe - remove from service if not ready
+  readiness:
+    enabled: true
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
 
 # Horizontal Pod Autoscaler - scale based on CPU/memory
 autoscaling:
   enabled: true
   minReplicas: 1
-  maxReplicas: 3
+  maxReplicas: 1  # Capped at 1: PVC is RWO, Multi-Attach errors with >1 replica
   targetCPUUtilizationPercentage: 70
-  targetMemoryUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 90  # Raised from 80% to avoid scaling storm
   scaleDownStabilizationWindowSeconds: 300
   scaleUpStabilizationWindowSeconds: 0
 
 # Vertical Pod Autoscaler - recommend optimal resources
+# NOTE: Requires VPA CRD to be installed (not installed in this cluster)
 vpa:
-  enabled: true
+  enabled: false
   updateMode: "Off"  # "Off" = recommendations only, "Auto" = automatic updates
   minAllowed:
     cpu: 100m

@@ -2,8 +2,8 @@
 # ArgoCD Application for distributed block storage
 #
 # Prerequisites:
-#   - btrfs subvolume at /var/lib/longhorn on each node
-#   - Mount options: subvol=@longhorn,noatime,compress=zstd:1,space_cache=v2,discard=async
+#   - /data/longhorn directory on each node (mounted on large data partition)
+#   - For homelab: single-node setup uses /data (3TB btrfs) for Longhorn storage
 #
 # This application:
 #   1. Installs Longhorn operator from official Helm chart
@@ -27,12 +27,14 @@ spec:
       chart: longhorn
       targetRevision: 1.7.2
       helm:
+        # Skip hooks for fresh installs (pre-upgrade hook fails without existing resources)
+        skipCrds: false
         valuesObject:
-          # Default settings for homelab
+          # Default settings for homelab (single-node, data on /data partition)
           defaultSettings:
-            defaultReplicaCount: 2
+            defaultReplicaCount: 1
             defaultDataLocality: best-effort
-            defaultDataPath: /var/lib/longhorn
+            defaultDataPath: /data/longhorn
             storageMinimalAvailablePercentage: 10
             storageReservedPercentageForDefaultDisk: 15
             # Disable automatic deletion of snapshots on volume deletion
@@ -40,12 +42,17 @@ spec:
             # Node drain policy
             nodeDrainPolicy: block-for-eviction
 
-          # Ingress for Longhorn UI (accessible via Traefik)
+          # Ingress for Longhorn UI (accessible via Traefik, behind Keycloak)
           ingress:
             enabled: true
             ingressClassName: traefik
-            host: longhorn.homelab.local
-            tls: false
+            host: longhorn.vectorweight.com
+            tls: true
+            tlsSecret: vectorweight-wildcard-tls
+            annotations:
+              traefik.ingress.kubernetes.io/router.entrypoints: websecure
+              traefik.ingress.kubernetes.io/router.tls: "true"
+              traefik.ingress.kubernetes.io/router.middlewares: automation-longhorn-forward-auth@kubernetescrd
 
           # Resource limits for Longhorn components
           longhornManager:
@@ -82,6 +89,8 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      # Skip pre-upgrade hooks (only needed for upgrades, not fresh installs)
+      - RespectIgnoreDifferences=true
     retry:
       limit: 5
       backoff:

@@ -191,6 +191,65 @@ model_list:
       mode: image_generation
       supports_image_generation: true
 
+  # === Audio Generation Models ===
+  - model_name: xtts-v2
+    litellm_params:
+      model: openai/audio  # Custom audio provider
+      api_base: http://tts-server:5002  # XTTS TTS server
+      api_key: "dummy"
+    model_info:
+      mode: audio_generation
+      supports_tts: true
+      supports_voice_cloning: true
+
+  - model_name: bark-tts
+    litellm_params:
+      model: openai/audio
+      api_base: http://bark-server:5003  # Bark TTS server
+      api_key: "dummy"
+    model_info:
+      mode: audio_generation
+      supports_tts: true
+      supports_sfx: true
+
+  - model_name: audioldm2
+    litellm_params:
+      model: openai/audio
+      api_base: http://audio-server:5004  # AudioLDM2 server
+      api_key: "dummy"
+    model_info:
+      mode: audio_generation
+      supports_sfx: true
+      supports_ambient: true
+
+  - model_name: musicgen
+    litellm_params:
+      model: openai/audio
+      api_base: http://audio-server:5004  # MusicGen server
+      api_key: "dummy"
+    model_info:
+      mode: audio_generation
+      supports_music: true
+
+  # === Video Generation Models ===
+  - model_name: wan-video
+    litellm_params:
+      model: openai/video
+      api_base: http://192.168.1.99:8188  # ComfyUI with WAN
+      api_key: "dummy"
+    model_info:
+      mode: video_generation
+      supports_text2video: true
+
+  - model_name: svd-video
+    litellm_params:
+      model: openai/video
+      api_base: http://192.168.1.99:8188  # ComfyUI with SVD
+      api_key: "dummy"
+    model_info:
+      mode: video_generation
+      supports_img2video: true
+
 # =============================================================================
 # Router Settings (Load Balancing & Fallbacks)
 # =============================================================================

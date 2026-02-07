@@ -1,0 +1,74 @@
+replicaCount: 1
+
+image:
+  repository: quay.io/oauth2-proxy/oauth2-proxy
+  tag: v7.7.1
+  pullPolicy: IfNotPresent
+
+# Keycloak OIDC configuration
+config:
+  # Provider
+  provider: keycloak-oidc
+  providerDisplayName: "VectorWeight SSO"
+
+  # Keycloak realm URLs
+  oidcIssuerUrl: "https://auth.vectorweight.com/realms/vectorweight"
+
+  # Cookie settings
+  cookieName: "_oauth2_proxy"
+  cookieSecure: true
+  cookieDomains:
+    - ".vectorweight.com"
+
+  # Email domain restriction (allow all for homelab)
+  emailDomains:
+    - "*"
+
+  # Pass auth info upstream
+  passBasicAuth: false
+  passAccessToken: true
+  setXAuthRequest: true
+  setAuthorizationHeader: true
+
+  # Cookie secret (32-byte base64)
+  # For dev: static value. For prod: generate with `openssl rand -base64 32`
+  cookieSecret: "ZGV2LWNvb2tpZS1zZWNyZXQtY2hhbmdlLW1lISEh"
+
+# OIDC client credentials from K8s secret
+# Uses a single OIDC client for the proxy itself
+secretEnv:
+  OAUTH2_PROXY_CLIENT_ID:
+    secretName: n8n-oidc-secret
+    key: client-id
+  OAUTH2_PROXY_CLIENT_SECRET:
+    secretName: n8n-oidc-secret
+    key: client-secret
+
+service:
+  type: ClusterIP
+  port: 4180
+
+# Services protected by oauth2-proxy forward-auth.
+# Each generates a Traefik ForwardAuth middleware named "<name>-forward-auth".
+# Reference in ingress annotations as:
+#   traefik.ingress.kubernetes.io/router.middlewares: <namespace>-<name>-forward-auth@kubernetescrd
+protectedServices:
+  - name: n8n
+  - name: searxng
+  - name: litellm
+  - name: traefik-dashboard
+  - name: dify
+  - name: prometheus
+  - name: longhorn
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
