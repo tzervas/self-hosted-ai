@@ -1,18 +1,20 @@
 {
   "ignorePatterns": [
     {
-      "pattern": "^http://192.168"
-    },
-    {
       "pattern": "^http://localhost"
     },
     {
-      "pattern": "^http://127.0.0.1"
+      "pattern": "^https://.*vectorweight.com"
+    },
+    {
+      "pattern": "^http://192.168."
     }
   ],
-  "timeout": "20s",
+  "replacementPatterns": [],
+  "httpHeaders": [],
+  "timeout": "10s",
   "retryOn429": true,
-  "retryCount": 3,
+  "retryCount": 2,
   "fallbackRetryDelay": "30s",
-  "aliveStatusCodes": [200, 206, 301, 302, 307, 308, 403, 429]
+  "aliveStatusCodes": [200, 206]
 }

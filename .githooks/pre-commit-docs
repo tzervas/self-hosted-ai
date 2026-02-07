@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+#
+# Pre-commit hook for documentation validation
+# Install: ln -sf ../../.githooks/pre-commit-docs .git/hooks/pre-commit-docs
+#
+
+set -euo pipefail
+
+echo "📚 Validating documentation..."
+
+# Check if any docs were modified
+DOCS_CHANGED=$(git diff --cached --name-only | grep -E '\.(md|MD)$' || true)
+
+if [ -z "$DOCS_CHANGED" ]; then
+    echo "✅ No documentation changes to validate"
+    exit 0
+fi
+
+echo "📝 Documentation files changed:"
+echo "$DOCS_CHANGED" | sed 's/^/   - /'
+echo
+
+# Run validation script
+if ! python3 scripts/validate_docs_index.py; then
+    echo "❌ Documentation validation failed!"
+    echo "   Fix the issues above or skip with: git commit --no-verify"
+    exit 1
+fi
+
+# Check if INDEX.md was modified
+INDEX_CHANGED=$(echo "$DOCS_CHANGED" | grep 'docs/INDEX.md' || true)
+
+if [ -n "$INDEX_CHANGED" ]; then
+    echo
+    echo "📊 INDEX.md modified, regenerating INDEX.json..."
+
+    # Regenerate INDEX.json
+    if python3 scripts/generate_index_json.py > /dev/null 2>&1; then
+        # Stage the regenerated INDEX.json
+        git add docs/INDEX.json docs/.doc_hashes.json
+        echo "✅ INDEX.json regenerated and staged"
+    else
+        echo "⚠️  Failed to regenerate INDEX.json (continuing anyway)"
+    fi
+fi
+
+# Update token counts and hashes
+echo
+echo "🔍 Checking for token count updates..."
+if python3 scripts/update_index_tokens.py; then
+    echo "✅ Token counts validated"
+else
+    echo "⚠️  Token counts were updated in INDEX.md"
+    echo "   Please review changes and commit again"
+    exit 1
+fi
+
+echo
+echo "✅ Documentation validation passed!"

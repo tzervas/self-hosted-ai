@@ -63,7 +63,7 @@
 
 ### Constitution & Principles
 
-#### [ARCHITECTURE.md](../ARCHITECTURE.md) (1,500 tokens)
+#### [ARCHITECTURE.md](../ARCHITECTURE.md) (3,833 tokens)
 **Mission**: Privacy-first, self-hosted AI infrastructure without external dependencies
 **Key Sections**:
 - **Core Principles** (lines 13-49): Privacy, Security, IaC, Ops Excellence, DevEx
@@ -80,7 +80,7 @@
 **Dependencies**: None (foundational)
 **When to Read**: Before any architectural decision or major feature
 
-#### [OPERATIONS.md](../OPERATIONS.md) (800 tokens)
+#### [OPERATIONS.md](../OPERATIONS.md) (1,528 tokens)
 **Purpose**: Daily ops runbook and service access
 **Key Sections**:
 - **Service Endpoints** (7-20): All HTTPS URLs with purposes
@@ -94,7 +94,7 @@
 
 ### Getting Started
 
-#### [README.md](../README.md) (600 tokens)
+#### [README.md](../README.md) (449 tokens)
 **Purpose**: Project overview and quick start
 **Key Sections**:
 - **Features** (12-21): Multi-model routing, Web UI, workflows, GitOps, MCP
@@ -108,7 +108,7 @@
 **Dependencies**: None (entry point)
 **When to Read**: First time exploring project
 
-#### [CONTRIBUTING.md](../CONTRIBUTING.md) (500 tokens)
+#### [CONTRIBUTING.md](../CONTRIBUTING.md) (1,808 tokens)
 **Purpose**: Git workflow and contribution standards
 **Key Sections**:
 - **Branch Strategy** (7-22): main (stable) ← dev ← feature/* workflow
@@ -159,7 +159,7 @@
 
 ### Security & Access
 
-#### [GITLAB_ACCESS_INSTRUCTIONS.md](../GITLAB_ACCESS_INSTRUCTIONS.md) (700 tokens)
+#### [GITLAB_ACCESS_INSTRUCTIONS.md](../GITLAB_ACCESS_INSTRUCTIONS.md) (919 tokens)
 **Purpose**: GitLab deployment with SSO integration
 **Key Sections**:
 - **Keycloak SSO Setup**: Realm configuration, OIDC clients
