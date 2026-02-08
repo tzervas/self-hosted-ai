@@ -150,6 +150,23 @@ vpa:
     cpu: 4
     memory: 8Gi
 
+# Security context for rootless execution
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  fsGroupChangePolicy: "OnRootMismatch"
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+  allowPrivilegeEscalation: false
+
 nodeSelector: {}
 tolerations: []
 affinity: {}
