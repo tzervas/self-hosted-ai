@@ -21,7 +21,7 @@ securityContext:
   runAsGroup: 1001
   fsGroup: 1001
   runAsNonRoot: true
-  fsGroupChangePolicy: "OnRootMismatch"
+  fsGroupChangePolicy: "Always"
 
 persistence:
   enabled: true
