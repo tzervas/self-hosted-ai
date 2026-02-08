@@ -1,6 +1,6 @@
 image:
   repository: bitnami/redis
-  tag: "7.4"
+  tag: "latest"
   pullPolicy: IfNotPresent
 
 service:

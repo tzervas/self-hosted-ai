@@ -1,6 +1,6 @@
 image:
   repository: bitnami/postgresql
-  tag: "16"
+  tag: "latest"
   pullPolicy: IfNotPresent
 
 service:
