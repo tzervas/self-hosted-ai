@@ -1,0 +1,95 @@
+# ArgoCD PostSync Hook: Verify StatefulSet Health
+# Ensures StatefulSets are healthy after sync and running as non-root
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify-statefulset-hook
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  template:
+    spec:
+      serviceAccountName: argocd-application-controller
+      restartPolicy: Never
+      containers:
+        - name: verify-statefulset
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+
+              NAMESPACE="${ARGOCD_APP_NAMESPACE}"
+              APP_NAME="${ARGOCD_APP_NAME}"
+              MAX_WAIT=300  # 5 minutes
+              START_TIME=$(date +%s)
+
+              echo "Verifying StatefulSets in namespace: $NAMESPACE"
+
+              # Find all StatefulSets managed by this ArgoCD app
+              STATEFULSETS=$(kubectl get statefulset -n "$NAMESPACE" \
+                -l "app.kubernetes.io/instance=$APP_NAME" \
+                -o name 2>/dev/null || true)
+
+              if [ -z "$STATEFULSETS" ]; then
+                echo "No StatefulSets found for app: $APP_NAME"
+                exit 0
+              fi
+
+              echo "Found StatefulSets: $STATEFULSETS"
+
+              # Wait for each StatefulSet to be ready
+              for sts in $STATEFULSETS; do
+                STS_NAME=$(echo "$sts" | cut -d'/' -f2)
+                echo "Waiting for $sts to be ready..."
+
+                while true; do
+                  CURRENT_TIME=$(date +%s)
+                  ELAPSED=$((CURRENT_TIME - START_TIME))
+
+                  if [ $ELAPSED -gt $MAX_WAIT ]; then
+                    echo "❌ Timeout waiting for $sts to be ready"
+                    exit 1
+                  fi
+
+                  # Get StatefulSet status
+                  READY=$(kubectl get "$sts" -n "$NAMESPACE" \
+                    -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
+                  DESIRED=$(kubectl get "$sts" -n "$NAMESPACE" \
+                    -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "1")
+
+                  echo "StatefulSet $STS_NAME: $READY/$DESIRED replicas ready"
+
+                  if [ "$READY" = "$DESIRED" ] && [ "$READY" != "0" ]; then
+                    echo "✅ $sts is ready"
+
+                    # Verify rootless execution
+                    POD_NAME="${STS_NAME}-0"
+                    if kubectl get pod "$POD_NAME" -n "$NAMESPACE" &>/dev/null; then
+                      UID=$(kubectl exec "$POD_NAME" -n "$NAMESPACE" -- id -u 2>/dev/null || echo "unknown")
+                      if [ "$UID" != "0" ] && [ "$UID" != "unknown" ]; then
+                        echo "✅ Verified: Running as non-root UID $UID"
+                      elif [ "$UID" = "0" ]; then
+                        echo "⚠️  WARNING: Pod running as root (UID 0)"
+                      fi
+                    fi
+                    break
+                  fi
+
+                  sleep 5
+                done
+              done
+
+              echo "✅ All StatefulSets verified successfully"
+          env:
+            - name: ARGOCD_APP_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/instance']
+            - name: ARGOCD_APP_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace

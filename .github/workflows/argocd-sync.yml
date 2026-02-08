@@ -1,0 +1,160 @@
+# ArgoCD Auto-Sync Trigger
+# Automatically refreshes ArgoCD applications on push to main
+name: ArgoCD Sync
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'helm/**'
+      - 'argocd/applications/**'
+      - 'policies/**'
+
+jobs:
+  trigger-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install ArgoCD CLI
+        run: |
+          curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x argocd
+          sudo mv argocd /usr/local/bin/
+
+      - name: Refresh affected applications
+        env:
+          ARGOCD_SERVER: argocd.vectorweight.com
+          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_TOKEN }}
+        run: |
+          set -e
+
+          # Determine which apps need refresh based on changed files
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Changed files: $CHANGED_FILES"
+
+          # Function to refresh and optionally sync an app
+          refresh_app() {
+            local app=$1
+            local sync=${2:-false}
+
+            echo "Refreshing ArgoCD app: $app"
+            if ! argocd app get "$app" --refresh \
+                --server "$ARGOCD_SERVER" \
+                --auth-token "$ARGOCD_AUTH_TOKEN" \
+                --grpc-web; then
+              echo "Warning: Failed to refresh $app"
+              return 1
+            fi
+
+            if [ "$sync" = "true" ]; then
+              echo "Syncing ArgoCD app: $app"
+              argocd app sync "$app" \
+                --server "$ARGOCD_SERVER" \
+                --auth-token "$ARGOCD_AUTH_TOKEN" \
+                --grpc-web \
+                --prune \
+                --retry-limit 3
+            fi
+          }
+
+          # Refresh apps based on changed Helm charts
+          if echo "$CHANGED_FILES" | grep -q "helm/postgresql/"; then
+            refresh_app "postgresql" true
+          fi
+
+          if echo "$CHANGED_FILES" | grep -q "helm/redis/"; then
+            refresh_app "redis" true
+          fi
+
+          if echo "$CHANGED_FILES" | grep -q "helm/open-webui/"; then
+            refresh_app "open-webui" true
+          fi
+
+          if echo "$CHANGED_FILES" | grep -q "helm/searxng/"; then
+            refresh_app "searxng" true
+          fi
+
+          if echo "$CHANGED_FILES" | grep -q "helm/litellm/"; then
+            refresh_app "litellm" true
+          fi
+
+          if echo "$CHANGED_FILES" | grep -q "helm/n8n/"; then
+            refresh_app "n8n" true
+          fi
+
+          if echo "$CHANGED_FILES" | grep -q "helm/ollama/"; then
+            refresh_app "ollama" true
+          fi
+
+          # Refresh all apps if ArgoCD application manifests changed
+          if echo "$CHANGED_FILES" | grep -q "argocd/applications/"; then
+            echo "ArgoCD application manifests changed, refreshing all apps"
+            argocd app list \
+              --server "$ARGOCD_SERVER" \
+              --auth-token "$ARGOCD_AUTH_TOKEN" \
+              --grpc-web \
+              -o name | while read -r app; do
+                refresh_app "$app" false
+              done
+          fi
+
+          # If policies changed, trigger validation
+          if echo "$CHANGED_FILES" | grep -q "policies/"; then
+            echo "Kyverno policies changed, triggering policy refresh"
+            refresh_app "kyverno-policies" true
+          fi
+
+      - name: Wait for sync completion
+        if: success()
+        env:
+          ARGOCD_SERVER: argocd.vectorweight.com
+          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_TOKEN }}
+        run: |
+          set -e
+
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+          APPS_TO_MONITOR=()
+
+          # Build list of apps to monitor based on changes
+          echo "$CHANGED_FILES" | grep -q "helm/postgresql/" && APPS_TO_MONITOR+=("postgresql")
+          echo "$CHANGED_FILES" | grep -q "helm/redis/" && APPS_TO_MONITOR+=("redis")
+          echo "$CHANGED_FILES" | grep -q "helm/open-webui/" && APPS_TO_MONITOR+=("open-webui")
+          echo "$CHANGED_FILES" | grep -q "helm/searxng/" && APPS_TO_MONITOR+=("searxng")
+          echo "$CHANGED_FILES" | grep -q "helm/litellm/" && APPS_TO_MONITOR+=("litellm")
+          echo "$CHANGED_FILES" | grep -q "helm/n8n/" && APPS_TO_MONITOR+=("n8n")
+          echo "$CHANGED_FILES" | grep -q "helm/ollama/" && APPS_TO_MONITOR+=("ollama")
+
+          # Monitor each app for successful sync
+          for app in "${APPS_TO_MONITOR[@]}"; do
+            echo "Monitoring sync status for: $app"
+            timeout 300 bash -c "
+              while true; do
+                STATUS=\$(argocd app get \"$app\" \
+                  --server \"$ARGOCD_SERVER\" \
+                  --auth-token \"$ARGOCD_AUTH_TOKEN\" \
+                  --grpc-web \
+                  -o json | jq -r '.status.sync.status')
+
+                HEALTH=\$(argocd app get \"$app\" \
+                  --server \"$ARGOCD_SERVER\" \
+                  --auth-token \"$ARGOCD_AUTH_TOKEN\" \
+                  --grpc-web \
+                  -o json | jq -r '.status.health.status')
+
+                echo \"App: $app | Sync: \$STATUS | Health: \$HEALTH\"
+
+                if [ \"\$STATUS\" = \"Synced\" ] && [ \"\$HEALTH\" = \"Healthy\" ]; then
+                  echo \"✅ $app is synced and healthy\"
+                  break
+                elif [ \"\$HEALTH\" = \"Degraded\" ]; then
+                  echo \"⚠️  $app is degraded, check manually\"
+                  exit 1
+                fi
+
+                sleep 10
+              done
+            " || echo "⚠️  Timeout waiting for $app to sync"
+          done

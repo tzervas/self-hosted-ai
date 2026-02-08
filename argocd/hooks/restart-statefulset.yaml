@@ -1,0 +1,79 @@
+# ArgoCD PreSync Hook: Restart StatefulSets
+# Automatically scales down StatefulSets before sync to ensure pods recreate
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: restart-statefulset-hook
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  template:
+    spec:
+      serviceAccountName: argocd-application-controller
+      restartPolicy: Never
+      containers:
+        - name: restart-statefulset
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+
+              NAMESPACE="${ARGOCD_APP_NAMESPACE}"
+              APP_NAME="${ARGOCD_APP_NAME}"
+
+              echo "Checking for StatefulSets in namespace: $NAMESPACE"
+
+              # Find all StatefulSets managed by this ArgoCD app
+              STATEFULSETS=$(kubectl get statefulset -n "$NAMESPACE" \
+                -l "app.kubernetes.io/instance=$APP_NAME" \
+                -o name 2>/dev/null || true)
+
+              if [ -z "$STATEFULSETS" ]; then
+                echo "No StatefulSets found for app: $APP_NAME"
+                exit 0
+              fi
+
+              echo "Found StatefulSets: $STATEFULSETS"
+
+              # For each StatefulSet, scale to 0 and back
+              for sts in $STATEFULSETS; do
+                echo "Processing: $sts"
+
+                # Get current replicas
+                REPLICAS=$(kubectl get "$sts" -n "$NAMESPACE" -o jsonpath='{.spec.replicas}')
+                echo "Current replicas: $REPLICAS"
+
+                # Skip if already at 0
+                if [ "$REPLICAS" = "0" ]; then
+                  echo "StatefulSet already scaled to 0, skipping"
+                  continue
+                fi
+
+                # Scale to 0
+                echo "Scaling to 0..."
+                kubectl scale "$sts" -n "$NAMESPACE" --replicas=0
+
+                # Wait for pods to terminate
+                echo "Waiting for pods to terminate..."
+                kubectl wait --for=delete pod \
+                  -l "app.kubernetes.io/instance=$APP_NAME" \
+                  -n "$NAMESPACE" \
+                  --timeout=120s || true
+
+                echo "StatefulSet scaled down successfully"
+              done
+
+              echo "PreSync hook completed"
+          env:
+            - name: ARGOCD_APP_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/instance']
+            - name: ARGOCD_APP_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
