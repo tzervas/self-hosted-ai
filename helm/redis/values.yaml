@@ -1,6 +1,6 @@
 image:
-  repository: redis
-  tag: 7.4-alpine
+  repository: bitnami/redis
+  tag: "7.4.0-debian-12-r1"
   pullPolicy: IfNotPresent
 
 service:
@@ -11,6 +11,15 @@ auth:
   enabled: true
   existingSecret: redis-secret
   passwordKey: redis-password
+
+# Security context for rootless execution
+securityContext:
+  enabled: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+  runAsNonRoot: true
+  fsGroupChangePolicy: "OnRootMismatch"
 
 persistence:
   enabled: true

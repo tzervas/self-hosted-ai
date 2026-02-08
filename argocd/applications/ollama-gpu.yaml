@@ -17,7 +17,8 @@ spec:
       releaseName: ollama-gpu
       values: |
         # GPU Ollama for akula-prime (RTX 5080 16GB VRAM)
-        replicaCount: 1
+        # TEMPORARY: Disabled for external hybrid-predict-trainer-rs benchmarking
+        replicaCount: 0
 
         image:
           repository: ollama/ollama

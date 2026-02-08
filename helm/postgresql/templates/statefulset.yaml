@@ -15,6 +15,14 @@ spec:
       labels:
         {{- include "postgresql.selectorLabels" . | nindent 8 }}
     spec:
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        runAsUser: {{ .Values.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.securityContext.runAsGroup }}
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+        runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
+        fsGroupChangePolicy: {{ .Values.securityContext.fsGroupChangePolicy }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -36,21 +44,21 @@ spec:
               containerPort: 5432
               protocol: TCP
           env:
-            - name: POSTGRES_PASSWORD
+            - name: POSTGRESQL_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.auth.existingSecret }}
                   key: {{ .Values.auth.adminPasswordKey }}
-            - name: POSTGRES_USER
+            - name: POSTGRESQL_USERNAME
               value: postgres
-            - name: POSTGRES_DB
+            - name: POSTGRESQL_DATABASE
               value: {{ .Values.auth.database }}
-            - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
+            - name: POSTGRESQL_DATA_DIR
+              value: /bitnami/postgresql/data
           {{- if .Values.persistence.enabled }}
           volumeMounts:
             - name: data
-              mountPath: /var/lib/postgresql/data
+              mountPath: /bitnami/postgresql
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
