@@ -35,6 +35,26 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.persistence.enabled }}
+      initContainers:
+        - name: init-chmod
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Setting up Bitnami PostgreSQL directories..."
+              mkdir -p /bitnami/postgresql/data /bitnami/postgresql/conf
+              chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.runAsGroup }} /bitnami/postgresql
+              chmod -R 775 /bitnami/postgresql
+              ls -la /bitnami/postgresql
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/postgresql
+          securityContext:
+            runAsUser: 0
+            runAsNonRoot: false
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
