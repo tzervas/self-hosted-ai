@@ -105,6 +105,7 @@ spec:
                 - kyverno
                 - argocd
                 - auth
+                - longhorn-system
       validate:
         message: "CPU and memory limits are required for all containers"
         pattern:
