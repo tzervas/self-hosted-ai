@@ -33,7 +33,19 @@ spec:
                 - argocd
                 - gitlab
                 - auth
+          # Temporarily exclude non-migrated ai-services apps (remove after ArgoCD sync)
+          - resources:
+              namespaces:
                 - ai-services
+              selector:
+                matchLabels:
+                  app.kubernetes.io/name: ollama
+          - resources:
+              namespaces:
+                - ai-services
+              selector:
+                matchLabels:
+                  app.kubernetes.io/name: qdrant
       validate:
         message: "Containers must set securityContext.runAsNonRoot=true"
         pattern:
@@ -58,7 +70,19 @@ spec:
                 - longhorn-system
                 - gitlab
                 - auth
+          # Temporarily exclude non-migrated ai-services apps (remove after ArgoCD sync)
+          - resources:
+              namespaces:
                 - ai-services
+              selector:
+                matchLabels:
+                  app.kubernetes.io/name: ollama
+          - resources:
+              namespaces:
+                - ai-services
+              selector:
+                matchLabels:
+                  app.kubernetes.io/name: qdrant
       validate:
         message: "Privileged containers are not allowed"
         pattern:
