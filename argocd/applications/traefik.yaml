@@ -68,6 +68,7 @@ spec:
             allowCrossNamespace: true
           kubernetesIngress:
             enabled: true
+            allowCrossNamespace: true
             publishedService:
               enabled: true
         

@@ -167,6 +167,9 @@ securityContext:
   readOnlyRootFilesystem: false
   allowPrivilegeEscalation: false
 
+podLabels:
+  network.policy/traefik-ingress: "true"
+
 nodeSelector:
   kubernetes.io/hostname: homelab
 tolerations: []

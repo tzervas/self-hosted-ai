@@ -106,6 +106,9 @@ readinessProbe:
   failureThreshold: 3
 
 # Pod configuration
+podLabels:
+  network.policy/traefik-ingress: "true"
+
 nodeSelector:
   kubernetes.io/hostname: homelab
 
