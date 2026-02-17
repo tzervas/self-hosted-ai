@@ -34,6 +34,7 @@ spec:
             - --set-authorization-header={{ .Values.config.setAuthorizationHeader }}
             - --reverse-proxy=true
             - --skip-provider-button=true
+            - --ssl-insecure-skip-verify={{ .Values.config.sslInsecureSkipVerify | default false }}
           env:
             {{- range $key, $val := .Values.secretEnv }}
             - name: {{ $key }}
