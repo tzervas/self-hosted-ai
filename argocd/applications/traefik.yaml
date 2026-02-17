@@ -106,10 +106,6 @@ spec:
             serviceMonitor:
               enabled: true
         
-        # Additional arguments not covered by chart values
-        additionalArguments:
-          - "--providers.kubernetesingress.allowCrossNamespace=true"
-
         # Logs
         logs:
           general:

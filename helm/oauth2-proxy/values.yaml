@@ -30,9 +30,9 @@ config:
   setXAuthRequest: true
   setAuthorizationHeader: true
 
-  # Cookie secret (32-byte base64)
-  # For dev: static value. For prod: generate with `openssl rand -base64 32`
-  cookieSecret: "ZGV2LWNvb2tpZS1zZWNyZXQtY2hhbmdlLW1lISEh"
+  # Cookie secret (must be exactly 16, 24, or 32 bytes for AES cipher)
+  # Generated with: openssl rand -base64 24 (produces 32-char output = 32 bytes)
+  cookieSecret: "b0/RvgHti3L6BkUSMSuuAbcPWDzuo1KG"
 
 # OIDC client credentials from K8s secret
 # Uses a single OIDC client for the proxy itself
