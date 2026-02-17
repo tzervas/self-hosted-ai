@@ -70,6 +70,7 @@ spec:
                 - longhorn-system
                 - gitlab
                 - auth
+                - monitoring
           # Temporarily exclude non-migrated ai-services apps (remove after ArgoCD sync)
           - resources:
               namespaces:
