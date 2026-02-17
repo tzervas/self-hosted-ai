@@ -228,6 +228,82 @@ grafana:
       role_attribute_path: "contains(realm_access.roles[*], 'admin') && 'Admin' || 'Viewer'"
       signout_redirect_url: https://auth.vectorweight.com/realms/vectorweight/protocol/openid-connect/logout?post_logout_redirect_uri=https%3A%2F%2Fgrafana.vectorweight.com%2Flogin
 
+  # Datasource provisioning
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      uid: loki
+      url: http://loki-gateway.monitoring.svc.cluster.local:80
+      access: proxy
+      isDefault: false
+      jsonData:
+        maxLines: 1000
+        derivedFields:
+          - name: TraceID
+            matcherRegex: "(?:traceID|trace_id|traceId)[=:]\\s*(\\w+)"
+            url: "$${__value.raw}"
+            datasourceUid: tempo
+            urlDisplayLabel: View Trace
+    - name: Tempo
+      type: tempo
+      uid: tempo
+      url: http://tempo.monitoring.svc.cluster.local:3100
+      access: proxy
+      isDefault: false
+      jsonData:
+        tracesToLogsV2:
+          datasourceUid: loki
+          filterByTraceID: true
+          filterBySpanID: true
+        tracesToMetrics:
+          datasourceUid: prometheus
+        nodeGraph:
+          enabled: true
+        serviceMap:
+          datasourceUid: prometheus
+        lokiSearch:
+          datasourceUid: loki
+    - name: OpenObserve
+      type: elasticsearch
+      uid: openobserve
+      url: http://openobserve.monitoring.svc.cluster.local:5080/api/default
+      access: proxy
+      isDefault: false
+      basicAuth: true
+      basicAuthUser: kang@vectorweight.com
+      secureJsonData:
+        basicAuthPassword: banana
+      jsonData:
+        esVersion: "7.10.0"
+        timeField: "_timestamp"
+        logMessageField: "log"
+        logLevelField: "level"
+
+  # Dashboard auto-provisioning via sidecar
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: ALL
+      folderAnnotation: grafana_folder
+      provider:
+        foldersFromFilesStructure: true
+
+  # Ingress for Grafana
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+    hosts:
+      - grafana.vectorweight.com
+    tls:
+      - secretName: vectorweight-wildcard-tls
+        hosts:
+          - grafana.vectorweight.com
+
   nodeSelector:
     kubernetes.io/hostname: homelab
 

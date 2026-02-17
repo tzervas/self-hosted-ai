@@ -9,6 +9,14 @@ spec:
   entryPoints:
     {{- toYaml .Values.ingressRoute.entryPoints | nindent 4 }}
   routes:
+    # oauth2-proxy callback route (no forward-auth to avoid circular redirect)
+    - match: Host(`{{ .Values.ingressRoute.host }}`) && PathPrefix(`/oauth2/`)
+      kind: Rule
+      services:
+        - name: oauth2-proxy
+          namespace: automation
+          port: 4180
+    # Application route (protected by forward-auth)
     - match: Host(`{{ .Values.ingressRoute.host }}`)
       kind: Rule
       {{- if .Values.ingressRoute.middlewares }}

@@ -50,7 +50,7 @@ env:
   WEBUI_URL: "https://ai.vectorweight.com"
   ENABLE_OAUTH_SIGNUP: "true"
   OAUTH_PROVIDER_NAME: "Keycloak"
-  OPENID_PROVIDER_URL: "https://auth.vectorweight.com/realms/vectorweight/.well-known/openid-configuration"
+  OPENID_PROVIDER_URL: "http://keycloak.auth.svc.cluster.local:8080/realms/vectorweight/.well-known/openid-configuration"
   OAUTH_SCOPES: "openid profile email"
   OAUTH_USERNAME_CLAIM: "preferred_username"
   OAUTH_EMAIL_CLAIM: "email"

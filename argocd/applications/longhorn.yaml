@@ -25,7 +25,7 @@ spec:
     # Source 1: Official Longhorn Helm chart
     - repoURL: https://charts.longhorn.io
       chart: longhorn
-      targetRevision: 1.7.2
+      targetRevision: 1.10.1
       helm:
         # Skip hooks for fresh installs (pre-upgrade hook fails without existing resources)
         skipCrds: false

@@ -63,6 +63,8 @@ protectedServices:
   - name: dify
   - name: prometheus
   - name: longhorn
+  - name: openobserve
+  - name: landing-page
 
 resources:
   requests:

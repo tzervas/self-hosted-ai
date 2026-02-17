@@ -1,0 +1,48 @@
+# Grafana Tempo - Distributed Tracing Backend
+# Single binary mode for homelab (lightweight)
+
+tempo:
+  # Receivers: accept OTLP traces
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: "0.0.0.0:4317"
+        http:
+          endpoint: "0.0.0.0:4318"
+    # Also accept Zipkin traces (for compatibility)
+    zipkin:
+      endpoint: "0.0.0.0:9411"
+
+  # Storage: local filesystem (homelab, no object store needed)
+  storage:
+    trace:
+      backend: local
+      local:
+        path: /var/tempo/traces
+      wal:
+        path: /var/tempo/wal
+
+  # Retention
+  retention: 168h  # 7 days
+
+  # Metrics generator (generates RED metrics from traces)
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: "http://prometheus-server.monitoring.svc.cluster.local:9090/api/v1/write"
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClassName: longhorn
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+nodeSelector:
+  kubernetes.io/hostname: homelab

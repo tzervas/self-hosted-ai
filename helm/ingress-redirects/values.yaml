@@ -1,0 +1,66 @@
+host: vectorweight.com
+
+services:
+  - name: Open WebUI
+    description: AI Chat Interface
+    url: https://ai.vectorweight.com
+    icon: chat
+    color: "#3b82f6"
+  - name: n8n
+    description: Workflow Automation
+    url: https://n8n.vectorweight.com
+    icon: workflow
+    color: "#ef4444"
+  - name: GitLab
+    description: Git Repository & CI/CD
+    url: https://git.vectorweight.com
+    icon: code
+    color: "#f97316"
+  - name: Grafana
+    description: Monitoring & Dashboards
+    url: https://grafana.vectorweight.com
+    icon: chart
+    color: "#22c55e"
+  - name: ArgoCD
+    description: GitOps Deployment
+    url: https://argocd.vectorweight.com
+    icon: deploy
+    color: "#a855f7"
+  - name: SearXNG
+    description: Privacy-First Search
+    url: https://search.vectorweight.com
+    icon: search
+    color: "#06b6d4"
+  - name: LiteLLM
+    description: LLM API Gateway
+    url: https://llm.vectorweight.com
+    icon: api
+    color: "#eab308"
+  - name: OpenObserve
+    description: Log Search & Analytics
+    url: https://logs.vectorweight.com
+    icon: logs
+    color: "#14b8a6"
+  - name: Prometheus
+    description: Metrics Collection
+    url: https://prometheus.vectorweight.com
+    icon: metrics
+    color: "#e11d48"
+  - name: Longhorn
+    description: Storage Management
+    url: https://longhorn.vectorweight.com
+    icon: storage
+    color: "#64748b"
+  - name: Keycloak
+    description: Identity & SSO
+    url: https://auth.vectorweight.com
+    icon: lock
+    color: "#8b5cf6"
+  - name: Traefik
+    description: Ingress & Routing
+    url: https://traefik.vectorweight.com
+    icon: network
+    color: "#0ea5e9"
+
+nodeSelector:
+  kubernetes.io/hostname: homelab

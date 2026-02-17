@@ -1,0 +1,137 @@
+# OpenTelemetry Collector - Central Telemetry Pipeline
+# Chart: open-telemetry/opentelemetry-collector
+# Mode: deployment (single instance for homelab)
+
+mode: deployment
+
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+nodeSelector:
+  kubernetes.io/hostname: homelab
+
+# Ports exposed by the collector
+ports:
+  otlp:
+    enabled: true
+    containerPort: 4317
+    servicePort: 4317
+    protocol: TCP
+  otlp-http:
+    enabled: true
+    containerPort: 4318
+    servicePort: 4318
+    protocol: TCP
+  zipkin:
+    enabled: true
+    containerPort: 9411
+    servicePort: 9411
+    protocol: TCP
+  metrics:
+    enabled: true
+    containerPort: 8888
+    servicePort: 8888
+    protocol: TCP
+
+# Collector configuration (receivers → processors → exporters)
+config:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: "0.0.0.0:4317"
+        http:
+          endpoint: "0.0.0.0:4318"
+    zipkin:
+      endpoint: "0.0.0.0:9411"
+    # Scrape the collector's own metrics
+    prometheus:
+      config:
+        scrape_configs:
+          - job_name: otel-collector
+            scrape_interval: 30s
+            static_configs:
+              - targets: ["localhost:8888"]
+
+  processors:
+    batch:
+      send_batch_size: 1024
+      timeout: 5s
+    memory_limiter:
+      check_interval: 5s
+      limit_mib: 400
+      spike_limit_mib: 100
+
+  exporters:
+    # Traces → Tempo
+    otlp/tempo:
+      endpoint: "tempo.monitoring.svc.cluster.local:4317"
+      tls:
+        insecure: true
+    # Metrics → Prometheus remote write
+    prometheusremotewrite:
+      endpoint: "http://prometheus-server.monitoring.svc.cluster.local:9090/api/v1/write"
+      tls:
+        insecure: true
+    # Logs → Loki
+    loki:
+      endpoint: "http://loki-gateway.monitoring.svc.cluster.local:80/loki/api/v1/push"
+    # Traces + Logs + Metrics → OpenObserve (full-text search layer)
+    otlphttp/openobserve:
+      endpoint: "http://openobserve.monitoring.svc.cluster.local:5080/api/default"
+      headers:
+        Authorization: "Basic a2FuZ0B2ZWN0b3J3ZWlnaHQuY29tOmJhbmFuYQ=="
+        stream-name: default
+    # Debug output (disable in production)
+    debug:
+      verbosity: basic
+
+  extensions:
+    health_check:
+      endpoint: "0.0.0.0:13133"
+    zpages:
+      endpoint: "0.0.0.0:55679"
+
+  service:
+    extensions:
+      - health_check
+      - zpages
+    pipelines:
+      traces:
+        receivers: [otlp, zipkin]
+        processors: [memory_limiter, batch]
+        exporters: [otlp/tempo, otlphttp/openobserve]
+      metrics:
+        receivers: [otlp, prometheus]
+        processors: [memory_limiter, batch]
+        exporters: [prometheusremotewrite, otlphttp/openobserve]
+      logs:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [loki, otlphttp/openobserve]
+    telemetry:
+      logs:
+        level: info
+      metrics:
+        address: "0.0.0.0:8888"
+
+# Service configuration
+service:
+  type: ClusterIP
+
+# Liveness/readiness probes
+livenessProbe:
+  httpGet:
+    path: /
+    port: 13133
+readinessProbe:
+  httpGet:
+    path: /
+    port: 13133

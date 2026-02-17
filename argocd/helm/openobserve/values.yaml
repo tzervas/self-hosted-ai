@@ -1,0 +1,68 @@
+# OpenObserve Standalone - FOSS Log Search & Analytics
+# Chart: openobserve/openobserve-standalone
+# Repository: https://charts.openobserve.ai
+# Replaces Splunk with SQL-based full-text search over logs, traces, metrics
+
+auth:
+  ZO_ROOT_USER_EMAIL: "kang@vectorweight.com"
+  ZO_ROOT_USER_PASSWORD: "banana"
+
+config:
+  # Local disk storage (no S3 needed for homelab)
+  ZO_LOCAL_MODE: "true"
+  ZO_LOCAL_MODE_STORAGE: "disk"
+  ZO_DATA_DIR: "./data/"
+
+  # Performance tuning for homelab (2-4GB RAM budget)
+  ZO_MEMORY_CACHE_ENABLED: "true"
+  ZO_MEMORY_CACHE_MAX_SIZE: "1024"  # 1GB cache
+  ZO_MEMORY_CACHE_STRATEGY: "lru"
+  ZO_DISK_CACHE_ENABLED: "true"
+  ZO_DISK_CACHE_MAX_SIZE: "5120"    # 5GB disk cache
+  ZO_DISK_CACHE_STRATEGY: "time_lru"
+
+  # Circuit breaker to prevent OOM
+  ZO_MEMORY_CIRCUIT_BREAKER_ENABLED: "true"
+  ZO_MEMORY_CIRCUIT_BREAKER_RATIO: "85"
+
+  # Telemetry: disable phoning home
+  ZO_TELEMETRY: "false"
+  ZO_TELEMETRY_URL: ""
+
+  # Enable tracing search
+  ZO_TRACING_ENABLED: "true"
+  ZO_TRACING_SEARCH_ENABLED: "true"
+
+  # Compact settings for homelab disk efficiency
+  ZO_COMPACT_MAX_FILE_SIZE: "256"
+  ZO_MAX_FILE_SIZE_ON_DISK: "64"
+
+  # Retention (7 days default, matches Tempo)
+  ZO_COMPACT_DATA_RETENTION_DAYS: "7"
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 2Gi
+  limits:
+    cpu: "2"
+    memory: 4Gi
+
+persistence:
+  enabled: true
+  size: 50Gi
+  storageClass: longhorn
+  accessModes:
+    - ReadWriteOnce
+
+service:
+  type: ClusterIP
+  http_port: 5080
+  grpc_port: 5081
+
+# Traefik IngressRoute will be used instead of native ingress
+ingress:
+  enabled: false
+
+nodeSelector:
+  kubernetes.io/hostname: homelab

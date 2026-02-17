@@ -1,0 +1,129 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: landing-page
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>VectorWeight</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background: #0f172a;
+          color: #e2e8f0;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        header {
+          text-align: center;
+          padding: 3rem 1rem 2rem;
+        }
+        header h1 {
+          font-size: 2.5rem;
+          font-weight: 700;
+          background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin-bottom: 0.5rem;
+        }
+        header p {
+          color: #94a3b8;
+          font-size: 1.1rem;
+        }
+        .grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+          gap: 1.25rem;
+          padding: 1rem 2rem 3rem;
+          max-width: 1200px;
+          width: 100%;
+        }
+        .tile {
+          background: #1e293b;
+          border: 1px solid #334155;
+          border-radius: 12px;
+          padding: 1.5rem;
+          text-decoration: none;
+          color: inherit;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: flex-start;
+          gap: 1rem;
+        }
+        .tile:hover {
+          border-color: #475569;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .tile-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          font-size: 1.5rem;
+        }
+        .tile-text h2 {
+          font-size: 1rem;
+          font-weight: 600;
+          margin-bottom: 0.25rem;
+        }
+        .tile-text p {
+          font-size: 0.85rem;
+          color: #94a3b8;
+        }
+        footer {
+          padding: 2rem;
+          color: #475569;
+          font-size: 0.8rem;
+          text-align: center;
+        }
+        .status { color: #22c55e; }
+      </style>
+    </head>
+    <body>
+      <header>
+        <h1>VectorWeight</h1>
+        <p>Self-Hosted AI Platform</p>
+      </header>
+      <div class="grid">
+        {{- range .Values.services }}
+        <a href="{{ .url }}" class="tile">
+          <div class="tile-icon" style="background: {{ .color }}20; color: {{ .color }}">
+            {{- if eq .icon "chat" }}&#128172;
+            {{- else if eq .icon "workflow" }}&#9881;
+            {{- else if eq .icon "code" }}&#128187;
+            {{- else if eq .icon "chart" }}&#128200;
+            {{- else if eq .icon "deploy" }}&#128640;
+            {{- else if eq .icon "search" }}&#128269;
+            {{- else if eq .icon "api" }}&#9889;
+            {{- else if eq .icon "logs" }}&#128220;
+            {{- else if eq .icon "metrics" }}&#128202;
+            {{- else if eq .icon "storage" }}&#128451;
+            {{- else if eq .icon "lock" }}&#128274;
+            {{- else if eq .icon "network" }}&#127760;
+            {{- else }}&#11044;
+            {{- end }}
+          </div>
+          <div class="tile-text">
+            <h2>{{ .name }}</h2>
+            <p>{{ .description }}</p>
+          </div>
+        </a>
+        {{- end }}
+      </div>
+      <footer>
+        <span class="status">&#9679;</span> Powered by Kubernetes &middot; GitOps via ArgoCD
+      </footer>
+    </body>
+    </html>

@@ -1,8 +1,3 @@
-{{- /*
-  IngressRoute CRD for vectorweight.com → ai.vectorweight.com redirect.
-  Uses Traefik CRD provider (not Kubernetes Ingress) to support
-  cross-namespace middleware references without provider isolation issues.
-*/ -}}
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
@@ -11,11 +6,21 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`vectorweight.com`)
+    # oauth2-proxy callback route (no forward-auth to avoid circular redirect)
+    - match: Host(`{{ .Values.host }}`) && PathPrefix(`/oauth2/`)
+      kind: Rule
+      services:
+        - name: oauth2-proxy
+          namespace: automation
+          port: 4180
+    # Landing page (protected by SSO)
+    - match: Host(`{{ .Values.host }}`)
       kind: Rule
       middlewares:
-        - name: redirect-root-to-ai
+        - name: landing-page-forward-auth
+          namespace: automation
       services:
-        - kind: TraefikService
-          name: noop@internal
-  tls: {}
+        - name: landing-page
+          port: 80
+  tls:
+    secretName: vectorweight-wildcard-tls
