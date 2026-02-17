@@ -9,23 +9,21 @@ service:
   type: ClusterIP
   port: 8080
 
+# Ingress disabled - using IngressRoute CRD for forward-auth middleware support
 ingress:
+  enabled: false
+
+# Traefik IngressRoute CRD (supports cross-namespace middleware references)
+ingressRoute:
   enabled: true
-  className: traefik
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.tls: "true"
-    traefik.ingress.kubernetes.io/router.middlewares: automation-searxng-forward-auth@kubernetescrd
-    cert-manager.io/cluster-issuer: letsencrypt-production
-  hosts:
-    - host: search.vectorweight.com
-      paths:
-        - path: /
-          pathType: Prefix
+  host: search.vectorweight.com
+  entryPoints:
+    - websecure
+  middlewares:
+    - name: searxng-forward-auth
+      namespace: automation
   tls:
-    - hosts:
-        - search.vectorweight.com
-      secretName: vectorweight-wildcard-tls
+    secretName: vectorweight-wildcard-tls
 
 resources:
   requests:

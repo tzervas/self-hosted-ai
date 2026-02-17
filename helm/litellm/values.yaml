@@ -20,23 +20,21 @@ service:
   port: 4000
   metricsPort: 9090
 
+# Ingress disabled - using IngressRoute CRD for forward-auth middleware support
 ingress:
+  enabled: false
+
+# Traefik IngressRoute CRD (supports cross-namespace middleware references)
+ingressRoute:
   enabled: true
-  className: traefik
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.tls: "true"
-    traefik.ingress.kubernetes.io/router.middlewares: automation-litellm-forward-auth@kubernetescrd
-    cert-manager.io/cluster-issuer: letsencrypt-production
-  hosts:
-    - host: llm.vectorweight.com
-      paths:
-        - path: /
-          pathType: Prefix
+  host: llm.vectorweight.com
+  entryPoints:
+    - websecure
+  middlewares:
+    - name: litellm-forward-auth
+      namespace: automation
   tls:
-    - hosts:
-        - llm.vectorweight.com
-      secretName: vectorweight-wildcard-tls
+    secretName: vectorweight-wildcard-tls
 
 # Environment variables
 env:
