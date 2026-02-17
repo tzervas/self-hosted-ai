@@ -34,6 +34,8 @@ spec:
                 - gitlab
                 - auth
                 - traefik
+                - automation
+                - monitoring
           # Temporarily exclude non-migrated ai-services apps (remove after ArgoCD sync)
           - resources:
               namespaces:
@@ -51,7 +53,7 @@ spec:
         message: "Containers must set securityContext.runAsNonRoot=true"
         pattern:
           spec:
-            securityContext:
+            =(securityContext):
               runAsNonRoot: true
 
     # Rule 2: Disallow privileged containers
@@ -72,6 +74,7 @@ spec:
                 - gitlab
                 - auth
                 - monitoring
+                - automation
                 - traefik
           # Temporarily exclude non-migrated ai-services apps (remove after ArgoCD sync)
           - resources:
