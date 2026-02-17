@@ -106,7 +106,8 @@ readinessProbe:
   failureThreshold: 3
 
 # Pod configuration
-nodeSelector: {}
+nodeSelector:
+  kubernetes.io/hostname: homelab
 
 tolerations: []
 

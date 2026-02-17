@@ -2,8 +2,8 @@
 # ArgoCD Application for distributed block storage
 #
 # Prerequisites:
-#   - /var/lib/longhorn directory on each node
-#   - For homelab: Uses /var/lib/longhorn (228GB btrfs) for Longhorn storage
+#   - /data/longhorn directory on homelab node (3TB volume)
+#   - For homelab: Uses /data/longhorn for Longhorn storage
 #
 # This application:
 #   1. Installs Longhorn operator from official Helm chart
@@ -34,7 +34,7 @@ spec:
           defaultSettings:
             defaultReplicaCount: 1
             defaultDataLocality: best-effort
-            defaultDataPath: /var/lib/longhorn
+            defaultDataPath: /data/longhorn
             storageMinimalAvailablePercentage: 10
             storageReservedPercentageForDefaultDisk: 15
             # Disable automatic deletion of snapshots on volume deletion

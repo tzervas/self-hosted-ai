@@ -187,6 +187,7 @@ securityContext:
       - ALL
 
 # Node selection
-nodeSelector: {}
+nodeSelector:
+  kubernetes.io/hostname: homelab
 tolerations: []
 affinity: {}

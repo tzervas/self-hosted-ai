@@ -248,8 +248,9 @@ securityContext:
   runAsGroup: 1001
   fsGroup: 1001
 
-# Node selector
-nodeSelector: {}
+# Pin all Dify components to homelab
+nodeSelector:
+  kubernetes.io/hostname: homelab
 
 # Tolerations
 tolerations: []

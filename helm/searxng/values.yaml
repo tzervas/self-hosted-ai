@@ -61,4 +61,10 @@ securityContext:
   readOnlyRootFilesystem: false
   allowPrivilegeEscalation: false
 
+nodeSelector:
+  kubernetes.io/hostname: homelab
+
+tolerations: []
+affinity: {}
+
 secretName: searxng-secret

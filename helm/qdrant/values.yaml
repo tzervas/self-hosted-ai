@@ -63,17 +63,11 @@ networkPolicy:
       - protocol: TCP
         port: 6334
 
-# Node affinity - prefer homelab node (more RAM)
-affinity:
-  nodeAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 100
-      preference:
-        matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - homelab
+# Pin to homelab node (required - akula-prime is GPU-only)
+nodeSelector:
+  kubernetes.io/hostname: homelab
+
+affinity: {}
 
 # Pod disruption budget
 podDisruptionBudget:

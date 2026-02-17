@@ -167,6 +167,7 @@ securityContext:
   readOnlyRootFilesystem: false
   allowPrivilegeEscalation: false
 
-nodeSelector: {}
+nodeSelector:
+  kubernetes.io/hostname: homelab
 tolerations: []
 affinity: {}

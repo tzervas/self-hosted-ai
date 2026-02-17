@@ -254,8 +254,9 @@ resources:
     cpu: 4
     memory: 16Gi
 
-# Node selector
-nodeSelector: {}
+# Pin all GitLab components to homelab
+nodeSelector:
+  kubernetes.io/hostname: homelab
 
 # Tolerations
 tolerations: []

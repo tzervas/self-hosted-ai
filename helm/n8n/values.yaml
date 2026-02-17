@@ -103,6 +103,7 @@ probes:
     failureThreshold: 3
     successThreshold: 1
 
-nodeSelector: {}
+nodeSelector:
+  kubernetes.io/hostname: homelab
 tolerations: []
 affinity: {}

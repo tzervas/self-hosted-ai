@@ -35,6 +35,7 @@ resources:
     cpu: 500m
     memory: 1Gi
 
-nodeSelector: {}
+nodeSelector:
+  kubernetes.io/hostname: homelab
 tolerations: []
 affinity: {}

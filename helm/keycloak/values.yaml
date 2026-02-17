@@ -105,6 +105,10 @@ keycloak:
     periodSeconds: 10
     timeoutSeconds: 5
 
+  # Pin to homelab node
+  nodeSelector:
+    kubernetes.io/hostname: homelab
+
   # Extra environment variables
   extraEnvVars:
     - name: KC_HOSTNAME

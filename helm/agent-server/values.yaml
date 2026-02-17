@@ -160,6 +160,7 @@ metrics:
     interval: 30s
     scrapeTimeout: 10s
 
-nodeSelector: {}
+nodeSelector:
+  kubernetes.io/hostname: homelab
 tolerations: []
 affinity: {}
