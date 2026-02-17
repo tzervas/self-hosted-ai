@@ -46,7 +46,7 @@ spec:
         # Enable API and dashboard
         api:
           dashboard: true
-          insecure: false
+          insecure: true  # TEMPORARY: enable for debugging, revert after
         
         # IngressRoute for dashboard
         ingressRoute:
