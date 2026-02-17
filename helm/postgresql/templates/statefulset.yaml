@@ -38,23 +38,48 @@ spec:
       {{- if .Values.persistence.enabled }}
       initContainers:
         - name: init-chmod
-          image: busybox:latest
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command:
             - sh
             - -c
             - |
-              echo "Setting up Bitnami PostgreSQL directories..."
-              mkdir -p /bitnami/postgresql/data /bitnami/postgresql/conf
-              chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.runAsGroup }} /bitnami/postgresql
-              chmod -R 775 /bitnami/postgresql
-              ls -la /bitnami/postgresql
+              set -e
+              echo "Fixing Bitnami PostgreSQL directory permissions..."
+              echo "Current user: $(id)"
+              echo "Before fix:"
+              ls -la /opt/bitnami/postgresql/conf || true
+              chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.runAsGroup }} /opt/bitnami/postgresql/conf
+              chmod -R 775 /opt/bitnami/postgresql/conf
+              echo "After fix on conf:"
+              ls -la /opt/bitnami/postgresql/conf
+              # Clear data directory completely if not initialized
+              if [ ! -f "/opt/bitnami/postgresql/data/PG_VERSION" ]; then
+                echo "Data directory not initialized, clearing completely..."
+                rm -rf /opt/bitnami/postgresql/data/*
+                rm -rf /opt/bitnami/postgresql/data/.[!.]* 2>/dev/null || true
+              fi
+              chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.runAsGroup }} /opt/bitnami/postgresql/data
+              chmod -R 775 /opt/bitnami/postgresql/data
+              chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.runAsGroup }} /opt/bitnami/postgresql/tmp
+              chmod -R 775 /opt/bitnami/postgresql/tmp
+              echo "Final permissions:"
+              ls -la /opt/bitnami/postgresql/
           volumeMounts:
             - name: data
-              mountPath: /bitnami/postgresql
+              mountPath: /opt/bitnami/postgresql/data
+            - name: conf
+              mountPath: /opt/bitnami/postgresql/conf
+            - name: tmp
+              mountPath: /opt/bitnami/postgresql/tmp
           securityContext:
             runAsUser: 0
             runAsNonRoot: false
       {{- end }}
+      volumes:
+        - name: conf
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -74,11 +99,15 @@ spec:
             - name: POSTGRESQL_DATABASE
               value: {{ .Values.auth.database }}
             - name: POSTGRESQL_DATA_DIR
-              value: /bitnami/postgresql/data
+              value: /opt/bitnami/postgresql/data
           {{- if .Values.persistence.enabled }}
           volumeMounts:
             - name: data
-              mountPath: /bitnami/postgresql
+              mountPath: /opt/bitnami/postgresql/data
+            - name: conf
+              mountPath: /opt/bitnami/postgresql/conf
+            - name: tmp
+              mountPath: /opt/bitnami/postgresql/tmp
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
