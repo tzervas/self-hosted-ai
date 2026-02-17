@@ -30,11 +30,27 @@ spec:
             cpu: 500m
             memory: 256Mi
 
+        # Security context for Kyverno pod-security-baseline compliance
+        podSecurityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          fsGroup: 1000
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+              - ALL
+
         # Metrics for monitoring
         metrics:
           controllerManagerAddr: ":8080"
           listenerAddr: ":8080"
           listenerEndpoint: "/metrics"
+
+        # Pin to homelab node
+        nodeSelector:
+          kubernetes.io/hostname: homelab
 
   destination:
     server: https://kubernetes.default.svc
