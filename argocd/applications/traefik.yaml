@@ -68,7 +68,6 @@ spec:
             allowCrossNamespace: true
           kubernetesIngress:
             enabled: true
-            allowCrossNamespace: true
             publishedService:
               enabled: true
         
@@ -107,6 +106,10 @@ spec:
             serviceMonitor:
               enabled: true
         
+        # Additional arguments not covered by chart values
+        additionalArguments:
+          - "--providers.kubernetesingress.allowCrossNamespace=true"
+
         # Logs
         logs:
           general:
