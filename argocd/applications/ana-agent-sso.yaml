@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ana-agent-sso
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"  # After Keycloak (wave 3), before AI backend (wave 5)
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/tzervas/aNa.git
+    targetRevision: main
+    path: deploy/argocd/apps/ana-agent/base
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ana
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

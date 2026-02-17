@@ -140,6 +140,7 @@ create_oidc_client "traefik" "https://traefik.vectorweight.com/oauth2/callback" 
 create_oidc_client "dify" "https://dify.vectorweight.com/oauth2/callback" "Dify (oauth2-proxy)"
 create_oidc_client "prometheus" "https://prometheus.vectorweight.com/oauth2/callback" "Prometheus (oauth2-proxy)"
 create_oidc_client "longhorn" "https://longhorn.vectorweight.com/oauth2/callback" "Longhorn (oauth2-proxy)"
+create_oidc_client "ana-agent" "https://ana.vectorweight.com/auth/keycloak/callback" "aNa Agent"
 
 # 4. Retrieve client secrets
 echo "[4/6] Retrieving client secrets..."
@@ -168,6 +169,7 @@ TRAEFIK_SECRET=$(get_client_secret "traefik")
 DIFY_SECRET=$(get_client_secret "dify")
 PROMETHEUS_SECRET=$(get_client_secret "prometheus")
 LONGHORN_SECRET=$(get_client_secret "longhorn")
+ANA_AGENT_SECRET=$(get_client_secret "ana-agent")
 
 # 5. Create admin user in realm
 echo "[5/6] Creating admin user in '${REALM}' realm..."
@@ -251,6 +253,12 @@ kubectl create secret generic longhorn-oidc-secret -n longhorn-system \
   --from-literal=client-secret="$LONGHORN_SECRET" \
   --dry-run=client -o yaml | kubectl apply -f -
 
+kubectl create secret generic ana-oidc-secret -n ana \
+  --from-literal=client-id=ana-agent \
+  --from-literal=client-secret="$ANA_AGENT_SECRET" \
+  --from-literal=redirect-uri="https://ana.vectorweight.com/auth/keycloak/callback" \
+  --dry-run=client -o yaml | kubectl apply -f -
+
 echo ""
 echo "=============================================="
 echo "  Setup Complete!"
@@ -267,6 +275,7 @@ echo "  - traefik-oidc-secret    (traefik)"
 echo "  - dify-oidc-secret       (dify)"
 echo "  - prometheus-oidc-secret  (monitoring)"
 echo "  - longhorn-oidc-secret   (longhorn-system)"
+echo "  - ana-oidc-secret        (ana)"
 echo ""
 echo "OIDC Discovery URL:"
 echo "  ${KEYCLOAK_URL}/realms/${REALM}/.well-known/openid-configuration"
