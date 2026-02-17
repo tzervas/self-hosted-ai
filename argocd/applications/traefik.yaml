@@ -46,7 +46,7 @@ spec:
         # Enable API and dashboard
         api:
           dashboard: true
-          insecure: true  # TEMPORARY: enable for debugging, revert after
+          insecure: false
         
         # IngressRoute for dashboard
         ingressRoute:
@@ -106,10 +106,12 @@ spec:
             serviceMonitor:
               enabled: true
         
-        # TEMPORARY: Enable API insecure mode for debugging
-        additionalArguments:
-          - "--api.insecure=true"
-          - "--log.level=DEBUG"
+        # Extra RBAC rules: CRD provider needs ConfigMap access for cache sync
+        rbac:
+          rules:
+            - apiGroups: [""]
+              resources: ["configmaps"]
+              verbs: ["get", "list", "watch"]
 
         # Logs
         logs:
