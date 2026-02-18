@@ -15,10 +15,10 @@ spec:
       targetRevision: 1.24.4
       helm:
         valueFiles:
-          - values.yaml
+          - $values/argocd/helm/tempo/values.yaml
     - repoURL: https://github.com/tzervas/self-hosted-ai.git
       targetRevision: main
-      path: argocd/helm/tempo
+      ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring

@@ -4,6 +4,8 @@ metadata:
   name: landing-page
   labels:
     app: landing-page
+    app.kubernetes.io/name: landing-page
+    app.kubernetes.io/version: "1.0.0"
 spec:
   replicas: 1
   selector:
@@ -13,6 +15,8 @@ spec:
     metadata:
       labels:
         app: landing-page
+        app.kubernetes.io/name: landing-page
+        app.kubernetes.io/version: "1.0.0"
     spec:
       containers:
         - name: nginx
