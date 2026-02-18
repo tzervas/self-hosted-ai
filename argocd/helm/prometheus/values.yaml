@@ -26,7 +26,16 @@ prometheus:
           limits:
             cpu: "1"
             memory: 2Gi
+        startupProbe:
+          httpGet:
+            path: /-/ready
+            port: http-web
+            scheme: HTTP
+          failureThreshold: 120
+          periodSeconds: 15
+          timeoutSeconds: 5
     retention: 30d
+    walCompression: true
     storageSpec:
       volumeClaimTemplate:
         spec:
