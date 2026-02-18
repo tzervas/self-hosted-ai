@@ -145,22 +145,12 @@ for item in data.get('items', []):
     kubectl delete pv "$pv" --wait=false 2>/dev/null || true
 done
 
-# === STEP 4: Clean up evicted Longhorn pods ===
-info "Step 4: Cleaning up evicted Longhorn pods..."
+# === STEP 4: Fix StorageClasses (WHILE WEBHOOKS ARE STILL DISABLED) ===
+# This must happen before re-enabling webhooks, because the webhook validates
+# volumes against StorageClass params. If SCs still have fromBackup:"", the
+# webhook will reject all volume operations after re-enable.
+info "Step 4: Fixing StorageClasses (webhooks still disabled)..."
 
-for pod in $(kubectl get pods -n longhorn-system --field-selector=status.phase=Failed -o name 2>/dev/null); do
-    warn "  Deleting: $pod"
-    kubectl delete "$pod" -n longhorn-system || true
-done
-
-# === STEP 5: Re-enable Longhorn webhooks ===
-info "Step 5: Re-enabling Longhorn webhooks..."
-restore_webhooks
-
-# === STEP 6: Fix StorageClasses ===
-info "Step 6: Fixing StorageClasses..."
-
-# Fix all Longhorn StorageClasses: remove fromBackup, fix replicas, fix defaults
 for sc_name in longhorn-homelab longhorn longhorn-single; do
     if ! kubectl get storageclass "$sc_name" &>/dev/null; then
         info "  StorageClass $sc_name not found, skipping."
@@ -206,15 +196,43 @@ if kubectl get recurringjobs.longhorn.io weekly-backup -n longhorn-system &>/dev
     kubectl delete recurringjobs.longhorn.io weekly-backup -n longhorn-system 2>/dev/null || true
 fi
 
-# === STEP 7: Trigger ArgoCD sync ===
-info "Step 7: Triggering ArgoCD sync for OpenObserve..."
+# === STEP 5: Clean up evicted Longhorn pods ===
+info "Step 5: Cleaning up evicted Longhorn pods..."
+
+for pod in $(kubectl get pods -n longhorn-system --field-selector=status.phase=Failed -o name 2>/dev/null); do
+    warn "  Deleting: $pod"
+    kubectl delete "$pod" -n longhorn-system || true
+done
+
+# === STEP 6: Re-enable Longhorn webhooks ===
+info "Step 6: Re-enabling Longhorn webhooks..."
+restore_webhooks
+sleep 5  # Give webhooks time to register
+
+# === STEP 7: Clean up OpenObserve again (in case ArgoCD recreated with old SC) ===
+info "Step 7: Ensuring OpenObserve is clean before final sync..."
+
+if kubectl get statefulset openobserve-openobserve-standalone -n monitoring &>/dev/null; then
+    kubectl delete statefulset openobserve-openobserve-standalone -n monitoring --wait=false 2>/dev/null || true
+fi
+for pod in $(kubectl get pods -n monitoring -l app.kubernetes.io/name=openobserve-standalone -o name 2>/dev/null); do
+    kubectl delete "$pod" -n monitoring --force --grace-period=0 2>/dev/null || true
+done
+if kubectl get pvc data-openobserve-openobserve-standalone-0 -n monitoring &>/dev/null; then
+    kubectl patch pvc data-openobserve-openobserve-standalone-0 -n monitoring \
+        -p '{"metadata":{"finalizers":null}}' --type=merge 2>/dev/null || true
+    kubectl delete pvc data-openobserve-openobserve-standalone-0 -n monitoring --wait=false 2>/dev/null || true
+fi
+
+# === STEP 8: Trigger ArgoCD sync ===
+info "Step 8: Triggering ArgoCD sync for OpenObserve..."
 
 kubectl patch application openobserve -n argocd --type merge \
     -p '{"operation":{"sync":{"revision":"HEAD"}}}' 2>/dev/null || \
     warn "  Could not trigger sync (may already be syncing)"
 
-# === STEP 8: Wait for OpenObserve ===
-info "Step 8: Waiting for OpenObserve to become ready (timeout: 180s)..."
+# === STEP 9: Wait for OpenObserve ===
+info "Step 9: Waiting for OpenObserve to become ready (timeout: 180s)..."
 
 TIMEOUT=180
 ELAPSED=0
@@ -243,8 +261,8 @@ if [ $ELAPSED -ge $TIMEOUT ]; then
     exit 1
 fi
 
-# === STEP 9: Verify ===
-info "Step 9: Final verification..."
+# === STEP 10: Verify ===
+info "Step 10: Final verification..."
 echo
 echo "=== OpenObserve Pod ==="
 kubectl get pods -n monitoring -l app.kubernetes.io/name=openobserve-standalone -o wide 2>/dev/null
