@@ -36,6 +36,7 @@ spec:
       kind: CustomResourceDefinition
       jsonPointers:
         - /metadata/annotations
+        - /metadata/labels
         - /spec/versions
         - /spec/conversion
         - /spec/preserveUnknownFields

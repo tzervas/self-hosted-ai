@@ -18,6 +18,7 @@ spec:
       kind: StatefulSet
       jqPathExpressions:
         - .spec.volumeClaimTemplates[]?.metadata.creationTimestamp
+        - .spec.template.metadata.annotations."checksum/secret"
   sources:
     - chart: redis
       repoURL: https://charts.bitnami.com/bitnami
