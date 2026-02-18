@@ -175,9 +175,13 @@ registry:
   database:
     enabled: true
 
-# GitLab Runner
+# GitLab Runner - DISABLED in bundled chart
+# The bundled runner uses legacy registration tokens which don't work with
+# fresh databases (GitLab 15.6+ requires authentication tokens from the UI).
+# Use the separate gitlab-runners ArgoCD app instead, which can be configured
+# with a proper authentication token after GitLab is running.
 gitlab-runner:
-  install: true
+  install: false
   # Trust internal CA certificate
   certsSecretName: gitlab-runner-certs
   runners:
