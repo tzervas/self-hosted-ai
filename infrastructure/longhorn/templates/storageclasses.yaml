@@ -1,5 +1,9 @@
 # Longhorn StorageClass: longhorn-homelab (default)
-# 2 replicas with best-effort data locality for general workloads
+# Single replica with best-effort data locality for homelab workloads
+#
+# IMPORTANT: Do NOT include 'fromBackup' parameter — even an empty string
+# triggers Longhorn v1.10.x webhook validation that requires a backup target,
+# creating a deadlock where volumes can't provision or be patched.
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
@@ -12,7 +16,10 @@ parameters:
   numberOfReplicas: "{{ .Values.storageClasses.homelab.numberOfReplicas }}"
   dataLocality: {{ .Values.storageClasses.homelab.dataLocality }}
   fsType: {{ .Values.storageClasses.homelab.fsType }}
-  staleReplicaTimeout: "30"
+  staleReplicaTimeout: "{{ .Values.storageClasses.homelab.staleReplicaTimeout | default 30 }}"
+  {{- if .Values.storageClasses.homelab.nodeSelector }}
+  nodeSelector: {{ .Values.storageClasses.homelab.nodeSelector }}
+  {{- end }}
 provisioner: driver.longhorn.io
 reclaimPolicy: {{ .Values.storageClasses.homelab.reclaimPolicy }}
 volumeBindingMode: WaitForFirstConsumer
@@ -32,7 +39,7 @@ parameters:
   numberOfReplicas: "{{ .Values.storageClasses.gpuLocal.numberOfReplicas }}"
   dataLocality: {{ .Values.storageClasses.gpuLocal.dataLocality }}
   fsType: {{ .Values.storageClasses.gpuLocal.fsType }}
-  staleReplicaTimeout: "30"
+  staleReplicaTimeout: "{{ .Values.storageClasses.gpuLocal.staleReplicaTimeout | default 30 }}"
 provisioner: driver.longhorn.io
 reclaimPolicy: {{ .Values.storageClasses.gpuLocal.reclaimPolicy }}
 volumeBindingMode: WaitForFirstConsumer

@@ -30,17 +30,25 @@ spec:
         # Skip hooks for fresh installs (pre-upgrade hook fails without existing resources)
         skipCrds: false
         valuesObject:
-          # Default settings for homelab (single-node, data on /var partition)
+          # Default settings for homelab (single-node, data on /data partition)
           defaultSettings:
             defaultReplicaCount: 1
             defaultDataLocality: best-effort
             defaultDataPath: /data/longhorn
             storageMinimalAvailablePercentage: 10
             storageReservedPercentageForDefaultDisk: 15
-            # Disable automatic deletion of snapshots on volume deletion
             autoDeletePodWhenVolumeDetachedUnexpectedly: true
-            # Node drain policy
             nodeDrainPolicy: block-for-eviction
+            # IMPORTANT: Do not set backupTarget without a valid URL.
+            # Empty backup targets cause v1.10.x webhook deadlocks.
+
+          # Override the auto-created 'longhorn' StorageClass defaults
+          # Without this, the chart creates a 'longhorn' SC with numberOfReplicas=3
+          # which is impossible on a single-node cluster.
+          persistence:
+            defaultClass: false  # Let longhorn-homelab be the default
+            defaultClassReplicaCount: 1
+            defaultDataLocality: best-effort
 
           # Ingress for Longhorn UI (accessible via Traefik, behind Keycloak)
           ingress:
