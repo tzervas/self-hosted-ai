@@ -75,8 +75,15 @@ global:
           key: provider
 
 # GitLab Rails (main application)
+# NOTE: Kubernetes injects GITLAB_PORT=tcp://... as a service env var,
+# which collides with GitLab's expected port number. extraEnv overrides this.
 gitlab:
+  migrations:
+    extraEnv:
+      GITLAB_PORT: "443"
   webservice:
+    extraEnv:
+      GITLAB_PORT: "443"
     minReplicas: 1
     maxReplicas: 3
     resources:
@@ -90,6 +97,8 @@ gitlab:
       targetAverageUtilization: 70
 
   sidekiq:
+    extraEnv:
+      GITLAB_PORT: "443"
     minReplicas: 1
     maxReplicas: 2
     resources:
@@ -99,6 +108,14 @@ gitlab:
       limits:
         cpu: 1
         memory: 2Gi
+
+  toolbox:
+    extraEnv:
+      GITLAB_PORT: "443"
+
+  gitlab-exporter:
+    extraEnv:
+      GITLAB_PORT: "443"
 
 # PostgreSQL - Disable bundled PostgreSQL (using external psql defined in global)
 # GitLab chart 9.7.1 defaults to bitnamilegacy/postgresql:16.6.0 which doesn't exist
@@ -114,7 +131,7 @@ redis:
 gitaly:
   persistence:
     enabled: true
-    size: 10Gi
+    size: 50Gi
     storageClass: longhorn-homelab
   resources:
     requests:
