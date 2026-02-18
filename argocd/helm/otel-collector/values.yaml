@@ -4,6 +4,9 @@
 
 mode: deployment
 
+image:
+  repository: otel/opentelemetry-collector-contrib
+
 replicaCount: 1
 
 resources:
@@ -85,7 +88,7 @@ config:
       endpoint: "http://loki-gateway.monitoring.svc.cluster.local:80/loki/api/v1/push"
     # Traces + Logs + Metrics → OpenObserve (full-text search layer)
     otlphttp/openobserve:
-      endpoint: "http://openobserve.monitoring.svc.cluster.local:5080/api/default"
+      endpoint: "http://openobserve-openobserve-standalone.monitoring.svc.cluster.local:5080/api/default"
       headers:
         Authorization: "Basic a2FuZ0B2ZWN0b3J3ZWlnaHQuY29tOmJhbmFuYQ=="
         stream-name: default

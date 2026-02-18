@@ -266,7 +266,7 @@ grafana:
     - name: OpenObserve
       type: elasticsearch
       uid: openobserve
-      url: http://openobserve.monitoring.svc.cluster.local:5080/api/default
+      url: http://openobserve-openobserve-standalone.monitoring.svc.cluster.local:5080/api/default
       access: proxy
       isDefault: false
       basicAuth: true
