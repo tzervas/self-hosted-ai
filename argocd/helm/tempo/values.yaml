@@ -34,7 +34,7 @@ tempo:
 persistence:
   enabled: true
   size: 10Gi
-  storageClassName: longhorn
+  storageClassName: longhorn-homelab
 
 resources:
   requests:
