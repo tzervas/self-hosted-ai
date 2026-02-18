@@ -16,6 +16,16 @@ prometheus:
       limits:
         cpu: "1"
         memory: 2Gi
+    # Force container resources directly (bypasses operator resource handling)
+    containers:
+      - name: prometheus
+        resources:
+          requests:
+            cpu: 200m
+            memory: 1Gi
+          limits:
+            cpu: "1"
+            memory: 2Gi
     retention: 30d
     storageSpec:
       volumeClaimTemplate:
