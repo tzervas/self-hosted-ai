@@ -118,6 +118,7 @@ spec:
                 - gitlab
                 - auth
                 - ai-services
+                - self-hosted-ai
       validate:
         message: "Using ':latest' tag is not allowed. Pin image versions for reproducibility."
         pattern:
