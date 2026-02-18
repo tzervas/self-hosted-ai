@@ -1,5 +1,8 @@
 # Longhorn storage configuration values
-# These values configure StorageClasses and backup policies for the homelab
+# These values configure StorageClasses and snapshot policies for the homelab
+#
+# IMPORTANT: Never include 'fromBackup' in StorageClass parameters.
+# Even an empty string triggers Longhorn v1.10.x webhook deadlock.
 
 # StorageClass configurations
 storageClasses:
@@ -11,6 +14,8 @@ storageClasses:
     fsType: ext4
     reclaimPolicy: Retain
     allowVolumeExpansion: true
+    staleReplicaTimeout: 30  # Minutes before marking replica stale
+    nodeSelector: homelab     # Schedule on homelab node's /data/longhorn disk
 
   gpuLocal:
     name: longhorn-gpu-local
@@ -20,8 +25,12 @@ storageClasses:
     fsType: ext4
     reclaimPolicy: Retain
     allowVolumeExpansion: true
+    staleReplicaTimeout: 30
 
 # Recurring snapshot configuration
+# NOTE: Only 'snapshot' tasks are configured. 'backup' tasks require a
+# backup target URL (S3/NFS) which is not set up for this homelab.
+# Do NOT create backup RecurringJobs without configuring a backup target first.
 recurringJobs:
   dailySnapshot:
     name: daily-snapshot
@@ -31,15 +40,6 @@ recurringJobs:
     concurrency: 2
     labels:
       backup-type: daily
-
-  weeklyBackup:
-    name: weekly-backup
-    cron: "0 3 * * 0"
-    task: backup
-    retain: 4
-    concurrency: 1
-    labels:
-      backup-type: weekly
 
 # Default volume labels
 defaultLabels:
