@@ -55,7 +55,6 @@ spec:
       - PruneLast=true
       - ServerSideApply=true  # Use SSA to avoid large annotation sizes
       - RespectIgnoreDifferences=true
-      - Replace=true  # Allow replacing existing PreSync hook resources
     retry:
       limit: 5
       backoff:
