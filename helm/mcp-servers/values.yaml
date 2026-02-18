@@ -11,7 +11,7 @@ mcpoProxy:
   enabled: true
   image:
     repository: ghcr.io/open-webui/mcpo
-    tag: latest
+    tag: v0.0.19
     pullPolicy: IfNotPresent
   port: 8000
   replicas: 1
@@ -180,6 +180,7 @@ podSecurityContext:
   fsGroup: 1000
 
 securityContext:
+  privileged: false
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: false  # Some servers need write access
   capabilities:

@@ -43,15 +43,16 @@ spec:
       jsonPointers:
         - /spec/versions
   syncPolicy:
-    # Note: Auto-sync disabled due to Gateway API CRD version migration issue
-    # CRDs are manually managed via Helm (linkerd-edge/linkerd-crds:2025.1.2)
-    # Gateway API CRDs (grpcroutes, httproutes) have v1/v1alpha2 version conflicts
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - Replace=true  # CRDs need replace strategy
+      - ServerSideApply=true   # SSA handles resourceVersion conflicts on shared CRDs
+      - RespectIgnoreDifferences=true
     retry:
-      limit: 3
+      limit: 5
       backoff:
         duration: 5s
         factor: 2
-        maxDuration: 1m
+        maxDuration: 3m

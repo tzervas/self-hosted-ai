@@ -21,6 +21,15 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
+  ignoreDifferences:
+    # Longhorn operator mutates CRDs at runtime (adds versions, labels, annotations).
+    # Ignore these fields to prevent perpetual OutOfSync.
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      jqPathExpressions:
+        - .spec.versions
+        - .metadata.labels
+        - .metadata.annotations
   sources:
     # Source 1: Official Longhorn Helm chart
     - repoURL: https://charts.longhorn.io

@@ -34,17 +34,15 @@ spec:
         # GitLab instance connection
         gitlabUrl: "https://git.vectorweight.com"
         
-        # Runner registration token from secret
-        runnerToken:
-          secret: gitlab-runner-token
-          key: runner-registration-token
-        
         # Runner configuration
         concurrent: 4  # Max concurrent jobs per runner
         checkInterval: 10  # Check for new jobs every 10s
-        
+
         # Kubernetes executor configuration
         runners:
+          # Reference existing secret containing runner token
+          secret: gitlab-runner-token
+
           # Runner tags for job selection
           tags: "self-hosted,linux,amd64,kubernetes"
           
