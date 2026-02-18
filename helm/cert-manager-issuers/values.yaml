@@ -50,59 +50,11 @@ certificates:
     # Wildcard requires DNS-01 challenge
     issuer: letsencrypt-dns
   
-  # Individual service certificates (HTTP-01 challenge)
-  services:
-    - name: ai-vectorweight-tls
-      host: ai.vectorweight.com
-      namespace: ai-services
-      
-    - name: llm-vectorweight-tls
-      host: llm.vectorweight.com
-      namespace: ai-services
-      
-    - name: argocd-vectorweight-tls
-      host: argocd.vectorweight.com
-      namespace: argocd
-      
-    - name: traefik-vectorweight-tls
-      host: traefik.vectorweight.com
-      namespace: traefik
-      
-    - name: n8n-vectorweight-tls
-      host: n8n.vectorweight.com
-      namespace: automation
-      
-    - name: search-vectorweight-tls
-      host: search.vectorweight.com
-      namespace: ai-services
-      
-    - name: dify-vectorweight-tls
-      host: dify.vectorweight.com
-      namespace: dify
-      
-    - name: gitlab-vectorweight-tls
-      host: git.vectorweight.com
-      namespace: gitlab
-      
-    - name: grafana-vectorweight-tls
-      host: grafana.vectorweight.com
-      namespace: monitoring
-      
-    - name: prometheus-vectorweight-tls
-      host: prometheus.vectorweight.com
-      namespace: monitoring
-
-    - name: alertmanager-vectorweight-tls
-      host: alertmanager.vectorweight.com
-      namespace: monitoring
-
-    - name: mcp-vectorweight-tls
-      host: mcp.vectorweight.com
-      namespace: ai-services
-
-    - name: longhorn-vectorweight-tls
-      host: longhorn.vectorweight.com
-      namespace: longhorn-system
+  # Individual service certificates (DNS-01 via Cloudflare)
+  # DISABLED: The wildcard certificate (vectorweight-wildcard-tls) covers all
+  # *.vectorweight.com subdomains. Per-service certs are redundant and cause
+  # cert-manager to stay in Progressing state during DNS propagation delays.
+  services: []
 
 # DNS provider configuration (for DNS-01 challenges)
 # Required for wildcard certificates

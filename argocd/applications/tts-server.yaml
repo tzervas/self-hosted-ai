@@ -1,12 +1,18 @@
-# TTS Server (Coqui XTTS-v2) - Text to Speech
-# Runs on akula-prime GPU node for fast inference
+# TTS Server - Text to Speech
+# DISABLED: Coqui AI shut down in December 2023 and their model CDN
+# (coqui.gateway.scarf.sh) is permanently offline. The container crashes
+# on startup trying to download models.
+#
+# TODO: Replace with Piper TTS (actively maintained, CPU-efficient)
+#   Image: lscr.io/linuxserver/piper:latest
+#   See: https://github.com/rhasspy/piper
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: tts-server
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "6"  # Deploy after Ollama GPU
+    argocd.argoproj.io/sync-wave: "6"
 spec:
   project: default
   source:
@@ -16,50 +22,20 @@ spec:
     helm:
       releaseName: tts-server
       values: |
-        # Only deploy TTS (disable other components)
+        # All components disabled until Piper TTS replacement is ready
         ollama:
           gpu:
             enabled: false
-
         comfyui:
           enabled: false
-
         automatic1111:
           enabled: false
-
         audio:
           enabled: false
-
         video:
           enabled: false
-
         tts:
-          enabled: true
-          image:
-            repository: ghcr.io/coqui-ai/tts
-            tag: latest
-            pullPolicy: IfNotPresent
-          service:
-            type: ClusterIP
-            port: 5002
-          env:
-            - name: USE_CUDA
-              value: "true"
-            - name: COQUI_TOS_AGREED
-              value: "1"
-          nodeSelector:
-            kubernetes.io/hostname: akula-prime
-          tolerations:
-            - key: nvidia.com/gpu
-              operator: Exists
-              effect: NoSchedule
-          resources:
-            requests:
-              memory: "2Gi"
-              cpu: "500m"
-            limits:
-              memory: "8Gi"
-              cpu: "2000m"
+          enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: gpu-workloads
