@@ -83,9 +83,11 @@ config:
       endpoint: "http://prometheus-server.monitoring.svc.cluster.local:9090/api/v1/write"
       tls:
         insecure: true
-    # Logs → Loki
-    loki:
-      endpoint: "http://loki-gateway.monitoring.svc.cluster.local:80/loki/api/v1/push"
+    # Logs → Loki (via OTLP HTTP - Loki 3.x supports OTLP natively)
+    otlphttp/loki:
+      endpoint: "http://loki-gateway.monitoring.svc.cluster.local:80/otlp"
+      tls:
+        insecure: true
     # Traces + Logs + Metrics → OpenObserve (full-text search layer)
     otlphttp/openobserve:
       endpoint: "http://openobserve-openobserve-standalone.monitoring.svc.cluster.local:5080/api/default"
@@ -118,7 +120,7 @@ config:
       logs:
         receivers: [otlp]
         processors: [memory_limiter, batch]
-        exporters: [loki, otlphttp/openobserve]
+        exporters: [otlphttp/loki, otlphttp/openobserve]
     telemetry:
       logs:
         level: info
