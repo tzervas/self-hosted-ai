@@ -9,6 +9,11 @@ metadata:
     argocd.argoproj.io/sync-wave: "6"  # Deploy after Ollama GPU
 spec:
   project: default
+  ignoreDifferences:
+    - group: ""
+      kind: PersistentVolumeClaim
+      jsonPointers:
+        - /spec
   source:
     repoURL: https://github.com/tzervas/self-hosted-ai.git
     targetRevision: main
@@ -39,6 +44,10 @@ spec:
             repository: ghcr.io/ai-dock/comfyui
             tag: latest
             pullPolicy: IfNotPresent
+          persistence:
+            enabled: true
+            size: 50Gi
+            storageClass: longhorn
           service:
             type: ClusterIP
             port: 8188
@@ -70,8 +79,7 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - Force=true      # PVC spec is immutable — force delete+recreate
-      - Replace=true
+      - RespectIgnoreDifferences=true
     retry:
       limit: 5
       backoff:

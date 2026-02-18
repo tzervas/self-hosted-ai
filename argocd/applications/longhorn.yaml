@@ -28,6 +28,7 @@ spec:
       kind: CustomResourceDefinition
       jqPathExpressions:
         - .spec.versions
+        - .spec.conversion
         - .metadata.labels
         - .metadata.annotations
   sources:
