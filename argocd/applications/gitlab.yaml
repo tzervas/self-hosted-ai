@@ -19,6 +19,11 @@ spec:
       kind: Secret
       jsonPointers:
         - /data
+    # StatefulSet VCTs are immutable after creation; ignore size/storage diffs
+    - group: apps
+      kind: StatefulSet
+      jqPathExpressions:
+        - .spec.volumeClaimTemplates[]?.spec.resources
   sources:
     - chart: gitlab
       repoURL: https://charts.gitlab.io
