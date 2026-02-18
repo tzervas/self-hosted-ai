@@ -36,6 +36,8 @@ spec:
                 - traefik
                 - automation
                 - monitoring
+                - linkerd
+                - linkerd-viz
           # Temporarily exclude non-migrated ai-services apps (remove after ArgoCD sync)
           - resources:
               namespaces:
@@ -76,6 +78,8 @@ spec:
                 - monitoring
                 - automation
                 - traefik
+                - linkerd
+                - linkerd-viz
           # Temporarily exclude non-migrated ai-services apps (remove after ArgoCD sync)
           - resources:
               namespaces:
@@ -140,6 +144,12 @@ spec:
                 - auth
                 - longhorn-system
                 - ai-services
+                - monitoring
+                - gpu-workloads
+                - linkerd
+                - linkerd-viz
+                - gitlab
+                - gitlab-runners
       validate:
         message: "CPU and memory limits are required for all containers"
         pattern:

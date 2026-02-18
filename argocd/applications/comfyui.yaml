@@ -70,6 +70,8 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - Force=true      # PVC spec is immutable — force delete+recreate
+      - Replace=true
     retry:
       limit: 5
       backoff:

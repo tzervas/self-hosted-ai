@@ -23,6 +23,37 @@ spec:
             - monitoring
           kinds:
             - Pod
+            - Job
+            - CronJob
+            - Deployment
+            - ReplicaSet
+---
+# Exception for Linkerd service mesh namespaces
+# Linkerd control plane and viz need elevated privileges for proxy injection
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: linkerd-exception
+  namespace: kyverno
+spec:
+  exceptions:
+    - policyName: pod-security-baseline
+      ruleNames:
+        - require-run-as-non-root
+        - disallow-privileged-containers
+        - require-resource-limits
+  match:
+    any:
+      - resources:
+          namespaces:
+            - linkerd
+            - linkerd-viz
+          kinds:
+            - Pod
+            - Job
+            - CronJob
+            - Deployment
+            - ReplicaSet
 ---
 # Exception for GPU workloads namespace
 # GPU pods require privileged access for NVIDIA drivers

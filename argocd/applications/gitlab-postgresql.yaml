@@ -9,10 +9,19 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      jsonPointers:
+        - /data
+    - group: apps
+      kind: StatefulSet
+      jqPathExpressions:
+        - .spec.volumeClaimTemplates[]?.metadata.creationTimestamp
   sources:
     - chart: postgresql
       repoURL: https://charts.bitnami.com/bitnami
-      targetRevision: "*"  # Use latest chart version
+      targetRevision: 18.4.0
       helm:
         valueFiles:
           - $values/argocd/helm/gitlab/postgresql-values.yaml
@@ -29,6 +38,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - RespectIgnoreDifferences=true
     retry:
       limit: 5
       backoff:
