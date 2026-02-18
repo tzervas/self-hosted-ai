@@ -29,9 +29,11 @@ config:
   ZO_TELEMETRY: "false"
   ZO_TELEMETRY_URL: ""
 
-  # Enable tracing search
-  ZO_TRACING_ENABLED: "true"
-  ZO_TRACING_SEARCH_ENABLED: "true"
+  # Tracing: OpenObserve's own internal tracing (not trace search UI)
+  # Trace search is handled by Grafana+Tempo — no need to duplicate here.
+  # ZO_TRACING_SEARCH_ENABLED requires a gRPC/HTTP URL or it panics.
+  ZO_TRACING_ENABLED: "false"
+  ZO_TRACING_SEARCH_ENABLED: "false"
 
   # Compact settings for homelab disk efficiency
   ZO_COMPACT_MAX_FILE_SIZE: "256"
