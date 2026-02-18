@@ -204,3 +204,7 @@ AI_USE_TECH_DEMO/
 .claude/*.local.*
 .claude/agent-memory-local/
 plans/
+
+# Scratch/working files
+creds
+gitlab-pvcs.yaml
