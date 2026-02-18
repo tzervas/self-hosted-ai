@@ -7,6 +7,11 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"  # After cert-manager is installed
 spec:
   project: default
+  ignoreDifferences:
+    - group: cert-manager.io
+      kind: ClusterIssuer
+      jsonPointers:
+        - /status
   source:
     repoURL: https://github.com/tzervas/self-hosted-ai.git
     targetRevision: main
@@ -20,6 +25,7 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
     retry:
       limit: 5
       backoff:

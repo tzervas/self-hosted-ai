@@ -118,10 +118,10 @@ metadata:
   namespace: linkerd
 spec:
   hard:
-    requests.cpu: "2"
-    requests.memory: 2Gi
-    limits.cpu: "4"
-    limits.memory: 4Gi
+    requests.cpu: "4"
+    requests.memory: 4Gi
+    limits.cpu: "8"
+    limits.memory: 8Gi
     pods: "15"
 ---
 # Linkerd Viz namespace
@@ -132,8 +132,8 @@ metadata:
   namespace: linkerd-viz
 spec:
   hard:
-    requests.cpu: "1"
-    requests.memory: 1Gi
-    limits.cpu: "2"
-    limits.memory: 2Gi
+    requests.cpu: "2"
+    requests.memory: 2Gi
+    limits.cpu: "4"
+    limits.memory: 4Gi
     pods: "10"

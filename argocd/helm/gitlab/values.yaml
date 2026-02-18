@@ -129,7 +129,7 @@ minio:
   persistence:
     enabled: true
     size: 5Gi
-    storageClass: longhorn
+    storageClass: longhorn-homelab
   resources:
     requests:
       cpu: 200m
@@ -208,6 +208,10 @@ nginx-ingress:
 # Prometheus monitoring
 prometheus:
   install: false  # Using external Prometheus
+
+# cert-manager - disable bundled (using cluster-wide cert-manager)
+certmanager:
+  install: false
 
 # Grafana monitoring
 grafana:

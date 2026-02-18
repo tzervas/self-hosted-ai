@@ -38,6 +38,7 @@ spec:
                 - monitoring
                 - linkerd
                 - linkerd-viz
+                - gitlab-runners
           # Temporarily exclude non-migrated ai-services apps (remove after ArgoCD sync)
           - resources:
               namespaces:
@@ -80,6 +81,7 @@ spec:
                 - traefik
                 - linkerd
                 - linkerd-viz
+                - gitlab-runners
           # Temporarily exclude non-migrated ai-services apps (remove after ArgoCD sync)
           - resources:
               namespaces:
@@ -119,6 +121,7 @@ spec:
                 - auth
                 - ai-services
                 - self-hosted-ai
+                - gpu-workloads
       validate:
         message: "Using ':latest' tag is not allowed. Pin image versions for reproducibility."
         pattern:
