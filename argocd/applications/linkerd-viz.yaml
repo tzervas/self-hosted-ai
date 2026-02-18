@@ -88,6 +88,18 @@ spec:
               request: 64Mi
               limit: 256Mi
 
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: tap-k8s-tls
+      jsonPointers:
+        - /data
+    - group: ""
+      kind: Secret
+      name: tap-injector-k8s-tls
+      jsonPointers:
+        - /data
+
   destination:
     server: https://kubernetes.default.svc
     namespace: linkerd-viz
@@ -98,6 +110,7 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
     retry:
       limit: 5
       backoff:
