@@ -15,10 +15,10 @@ spec:
       targetRevision: 0.145.0
       helm:
         valueFiles:
-          - values.yaml
+          - $values/argocd/helm/otel-collector/values.yaml
     - repoURL: https://github.com/tzervas/self-hosted-ai.git
       targetRevision: main
-      path: argocd/helm/otel-collector
+      ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
