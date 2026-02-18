@@ -7,6 +7,11 @@ metadata:
     argocd.argoproj.io/sync-wave: "0"  # Deploy early - database tier
 spec:
   project: default
+  ignoreDifferences:
+    - group: apps
+      kind: StatefulSet
+      jqPathExpressions:
+        - .spec.volumeClaimTemplates[]?.metadata.creationTimestamp
   source:
     repoURL: https://github.com/tzervas/self-hosted-ai.git
     targetRevision: main
@@ -20,3 +25,10 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

@@ -97,6 +97,16 @@ repos:
       - id: markdownlint
         args: [--fix, --disable, MD013, MD033, MD041, --]
 
+  # Helm template validation
+  - repo: local
+    hooks:
+      - id: helm-template
+        name: Helm template validation
+        entry: bash -c 'for chart in helm/*/Chart.yaml infrastructure/*/Chart.yaml; do dir=$(dirname "$chart"); helm template test "$dir" > /dev/null || exit 1; done'
+        language: system
+        files: '(helm|infrastructure)/.*\.(yaml|yml|tpl)$'
+        pass_filenames: false
+
   # Conventional commits
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v3.6.0

@@ -10,6 +10,7 @@ metadata:
   name: {{ .Values.storageClasses.homelab.name }}
   annotations:
     storageclass.kubernetes.io/is-default-class: "{{ .Values.storageClasses.homelab.isDefault }}"
+    argocd.argoproj.io/sync-options: Force=true,Replace=true
   labels:
     {{- include "longhorn-config.labels" . | nindent 4 }}
 parameters:
@@ -33,6 +34,7 @@ metadata:
   name: {{ .Values.storageClasses.gpuLocal.name }}
   annotations:
     storageclass.kubernetes.io/is-default-class: "{{ .Values.storageClasses.gpuLocal.isDefault }}"
+    argocd.argoproj.io/sync-options: Force=true,Replace=true
   labels:
     {{- include "longhorn-config.labels" . | nindent 4 }}
 parameters:
