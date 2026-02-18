@@ -210,10 +210,8 @@ prometheus:
   install: false  # Using external Prometheus
 
 # cert-manager - disable bundled (using cluster-wide cert-manager)
-# The gitlab chart uses 'condition: installCertmanager' (top-level), not certmanager.install
+# The gitlab chart uses 'condition: installCertmanager' (top-level)
 installCertmanager: false
-certmanager:
-  install: false
 
 # Grafana monitoring
 grafana:
