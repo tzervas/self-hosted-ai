@@ -18,7 +18,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://comfyui:8188/prompt",
+        "url": "http://comfyui-self-hosted-ai-gpu-worker-comfyui.gpu-workloads:8188/prompt",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ prompt: $json.body.workflow, client_id: $json.body.client_id || 'n8n-' + Date.now() }) }}",
@@ -45,7 +45,7 @@
     },
     {
       "parameters": {
-        "url": "=http://comfyui:8188/history/{{ $('Queue Prompt').item.json.prompt_id }}",
+        "url": "=http://comfyui-self-hosted-ai-gpu-worker-comfyui.gpu-workloads:8188/history/{{ $('Queue Prompt').item.json.prompt_id }}",
         "options": {}
       },
       "id": "check-status",

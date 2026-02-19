@@ -50,7 +50,7 @@ spec:
             storageClass: longhorn
           service:
             type: ClusterIP
-            port: 18188  # ai-dock image uses 18188 internally
+            port: 8188  # Caddy proxies external 8188 → internal 18188
           env:
             - name: NVIDIA_VISIBLE_DEVICES
               value: "all"

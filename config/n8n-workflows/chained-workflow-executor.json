@@ -56,7 +56,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://litellm:4000/v1/chat/completions",
+        "url": "http://litellm.ai-services:4000/v1/chat/completions",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -82,7 +82,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://comfyui:8188/prompt",
+        "url": "http://comfyui-self-hosted-ai-gpu-worker-comfyui.gpu-workloads:8188/prompt",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ prompt: { workflow: $json.current_step_config.workflow || 'txt2img-sdxl', positive_prompt: $json.current_step_config.prompt }, client_id: 'chain-image-' + Date.now() }) }}",
@@ -99,7 +99,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://comfyui:8188/prompt",
+        "url": "http://comfyui-self-hosted-ai-gpu-worker-comfyui.gpu-workloads:8188/prompt",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ prompt: { workflow: $json.current_step_config.workflow || 'text2video-wan', video_prompt: $json.current_step_config.prompt, frames: $json.current_step_config.frames || 24 }, client_id: 'chain-video-' + Date.now() }) }}",
@@ -116,7 +116,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $json.current_step_config.audio_type === 'tts' ? 'http://tts-server:5002/api/tts' : 'http://audio-server:5004/api/audioldm' }}",
+        "url": "={{ $json.current_step_config.audio_type === 'tts' ? 'http://tts-self-hosted-ai-gpu-worker-tts.gpu-workloads:5002/api/tts' : 'http://audio-server-self-hosted-ai-gpu-worker-audio.gpu-workloads:5004/api/audioldm' }}",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify($json.current_step_config.audio_type === 'tts' ? { text: $json.current_step_config.text, speaker_wav: $json.current_step_config.voice || 'en_speaker_0' } : { prompt: $json.current_step_config.prompt, duration: $json.current_step_config.duration || 5 }) }}",

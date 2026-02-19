@@ -28,7 +28,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://litellm:4000/v1/chat/completions",
+        "url": "http://litellm.ai-services:4000/v1/chat/completions",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -64,7 +64,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://comfyui:8188/prompt",
+        "url": "http://comfyui-self-hosted-ai-gpu-worker-comfyui.gpu-workloads:8188/prompt",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ prompt: { workflow: 'txt2img-sdxl', positive_prompt: $json.script.image_prompt, negative_prompt: 'blurry, low quality, distorted', width: 1024, height: 576, steps: 30 }, client_id: 'unified-image-' + Date.now() }) }}",
@@ -81,7 +81,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://tts-server:5002/api/tts",
+        "url": "http://tts-self-hosted-ai-gpu-worker-tts.gpu-workloads:5002/api/tts",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ text: $json.script.narration || 'No narration provided.', speaker_wav: 'en_speaker_0', language: 'en' }) }}",
@@ -98,7 +98,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://audio-server:5004/api/audioldm",
+        "url": "http://audio-server-self-hosted-ai-gpu-worker-audio.gpu-workloads:5004/api/audioldm",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ prompt: ($json.script.sfx_prompts || []).map(s => s.description).join(', '), duration: Math.min($json.duration, 10), num_inference_steps: 30 }) }}",
@@ -115,7 +115,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://audio-server:5004/api/musicgen",
+        "url": "http://audio-server-self-hosted-ai-gpu-worker-audio.gpu-workloads:5004/api/musicgen",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ prompt: $json.script.music_prompt || ($json.style + ' instrumental background music'), duration: $json.duration }) }}",
@@ -142,7 +142,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://comfyui:8188/prompt",
+        "url": "http://comfyui-self-hosted-ai-gpu-worker-comfyui.gpu-workloads:8188/prompt",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ prompt: { workflow: 'text2video-wan', source_image_prompt_id: $json.outputs.image_prompt_id, video_prompt: $json.script.video_prompt || $json.concept, frames: Math.min($json.duration * 8, 120), width: 512, height: 288 }, client_id: 'unified-video-' + Date.now() }) }}",

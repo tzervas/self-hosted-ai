@@ -46,7 +46,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://audio-server:5004/api/musicgen",
+        "url": "http://audio-server-self-hosted-ai-gpu-worker-audio.gpu-workloads:5004/api/musicgen",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ prompt: $json.prompt, duration: $json.duration, guidance_scale: $json.guidance_scale, model_id: 'facebook/musicgen-large' }) }}",
@@ -63,7 +63,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://audio-server:5004/api/audioldm",
+        "url": "http://audio-server-self-hosted-ai-gpu-worker-audio.gpu-workloads:5004/api/audioldm",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ prompt: $json.prompt, negative_prompt: $json.negative_prompt, duration: $json.duration, num_inference_steps: $json.num_inference_steps, guidance_scale: $json.guidance_scale }) }}",

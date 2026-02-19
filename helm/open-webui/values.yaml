@@ -44,6 +44,11 @@ env:
   TASK_MODEL: "llama3.1:8b"
   TITLE_GENERATION_PROMPT_TEMPLATE: "Create a concise, 3-5 word title for this chat. No quotes or punctuation. Title:"
   # ========================================
+  # Tools & Function Calling
+  # ========================================
+  # Enable native tool/function calling for compatible models
+  TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE: "Available Tools: {{TOOLS}}\nIf a tool is needed, respond with the JSON tool call. Otherwise respond normally."
+  # ========================================
   # RAG & Document Processing
   # ========================================
   RAG_EMBEDDING_ENGINE: "ollama"
@@ -75,9 +80,13 @@ env:
   # ========================================
   ENABLE_IMAGE_GENERATION: "true"
   IMAGE_GENERATION_ENGINE: "comfyui"
-  COMFYUI_BASE_URL: "http://comfyui-self-hosted-ai-gpu-worker-comfyui.gpu-workloads:18188"
+  COMFYUI_BASE_URL: "http://comfyui-self-hosted-ai-gpu-worker-comfyui.gpu-workloads:8188"
   IMAGE_SIZE: "1024x1024"
   IMAGE_STEPS: "30"
+  # ComfyUI SDXL workflow (API format) - node IDs map to Open WebUI controls
+  COMFYUI_WORKFLOW: '{"3":{"inputs":{"seed":0,"steps":25,"cfg":7.5,"sampler_name":"euler_ancestral","scheduler":"normal","denoise":1,"model":["4",0],"positive":["6",0],"negative":["7",0],"latent_image":["5",0]},"class_type":"KSampler"},"4":{"inputs":{"ckpt_name":"sd_xl_base_1.0.safetensors"},"class_type":"CheckpointLoaderSimple"},"5":{"inputs":{"width":1024,"height":1024,"batch_size":1},"class_type":"EmptyLatentImage"},"6":{"inputs":{"text":"Prompt","clip":["4",1]},"class_type":"CLIPTextEncode"},"7":{"inputs":{"text":"blurry, bad quality, distorted, ugly, deformed","clip":["4",1]},"class_type":"CLIPTextEncode"},"8":{"inputs":{"samples":["3",0],"vae":["4",2]},"class_type":"VAEDecode"},"9":{"inputs":{"filename_prefix":"OpenWebUI","images":["8",0]},"class_type":"SaveImage"}}'
+  # Node ID mapping: prompt→6, negative→7, seed/steps/cfg→3, width/height→5
+  COMFYUI_WORKFLOW_NODES: '{"positive_prompt":{"node_id":"6","field":"text"},"negative_prompt":{"node_id":"7","field":"text"},"seed":{"node_id":"3","field":"seed"},"steps":{"node_id":"3","field":"steps"},"cfg":{"node_id":"3","field":"cfg"},"width":{"node_id":"5","field":"width"},"height":{"node_id":"5","field":"height"}}'
   # ========================================
   # Community & Sharing
   # ========================================
