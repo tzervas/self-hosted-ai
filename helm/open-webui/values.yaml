@@ -75,7 +75,7 @@ env:
   # ========================================
   ENABLE_IMAGE_GENERATION: "true"
   IMAGE_GENERATION_ENGINE: "comfyui"
-  COMFYUI_BASE_URL: "http://comfyui.gpu-workloads:8188"
+  COMFYUI_BASE_URL: "http://comfyui-self-hosted-ai-gpu-worker-comfyui.gpu-workloads:18188"
   IMAGE_SIZE: "1024x1024"
   IMAGE_STEPS: "30"
   # ========================================

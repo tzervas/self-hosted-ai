@@ -39,7 +39,7 @@ spec:
           imagePullPolicy: {{ .Values.comfyui.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: 8188
+              containerPort: {{ .Values.comfyui.service.port | default 8188 }}
               protocol: TCP
           env:
             {{- range .Values.comfyui.env }}

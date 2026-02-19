@@ -50,12 +50,12 @@ spec:
             storageClass: longhorn
           service:
             type: ClusterIP
-            port: 8188
+            port: 18188  # ai-dock image uses 18188 internally
           env:
-            - name: CLI_ARGS
-              value: "--listen 0.0.0.0 --port 8188"
             - name: NVIDIA_VISIBLE_DEVICES
               value: "all"
+            - name: CF_QUICK_TUNNELS
+              value: "false"  # Disable Cloudflare tunnels (we use Traefik)
           nodeSelector:
             kubernetes.io/hostname: akula-prime
           tolerations:

@@ -28,6 +28,7 @@ spec:
               namespaces:
                 - kube-system
                 - kyverno
+                - gpu-operator
                 - gpu-workloads
                 - longhorn-system
                 - argocd
@@ -72,6 +73,7 @@ spec:
               namespaces:
                 - kube-system
                 - kyverno
+                - gpu-operator
                 - gpu-workloads
                 - longhorn-system
                 - gitlab
@@ -121,6 +123,7 @@ spec:
                 - auth
                 - ai-services
                 - self-hosted-ai
+                - gpu-operator
                 - gpu-workloads
       validate:
         message: "Using ':latest' tag is not allowed. Pin image versions for reproducibility."
@@ -149,6 +152,7 @@ spec:
                 - longhorn-system
                 - ai-services
                 - monitoring
+                - gpu-operator
                 - gpu-workloads
                 - linkerd
                 - linkerd-viz
