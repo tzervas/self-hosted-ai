@@ -2,12 +2,18 @@
 title: Video Generation Tool
 description: Generate videos using Wan 2.1 T2V via ComfyUI direct API. The LLM can call this tool when a user asks for video creation.
 author: self-hosted-ai
-version: 2.0.0
+version: 2.1.0
 """
 
 import json
+import logging
+import random
+import time
+
 import requests
 from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
 
 
 class Tools:
@@ -45,10 +51,14 @@ class Tools:
         :param seed: Random seed (-1 for random)
         :return: Status message with video generation details
         """
-        import random
-
         if seed == -1:
-            seed = random.randint(0, 2**32 - 1)
+            seed = random.randint(0, 2**31 - 1)
+
+        # Clamp values to hardware-safe limits
+        actual_width = min(width, 720)
+        actual_height = min(height, 480)
+        actual_frames = min(frames, 81)
+        actual_steps = min(steps, 40)
 
         # Build Wan 2.1 T2V 1.3B workflow
         workflow = {
@@ -80,9 +90,9 @@ class Tools:
             },
             "6": {
                 "inputs": {
-                    "width": min(width, 720),
-                    "height": min(height, 480),
-                    "length": min(frames, 81),
+                    "width": actual_width,
+                    "height": actual_height,
+                    "length": actual_frames,
                     "batch_size": 1,
                 },
                 "class_type": "EmptyWanLatentVideo",
@@ -90,7 +100,7 @@ class Tools:
             "7": {
                 "inputs": {
                     "seed": seed,
-                    "steps": min(steps, 40),
+                    "steps": actual_steps,
                     "cfg": 6.0,
                     "sampler_name": "uni_pc_bh2",
                     "scheduler": "normal",
@@ -119,21 +129,22 @@ class Tools:
             response = requests.post(
                 f"{self.valves.comfyui_base_url}/prompt",
                 json={"prompt": workflow, "client_id": f"owui-vid-{seed}"},
-                timeout=30,
+                timeout=self.valves.timeout,
             )
             response.raise_for_status()
             result = response.json()
             prompt_id = result.get("prompt_id", "unknown")
 
             # Poll for completion (video takes longer than images)
-            import time
+            poll_timeout = min(self.valves.timeout, 300)
+            max_polls = poll_timeout // 2
 
-            for _ in range(150):  # up to 5 minutes
+            for _ in range(max_polls):
                 time.sleep(2)
                 try:
                     hist = requests.get(
                         f"{self.valves.comfyui_base_url}/history/{prompt_id}",
-                        timeout=10,
+                        timeout=self.valves.timeout,
                     ).json()
                     if prompt_id in hist:
                         outputs = hist[prompt_id].get("outputs", {})
@@ -143,16 +154,16 @@ class Tools:
                                 return (
                                     f"Video generated successfully with Wan 2.1!\n"
                                     f"Prompt: '{prompt}'\n"
-                                    f"Frames: {len(imgs)}, Resolution: {width}x{height}, "
-                                    f"Steps: {steps}, Seed: {seed}\n"
+                                    f"Frames: {len(imgs)}, Resolution: {actual_width}x{actual_height}, "
+                                    f"Steps: {actual_steps}, Seed: {seed}\n"
                                     f"Output: {imgs[0]['filename']}"
                                 )
-                except Exception:
-                    pass
+                except (requests.exceptions.RequestException, ValueError, KeyError) as exc:
+                    logger.warning("Transient error polling video status: %s", exc)
 
             return (
                 f"Video queued (prompt_id: {prompt_id}). "
-                f"Generating '{prompt}' with {frames} frames at {width}x{height}. "
+                f"Generating '{prompt}' with {actual_frames} frames at {actual_width}x{actual_height}. "
                 f"This may take several minutes. Check ComfyUI output for results."
             )
 
