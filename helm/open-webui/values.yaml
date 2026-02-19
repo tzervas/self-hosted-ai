@@ -58,6 +58,8 @@ env:
   ENABLE_LOGIN_FORM: "true"
   # Merge accounts by email (existing admin stays admin)
   OAUTH_MERGE_ACCOUNTS_BY_EMAIL: "true"
+  # Auto-approve new SSO users (no admin approval needed)
+  DEFAULT_USER_ROLE: "user"
 
 # Secret references
 secretEnv:
