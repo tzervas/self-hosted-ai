@@ -62,7 +62,7 @@ comfyui:
   image:
     repository: ghcr.io/tzervas/comfyui-blackwell
     tag: latest
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
   service:
     type: ClusterIP
     port: 8188  # Direct ComfyUI listener (no proxy)

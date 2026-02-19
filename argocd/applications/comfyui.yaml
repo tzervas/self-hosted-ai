@@ -43,7 +43,7 @@ spec:
           image:
             repository: ghcr.io/tzervas/comfyui-blackwell
             tag: latest
-            pullPolicy: Always
+            pullPolicy: IfNotPresent
           persistence:
             enabled: true
             size: 50Gi
