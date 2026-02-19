@@ -33,7 +33,10 @@ spec:
       valuesObject:
         # GitLab instance connection
         gitlabUrl: "https://git.vectorweight.com"
-        
+
+        # Trust custom CA for git.vectorweight.com (self-signed root CA)
+        certsSecretName: gitlab-runner-certs
+
         # Runner configuration
         concurrent: 4  # Max concurrent jobs per runner
         checkInterval: 10  # Check for new jobs every 10s
