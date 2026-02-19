@@ -10,7 +10,7 @@ metadata:
 data:
   extra_model_paths.yaml: |
     persistent_models:
-        base_path: /comfyui/models/
+        base_path: /models/
         checkpoints: checkpoints/
         clip: clip/
         clip_vision: clip_vision/
