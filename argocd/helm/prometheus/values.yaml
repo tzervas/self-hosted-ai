@@ -144,6 +144,7 @@ grafana:
       enabled: true
       name: Keycloak
       allow_sign_up: true
+      auto_login: true
       client_id: grafana
       client_secret: ${GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}
       scopes: openid email profile
