@@ -55,25 +55,19 @@ ollama:
         memory: "32Gi"
         cpu: "8000m"
 
-# ComfyUI configuration (ai-dock image with Caddy reverse proxy)
+# ComfyUI configuration (custom Blackwell image with PyTorch 2.7+cu128)
 # Enabled via ArgoCD app override; uses GPU time-slicing alongside ollama-gpu
 comfyui:
   enabled: false
   image:
-    repository: ghcr.io/ai-dock/comfyui
+    repository: ghcr.io/tzervas/comfyui-blackwell
     tag: latest
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   service:
     type: ClusterIP
-    port: 8188  # Caddy proxies 8188 (external) → 18188 (internal ComfyUI)
+    port: 8188  # Direct ComfyUI listener (no proxy)
     annotations: {}
-  env:
-    - name: NVIDIA_VISIBLE_DEVICES
-      value: "all"
-    - name: WEB_ENABLE_AUTH
-      value: "false"
-    - name: CF_QUICK_TUNNELS
-      value: "false"
+  env: []
   persistence:
     enabled: true
     size: 50Gi

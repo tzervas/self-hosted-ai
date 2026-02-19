@@ -40,17 +40,18 @@ spec:
           args:
             - |
               # CLIPLoader only scans clip/ dir, so symlink text_encoders into it
-              mkdir -p /comfyui/models/clip /comfyui/models/checkpoints \
-                       /comfyui/models/diffusion_models /comfyui/models/vae \
-                       /comfyui/models/text_encoders /comfyui/models/loras \
-                       /comfyui/models/controlnet /comfyui/models/embeddings
-              for f in /comfyui/models/text_encoders/*.safetensors; do
-                [ -f "$f" ] && ln -sf "$f" "/comfyui/models/clip/$(basename $f)" 2>/dev/null || true
+              mkdir -p /models/clip /models/checkpoints \
+                       /models/diffusion_models /models/vae \
+                       /models/text_encoders /models/loras \
+                       /models/controlnet /models/embeddings \
+                       /models/unet /models/upscale_models
+              for f in /models/text_encoders/*.safetensors; do
+                [ -f "$f" ] && ln -sf "$f" "/models/clip/$(basename $f)" 2>/dev/null || true
               done
               echo "Model symlinks created"
           volumeMounts:
             - name: models
-              mountPath: /comfyui/models
+              mountPath: /models
       containers:
         - name: comfyui
           image: "{{ .Values.comfyui.image.repository }}:{{ .Values.comfyui.image.tag }}"
@@ -59,32 +60,36 @@ spec:
             - name: http
               containerPort: 8188
               protocol: TCP
+          {{- if .Values.comfyui.env }}
           env:
             {{- range .Values.comfyui.env }}
             - name: {{ .name }}
               value: {{ .value | quote }}
             {{- end }}
+          {{- end }}
           volumeMounts:
             - name: models
-              mountPath: /comfyui/models
+              mountPath: /models
             - name: outputs
-              mountPath: /comfyui/output
+              mountPath: /app/output
             - name: extra-model-paths
-              mountPath: /opt/ComfyUI/extra_model_paths.yaml
+              mountPath: /app/extra_model_paths.yaml
               subPath: extra_model_paths.yaml
               readOnly: true
           livenessProbe:
             httpGet:
-              path: /
+              path: /system_stats
               port: http
-            initialDelaySeconds: 60
+            initialDelaySeconds: 120
             periodSeconds: 60
+            timeoutSeconds: 10
           readinessProbe:
             httpGet:
-              path: /
+              path: /system_stats
               port: http
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 30
+            timeoutSeconds: 10
           resources:
             {{- toYaml .Values.comfyui.resources | nindent 12 }}
       volumes:

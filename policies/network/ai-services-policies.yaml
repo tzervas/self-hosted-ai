@@ -131,6 +131,75 @@ spec:
         - protocol: TCP
           port: 443
 ---
+# Allow egress to automation namespace (n8n workflows for agentic tools)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-automation-egress
+  namespace: ai-services
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - open-webui
+          - litellm
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: automation
+      ports:
+        - protocol: TCP
+          port: 5678  # n8n
+---
+# Allow egress to auth namespace (Keycloak OIDC for SSO)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-keycloak-egress
+  namespace: ai-services
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: auth
+      ports:
+        - protocol: TCP
+          port: 8080  # Keycloak
+---
+# Allow Open WebUI external egress (for web_fetch tool, OpenAI-compatible APIs)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-open-webui-external-egress
+  namespace: ai-services
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: open-webui
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+---
 # Allow egress to gpu-workloads namespace (Ollama GPU, ComfyUI, audio, video)
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -161,3 +230,28 @@ spec:
           port: 5004   # Audio server
         - protocol: TCP
           port: 5005   # Video server
+---
+# Allow SearXNG external egress (search engines require HTTPS)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-searxng-external-egress
+  namespace: ai-services
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: searxng
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80

@@ -41,23 +41,17 @@ spec:
         comfyui:
           enabled: true
           image:
-            repository: ghcr.io/ai-dock/comfyui
+            repository: ghcr.io/tzervas/comfyui-blackwell
             tag: latest
-            pullPolicy: IfNotPresent
+            pullPolicy: Always
           persistence:
             enabled: true
             size: 50Gi
             storageClass: longhorn
           service:
             type: ClusterIP
-            port: 8188  # Caddy proxies external 8188 → internal 18188
-          env:
-            - name: NVIDIA_VISIBLE_DEVICES
-              value: "all"
-            - name: CF_QUICK_TUNNELS
-              value: "false"  # Disable Cloudflare tunnels (we use Traefik)
-            - name: WEB_ENABLE_AUTH
-              value: "false"  # Disable Caddy auth (behind K8s NetworkPolicies)
+            port: 8188  # Direct ComfyUI (no proxy layer)
+          env: []  # No ai-dock env vars needed; official image is clean
           nodeSelector:
             kubernetes.io/hostname: akula-prime
           tolerations:
