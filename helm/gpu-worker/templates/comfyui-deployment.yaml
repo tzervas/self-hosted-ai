@@ -33,6 +33,24 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      initContainers:
+        - name: setup-model-symlinks
+          image: busybox:1.36
+          command: ['sh', '-c']
+          args:
+            - |
+              # CLIPLoader only scans clip/ dir, so symlink text_encoders into it
+              mkdir -p /comfyui/models/clip /comfyui/models/checkpoints \
+                       /comfyui/models/diffusion_models /comfyui/models/vae \
+                       /comfyui/models/text_encoders /comfyui/models/loras \
+                       /comfyui/models/controlnet /comfyui/models/embeddings
+              for f in /comfyui/models/text_encoders/*.safetensors; do
+                [ -f "$f" ] && ln -sf "$f" "/comfyui/models/clip/$(basename $f)" 2>/dev/null || true
+              done
+              echo "Model symlinks created"
+          volumeMounts:
+            - name: models
+              mountPath: /comfyui/models
       containers:
         - name: comfyui
           image: "{{ .Values.comfyui.image.repository }}:{{ .Values.comfyui.image.tag }}"
