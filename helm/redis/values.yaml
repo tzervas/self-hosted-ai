@@ -21,6 +21,11 @@ securityContext:
   runAsNonRoot: true
   fsGroupChangePolicy: "OnRootMismatch"
 
+# Redis extra flags (memory management)
+# allkeys-lru: Evict least recently used keys when maxmemory is reached
+# Prevents OOM crashes and ensures Redis stays within memory limits
+extraFlags: "--maxmemory 768mb --maxmemory-policy allkeys-lru --save 60 1000 --save 300 100"
+
 persistence:
   enabled: true
   size: 8Gi

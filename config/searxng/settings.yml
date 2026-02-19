@@ -170,6 +170,27 @@ engines:
     disabled: false
     shortcut: rs
 
+  # Documentation sites (developer-focused)
+  - name: docs.rs
+    engine: xpath
+    search_url: https://docs.rs/releases/search?query={query}
+    url_xpath: //a[contains(@class, "release")]/@href
+    title_xpath: //a[contains(@class, "release")]//div[contains(@class, "name")]/text()
+    content_xpath: //a[contains(@class, "release")]//div[contains(@class, "description")]/text()
+    categories: [it, packages]
+    shortcut: drs
+    disabled: false
+
+  - name: mdn
+    engine: xpath
+    search_url: https://developer.mozilla.org/en-US/search?q={query}
+    url_xpath: //div[contains(@class, "result")]//a/@href
+    title_xpath: //div[contains(@class, "result")]//a//mark/text()
+    content_xpath: //div[contains(@class, "result")]//p/text()
+    categories: [it]
+    shortcut: mdn
+    disabled: false
+
 # Outgoing request settings
 outgoing:
   request_timeout: 8.0

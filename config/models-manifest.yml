@@ -1,278 +1,111 @@
 # Model Manifest for Self-Hosted AI Stack
-# Comprehensive production-ready multi-modal AI setup
+# Tracks deployed models across GPU and CPU Ollama instances
 # Used by bootstrap.sh to ensure required models are available
-# Models are checked against Ollama API before pulling (no re-downloads)
 #
-# Model Sources:
-#   - Ollama: Censored/standard models from Ollama library
-#   - HuggingFace: Uncensored models requiring HF_TOKEN authentication
+# Last verified: 2026-02-18
 #
 # RTX 5080 VRAM Budget: 16GB
 #   - Keep loaded models under 14GB for comfortable inference
-#   - Larger models will be quantized (Q4/Q5) before deployment
+#   - Models swap in/out of VRAM automatically (OLLAMA_KEEP_ALIVE: 24h)
 
-# GPU Worker Models (akula-prime)
-# Optimized for RTX 5080 16GB VRAM - Multi-modal capabilities
+# GPU Worker Models (akula-prime, RTX 5080 16GB)
 gpu_worker:
-  host: ${GPU_WORKER_HOST:-192.168.1.99}
+  host: ${GPU_WORKER_HOST:-ollama-gpu.gpu-workloads}
   port: ${GPU_WORKER_PORT:-11434}
   models:
     # === CODE GENERATION ===
-    # Primary coding model - excellent for Rust, Python, Shell, multi-language
     - name: qwen2.5-coder:14b
-      size: 8GB
+      size: 9.0GB
       purpose: coding
       priority: required
-      capabilities: [code_generation, code_review, refactoring, debugging]
-
-    # Advanced coding with reasoning - complex problem solving
-    - name: deepseek-coder-v2:16b
-      size: 8GB
-      purpose: coding
-      priority: required
-      capabilities: [code_generation, architecture, optimization]
-
-    # Specialized code model - alternative for variety
-    - name: codellama:13b
-      size: 7GB
-      purpose: coding
-      priority: optional
-      capabilities: [code_completion, code_explanation]
+      status: deployed
+      capabilities: [code_generation, code_review, refactoring, debugging, function_calling]
 
     # === REASONING & PROBLEM SOLVING ===
-    # Advanced reasoning for research and analysis
     - name: phi4:latest
-      size: 8GB
+      size: 9.1GB
       purpose: reasoning
       priority: required
-      capabilities: [logical_reasoning, mathematics, analysis]
+      status: deployed
+      capabilities: [logical_reasoning, mathematics, analysis, function_calling]
 
-    # General reasoning and instruction following
+    # Fast general-purpose model
     - name: llama3.1:8b
-      size: 4.7GB
-      purpose: reasoning
+      size: 4.9GB
+      purpose: general
       priority: required
-      capabilities: [instruction_following, reasoning, chat]
+      status: deployed
+      capabilities: [instruction_following, reasoning, chat, function_calling]
 
     # === VISION & MULTI-MODAL ===
-    # Vision language model - image understanding and analysis
     - name: llava:13b
-      size: 8GB
+      size: 8.0GB
       purpose: vision
       priority: required
+      status: deployed
       capabilities: [image_understanding, ocr, visual_reasoning, image_description]
 
-    # Advanced vision model for detailed analysis
-    - name: bakllava:latest
-      size: 4.7GB
-      purpose: vision
-      priority: optional
-      capabilities: [image_analysis, visual_qa, scene_understanding]
-
-    # === FUNCTION CALLING & TOOL USE ===
-    # Function calling specialist
-    - name: mistral:7b-instruct-v0.3
-      size: 4.1GB
-      purpose: function_calling
-      priority: required
-      capabilities: [function_calling, tool_use, api_integration, json_mode]
-
-    # Advanced tool use with large context
-    - name: llama3.1:70b-instruct-q4_0
-      size: 40GB
-      purpose: function_calling
-      priority: optional
-      capabilities: [function_calling, tool_use, complex_reasoning, large_context]
-
-# CPU Server Models (homelab)
-# Optimized for 120GB RAM - Embeddings, fallback, and specialized tasks
-cpu_server:
-  host: ${CPU_SERVER_HOST:-192.168.1.170}
-  port: ${CPU_SERVER_PORT:-11434}
-  models:
-    # === GENERAL PURPOSE ===
-    # Fast general chat and fallback
-    - name: mistral:7b
-      size: 4GB
-      purpose: chat
-      priority: required
-      capabilities: [chat, general_qa, summarization]
-
-    # Lightweight fast model for simple tasks
-    - name: phi3:latest
-      size: 2GB
-      purpose: chat
-      priority: required
-      capabilities: [chat, quick_responses, simple_tasks]
-
-    # Small efficient model for testing
-    - name: gemma2:2b
-      size: 1.6GB
-      purpose: chat
-      priority: optional
-      capabilities: [chat, fast_inference]
-
-    # === EMBEDDINGS & RAG ===
-    # Primary embedding model - semantic search
+    # === EMBEDDINGS ===
     - name: nomic-embed-text:latest
       size: 274MB
       purpose: embeddings
       priority: required
+      status: deployed
+      capabilities: [text_embeddings, semantic_search, rag]
+
+# CPU Server Models (homelab)
+# Fallback models when GPU is busy, plus dedicated embedding
+cpu_server:
+  host: ${CPU_SERVER_HOST:-ollama.ai-services}
+  port: ${CPU_SERVER_PORT:-11434}
+  models:
+    # General chat fallback
+    - name: mistral:7b
+      size: 4.4GB
+      purpose: chat
+      priority: required
+      status: deployed
+      capabilities: [chat, general_qa, summarization]
+
+    # Primary embedding model (runs on CPU to avoid GPU contention)
+    - name: nomic-embed-text:latest
+      size: 274MB
+      purpose: embeddings
+      priority: required
+      status: deployed
       capabilities: [text_embeddings, semantic_search, rag, document_retrieval]
 
-    # Advanced embeddings - better quality
-    - name: mxbai-embed-large:latest
-      size: 669MB
-      purpose: embeddings
-      priority: required
-      capabilities: [text_embeddings, semantic_search, high_quality]
-
-    # Specialized embeddings for code
-    - name: nomic-embed-text:137m-v1.5-q8_0
-      size: 137MB
-      purpose: embeddings
-      priority: optional
-      capabilities: [code_embeddings, fast_embeddings]
-
-    # === SPECIALIZED TASKS ===
-    # SQL generation and database queries
-    - name: sqlcoder:15b
-      size: 8.5GB
-      purpose: sql
-      priority: optional
-      capabilities: [sql_generation, database_queries, data_analysis]
-
-    # Document analysis and extraction
-    - name: llama3.1:8b-instruct-q8_0
-      size: 8.5GB
-      purpose: documents
-      priority: optional
-      capabilities: [document_analysis, information_extraction, summarization]
-
-    # Math and scientific computing
-    - name: deepseek-math:7b
-      size: 4.1GB
-      purpose: mathematics
-      priority: optional
-      capabilities: [mathematical_reasoning, symbolic_math, problem_solving]
-
-    # Long context processing (128k tokens)
-    - name: qwen2.5:7b
-      size: 4.7GB
-      purpose: long_context
-      priority: optional
-      capabilities: [long_context, document_processing, analysis]
+# =============================================================================
+# Future Models (not yet deployed)
+# =============================================================================
+# These models are planned but not currently pulled. Add them to the
+# appropriate section above and run `ollama pull` when ready.
+#
+# GPU candidates:
+#   - deepseek-coder-v2:16b (coding, 8GB) - excellent for code generation
+#   - codellama:13b (coding, 7GB) - fast code completion
+#   - mistral:7b-instruct-v0.3 (function_calling, 4.1GB) - tool use specialist
+#
+# CPU candidates:
+#   - phi3:latest (chat, 2GB) - lightweight fast model
+#   - gemma2:2b (chat, 1.6GB) - smallest model for testing
+#   - mxbai-embed-large:latest (embeddings, 669MB) - higher quality embeddings
+#   - sqlcoder:15b (sql, 8.5GB) - SQL generation specialist
+#
+# HuggingFace models (require HF_TOKEN):
+#   - See archive/models-manifest-full.yml for the complete list of
+#     uncensored, TTS, audio, and video models planned for future phases
 
 # =============================================================================
-# HuggingFace Models - Uncensored & Specialized
-# =============================================================================
-# These models require HF_TOKEN authentication for download
-# Source: HuggingFace Hub (not Ollama library)
-# Storage: /data/models/huggingface on GPU worker
-
-huggingface:
-  # Token stored in sealed secret: huggingface-token
-  token_secret: huggingface-token
-  cache_dir: /data/models/huggingface
-  models:
-    # === UNCENSORED TEXT GENERATION ===
-    # Primary uncensored model - Wan2.5 14B (may need Q4 quant for 14GB VRAM)
-    - repo_id: cognitivecomputations/Wan2.5-14B-Instruct-Uncensored
-      name: wan2.5-14b-uncensored
-      size_gb: 28
-      quantization: Q4_K_M  # Reduces to ~8GB for comfortable VRAM fit
-      purpose: uncensored_chat
-      priority: required
-      capabilities: [uncensored_generation, creative_writing, roleplay, unrestricted]
-      notes: "Will be quantized to Q4_K_M before deployment if full precision doesn't fit"
-
-    # Smaller uncensored model - Wan2.5 7B for faster inference
-    - repo_id: cognitivecomputations/Wan2.5-7B-Instruct-Uncensored
-      name: wan2.5-7b-uncensored
-      size_gb: 14
-      quantization: Q5_K_M  # Good quality/size balance
-      purpose: uncensored_chat
-      priority: required
-      capabilities: [uncensored_generation, creative_writing, fast_inference]
-      notes: "Lighter weight option for quick uncensored responses"
-
-    # Alternative uncensored - Dolphin (based on Mistral)
-    - repo_id: cognitivecomputations/dolphin-2.9.3-mistral-7B-32k
-      name: dolphin-mistral-7b
-      size_gb: 14
-      quantization: Q5_K_M
-      purpose: uncensored_chat
-      priority: optional
-      capabilities: [uncensored_generation, long_context, instruction_following]
-
-    # === VOICE GENERATION (TTS) ===
-    # XTTS v2 - High quality multilingual text-to-speech
-    - repo_id: coqui/XTTS-v2
-      name: xtts-v2
-      size_gb: 1.8
-      purpose: voice_generation
-      priority: required
-      capabilities: [text_to_speech, voice_cloning, multilingual, emotional_speech]
-      notes: "Uncensored TTS - no content filtering on generated speech"
-
-    # Bark - Alternative TTS with more expressive output
-    - repo_id: suno/bark
-      name: bark
-      size_gb: 5
-      purpose: voice_generation
-      priority: optional
-      capabilities: [text_to_speech, music_generation, sound_effects, expressive]
-      notes: "Can generate non-speech sounds like laughter, sighing, music"
-
-    # === SOUND EFFECTS (SFX) GENERATION ===
-    # AudioLDM 2 - Text-to-audio generation
-    - repo_id: cvssp/audioldm2-large
-      name: audioldm2-large
-      size_gb: 3.5
-      purpose: sfx_generation
-      priority: required
-      capabilities: [text_to_audio, sound_effects, ambient_sounds, music_generation]
-      notes: "Generate any audio from text descriptions"
-
-    # AudioGen - Meta's audio generation model
-    - repo_id: facebook/audiogen-medium
-      name: audiogen-medium
-      size_gb: 1.5
-      purpose: sfx_generation
-      priority: optional
-      capabilities: [text_to_audio, sound_effects, environmental_sounds]
-
-    # === MUSIC GENERATION ===
-    # MusicGen - High quality music generation
-    - repo_id: facebook/musicgen-large
-      name: musicgen-large
-      size_gb: 3.3
-      purpose: music_generation
-      priority: optional
-      capabilities: [text_to_music, melody_continuation, style_transfer]
-      notes: "Uncensored music generation - any genre/style"
-
-# =============================================================================
-# ComfyUI Models - Image/Video Generation
+# ComfyUI Models (Image/Video Generation)
 # =============================================================================
 # Downloaded directly to ComfyUI model directories on GPU worker
+# ComfyUI is currently scaled to 0 (GPU shared with Ollama)
 
 comfyui:
   base_path: /data/comfyui/models
+  status: disabled  # Scaled to 0, enable when GPU time-slicing is configured
   models:
-    # === VIDEO GENERATION ===
-    # Wan Video - Text/Image to video
-    - type: checkpoint
-      name: wan_video_1.3b.safetensors
-      url: https://huggingface.co/Wan-AI/Wan-1.3B/resolve/main/wan_video_1.3b.safetensors
-      path: checkpoints/
-      size_gb: 2.6
-      purpose: video_generation
-      priority: required
-      capabilities: [text_to_video, image_to_video]
-
-    # === IMAGE GENERATION ===
-    # SDXL Base - Primary image generation
     - type: checkpoint
       name: sd_xl_base_1.0.safetensors
       url: https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors
@@ -281,17 +114,6 @@ comfyui:
       purpose: image_generation
       priority: required
 
-    # FLUX.1 Schnell - Fast high quality generation
-    - type: unet
-      name: flux1-schnell.safetensors
-      url: https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/flux1-schnell.safetensors
-      path: unet/
-      size_gb: 23
-      purpose: image_generation
-      priority: optional
-      notes: "Requires offloading for 16GB VRAM"
-
-    # === UPSCALERS ===
     - type: upscale_models
       name: RealESRGAN_x4plus.pth
       url: https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
@@ -300,7 +122,6 @@ comfyui:
       purpose: upscaling
       priority: required
 
-    # === VAE ===
     - type: vae
       name: sdxl_vae.safetensors
       url: https://huggingface.co/stabilityai/sdxl-vae/resolve/main/sdxl_vae.safetensors
@@ -308,12 +129,3 @@ comfyui:
       size_gb: 0.335
       purpose: vae
       priority: required
-
-    # === CONTROLNET ===
-    - type: controlnet
-      name: control_v11p_sd15_canny.pth
-      url: https://huggingface.co/lllyasviel/ControlNet-v1-1/resolve/main/control_v11p_sd15_canny.pth
-      path: controlnet/
-      size_gb: 1.4
-      purpose: controlnet
-      priority: optional
