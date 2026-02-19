@@ -28,7 +28,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://litellm:4000/v1/chat/completions",
+        "url": "http://litellm.ai-services:4000/v1/chat/completions",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -128,7 +128,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://comfyui:8188/prompt",
+        "url": "http://comfyui-self-hosted-ai-gpu-worker-comfyui.gpu-workloads:8188/prompt",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ prompt: { workflow: 'txt2img-sdxl', positive_prompt: $json.current_input } }) }}",
@@ -145,7 +145,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://litellm:4000/v1/chat/completions",
+        "url": "http://litellm.ai-services:4000/v1/chat/completions",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [

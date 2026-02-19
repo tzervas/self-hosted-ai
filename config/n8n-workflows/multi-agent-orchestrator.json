@@ -56,7 +56,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://litellm:4000/v1/chat/completions",
+        "url": "http://litellm.ai-services:4000/v1/chat/completions",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [

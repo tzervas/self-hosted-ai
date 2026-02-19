@@ -18,7 +18,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://ollama-gpu:11434/api/chat",
+        "url": "http://ollama-gpu.gpu-workloads:11434/api/chat",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ model: $json.body.model || 'qwen2.5-coder:14b', messages: $json.body.messages, stream: false }) }}",

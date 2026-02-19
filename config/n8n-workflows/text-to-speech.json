@@ -46,7 +46,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://tts-server:5002/api/tts",
+        "url": "http://tts-self-hosted-ai-gpu-worker-tts.gpu-workloads:5002/api/tts",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ text: $json.text, speaker_wav: $json.voice, language: $json.language, speed: $json.speed }) }}",
@@ -68,7 +68,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://bark-server:5003/api/generate",
+        "url": "http://tts-self-hosted-ai-gpu-worker-tts.gpu-workloads:5003/api/generate",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ text: $json.text, voice_preset: $json.voice, text_temp: 0.7, waveform_temp: 0.7 }) }}",

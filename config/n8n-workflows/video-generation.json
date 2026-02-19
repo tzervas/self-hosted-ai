@@ -28,7 +28,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://comfyui:8188/prompt",
+        "url": "http://comfyui-self-hosted-ai-gpu-worker-comfyui.gpu-workloads:8188/prompt",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ prompt: { '3': { class_type: 'CLIPTextEncode', inputs: { text: $json.prompt, clip: ['4', 0] } }, '4': { class_type: 'CheckpointLoaderSimple', inputs: { ckpt_name: $json.model === 'svd' ? 'svd_xt_1_1.safetensors' : 'wan_1.3B_exp_e9.safetensors' } }, '5': { class_type: 'EmptyLatentImage', inputs: { width: $json.width, height: $json.height, batch_size: $json.frames } }, '6': { class_type: 'KSampler', inputs: { seed: Math.floor(Math.random() * 1000000), steps: 20, cfg: $json.guidance_scale, sampler_name: 'euler_ancestral', scheduler: 'normal', denoise: 1, model: ['4', 0], positive: ['3', 0], negative: ['7', 0], latent_image: ['5', 0] } }, '7': { class_type: 'CLIPTextEncode', inputs: { text: $json.negative_prompt, clip: ['4', 0] } }, '8': { class_type: 'VAEDecode', inputs: { samples: ['6', 0], vae: ['4', 2] } }, '9': { class_type: 'VHS_VideoCombine', inputs: { images: ['8', 0], frame_rate: $json.fps, loop_count: 0, filename_prefix: 'video_' + $json.request_id, format: 'video/h264-mp4', save_output: true } } }, client_id: 'n8n-video-' + Date.now() }) }}",
@@ -55,7 +55,7 @@
     },
     {
       "parameters": {
-        "url": "=http://comfyui:8188/history/{{ $('Queue ComfyUI').item.json.prompt_id }}",
+        "url": "=http://comfyui-self-hosted-ai-gpu-worker-comfyui.gpu-workloads:8188/history/{{ $('Queue ComfyUI').item.json.prompt_id }}",
         "options": {}
       },
       "id": "check-status",
@@ -95,7 +95,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Extract video output info\nconst input = $input.first();\nconst request = $('Prepare Video Request').first().json;\nconst history = Object.values(input.json)[0];\n\nlet videoUrl = null;\nlet outputs = [];\n\nif (history && history.outputs) {\n  for (const [nodeId, output] of Object.entries(history.outputs)) {\n    if (output.gifs || output.videos) {\n      const files = output.gifs || output.videos;\n      for (const file of files) {\n        outputs.push({\n          filename: file.filename,\n          subfolder: file.subfolder || '',\n          type: file.type || 'output'\n        });\n        videoUrl = `http://comfyui:8188/view?filename=${file.filename}&subfolder=${file.subfolder || ''}&type=${file.type || 'output'}`;\n      }\n    }\n  }\n}\n\nreturn {\n  json: {\n    success: true,\n    request_id: request.request_id,\n    model: request.model,\n    prompt: request.prompt,\n    frames: request.frames,\n    fps: request.fps,\n    resolution: `${request.width}x${request.height}`,\n    video_url: videoUrl,\n    outputs: outputs,\n    status: 'completed'\n  }\n};"
+        "jsCode": "// Extract video output info\nconst input = $input.first();\nconst request = $('Prepare Video Request').first().json;\nconst history = Object.values(input.json)[0];\n\nlet videoUrl = null;\nlet outputs = [];\n\nif (history && history.outputs) {\n  for (const [nodeId, output] of Object.entries(history.outputs)) {\n    if (output.gifs || output.videos) {\n      const files = output.gifs || output.videos;\n      for (const file of files) {\n        outputs.push({\n          filename: file.filename,\n          subfolder: file.subfolder || '',\n          type: file.type || 'output'\n        });\n        videoUrl = `http://comfyui-self-hosted-ai-gpu-worker-comfyui.gpu-workloads:8188/view?filename=${file.filename}&subfolder=${file.subfolder || ''}&type=${file.type || 'output'}`;\n      }\n    }\n  }\n}\n\nreturn {\n  json: {\n    success: true,\n    request_id: request.request_id,\n    model: request.model,\n    prompt: request.prompt,\n    frames: request.frames,\n    fps: request.fps,\n    resolution: `${request.width}x${request.height}`,\n    video_url: videoUrl,\n    outputs: outputs,\n    status: 'completed'\n  }\n};"
       },
       "id": "extract-result",
       "name": "Extract Result",
