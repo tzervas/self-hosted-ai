@@ -12,13 +12,13 @@ from pydantic import BaseModel, Field
 
 class Tools:
     class Valves(BaseModel):
-        n8n_webhook_url: str = Field(
-            default="http://n8n.automation:5678/webhook/generate-image",
-            description="n8n webhook URL for image generation",
-        )
         comfyui_base_url: str = Field(
             default="http://comfyui-self-hosted-ai-gpu-worker-comfyui.gpu-workloads:8188",
-            description="ComfyUI API base URL for retrieving images",
+            description="ComfyUI API base URL",
+        )
+        n8n_webhook_url: str = Field(
+            default="http://n8n.automation:5678/webhook/generate-image",
+            description="n8n webhook URL (fallback)",
         )
         default_steps: int = Field(default=25, description="Default sampling steps")
         default_cfg: float = Field(default=7.5, description="Default CFG scale")
@@ -101,32 +101,51 @@ class Tools:
         }
 
         try:
-            # Submit to ComfyUI via n8n webhook
+            # Submit directly to ComfyUI API
             response = requests.post(
-                self.valves.n8n_webhook_url,
-                json={"workflow": workflow, "client_id": f"owui-{seed}"},
+                f"{self.valves.comfyui_base_url}/prompt",
+                json={"prompt": workflow, "client_id": f"owui-{seed}"},
                 timeout=self.valves.timeout,
             )
             response.raise_for_status()
             result = response.json()
+            prompt_id = result.get("prompt_id", "unknown")
 
-            if result.get("status") == "pending":
-                return f"Image generation queued (prompt_id: {result.get('prompt_id')}). It may take 30-60 seconds to complete. Prompt: '{prompt}' at {width}x{height}, {steps} steps, seed {seed}."
+            # Poll for completion
+            import time
 
-            return f"Image generated successfully! Prompt: '{prompt}', Size: {width}x{height}, Steps: {steps}, Seed: {seed}. Result: {json.dumps(result)}"
+            for _ in range(60):  # up to 60 seconds
+                time.sleep(2)
+                try:
+                    hist = requests.get(
+                        f"{self.valves.comfyui_base_url}/history/{prompt_id}",
+                        timeout=10,
+                    ).json()
+                    if prompt_id in hist:
+                        outputs = hist[prompt_id].get("outputs", {})
+                        for node_output in outputs.values():
+                            if "images" in node_output:
+                                img = node_output["images"][0]
+                                img_url = (
+                                    f"{self.valves.comfyui_base_url}/view?"
+                                    f"filename={img['filename']}&type={img.get('type', 'output')}"
+                                )
+                                return (
+                                    f"Image generated successfully!\n"
+                                    f"Prompt: '{prompt}'\n"
+                                    f"Size: {width}x{height}, Steps: {steps}, Seed: {seed}\n"
+                                    f"Image: {img['filename']}"
+                                )
+                except Exception:
+                    pass
+
+            return (
+                f"Image queued (prompt_id: {prompt_id}). "
+                f"Generating '{prompt}' at {width}x{height}, {steps} steps, seed {seed}. "
+                f"Check ComfyUI output for results."
+            )
 
         except requests.exceptions.ConnectionError:
-            # Fall back to direct ComfyUI API
-            try:
-                response = requests.post(
-                    f"{self.valves.comfyui_base_url}/prompt",
-                    json={"prompt": workflow, "client_id": f"owui-{seed}"},
-                    timeout=self.valves.timeout,
-                )
-                response.raise_for_status()
-                result = response.json()
-                return f"Image queued directly to ComfyUI (prompt_id: {result.get('prompt_id')}). Generating '{prompt}' at {width}x{height}, {steps} steps."
-            except Exception as e:
-                return f"Error connecting to image generation service: {str(e)}"
+            return "ComfyUI is not reachable. Ensure the ComfyUI service is running and models are loaded."
         except Exception as e:
             return f"Error generating image: {str(e)}"

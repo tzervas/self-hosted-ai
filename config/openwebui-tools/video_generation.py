@@ -24,24 +24,23 @@ class Tools:
     def generate_video(
         self,
         prompt: str,
-        negative_prompt: str = "blurry, low quality, distorted, artifacts",
-        frames: int = 24,
-        fps: int = 8,
-        width: int = 512,
-        height: int = 512,
-        model: str = "wan",
+        negative_prompt: str = "blurry, low quality, distorted, artifacts, watermark, text",
+        frames: int = 33,
+        width: int = 480,
+        height: int = 320,
+        steps: int = 20,
     ) -> str:
         """
-        Generate a short video from a text description using AI video models via ComfyUI.
+        Generate a short video from a text description using Wan 2.1 (1.3B) via ComfyUI.
         Use this when the user asks you to create, generate, or make a video or animation.
+        Outputs frames as images that form the video sequence.
 
-        :param prompt: Detailed description of the video to generate
+        :param prompt: Detailed description of the video to generate (be specific about motion and scene)
         :param negative_prompt: Things to avoid in the generated video
-        :param frames: Number of frames to generate (default 24, max 120)
-        :param fps: Frames per second (default 8)
-        :param width: Video width in pixels (default 512)
-        :param height: Video height in pixels (default 512)
-        :param model: Video model to use - 'wan' (default) or 'svd'
+        :param frames: Number of frames (default 33, max 81). More frames = longer video but slower.
+        :param width: Video width in pixels (default 480, max 720)
+        :param height: Video height in pixels (default 320, max 480)
+        :param steps: Sampling steps (default 20, higher = better quality but slower)
         :return: Status message with video generation details
         """
         try:
@@ -50,12 +49,11 @@ class Tools:
                 json={
                     "prompt": prompt,
                     "negative_prompt": negative_prompt,
-                    "model": model,
-                    "frames": min(frames, 120),
-                    "fps": fps,
-                    "width": min(width, 1024),
-                    "height": min(height, 1024),
-                    "guidance_scale": 7.5,
+                    "frames": min(frames, 81),
+                    "width": min(width, 720),
+                    "height": min(height, 480),
+                    "steps": steps,
+                    "cfg": 6.0,
                 },
                 timeout=self.valves.timeout,
             )
@@ -65,22 +63,23 @@ class Tools:
             status = result.get("status", "unknown")
             if status == "processing":
                 return (
-                    f"Video generation started! Model: {model}, Frames: {frames}, "
-                    f"FPS: {fps}, Resolution: {width}x{height}. "
+                    f"Video generation started using Wan 2.1 T2V 1.3B! "
+                    f"Frames: {frames}, Resolution: {width}x{height}, Steps: {steps}. "
                     f"Prompt: '{prompt}'. "
-                    f"Estimated time: ~{frames * 2} seconds. "
+                    f"This may take 1-3 minutes. "
                     f"Request ID: {result.get('request_id', 'N/A')}"
                 )
             elif status == "completed":
                 return (
-                    f"Video generated successfully! Model: {model}, "
+                    f"Video generated successfully with Wan 2.1! "
+                    f"Frames: {result.get('frames_generated', frames)}, "
                     f"Resolution: {result.get('resolution', f'{width}x{height}')}. "
-                    f"Video URL: {result.get('video_url', 'available in outputs')}"
+                    f"{result.get('message', '')}"
                 )
             else:
                 return f"Video generation response: {json.dumps(result)}"
 
         except requests.exceptions.ConnectionError:
-            return "Video generation service is not available. Ensure the n8n video-generation workflow is active and ComfyUI has video models loaded."
+            return "Video generation service is not available. Ensure the n8n video-generation workflow is active and ComfyUI has Wan 2.1 models loaded."
         except Exception as e:
             return f"Error generating video: {str(e)}"
