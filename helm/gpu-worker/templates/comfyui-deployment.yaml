@@ -51,6 +51,10 @@ spec:
               mountPath: /comfyui/models
             - name: outputs
               mountPath: /comfyui/output
+            - name: extra-model-paths
+              mountPath: /opt/ComfyUI/extra_model_paths.yaml
+              subPath: extra_model_paths.yaml
+              readOnly: true
           livenessProbe:
             httpGet:
               path: /
@@ -72,4 +76,7 @@ spec:
         - name: outputs
           persistentVolumeClaim:
             claimName: {{ include "self-hosted-ai-gpu-worker.fullname" . }}-comfyui
+        - name: extra-model-paths
+          configMap:
+            name: {{ include "self-hosted-ai-gpu-worker.fullname" . }}-comfyui-config
 {{- end }}
