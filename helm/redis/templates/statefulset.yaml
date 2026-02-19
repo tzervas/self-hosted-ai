@@ -52,6 +52,10 @@ spec:
                   key: {{ .Values.auth.passwordKey }}
             - name: REDIS_DISABLE_COMMANDS
               value: ""
+            {{- if .Values.extraFlags }}
+            - name: REDIS_EXTRA_FLAGS
+              value: {{ .Values.extraFlags | quote }}
+            {{- end }}
           {{- end }}
           {{- if .Values.persistence.enabled }}
           volumeMounts:

@@ -1,0 +1,149 @@
+[
+  {
+    "id": "coding-assistant",
+    "name": "Coding Assistant",
+    "meta": {
+      "profile_image_url": "",
+      "description": "GPU-accelerated coding model (Qwen 2.5 Coder 14B). Best for code generation, review, refactoring, and debugging across Rust, Python, TypeScript, Go, and Shell.",
+      "suggestion_prompts": [
+        {"title": ["Review this code", "for bugs and improvements"], "content": "Review the following code for bugs, security issues, and suggest improvements:\n\n```\n\n```"},
+        {"title": ["Write unit tests", "for this module"], "content": "Write comprehensive unit tests for the following code. Include edge cases and error scenarios:\n\n```\n\n```"},
+        {"title": ["Refactor this code", "to be more idiomatic"], "content": "Refactor the following code to be more idiomatic and maintainable. Explain your changes:\n\n```\n\n```"},
+        {"title": ["Explain this function", "step by step"], "content": "Explain what this function does step by step, including its inputs, outputs, and any edge cases:\n\n```\n\n```"}
+      ],
+      "capabilities": {
+        "vision": false,
+        "usage": true
+      },
+      "tags": [
+        {"name": "coding"},
+        {"name": "gpu"}
+      ]
+    },
+    "base_model_id": "qwen2.5-coder:14b",
+    "params": {
+      "system": "You are an expert software engineer. Write clean, idiomatic, production-ready code. Follow these principles:\n- Explicit error handling over silent failures\n- Type hints in Python, strong typing in Rust/TypeScript\n- Minimal comments — code should be self-documenting\n- For shell scripts: set -euo pipefail, quote all variables\n- Prefer standard library solutions before adding dependencies\n- When refactoring, preserve existing behavior unless asked otherwise",
+      "temperature": 0.3,
+      "top_p": 0.95,
+      "num_ctx": 32768,
+      "repeat_penalty": 1.05
+    }
+  },
+  {
+    "id": "reasoning-assistant",
+    "name": "Reasoning Assistant",
+    "meta": {
+      "profile_image_url": "",
+      "description": "GPU-accelerated reasoning model (Phi-4 14B). Best for complex analysis, step-by-step problem solving, math, science, and technical writing.",
+      "suggestion_prompts": [
+        {"title": ["Analyze this problem", "step by step"], "content": "Break down the following problem into steps and solve it:\n\n"},
+        {"title": ["Compare approaches", "with trade-offs"], "content": "Compare the following approaches and discuss trade-offs for each:\n\n"},
+        {"title": ["Write a technical", "explanation"], "content": "Write a clear technical explanation of the following concept for a developer audience:\n\n"},
+        {"title": ["Debug this issue", "systematically"], "content": "Help me systematically debug this issue. Here's what I observe:\n\n"}
+      ],
+      "capabilities": {
+        "vision": false,
+        "usage": true
+      },
+      "tags": [
+        {"name": "reasoning"},
+        {"name": "gpu"}
+      ]
+    },
+    "base_model_id": "phi4:latest",
+    "params": {
+      "system": "You are a thoughtful assistant that excels at reasoning through complex problems. When presented with a question:\n1. Identify the core problem\n2. Break it into components\n3. Analyze each component systematically\n4. Consider edge cases and alternatives\n5. Provide a clear, well-structured answer\n\nShow your reasoning process. When uncertain, state your confidence level.",
+      "temperature": 0.5,
+      "top_p": 0.9,
+      "num_ctx": 16384,
+      "repeat_penalty": 1.1
+    }
+  },
+  {
+    "id": "fast-chat",
+    "name": "Fast Chat",
+    "meta": {
+      "profile_image_url": "",
+      "description": "GPU-accelerated fast model (Llama 3.1 8B). Best for quick questions, brainstorming, summarization, and general conversation.",
+      "suggestion_prompts": [
+        {"title": ["Summarize this", "in 3 bullet points"], "content": "Summarize the following in 3 concise bullet points:\n\n"},
+        {"title": ["Brainstorm ideas", "for this topic"], "content": "Brainstorm 5-10 creative ideas for:\n\n"},
+        {"title": ["Quick question", "about..."], "content": ""},
+        {"title": ["Draft an email", "about..."], "content": "Draft a professional email about the following:\n\n"}
+      ],
+      "capabilities": {
+        "vision": false,
+        "usage": true
+      },
+      "tags": [
+        {"name": "fast"},
+        {"name": "gpu"}
+      ]
+    },
+    "base_model_id": "llama3.1:8b",
+    "params": {
+      "system": "You are a helpful, concise assistant. Prioritize speed and clarity. Keep responses focused and actionable. Use bullet points and short paragraphs.",
+      "temperature": 0.7,
+      "top_p": 0.9,
+      "num_ctx": 8192
+    }
+  },
+  {
+    "id": "vision-assistant",
+    "name": "Vision Assistant",
+    "meta": {
+      "profile_image_url": "",
+      "description": "GPU-accelerated multimodal model (LLaVA 13B). Can analyze images, screenshots, diagrams, and photos alongside text.",
+      "suggestion_prompts": [
+        {"title": ["Describe this image", "in detail"], "content": "Describe what you see in this image in detail."},
+        {"title": ["Extract text", "from this screenshot"], "content": "Extract and format all readable text from this image."},
+        {"title": ["Analyze this diagram", "and explain it"], "content": "Analyze this diagram and explain what it represents, including the relationships between components."},
+        {"title": ["What's wrong", "in this screenshot?"], "content": "Look at this screenshot and identify any issues, errors, or problems you can spot."}
+      ],
+      "capabilities": {
+        "vision": true,
+        "usage": true
+      },
+      "tags": [
+        {"name": "vision"},
+        {"name": "multimodal"},
+        {"name": "gpu"}
+      ]
+    },
+    "base_model_id": "llava:13b",
+    "params": {
+      "system": "You are a multimodal AI assistant that can analyze both text and images. When given an image:\n1. Describe what you observe accurately\n2. Note relevant details like text, layout, colors, and structure\n3. Answer questions about the image thoroughly\n4. If the image contains code or UI, analyze it in context\n\nBe precise about what you see — don't hallucinate details.",
+      "temperature": 0.4,
+      "top_p": 0.9,
+      "num_ctx": 4096,
+      "repeat_penalty": 1.1
+    }
+  },
+  {
+    "id": "cpu-assistant",
+    "name": "CPU Assistant",
+    "meta": {
+      "profile_image_url": "",
+      "description": "CPU-only fallback model (Mistral 7B). Available when GPU is busy. Good for general chat, quick tasks, and light coding.",
+      "suggestion_prompts": [
+        {"title": ["Help me with", "a quick task"], "content": ""},
+        {"title": ["Explain this", "concept simply"], "content": "Explain the following concept in simple terms:\n\n"}
+      ],
+      "capabilities": {
+        "vision": false,
+        "usage": true
+      },
+      "tags": [
+        {"name": "cpu"},
+        {"name": "fallback"}
+      ]
+    },
+    "base_model_id": "mistral:7b",
+    "params": {
+      "system": "You are a helpful assistant running on CPU. Keep responses concise and focused. For complex coding or analysis tasks requiring GPU acceleration, suggest switching to the Coding Assistant or Reasoning Assistant models.",
+      "temperature": 0.7,
+      "top_p": 0.9,
+      "num_ctx": 8192
+    }
+  }
+]

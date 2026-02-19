@@ -28,22 +28,60 @@ ingress:
 
 # Environment configuration
 env:
-  OLLAMA_BASE_URLS: "http://ollama.ai-services:11434;http://ollama-gpu.gpu-workloads:11434"
+  OLLAMA_BASE_URLS: "http://ollama-gpu.gpu-workloads:11434;http://ollama.ai-services:11434"
   WEBUI_NAME: "Self-Hosted AI Server"
   WEBUI_ADMIN_NAME: "kang"
   # CRITICAL: Force env vars to override database
   ENABLE_PERSISTENT_CONFIG: "False"
   ENABLE_AUTH: "true"
   ENABLE_SIGNUP: "false"
-  # SearXNG web search
+  # ========================================
+  # Model Defaults
+  # ========================================
+  # Default model for new chats (GPU-first)
+  DEFAULT_MODELS: "qwen2.5-coder:14b"
+  # Internal task models (lightweight for background tasks)
+  TASK_MODEL: "llama3.1:8b"
+  TITLE_GENERATION_PROMPT_TEMPLATE: "Create a concise, 3-5 word title for this chat. No quotes or punctuation. Title:"
+  # ========================================
+  # RAG & Document Processing
+  # ========================================
+  RAG_EMBEDDING_ENGINE: "ollama"
+  RAG_EMBEDDING_MODEL: "nomic-embed-text:latest"
+  RAG_EMBEDDING_OLLAMA_URL: "http://ollama.ai-services:11434"
+  # Chunk size tuned for technical documentation (code + prose)
+  CHUNK_SIZE: "1000"
+  CHUNK_OVERLAP: "200"
+  RAG_TOP_K: "5"
+  RAG_RELEVANCE_THRESHOLD: "0.3"
+  PDF_EXTRACT_IMAGES: "true"
+  # Web content fetching (fetch URLs pasted in chat)
+  ENABLE_RAG_LOCAL_WEB_FETCH: "true"
+  # ========================================
+  # Web Search (SearXNG)
+  # ========================================
   ENABLE_RAG_WEB_SEARCH: "true"
   RAG_WEB_SEARCH_ENGINE: "searxng"
   SEARXNG_QUERY_URL: "http://searxng:8080/search?q=<query>"
-  RAG_WEB_SEARCH_RESULT_COUNT: "3"
-  # Image generation
+  RAG_WEB_SEARCH_RESULT_COUNT: "5"
+  RAG_WEB_SEARCH_CONCURRENT_REQUESTS: "3"
+  # ========================================
+  # Evaluation Arena (A/B model comparison)
+  # ========================================
+  ENABLE_EVALUATION_ARENA_MODELS: "true"
+  EVALUATION_ARENA_MODELS: "qwen2.5-coder:14b,phi4:latest,llama3.1:8b,mistral:7b"
+  # ========================================
+  # Image Generation
+  # ========================================
   ENABLE_IMAGE_GENERATION: "true"
   IMAGE_GENERATION_ENGINE: "comfyui"
-  COMFYUI_BASE_URL: "http://comfyui.gpu-worker:8188"
+  COMFYUI_BASE_URL: "http://comfyui.gpu-workloads:8188"
+  IMAGE_SIZE: "1024x1024"
+  IMAGE_STEPS: "30"
+  # ========================================
+  # Community & Sharing
+  # ========================================
+  ENABLE_COMMUNITY_SHARING: "false"
   # ========================================
   # Keycloak OIDC Configuration
   # ========================================

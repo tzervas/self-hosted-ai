@@ -114,7 +114,24 @@ spec:
             matchLabels:
               kubernetes.io/metadata.name: ai-services
 ---
-# Allow egress to gpu-workloads namespace (for LiteLLM -> Ollama GPU)
+# Allow Ollama to pull models from registry.ollama.ai (HTTPS egress)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ollama-registry-egress
+  namespace: ai-services
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ollama
+  policyTypes:
+    - Egress
+  egress:
+    - ports:
+        - protocol: TCP
+          port: 443
+---
+# Allow egress to gpu-workloads namespace (for LiteLLM + Open WebUI -> Ollama GPU)
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -122,8 +139,12 @@ metadata:
   namespace: ai-services
 spec:
   podSelector:
-    matchLabels:
-      app.kubernetes.io/name: litellm
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - litellm
+          - open-webui
   policyTypes:
     - Egress
   egress:
