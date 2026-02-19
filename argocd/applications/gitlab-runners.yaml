@@ -41,17 +41,15 @@ spec:
         # Kubernetes executor configuration
         runners:
           # Reference existing secret containing runner token
+          # Uses authentication token (glrt-*) created via GitLab API
+          # Tags, runUntagged, protected, locked are set server-side
+          # and CANNOT be passed as CLI flags with auth tokens
           secret: gitlab-runner-token
 
-          # Runner tags for job selection
-          tags: "self-hosted,linux,amd64,kubernetes"
-          
-          # Run untagged jobs
-          runUntagged: true
-          
-          # Protected branches only
-          protected: false
-          
+          # Kubernetes executor name
+          name: "homelab-k8s-runner"
+          executor: kubernetes
+
           # Privileged mode for Docker-in-Docker
           privileged: true
           
