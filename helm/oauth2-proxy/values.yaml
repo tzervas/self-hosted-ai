@@ -27,6 +27,10 @@ config:
   # Skip TLS verification for OIDC provider (needed when using self-signed certs)
   sslInsecureSkipVerify: true
 
+  # Upstream for reverse-proxy mode (used by vectorweight.com root domain)
+  # Non-/oauth2 requests are proxied here after authentication
+  upstream: "http://landing-page.default.svc.cluster.local:80/"
+
   # Pass auth info upstream
   passBasicAuth: false
   passAccessToken: true

@@ -13,14 +13,14 @@ spec:
         - name: oauth2-proxy
           namespace: automation
           port: 4180
-    # Landing page (protected by SSO)
+    # Landing page (protected by SSO via oauth2-proxy reverse-proxy mode)
+    # oauth2-proxy handles the full auth flow: unauthenticated users get
+    # redirected to Keycloak, authenticated users are proxied to the landing page
     - match: Host(`{{ .Values.host }}`)
       kind: Rule
-      middlewares:
-        - name: landing-page-forward-auth
-          namespace: automation
       services:
-        - name: landing-page
-          port: 80
+        - name: oauth2-proxy
+          namespace: automation
+          port: 4180
   tls:
     secretName: vectorweight-wildcard-tls
