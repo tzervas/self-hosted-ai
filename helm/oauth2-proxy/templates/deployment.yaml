@@ -35,6 +35,7 @@ spec:
             - --upstream={{ .Values.config.upstream }}
             - --reverse-proxy=true
             - --skip-provider-button=true
+            - --oidc-extra-audience=account
             - --ssl-insecure-skip-verify={{ .Values.config.sslInsecureSkipVerify | default false }}
           env:
             {{- range $key, $val := .Values.secretEnv }}
