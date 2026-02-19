@@ -13,6 +13,14 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
+  # ARC chart 0.9.3 ClusterRole lacks patch/update on serviceaccounts,
+  # which the controller needs for finalizer management in runner namespaces.
+  # We manually add these verbs; ignoreDifferences prevents selfHeal from reverting.
+  ignoreDifferences:
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+      jsonPointers:
+        - /rules
   source:
     repoURL: ghcr.io/actions/actions-runner-controller-charts
     chart: gha-runner-scale-set-controller
@@ -63,6 +71,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true  # Avoid annotation size limit issues
+      - RespectIgnoreDifferences=true
     retry:
       limit: 5
       backoff:
