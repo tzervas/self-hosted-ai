@@ -56,6 +56,8 @@ spec:
               value: "all"
             - name: CF_QUICK_TUNNELS
               value: "false"  # Disable Cloudflare tunnels (we use Traefik)
+            - name: WEB_ENABLE_AUTH
+              value: "false"  # Disable Caddy auth (behind K8s NetworkPolicies)
           nodeSelector:
             kubernetes.io/hostname: akula-prime
           tolerations:

@@ -32,16 +32,14 @@ spec:
         - protocol: TCP
           port: 53
 ---
-# Allow ingress from ai-services to Ollama GPU
+# Allow ingress from ai-services to all GPU services (Ollama, ComfyUI, audio, video)
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-ai-services-to-ollama
+  name: allow-ai-services-ingress
   namespace: gpu-workloads
 spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: ollama
+  podSelector: {}  # All pods in gpu-workloads
   policyTypes:
     - Ingress
   ingress:
@@ -51,7 +49,36 @@ spec:
               kubernetes.io/metadata.name: ai-services
       ports:
         - protocol: TCP
-          port: 11434
+          port: 11434  # Ollama GPU
+        - protocol: TCP
+          port: 8188   # ComfyUI
+        - protocol: TCP
+          port: 5004   # Audio server
+        - protocol: TCP
+          port: 5005   # Video server
+---
+# Allow ingress from automation namespace (n8n -> ComfyUI, audio, video for workflows)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-automation-ingress
+  namespace: gpu-workloads
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: automation
+      ports:
+        - protocol: TCP
+          port: 8188   # ComfyUI
+        - protocol: TCP
+          port: 5004   # Audio server
+        - protocol: TCP
+          port: 5005   # Video server
 ---
 # Allow LAN access to Ollama GPU
 apiVersion: networking.k8s.io/v1

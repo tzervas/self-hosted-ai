@@ -131,7 +131,7 @@ spec:
         - protocol: TCP
           port: 443
 ---
-# Allow egress to gpu-workloads namespace (for LiteLLM + Open WebUI -> Ollama GPU)
+# Allow egress to gpu-workloads namespace (Ollama GPU, ComfyUI, audio, video)
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -154,4 +154,10 @@ spec:
               kubernetes.io/metadata.name: gpu-workloads
       ports:
         - protocol: TCP
-          port: 11434
+          port: 11434  # Ollama GPU
+        - protocol: TCP
+          port: 8188   # ComfyUI
+        - protocol: TCP
+          port: 5004   # Audio server
+        - protocol: TCP
+          port: 5005   # Video server
