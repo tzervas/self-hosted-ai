@@ -21,56 +21,69 @@
   },
 
   "model_configs": {
+    "_comment": "See config/open-webui-model-presets.json for importable presets",
+
     "qwen2.5-coder:14b": {
       "name": "Qwen 2.5 Coder 14B",
-      "description": "Primary coding model - Rust, Python, Shell",
+      "description": "Primary coding model - GPU accelerated (RTX 5080)",
       "params": {
         "temperature": 0.3,
         "top_p": 0.95,
         "num_ctx": 32768,
         "repeat_penalty": 1.05
       },
-      "system_prompt": "You are an expert software engineer specializing in Rust, Python, and Shell scripting. Write clean, idiomatic, well-documented code. Prefer explicit error handling over exceptions. Use type hints in Python. Follow Rust best practices for ownership and borrowing. For shell scripts, use strict mode (set -euo pipefail) and quote variables."
+      "system_prompt": "You are an expert software engineer. Write clean, idiomatic, production-ready code. Explicit error handling, type hints in Python, strict mode in shell scripts."
     },
 
     "phi4:latest": {
-      "name": "Phi-4",
-      "description": "Reasoning and complex problem solving",
+      "name": "Phi-4 14B",
+      "description": "Reasoning and analysis - GPU accelerated (RTX 5080)",
       "params": {
         "temperature": 0.5,
         "top_p": 0.9,
         "num_ctx": 16384,
         "repeat_penalty": 1.1
       },
-      "system_prompt": "You are a thoughtful assistant that excels at reasoning through complex problems step by step. When given a coding task, first analyze the requirements, consider edge cases, then provide a well-structured solution with clear explanations."
+      "system_prompt": "You are a thoughtful assistant that excels at reasoning through complex problems step by step."
     },
 
-    "deepseek-coder-v2:16b": {
-      "name": "DeepSeek Coder V2 16B",
-      "description": "Advanced code generation and analysis",
-      "params": {
-        "temperature": 0.2,
-        "top_p": 0.95,
-        "num_ctx": 32768,
-        "repeat_penalty": 1.0
-      },
-      "system_prompt": "You are DeepSeek Coder, an expert programming assistant. Generate production-quality code with comprehensive error handling, proper typing, and inline documentation. When refactoring, preserve existing functionality while improving code quality."
-    },
-
-    "mistral:7b": {
-      "name": "Mistral 7B",
-      "description": "General chat and quick tasks (CPU)",
+    "llama3.1:8b": {
+      "name": "Llama 3.1 8B",
+      "description": "Fast general-purpose - GPU accelerated (RTX 5080)",
       "params": {
         "temperature": 0.7,
         "top_p": 0.9,
         "num_ctx": 8192
       },
-      "system_prompt": "You are a helpful assistant running on CPU. Keep responses concise and focused. For complex coding tasks, suggest using a GPU model instead."
+      "system_prompt": "You are a helpful, concise assistant. Prioritize speed and clarity."
+    },
+
+    "llava:13b": {
+      "name": "LLaVA 13B",
+      "description": "Vision/multimodal - GPU accelerated (RTX 5080)",
+      "params": {
+        "temperature": 0.4,
+        "top_p": 0.9,
+        "num_ctx": 4096,
+        "repeat_penalty": 1.1
+      },
+      "system_prompt": "You are a multimodal AI assistant that can analyze both text and images. Be precise about what you see."
+    },
+
+    "mistral:7b": {
+      "name": "Mistral 7B",
+      "description": "General chat - CPU fallback (available when GPU is busy)",
+      "params": {
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "num_ctx": 8192
+      },
+      "system_prompt": "You are a helpful assistant running on CPU. Keep responses concise and focused."
     },
 
     "nomic-embed-text:latest": {
       "name": "Nomic Embed Text",
-      "description": "Text embeddings for RAG",
+      "description": "Text embeddings for RAG (CPU)",
       "params": {},
       "system_prompt": ""
     }
@@ -78,12 +91,14 @@
 
   "workspace": {
     "default_model": "qwen2.5-coder:14b",
+    "task_model": "llama3.1:8b",
+    "embedding_model": "nomic-embed-text:latest",
     "default_prompt_suggestions": [
       "Review this code for bugs and suggest improvements",
       "Explain this function and suggest better naming",
       "Write unit tests for this module",
-      "Refactor this to be more idiomatic Rust/Python",
-      "Convert this Python script to a proper CLI with argparse"
+      "Analyze this image and describe what you see",
+      "Break down this problem step by step"
     ]
   },
 

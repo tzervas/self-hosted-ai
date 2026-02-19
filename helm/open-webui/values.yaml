@@ -28,13 +28,22 @@ ingress:
 
 # Environment configuration
 env:
-  OLLAMA_BASE_URLS: "http://ollama.ai-services:11434;http://ollama-gpu.gpu-workloads:11434"
+  OLLAMA_BASE_URLS: "http://ollama-gpu.gpu-workloads:11434;http://ollama.ai-services:11434"
   WEBUI_NAME: "Self-Hosted AI Server"
   WEBUI_ADMIN_NAME: "kang"
   # CRITICAL: Force env vars to override database
   ENABLE_PERSISTENT_CONFIG: "False"
   ENABLE_AUTH: "true"
   ENABLE_SIGNUP: "false"
+  # Default model selection (GPU-first)
+  DEFAULT_MODELS: "qwen2.5-coder:14b"
+  # Internal task models (lightweight for background tasks)
+  TASK_MODEL: "llama3.1:8b"
+  TITLE_GENERATION_PROMPT_TEMPLATE: "Create a concise, 3-5 word title for this chat. No quotes or punctuation. Title:"
+  # RAG embedding model
+  RAG_EMBEDDING_ENGINE: "ollama"
+  RAG_EMBEDDING_MODEL: "nomic-embed-text:latest"
+  RAG_EMBEDDING_OLLAMA_URL: "http://ollama.ai-services:11434"
   # SearXNG web search
   ENABLE_RAG_WEB_SEARCH: "true"
   RAG_WEB_SEARCH_ENGINE: "searxng"
