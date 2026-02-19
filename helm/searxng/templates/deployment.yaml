@@ -37,11 +37,15 @@ spec:
                 safe_search: 0
                 autocomplete: "google"
                 default_lang: "en"
+                formats:
+                  - html
+                  - json
               server:
                 port: 8080
                 bind_address: "0.0.0.0"
                 secret_key: "${SEARXNG_SECRET}"
                 image_proxy: true
+                limiter: false
               outgoing:
                 request_timeout: 3.0
                 pool_connections: 100
