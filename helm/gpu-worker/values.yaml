@@ -55,21 +55,25 @@ ollama:
         memory: "32Gi"
         cpu: "8000m"
 
-# ComfyUI configuration
-# NOTE: Disabled due to single GPU constraint. Requires GPU time-slicing to run alongside ollama-gpu.
+# ComfyUI configuration (ai-dock image with Caddy reverse proxy)
+# Enabled via ArgoCD app override; uses GPU time-slicing alongside ollama-gpu
 comfyui:
   enabled: false
   image:
-    repository: ghcr.io/yolandawu/comfyui
+    repository: ghcr.io/ai-dock/comfyui
     tag: latest
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP
-    port: 8188
+    port: 8188  # Caddy proxies 8188 (external) → 18188 (internal ComfyUI)
     annotations: {}
   env:
-    - name: CLI_ARGS
-      value: "--listen 0.0.0.0 --port 8188"
+    - name: NVIDIA_VISIBLE_DEVICES
+      value: "all"
+    - name: WEB_ENABLE_AUTH
+      value: "false"
+    - name: CF_QUICK_TUNNELS
+      value: "false"
   persistence:
     enabled: true
     size: 50Gi

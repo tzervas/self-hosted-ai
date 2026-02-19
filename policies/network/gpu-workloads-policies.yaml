@@ -100,20 +100,18 @@ spec:
         - protocol: TCP
           port: 11434
 ---
-# Allow egress for model downloads (Ollama needs to pull models)
+# Allow egress for model downloads (Ollama + ComfyUI need to pull models)
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-ollama-model-downloads
+  name: allow-model-downloads
   namespace: gpu-workloads
 spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: ollama
+  podSelector: {}  # All GPU workload pods can download models
   policyTypes:
     - Egress
   egress:
-    # Allow HTTPS to anywhere for model downloads
+    # Allow HTTPS to anywhere for model downloads (HuggingFace, registry, etc.)
     - to:
         - ipBlock:
             cidr: 0.0.0.0/0

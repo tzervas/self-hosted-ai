@@ -1,0 +1,84 @@
+{
+  "_comment": "Wan 2.1 Text-to-Video 1.3B workflow for ComfyUI. Generates 480p video from text prompts.",
+  "1": {
+    "inputs": {
+      "unet_name": "wan2.1_t2v_1.3B_bf16.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": { "title": "Load Wan 2.1 UNet" }
+  },
+  "2": {
+    "inputs": {
+      "clip_name": "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+      "type": "wan"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": { "title": "Load UMT5 Text Encoder" }
+  },
+  "3": {
+    "inputs": {
+      "vae_name": "wan_2.1_vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": { "title": "Load Wan VAE" }
+  },
+  "4": {
+    "inputs": {
+      "text": "A beautiful sunset over calm ocean waters, golden light reflecting on gentle waves, cinematic quality",
+      "clip": ["2", 0]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Positive Prompt" }
+  },
+  "5": {
+    "inputs": {
+      "text": "blurry, low quality, distorted, artifacts, watermark, text",
+      "clip": ["2", 0]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Negative Prompt" }
+  },
+  "6": {
+    "inputs": {
+      "width": 480,
+      "height": 320,
+      "length": 33,
+      "batch_size": 1
+    },
+    "class_type": "EmptyWanLatentVideo",
+    "_meta": { "title": "Empty Wan Latent Video (480p, 33 frames)" }
+  },
+  "7": {
+    "inputs": {
+      "seed": 0,
+      "steps": 20,
+      "cfg": 6.0,
+      "sampler_name": "uni_pc_bh2",
+      "scheduler": "normal",
+      "denoise": 1.0,
+      "model": ["1", 0],
+      "positive": ["4", 0],
+      "negative": ["5", 0],
+      "latent_image": ["6", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": { "title": "KSampler (Wan Video)" }
+  },
+  "8": {
+    "inputs": {
+      "samples": ["7", 0],
+      "vae": ["3", 0]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "VAE Decode Frames" }
+  },
+  "9": {
+    "inputs": {
+      "filename_prefix": "wan21_video",
+      "images": ["8", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": { "title": "Save Frames to Disk" }
+  }
+}

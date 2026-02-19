@@ -17,10 +17,10 @@
     },
     {
       "parameters": {
-        "jsCode": "// Prepare video generation request\nconst input = $input.first();\nconst prompt = input.json.body.prompt;\nconst model = input.json.body.model || 'wan'; // wan, svd, cogvideo\nconst frames = input.json.body.frames || 24;\nconst fps = input.json.body.fps || 8;\nconst width = input.json.body.width || 512;\nconst height = input.json.body.height || 512;\nconst guidanceScale = input.json.body.guidance_scale || 7.5;\nconst sourceImage = input.json.body.source_image || null; // For img2vid\n\nif (!prompt || prompt.length === 0) {\n  throw new Error('Prompt is required for video generation');\n}\n\n// Build ComfyUI workflow based on model\nlet workflowName;\nswitch(model) {\n  case 'svd':\n    workflowName = 'text2video-svd';\n    break;\n  case 'wan':\n  default:\n    workflowName = 'text2video-wan';\n    break;\n}\n\nreturn {\n  json: {\n    prompt: prompt,\n    model: model,\n    workflow: workflowName,\n    frames: Math.min(frames, 120),\n    fps: fps,\n    width: width,\n    height: height,\n    guidance_scale: guidanceScale,\n    source_image: sourceImage,\n    request_id: 'video_' + Date.now(),\n    negative_prompt: input.json.body.negative_prompt || 'blurry, low quality, distorted, artifacts'\n  }\n};"
+        "jsCode": "// Prepare Wan 2.1 T2V 1.3B workflow for ComfyUI\nconst input = $input.first();\nconst prompt = input.json.body.prompt;\nconst negativePrompt = input.json.body.negative_prompt || 'blurry, low quality, distorted, artifacts, watermark, text';\nconst frames = Math.min(input.json.body.frames || 33, 81);\nconst width = input.json.body.width || 480;\nconst height = input.json.body.height || 320;\nconst steps = input.json.body.steps || 20;\nconst cfg = input.json.body.cfg || 6.0;\nconst seed = input.json.body.seed || Math.floor(Math.random() * 2**32);\n\nif (!prompt || prompt.length === 0) {\n  throw new Error('Prompt is required for video generation');\n}\n\n// Build Wan 2.1 ComfyUI workflow with proper node types\nconst workflow = {\n  '1': {\n    inputs: { unet_name: 'wan2.1_t2v_1.3B_bf16.safetensors', weight_dtype: 'default' },\n    class_type: 'UNETLoader'\n  },\n  '2': {\n    inputs: { clip_name: 'umt5_xxl_fp8_e4m3fn_scaled.safetensors', type: 'wan' },\n    class_type: 'CLIPLoader'\n  },\n  '3': {\n    inputs: { vae_name: 'wan_2.1_vae.safetensors' },\n    class_type: 'VAELoader'\n  },\n  '4': {\n    inputs: { text: prompt, clip: ['2', 0] },\n    class_type: 'CLIPTextEncode'\n  },\n  '5': {\n    inputs: { text: negativePrompt, clip: ['2', 0] },\n    class_type: 'CLIPTextEncode'\n  },\n  '6': {\n    inputs: { width: width, height: height, length: frames, batch_size: 1 },\n    class_type: 'EmptyWanLatentVideo'\n  },\n  '7': {\n    inputs: {\n      seed: seed, steps: steps, cfg: cfg,\n      sampler_name: 'uni_pc_bh2', scheduler: 'normal', denoise: 1.0,\n      model: ['1', 0], positive: ['4', 0], negative: ['5', 0], latent_image: ['6', 0]\n    },\n    class_type: 'KSampler'\n  },\n  '8': {\n    inputs: { samples: ['7', 0], vae: ['3', 0] },\n    class_type: 'VAEDecode'\n  },\n  '9': {\n    inputs: { filename_prefix: 'wan21_video_' + Date.now(), images: ['8', 0] },\n    class_type: 'SaveImage'\n  }\n};\n\nreturn {\n  json: {\n    workflow: workflow,\n    client_id: 'n8n-video-' + Date.now(),\n    request_id: 'video_' + Date.now(),\n    prompt: prompt,\n    frames: frames,\n    width: width,\n    height: height,\n    seed: seed\n  }\n};"
       },
       "id": "prepare-request",
-      "name": "Prepare Video Request",
+      "name": "Build Wan 2.1 Workflow",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [470, 300]
@@ -31,7 +31,7 @@
         "url": "http://comfyui-self-hosted-ai-gpu-worker-comfyui.gpu-workloads:8188/prompt",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ prompt: { '3': { class_type: 'CLIPTextEncode', inputs: { text: $json.prompt, clip: ['4', 0] } }, '4': { class_type: 'CheckpointLoaderSimple', inputs: { ckpt_name: $json.model === 'svd' ? 'svd_xt_1_1.safetensors' : 'wan_1.3B_exp_e9.safetensors' } }, '5': { class_type: 'EmptyLatentImage', inputs: { width: $json.width, height: $json.height, batch_size: $json.frames } }, '6': { class_type: 'KSampler', inputs: { seed: Math.floor(Math.random() * 1000000), steps: 20, cfg: $json.guidance_scale, sampler_name: 'euler_ancestral', scheduler: 'normal', denoise: 1, model: ['4', 0], positive: ['3', 0], negative: ['7', 0], latent_image: ['5', 0] } }, '7': { class_type: 'CLIPTextEncode', inputs: { text: $json.negative_prompt, clip: ['4', 0] } }, '8': { class_type: 'VAEDecode', inputs: { samples: ['6', 0], vae: ['4', 2] } }, '9': { class_type: 'VHS_VideoCombine', inputs: { images: ['8', 0], frame_rate: $json.fps, loop_count: 0, filename_prefix: 'video_' + $json.request_id, format: 'video/h264-mp4', save_output: true } } }, client_id: 'n8n-video-' + Date.now() }) }}",
+        "jsonBody": "={{ JSON.stringify({ prompt: $json.workflow, client_id: $json.client_id }) }}",
         "options": {
           "timeout": 900000
         }
@@ -44,11 +44,11 @@
     },
     {
       "parameters": {
-        "amount": 10,
+        "amount": 15,
         "unit": "seconds"
       },
       "id": "wait-initial",
-      "name": "Wait Initial",
+      "name": "Wait for Generation",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [910, 300]
@@ -75,7 +75,7 @@
           "conditions": [
             {
               "id": "is-complete",
-              "leftValue": "={{ Object.keys($json).length > 0 && Object.values($json)[0]?.status?.completed === true }}",
+              "leftValue": "={{ Object.keys($json).length > 0 }}",
               "rightValue": true,
               "operator": {
                 "type": "boolean",
@@ -95,7 +95,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Extract video output info\nconst input = $input.first();\nconst request = $('Prepare Video Request').first().json;\nconst history = Object.values(input.json)[0];\n\nlet videoUrl = null;\nlet outputs = [];\n\nif (history && history.outputs) {\n  for (const [nodeId, output] of Object.entries(history.outputs)) {\n    if (output.gifs || output.videos) {\n      const files = output.gifs || output.videos;\n      for (const file of files) {\n        outputs.push({\n          filename: file.filename,\n          subfolder: file.subfolder || '',\n          type: file.type || 'output'\n        });\n        videoUrl = `http://comfyui-self-hosted-ai-gpu-worker-comfyui.gpu-workloads:8188/view?filename=${file.filename}&subfolder=${file.subfolder || ''}&type=${file.type || 'output'}`;\n      }\n    }\n  }\n}\n\nreturn {\n  json: {\n    success: true,\n    request_id: request.request_id,\n    model: request.model,\n    prompt: request.prompt,\n    frames: request.frames,\n    fps: request.fps,\n    resolution: `${request.width}x${request.height}`,\n    video_url: videoUrl,\n    outputs: outputs,\n    status: 'completed'\n  }\n};"
+        "jsCode": "// Extract frame outputs from ComfyUI history\nconst input = $input.first();\nconst request = $('Build Wan 2.1 Workflow').first().json;\nconst history = Object.values(input.json)[0];\nconst comfyUrl = 'http://comfyui-self-hosted-ai-gpu-worker-comfyui.gpu-workloads:8188';\n\nlet frames = [];\nif (history && history.outputs) {\n  for (const [nodeId, output] of Object.entries(history.outputs)) {\n    if (output.images) {\n      for (const img of output.images) {\n        frames.push({\n          filename: img.filename,\n          url: `${comfyUrl}/view?filename=${encodeURIComponent(img.filename)}&subfolder=${encodeURIComponent(img.subfolder || '')}&type=${img.type || 'output'}`\n        });\n      }\n    }\n  }\n}\n\nreturn {\n  json: {\n    success: true,\n    status: 'completed',\n    request_id: request.request_id,\n    prompt: request.prompt,\n    frames_generated: frames.length,\n    resolution: `${request.width}x${request.height}`,\n    seed: request.seed,\n    frames: frames.slice(0, 5),\n    message: `Generated ${frames.length} frames at ${request.width}x${request.height} using Wan 2.1 T2V 1.3B`\n  }\n};"
       },
       "id": "extract-result",
       "name": "Extract Result",
@@ -105,7 +105,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Still processing - return pending status\nconst request = $('Prepare Video Request').first().json;\nconst promptId = $('Queue ComfyUI').first().json.prompt_id;\n\nreturn {\n  json: {\n    success: true,\n    status: 'processing',\n    request_id: request.request_id,\n    prompt_id: promptId,\n    message: 'Video generation in progress. Poll /video/status/' + promptId + ' for updates.',\n    estimated_time: request.frames * 2 + ' seconds'\n  }\n};"
+        "jsCode": "const request = $('Build Wan 2.1 Workflow').first().json;\nconst promptId = $('Queue ComfyUI').first().json.prompt_id;\n\nreturn {\n  json: {\n    success: true,\n    status: 'processing',\n    request_id: request.request_id,\n    prompt_id: promptId,\n    message: `Video generation in progress (Wan 2.1 T2V 1.3B, ${request.frames} frames at ${request.width}x${request.height}). This may take 1-3 minutes.`\n  }\n};"
       },
       "id": "pending-result",
       "name": "Pending Result",
@@ -140,118 +140,41 @@
   ],
   "connections": {
     "Webhook": {
-      "main": [
-        [
-          {
-            "node": "Prepare Video Request",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Build Wan 2.1 Workflow", "type": "main", "index": 0 }]]
     },
-    "Prepare Video Request": {
-      "main": [
-        [
-          {
-            "node": "Queue ComfyUI",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+    "Build Wan 2.1 Workflow": {
+      "main": [[{ "node": "Queue ComfyUI", "type": "main", "index": 0 }]]
     },
     "Queue ComfyUI": {
-      "main": [
-        [
-          {
-            "node": "Wait Initial",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Wait for Generation", "type": "main", "index": 0 }]]
     },
-    "Wait Initial": {
-      "main": [
-        [
-          {
-            "node": "Check Status",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+    "Wait for Generation": {
+      "main": [[{ "node": "Check Status", "type": "main", "index": 0 }]]
     },
     "Check Status": {
-      "main": [
-        [
-          {
-            "node": "Is Complete?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Is Complete?", "type": "main", "index": 0 }]]
     },
     "Is Complete?": {
       "main": [
-        [
-          {
-            "node": "Extract Result",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Pending Result",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{ "node": "Extract Result", "type": "main", "index": 0 }],
+        [{ "node": "Pending Result", "type": "main", "index": 0 }]
       ]
     },
     "Extract Result": {
-      "main": [
-        [
-          {
-            "node": "Respond Success",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Respond Success", "type": "main", "index": 0 }]]
     },
     "Pending Result": {
-      "main": [
-        [
-          {
-            "node": "Respond Pending",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Respond Pending", "type": "main", "index": 0 }]]
     }
   },
   "active": false,
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "versionId": "1",
-  "meta": {
-    "instanceId": "self-hosted-ai"
-  },
+  "settings": { "executionOrder": "v1" },
+  "versionId": "2",
+  "meta": { "instanceId": "self-hosted-ai" },
   "tags": [
-    {
-      "name": "video"
-    },
-    {
-      "name": "generation"
-    },
-    {
-      "name": "comfyui"
-    }
+    { "name": "video" },
+    { "name": "generation" },
+    { "name": "comfyui" },
+    { "name": "wan2.1" }
   ]
 }
