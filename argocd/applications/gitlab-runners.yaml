@@ -31,10 +31,11 @@ spec:
     helm:
       releaseName: gitlab-runner
       valuesObject:
-        # GitLab instance connection
-        gitlabUrl: "https://git.vectorweight.com"
+        # GitLab instance connection (internal service URL to avoid TLS/ingress issues)
+        gitlabUrl: "http://gitlab-webservice-default.gitlab:8181"
 
         # Trust custom CA for git.vectorweight.com (self-signed root CA)
+        # Still needed for git clone operations through external URL
         certsSecretName: gitlab-runner-certs
 
         # Runner configuration
