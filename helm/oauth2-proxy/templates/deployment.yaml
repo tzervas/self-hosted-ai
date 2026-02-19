@@ -32,6 +32,7 @@ spec:
             - --pass-access-token={{ .Values.config.passAccessToken }}
             - --set-xauthrequest={{ .Values.config.setXAuthRequest }}
             - --set-authorization-header={{ .Values.config.setAuthorizationHeader }}
+            - --upstream={{ .Values.config.upstream }}
             - --reverse-proxy=true
             - --skip-provider-button=true
             - --ssl-insecure-skip-verify={{ .Values.config.sslInsecureSkipVerify | default false }}
