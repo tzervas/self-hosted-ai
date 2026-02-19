@@ -172,32 +172,47 @@ LONGHORN_SECRET=$(get_client_secret "longhorn")
 ANA_AGENT_SECRET=$(get_client_secret "ana-agent")
 
 # 5. Create admin user in realm
-echo "[5/6] Creating admin user in '${REALM}' realm..."
+echo "[5/6] Creating admin user 'kang' in '${REALM}' realm..."
 USER_EXISTS=$(curl -sf \
   -H "Authorization: Bearer $TOKEN" \
-  "${KEYCLOAK_URL}/admin/realms/${REALM}/users?username=admin" \
+  "${KEYCLOAK_URL}/admin/realms/${REALM}/users?username=kang" \
   | jq 'length')
 
 if [ "$USER_EXISTS" -gt 0 ]; then
-  echo "  Admin user already exists, skipping."
+  echo "  User 'kang' already exists, skipping."
 else
   curl -sf -X POST "${KEYCLOAK_URL}/admin/realms/${REALM}/users" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
     -d '{
-      "username": "admin",
-      "email": "admin@vectorweight.com",
+      "username": "kang",
+      "email": "tz-dev@vectorweight.com",
       "emailVerified": true,
       "enabled": true,
-      "firstName": "Admin",
-      "lastName": "User",
+      "firstName": "Kang",
+      "lastName": "",
       "credentials": [{
         "type": "password",
         "value": "ChangeMe123",
-        "temporary": false
+        "temporary": true
       }]
     }'
-  echo "  Admin user created (password: 'ChangeMe123')."
+  echo "  User 'kang' created (password: 'ChangeMe123', must change on first login)."
+
+  # Assign admin realm role for Grafana/service role mapping
+  USER_ID=$(curl -sf \
+    -H "Authorization: Bearer $TOKEN" \
+    "${KEYCLOAK_URL}/admin/realms/${REALM}/users?username=kang" \
+    | jq -r '.[0].id')
+  ADMIN_ROLE=$(curl -sf \
+    -H "Authorization: Bearer $TOKEN" \
+    "${KEYCLOAK_URL}/admin/realms/${REALM}/roles/admin")
+  curl -sf -X POST \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Content-Type: application/json" \
+    "${KEYCLOAK_URL}/admin/realms/${REALM}/users/${USER_ID}/role-mappings/realm" \
+    -d "[${ADMIN_ROLE}]"
+  echo "  Assigned 'admin' realm role to kang."
 fi
 
 # 6. Create K8s secrets in service namespaces
