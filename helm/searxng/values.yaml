@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: searxng/searxng
-  tag: 2026.1.11-cf74e1d9e
+  tag: 2026.2.11-970f2b843
   pullPolicy: IfNotPresent
 
 service:
