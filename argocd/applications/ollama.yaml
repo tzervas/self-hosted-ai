@@ -18,7 +18,7 @@ spec:
 
         image:
           repository: ollama/ollama
-          tag: "0.5.4"  # Pin version, never use :latest
+          tag: "0.16.2"  # Pin version, never use :latest
 
         env:
           OLLAMA_HOST: "0.0.0.0"
