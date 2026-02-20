@@ -107,6 +107,21 @@ env:
   OAUTH_MERGE_ACCOUNTS_BY_EMAIL: "true"
   # Auto-approve new SSO users (no admin approval needed)
   DEFAULT_USER_ROLE: "user"
+  # ========================================
+  # OpenTelemetry Configuration
+  # ========================================
+  # Enable OpenTelemetry auto-instrumentation for Python
+  OTEL_PYTHON_DISABLED_INSTRUMENTATIONS: ""
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.monitoring.svc.cluster.local:4318"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
+  OTEL_SERVICE_NAME: "open-webui"
+  OTEL_RESOURCE_ATTRIBUTES: "service.namespace=ai-services,deployment.environment=production"
+  OTEL_TRACES_EXPORTER: "otlp"
+  OTEL_METRICS_EXPORTER: "otlp"
+  OTEL_LOGS_EXPORTER: "none"
+  # Instrument FastAPI, HTTP requests, and database calls
+  OTEL_PYTHON_FASTAPI_EXCLUDED_URLS: "/health"
+  OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED: "true"
 
 # Secret references
 secretEnv:

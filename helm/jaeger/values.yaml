@@ -1,0 +1,102 @@
+replicaCount: 1
+
+image:
+  repository: jaegertracing/jaeger-query
+  tag: "1.54.0"
+  pullPolicy: IfNotPresent
+
+# Service configuration
+service:
+  type: ClusterIP
+  ports:
+    http:
+      port: 16686
+      targetPort: 16686
+      protocol: TCP
+    grpc:
+      port: 16685
+      targetPort: 16685
+      protocol: TCP
+    admin:
+      port: 16687
+      targetPort: 16687
+      protocol: TCP
+
+# Jaeger Query configuration
+config:
+  # Use Tempo as storage backend via gRPC plugin
+  grpcStoragePlugin:
+    enabled: true
+    # Connect to Tempo's Jaeger-compatible query endpoint
+    server: tempo.monitoring.svc.cluster.local:16685
+
+  # UI configuration
+  queryBasePath: /
+
+  # Additional query options
+  queryMaxClockSkewAdjust: 0s
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: traefik
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+  hosts:
+    - host: traces.vectorweight.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: jaeger-tls
+      hosts:
+        - traces.vectorweight.com
+
+# Resource limits
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+# Node affinity - prefer homelab worker
+nodeSelector: {}
+
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        preference:
+          matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - homelab
+
+# Health checks
+livenessProbe:
+  httpGet:
+    path: /
+    port: 16687
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: 16687
+  initialDelaySeconds: 10
+  periodSeconds: 5
+
+# Environment variables
+env:
+  - name: SPAN_STORAGE_TYPE
+    value: "grpc-plugin"
+  - name: GRPC_STORAGE_SERVER
+    value: "tempo.monitoring.svc.cluster.local:16685"
+  - name: GRPC_STORAGE_TLS
+    value: "false"
