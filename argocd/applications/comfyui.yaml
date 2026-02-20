@@ -48,6 +48,9 @@ spec:
             enabled: true
             size: 50Gi
             storageClass: longhorn
+          models:
+            # Use NFS-backed shared models storage on homelab (192.168.1.170:/data/models)
+            existingClaim: "shared-models-nfs"
           service:
             type: ClusterIP
             port: 8188  # Direct ComfyUI (no proxy layer)

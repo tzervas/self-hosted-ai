@@ -83,6 +83,13 @@ comfyui:
     accessModes:
       - ReadWriteOnce
     annotations: {}
+  # Models storage configuration
+  models:
+    # Use existing PVC for models (shared across GPU workloads)
+    existingClaim: ""  # If set, uses this PVC instead of creating one
+    # Storage size/class only used if existingClaim is empty
+    size: 500Gi
+    storageClass: ""
   nodeSelector:
     gpu: "true"
   tolerations:
