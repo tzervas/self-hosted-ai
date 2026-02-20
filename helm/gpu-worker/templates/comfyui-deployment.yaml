@@ -154,7 +154,11 @@ spec:
       volumes:
         - name: models
           persistentVolumeClaim:
+            {{- if .Values.comfyui.models.existingClaim }}
+            claimName: {{ .Values.comfyui.models.existingClaim }}
+            {{- else }}
             claimName: {{ include "self-hosted-ai-gpu-worker.fullname" . }}-models
+            {{- end }}
         - name: outputs
           persistentVolumeClaim:
             claimName: {{ include "self-hosted-ai-gpu-worker.fullname" . }}-comfyui
