@@ -25,7 +25,7 @@ resources:
     cpu: 500m
     memory: 1Gi
   limits:
-    cpu: 2000m
+    cpu: 1500m  # Reduced from 2000m (homelab optimization, vector DB)
     memory: 4Gi
 
 # Qdrant configuration

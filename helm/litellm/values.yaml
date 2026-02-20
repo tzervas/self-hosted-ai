@@ -79,10 +79,10 @@ config:
 # Resource allocation - sufficient for handling concurrent requests
 resources:
   requests:
-    cpu: 500m
+    cpu: 250m  # Reduced from 500m (lightweight proxy)
     memory: 1Gi
   limits:
-    cpu: 2000m
+    cpu: 1000m  # Reduced from 2000m (homelab optimization, API proxy)
     memory: 4Gi
 
 # Health checks - startup probe handles slow initialization
