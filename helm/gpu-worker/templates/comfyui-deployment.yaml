@@ -53,7 +53,7 @@ spec:
             - name: models
               mountPath: /models
         - name: install-video-nodes
-          image: alpine/git:latest
+          image: alpine/git:2.43.0
           command: ['sh', '-c']
           args:
             - |
@@ -77,6 +77,13 @@ spec:
               fi
 
               echo "Video custom nodes installed"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
           volumeMounts:
             - name: custom-nodes
               mountPath: /app/custom_nodes
