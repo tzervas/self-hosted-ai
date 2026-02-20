@@ -15,11 +15,6 @@ spec:
       jqPathExpressions:
         - .spec.volumeClaimTemplates[]?.metadata.creationTimestamp
     - group: ""
-      kind: ConfigMap
-      name: prometheus-grafana
-      jsonPointers:
-        - /data/grafana.ini
-    - group: ""
       kind: Secret
       name: prometheus-grafana
       jsonPointers:
@@ -36,11 +31,11 @@ spec:
       targetRevision: 81.5.0
       helm:
         valueFiles:
-          - values.yaml
+          - $values/argocd/helm/prometheus/values.yaml
         skipCrds: true  # CRDs installed manually to avoid annotation size issues
     - repoURL: https://github.com/tzervas/self-hosted-ai
       targetRevision: main
-      path: argocd/helm/prometheus
+      ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
