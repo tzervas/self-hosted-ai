@@ -65,7 +65,7 @@ resources:
     cpu: 250m
     memory: 512Mi
   limits:
-    cpu: 2000m
+    cpu: 1000m  # Reduced from 2000m (homelab optimization, workflow automation)
     memory: 4Gi
 
 # Health probes for deployment orchestration

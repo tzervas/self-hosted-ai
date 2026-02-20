@@ -13,11 +13,11 @@ metadata:
   namespace: ai-services
 spec:
   hard:
-    # Compute limits - generous for AI inference
-    requests.cpu: "16"
-    requests.memory: 48Gi
-    limits.cpu: "24"
-    limits.memory: 64Gi
+    # Compute limits - optimized for homelab (reduced Ollama CPU, LiteLLM, Open WebUI, Qdrant)
+    requests.cpu: "12"  # Reduced from 16 (actual usage ~3-5 cores)
+    requests.memory: 40Gi  # Reduced from 48Gi
+    limits.cpu: "18"    # Reduced from 24 (homelab optimization, ~5.5 cores saved)
+    limits.memory: 56Gi  # Reduced from 64Gi
     # Pod limits
     pods: "30"
     # Storage
@@ -29,7 +29,7 @@ spec:
     services.nodeports: "5"
 ---
 # GPU Workloads namespace - GPU-related services on akula-prime (48GB RAM, RTX 5080 16GB)
-# Limits are over-provisioned as not all services hit max simultaneously
+# Optimized for homelab: GPU does heavy lifting, CPU minimal
 apiVersion: v1
 kind: ResourceQuota
 metadata:
@@ -37,11 +37,12 @@ metadata:
   namespace: gpu-workloads
 spec:
   hard:
-    # Compute - akula-prime has Intel 14700K + 48GB RAM
-    requests.cpu: "20"
-    requests.memory: 40Gi
-    limits.cpu: "32"
-    limits.memory: 128Gi  # Over-provisioned: allows burst but not all services peak at once
+    # Compute - akula-prime has Intel 14700K (20 cores / 28 threads) + 48GB RAM
+    # Reduced from 32→12 cores: GPU workloads optimized (GPU does 95% of work)
+    requests.cpu: "8"   # Reduced from 20 (realistic for GPU workloads)
+    requests.memory: 20Gi  # Reduced from 40Gi (GPU uses VRAM, not RAM)
+    limits.cpu: "12"    # Reduced from 32 (homelab optimization, 60% headroom)
+    limits.memory: 48Gi  # Reduced from 128Gi (matches akula-prime physical RAM)
     # Pods - Ollama, ComfyUI, TTS, Audio
     pods: "20"
     # Storage - 600Gi to accommodate Ollama models + ComfyUI checkpoints

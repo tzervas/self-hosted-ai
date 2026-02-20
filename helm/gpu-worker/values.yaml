@@ -49,11 +49,11 @@ ollama:
       requests:
         nvidia.com/gpu: 1
         memory: "8Gi"
-        cpu: "2000m"
+        cpu: "500m"  # GPU does inference, CPU minimal
       limits:
         nvidia.com/gpu: 1
         memory: "32Gi"
-        cpu: "8000m"
+        cpu: "2000m"  # Reduced from 8000m (homelab optimization)
 
 # ComfyUI configuration (custom Blackwell image with PyTorch 2.7+cu128)
 # Enabled via ArgoCD app override; uses GPU time-slicing alongside ollama-gpu
@@ -100,11 +100,11 @@ comfyui:
     requests:
       nvidia.com/gpu: 1
       memory: "4Gi"
-      cpu: "1000m"
+      cpu: "500m"  # GPU does video gen, CPU minimal
     limits:
       nvidia.com/gpu: 1
       memory: "16Gi"
-      cpu: "4000m"
+      cpu: "1000m"  # Reduced from 4000m (homelab optimization)
 
 # Automatic1111 Stable Diffusion WebUI configuration
 # NOTE: Disabled due to single GPU constraint. Requires GPU time-slicing to run alongside ollama-gpu.
@@ -140,11 +140,11 @@ automatic1111:
     requests:
       nvidia.com/gpu: 1
       memory: "8Gi"
-      cpu: "2000m"
+      cpu: "500m"  # GPU does image gen, CPU minimal
     limits:
       nvidia.com/gpu: 1
       memory: "24Gi"
-      cpu: "6000m"
+      cpu: "1500m"  # Reduced from 6000m (homelab optimization)
 
 # TTS Server (XTTS-v2) configuration
 tts:
