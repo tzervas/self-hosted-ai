@@ -163,7 +163,9 @@ metadata:
   name: allow-keycloak-egress
   namespace: ai-services
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: open-webui
   policyTypes:
     - Egress
   egress:

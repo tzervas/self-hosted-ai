@@ -45,7 +45,7 @@ spec:
                 bind_address: "0.0.0.0"
                 secret_key: "${SEARXNG_SECRET}"
                 image_proxy: true
-                limiter: false
+                limiter: false  # Disabled: rate limiting handled by NetworkPolicy + oauth2-proxy
               outgoing:
                 request_timeout: 3.0
                 pool_connections: 100
