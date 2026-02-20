@@ -141,6 +141,7 @@ create_oidc_client "dify" "https://dify.vectorweight.com/oauth2/callback" "Dify 
 create_oidc_client "prometheus" "https://prometheus.vectorweight.com/oauth2/callback" "Prometheus (oauth2-proxy)"
 create_oidc_client "longhorn" "https://longhorn.vectorweight.com/oauth2/callback" "Longhorn (oauth2-proxy)"
 create_oidc_client "ana-agent" "https://ana.vectorweight.com/auth/keycloak/callback" "aNa Agent"
+create_oidc_client "argocd" "https://argocd.vectorweight.com/auth/callback" "ArgoCD"
 
 # 4. Retrieve client secrets
 echo "[4/6] Retrieving client secrets..."
@@ -170,6 +171,7 @@ DIFY_SECRET=$(get_client_secret "dify")
 PROMETHEUS_SECRET=$(get_client_secret "prometheus")
 LONGHORN_SECRET=$(get_client_secret "longhorn")
 ANA_AGENT_SECRET=$(get_client_secret "ana-agent")
+ARGOCD_SECRET=$(get_client_secret "argocd")
 
 # 5. Create admin user in realm
 echo "[5/6] Creating admin user 'kang' in '${REALM}' realm..."
@@ -274,6 +276,11 @@ kubectl create secret generic ana-oidc-secret -n ana \
   --from-literal=redirect-uri="https://ana.vectorweight.com/auth/keycloak/callback" \
   --dry-run=client -o yaml | kubectl apply -f -
 
+kubectl create secret generic argocd-oidc-secret -n argocd \
+  --from-literal=oidc.keycloak.clientSecret="$ARGOCD_SECRET" \
+  --dry-run=client -o yaml | kubectl apply -f -
+kubectl label secret argocd-oidc-secret -n argocd app.kubernetes.io/part-of=argocd --overwrite
+
 echo ""
 echo "=============================================="
 echo "  Setup Complete!"
@@ -291,6 +298,7 @@ echo "  - dify-oidc-secret       (dify)"
 echo "  - prometheus-oidc-secret  (monitoring)"
 echo "  - longhorn-oidc-secret   (longhorn-system)"
 echo "  - ana-oidc-secret        (ana)"
+echo "  - argocd-oidc-secret     (argocd)"
 echo ""
 echo "OIDC Discovery URL:"
 echo "  ${KEYCLOAK_URL}/realms/${REALM}/.well-known/openid-configuration"
