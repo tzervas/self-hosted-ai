@@ -97,24 +97,18 @@ spec:
             - |
               set -e  # Exit on any error
 
-              # Install custom node dependencies (pinned versions for stability)
-              echo "Installing custom node dependencies..."
-              pip install --no-cache-dir --no-deps \
-                'accelerate>=0.34,<1.0' \
-                'einops>=0.7,<1.0' \
-                'imageio>=2.31,<3.0' \
-                'imageio-ffmpeg>=0.4,<1.0' \
-                'pydantic>=2.0,<3.0' \
-                'timm>=0.9,<1.0' \
-                'transformers>=4.45,<4.50' \
-                'sentencepiece>=0.1,<1.0' \
-                'tokenizers>=0.21,<0.22' \
-                'huggingface-hub>=0.26,<1.0' \
-                'gguf>=0.10.0' \
-                || {
-                  echo "ERROR: Failed to install required dependencies for WanVideo nodes"
-                  exit 1
-                }
+              # Install WanVideo custom node dependencies from requirements.txt
+              echo "Installing WanVideoWrapper dependencies..."
+              if [ -f /app/custom_nodes/ComfyUI-WanVideoWrapper/requirements.txt ]; then
+                pip install --no-cache-dir -r /app/custom_nodes/ComfyUI-WanVideoWrapper/requirements.txt \
+                  || {
+                    echo "ERROR: Failed to install WanVideo dependencies"
+                    exit 1
+                  }
+                echo "✓ WanVideo dependencies installed successfully"
+              else
+                echo "WARNING: WanVideoWrapper requirements.txt not found"
+              fi
 
               # Start ComfyUI
               echo "Starting ComfyUI..."
