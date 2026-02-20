@@ -26,6 +26,8 @@ spec:
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         app.kubernetes.io/component: video
     spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- with .Values.video.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -42,6 +44,8 @@ spec:
         - name: video
           image: "{{ .Values.video.image.repository }}:{{ .Values.video.image.tag }}"
           imagePullPolicy: {{ .Values.video.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
           ports:
             - name: http
               containerPort: 5005
