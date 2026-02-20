@@ -91,6 +91,31 @@ spec:
         - name: comfyui
           image: "{{ .Values.comfyui.image.repository }}:{{ .Values.comfyui.image.tag }}"
           imagePullPolicy: {{ .Values.comfyui.image.pullPolicy }}
+          command: ["/bin/bash"]
+          args:
+            - -c
+            - |
+              set -e  # Exit on any error
+
+              # Install custom node dependencies (pinned versions for stability)
+              echo "Installing custom node dependencies..."
+              pip install --no-cache-dir --no-deps \
+                'accelerate>=0.34,<1.0' \
+                'einops>=0.7,<1.0' \
+                'imageio>=2.31,<3.0' \
+                'imageio-ffmpeg>=0.4,<1.0' \
+                'pydantic>=2.0,<3.0' \
+                'timm>=0.9,<1.0' \
+                'transformers>=4.45,<4.50' \
+                'sentencepiece>=0.1,<1.0' \
+                || {
+                  echo "ERROR: Failed to install required dependencies for WanVideo nodes"
+                  exit 1
+                }
+
+              # Start ComfyUI
+              echo "Starting ComfyUI..."
+              cd /app && python main.py --listen 0.0.0.0 --port 8188 $COMMANDLINE_ARGS
           ports:
             - name: http
               containerPort: 8188
