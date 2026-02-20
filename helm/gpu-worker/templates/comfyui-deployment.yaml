@@ -108,6 +108,7 @@ spec:
                 'timm>=0.9,<1.0' \
                 'transformers>=4.45,<4.50' \
                 'sentencepiece>=0.1,<1.0' \
+                'tokenizers>=0.21,<0.22' \
                 || {
                   echo "ERROR: Failed to install required dependencies for WanVideo nodes"
                   exit 1
