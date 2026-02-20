@@ -1,0 +1,13 @@
+apiVersion: v2
+name: jaeger
+description: Jaeger Query UI with Tempo backend for distributed tracing
+type: application
+version: 0.1.0
+appVersion: "1.54.0"
+keywords:
+  - observability
+  - tracing
+  - jaeger
+  - tempo
+maintainers:
+  - name: Self-Hosted AI Platform

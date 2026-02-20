@@ -49,6 +49,17 @@ env:
   STORE_MODEL_IN_DB: "false"
   DISABLE_SPEND_LOGS: "true"
 
+  # OpenTelemetry configuration
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.monitoring.svc.cluster.local:4318"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
+  OTEL_SERVICE_NAME: "litellm"
+  OTEL_RESOURCE_ATTRIBUTES: "service.namespace=ai-services,deployment.environment=production"
+  OTEL_TRACES_EXPORTER: "otlp"
+  OTEL_METRICS_EXPORTER: "otlp"
+  OTEL_LOGS_EXPORTER: "none"
+  # Enable OpenTelemetry tracing in LiteLLM
+  OTEL_ENABLED: "true"
+
 # Secret references
 secrets:
   litellmMasterKey:
