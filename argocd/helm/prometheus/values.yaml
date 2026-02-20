@@ -153,7 +153,7 @@ grafana:
       api_url: https://auth.vectorweight.com/realms/vectorweight/protocol/openid-connect/userinfo
       role_attribute_path: "contains(realm_access.roles[*], 'admin') && 'Admin' || 'Viewer'"
       signout_redirect_url: https://auth.vectorweight.com/realms/vectorweight/protocol/openid-connect/logout?post_logout_redirect_uri=https%3A%2F%2Fgrafana.vectorweight.com%2Flogin
-      tls_skip_verify_insecure: true
+      tls_skip_verify_insecure: true  # Keycloak uses self-signed cert (cert-manager local CA); proper fix: mount CA bundle
 
   # Datasource provisioning
   additionalDataSources:

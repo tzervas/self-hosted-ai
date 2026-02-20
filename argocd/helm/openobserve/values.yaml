@@ -5,7 +5,7 @@
 
 auth:
   ZO_ROOT_USER_EMAIL: "kang@vectorweight.com"
-  ZO_ROOT_USER_PASSWORD: "banana"
+  ZO_ROOT_USER_PASSWORD: "banana12"
 
 config:
   # Local disk storage (no S3 needed for homelab)
