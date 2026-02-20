@@ -1,4 +1,4 @@
-{{- if or (and .Values.comfyui.enabled .Values.comfyui.persistence.enabled) (and .Values.automatic1111.enabled .Values.automatic1111.persistence.enabled) }}
+{{- if and (or (and .Values.comfyui.enabled .Values.comfyui.persistence.enabled) (and .Values.automatic1111.enabled .Values.automatic1111.persistence.enabled)) (not .Values.comfyui.models.existingClaim) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -17,8 +17,10 @@ spec:
     - ReadWriteOnce  # Single node access for GPU workloads
   resources:
     requests:
-      storage: 500Gi  # Large storage for models
-  {{- if and .Values.global .Values.global.storageClass }}
+      storage: {{ .Values.comfyui.models.size }}
+  {{- if .Values.comfyui.models.storageClass }}
+  storageClassName: {{ .Values.comfyui.models.storageClass }}
+  {{- else if and .Values.global .Values.global.storageClass }}
   storageClassName: {{ .Values.global.storageClass }}
   {{- end }}
 {{- end }}
