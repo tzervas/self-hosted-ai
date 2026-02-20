@@ -53,9 +53,10 @@ spec:
             port: 8188  # Direct ComfyUI (no proxy layer)
           env:
             # VRAM optimization for 16GB GPU (RTX 5080)
-            # These flags enable model offloading, attention slicing, and VAE tiling
+            # lowvram: model offloading to RAM when not in use
+            # preview-method auto: optimized preview generation
             - name: COMMANDLINE_ARGS
-              value: "--lowvram --preview-method auto --disable-xformers-enable-attention-slicing"
+              value: "--lowvram --preview-method auto"
             # PyTorch CUDA memory optimization
             - name: PYTORCH_CUDA_ALLOC_CONF
               value: "max_split_size_mb:512"
