@@ -153,7 +153,7 @@ resources:
     cpu: 250m
     memory: 768Mi  # v0.7.2 uses ~640MB RSS; 768Mi keeps HPA utilization ~83%
   limits:
-    cpu: 2000m
+    cpu: 1000m  # Reduced from 2000m (homelab optimization, web frontend)
     memory: 4Gi
 
 # Health probes for deployment orchestration

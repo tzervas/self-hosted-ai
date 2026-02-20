@@ -53,7 +53,7 @@ resources:
     cpu: 500m
     memory: 2Gi
   limits:
-    cpu: 8000m
+    cpu: 4000m  # Reduced from 8000m (homelab optimization, CPU fallback inference)
     memory: 32Gi
 
 # Security context
