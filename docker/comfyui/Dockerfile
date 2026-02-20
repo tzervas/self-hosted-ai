@@ -2,7 +2,7 @@
 # Base: NVIDIA CUDA 12.8 runtime + PyTorch 2.7 stable
 #
 # Build:
-#   docker build -t ghcr.io/tzervas/comfyui-blackwell:latest .
+#   docker build -t ghcr.io/tzervas/comfyui-blackwell:1.0.0 .
 #
 # Run:
 #   docker run --gpus all -p 8188:8188 -v models:/app/models ghcr.io/tzervas/comfyui-blackwell:latest
@@ -52,7 +52,7 @@ EXPOSE 8188
 
 # Health check: ComfyUI returns JSON on /system_stats
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8188/system_stats')" || exit 1
+    CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8188/system_stats')"
 
 # Run ComfyUI listening on all interfaces
 CMD ["python3", "main.py", "--listen", "0.0.0.0", "--port", "8188"]

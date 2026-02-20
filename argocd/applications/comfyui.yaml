@@ -42,7 +42,7 @@ spec:
           enabled: true
           image:
             repository: ghcr.io/tzervas/comfyui-blackwell
-            tag: latest
+            tag: "1.0.0"  # Pinned: ComfyUI@2687652 + Manager@f41365a + PyTorch 2.7+cu128
             pullPolicy: IfNotPresent
           persistence:
             enabled: true

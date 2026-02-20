@@ -61,17 +61,19 @@ class Tools:
             if not embedding:
                 return "Failed to generate embedding for the memory."
 
-            # Ensure collection exists
-            requests.put(
+            # Ensure collection exists (409 = already exists, which is fine)
+            coll_resp = requests.put(
                 f"{self.valves.qdrant_url}/collections/{self.valves.collection}",
                 json={
                     "vectors": {"size": len(embedding), "distance": "Cosine"},
                 },
                 timeout=10,
             )
+            if coll_resp.status_code not in (200, 409):
+                return f"Failed to ensure collection exists: {coll_resp.text}"
 
             # Store in Qdrant
-            point_id = int(hashlib.md5(content.encode()).hexdigest()[:8], 16)
+            point_id = int(hashlib.sha256(content.encode()).hexdigest()[:16], 16)
             requests.put(
                 f"{self.valves.qdrant_url}/collections/{self.valves.collection}/points",
                 json={

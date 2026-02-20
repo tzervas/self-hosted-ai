@@ -40,7 +40,7 @@ class Tools:
         """
         Generate a short video from a text description using Wan 2.1 (1.3B) via ComfyUI.
         Use this when the user asks you to create, generate, or make a video or animation.
-        Outputs frames as images that form the video sequence.
+        Outputs frames as individual images (video assembly requires VHS_VideoCombine custom node).
 
         :param prompt: Detailed description of the video to generate (be specific about motion and scene)
         :param negative_prompt: Things to avoid in the generated video
@@ -121,7 +121,7 @@ class Tools:
                     "filename_prefix": "OpenWebUI_video",
                     "images": ["8", 0],
                 },
-                "class_type": "SaveImage",
+                "class_type": "SaveImage",  # Exports individual frames; video assembly via VHS_VideoCombine if available
             },
         }
 
@@ -129,7 +129,7 @@ class Tools:
             response = requests.post(
                 f"{self.valves.comfyui_base_url}/prompt",
                 json={"prompt": workflow, "client_id": f"owui-vid-{seed}"},
-                timeout=self.valves.timeout,
+                timeout=30,  # Prompt submission should return immediately
             )
             response.raise_for_status()
             result = response.json()
@@ -144,7 +144,7 @@ class Tools:
                 try:
                     hist = requests.get(
                         f"{self.valves.comfyui_base_url}/history/{prompt_id}",
-                        timeout=self.valves.timeout,
+                        timeout=10,  # Short timeout per poll; total budget controlled by poll_timeout
                     ).json()
                     if prompt_id in hist:
                         outputs = hist[prompt_id].get("outputs", {})
