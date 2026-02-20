@@ -91,6 +91,18 @@ spec:
         - name: comfyui
           image: "{{ .Values.comfyui.image.repository }}:{{ .Values.comfyui.image.tag }}"
           imagePullPolicy: {{ .Values.comfyui.image.pullPolicy }}
+          command: ["/bin/bash"]
+          args:
+            - -c
+            - |
+              # Install custom node dependencies
+              echo "Installing custom node dependencies..."
+              pip install --no-cache-dir accelerate einops imageio imageio-ffmpeg pydantic timm transformers sentencepiece \
+                 || echo "Warning: Some dependencies failed to install"
+
+              # Start ComfyUI
+              echo "Starting ComfyUI..."
+              cd /app && python main.py --listen 0.0.0.0 --port 8188 $COMMANDLINE_ARGS
           ports:
             - name: http
               containerPort: 8188
