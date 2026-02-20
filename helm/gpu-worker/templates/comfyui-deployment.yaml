@@ -110,6 +110,7 @@ spec:
                 'sentencepiece>=0.1,<1.0' \
                 'tokenizers>=0.21,<0.22' \
                 'huggingface-hub>=0.26,<1.0' \
+                'gguf>=0.10.0' \
                 || {
                   echo "ERROR: Failed to install required dependencies for WanVideo nodes"
                   exit 1
