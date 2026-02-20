@@ -8,19 +8,33 @@ GPU_WORKER_DIR="$PROJECT_DIR/gpu-worker"
 
 cd "$GPU_WORKER_DIR"
 
+# Detect container runtime (prefer podman, fallback to docker)
+if command -v podman &> /dev/null; then
+    CONTAINER_RUNTIME="podman"
+    COMPOSE_COMMAND="podman compose"
+elif command -v docker &> /dev/null; then
+    CONTAINER_RUNTIME="docker"
+    COMPOSE_COMMAND="docker compose"
+else
+    echo "Error: Neither Podman nor Docker is installed"
+    exit 1
+fi
+
+echo "Using container runtime: $CONTAINER_RUNTIME"
+
 usage() {
     echo "Usage: $0 {deploy|stop|status|logs|update|pull-model <model>|list-models|test|benchmark|comfyui-status}"
     exit 1
 }
 
 check_dependencies() {
-    if ! command -v docker &> /dev/null; then
-        echo "Error: Docker is not installed"
+    if ! command -v $CONTAINER_RUNTIME &> /dev/null; then
+        echo "Error: $CONTAINER_RUNTIME is not installed"
         exit 1
     fi
 
-    if ! command -v docker compose &> /dev/null; then
-        echo "Error: Docker Compose is not installed"
+    if ! $COMPOSE_COMMAND version &> /dev/null; then
+        echo "Error: $CONTAINER_RUNTIME compose is not installed or not working"
         exit 1
     fi
 
@@ -31,7 +45,7 @@ check_dependencies() {
 
 deploy() {
     echo "Deploying GPU worker (Ollama + ComfyUI)..."
-    docker compose up -d
+    $COMPOSE_COMMAND up -d
     echo "GPU worker deployed."
     echo "  Ollama API: http://localhost:11434"
     echo "  ComfyUI:    http://localhost:8188"
@@ -39,12 +53,12 @@ deploy() {
 
 stop() {
     echo "Stopping GPU worker..."
-    docker compose down
+    $COMPOSE_COMMAND down
 }
 
 status() {
     echo "GPU worker status:"
-    docker compose ps
+    $COMPOSE_COMMAND ps
 
     echo ""
     echo "GPU status:"
@@ -60,13 +74,13 @@ status() {
 }
 
 logs() {
-    docker compose logs -f
+    $COMPOSE_COMMAND logs -f
 }
 
 update() {
     echo "Updating GPU worker..."
-    docker compose pull
-    docker compose up -d
+    $COMPOSE_COMMAND pull
+    $COMPOSE_COMMAND up -d
 }
 
 pull_model() {
@@ -76,12 +90,12 @@ pull_model() {
         exit 1
     fi
     echo "Pulling model: $MODEL"
-    timeout 600 docker compose exec ollama-gpu ollama pull "$MODEL"
+    timeout 600 $COMPOSE_COMMAND exec ollama-gpu ollama pull "$MODEL"
 }
 
 list_models() {
     echo "Available GPU models:"
-    docker compose exec ollama-gpu ollama list
+    $COMPOSE_COMMAND exec ollama-gpu ollama list
 }
 
 test() {
@@ -101,7 +115,7 @@ test() {
 
     # Test GPU access
     echo "Testing GPU access..."
-    if docker compose exec ollama-gpu nvidia-smi > /dev/null 2>&1; then
+    if $COMPOSE_COMMAND exec ollama-gpu nvidia-smi > /dev/null 2>&1; then
         echo "✓ GPU accessible from container"
     else
         echo "✗ GPU not accessible from container"
@@ -109,7 +123,7 @@ test() {
 
     # Test inference
     echo "Testing inference..."
-    if docker compose exec ollama-gpu ollama run llama3.2 "Hello" --format json > /dev/null 2>&1; then
+    if $COMPOSE_COMMAND exec ollama-gpu ollama run llama3.2 "Hello" --format json > /dev/null 2>&1; then
         echo "✓ Inference working"
     else
         echo "✗ Inference failed"
@@ -121,7 +135,7 @@ benchmark() {
 
     # Simple inference test
     echo "Running inference test..."
-    timeout 60 docker compose exec ollama-gpu ollama run llama3.2 "Write a short summary of artificial intelligence." 2>/dev/null | head -10
+    timeout 60 $COMPOSE_COMMAND exec ollama-gpu ollama run llama3.2 "Write a short summary of artificial intelligence." 2>/dev/null | head -10
     if [ $? -eq 0 ]; then
         echo "✓ GPU Inference successful"
     else
@@ -134,7 +148,7 @@ comfyui_status() {
     echo "=============="
 
     # Check if container is running
-    if docker compose ps comfyui 2>/dev/null | grep -q "running"; then
+    if $COMPOSE_COMMAND ps comfyui 2>/dev/null | grep -q "running"; then
         echo "✓ Container: Running"
     else
         echo "✗ Container: Not running"
