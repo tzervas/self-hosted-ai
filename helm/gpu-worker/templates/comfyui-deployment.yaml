@@ -52,6 +52,34 @@ spec:
           volumeMounts:
             - name: models
               mountPath: /models
+        - name: install-video-nodes
+          image: alpine/git:latest
+          command: ['sh', '-c']
+          args:
+            - |
+              set -e
+              cd /app/custom_nodes
+
+              # Install Wan video wrapper if not exists
+              if [ ! -d "ComfyUI-WanVideoWrapper" ]; then
+                echo "Installing ComfyUI-WanVideoWrapper..."
+                git clone --depth 1 https://github.com/kijai/ComfyUI-WanVideoWrapper.git
+              else
+                echo "ComfyUI-WanVideoWrapper already installed"
+              fi
+
+              # Install SVD if not exists
+              if [ ! -d "ComfyUI-SVD" ]; then
+                echo "Installing ComfyUI-SVD..."
+                git clone --depth 1 https://github.com/kijai/ComfyUI-SVD.git
+              else
+                echo "ComfyUI-SVD already installed"
+              fi
+
+              echo "Video custom nodes installed"
+          volumeMounts:
+            - name: custom-nodes
+              mountPath: /app/custom_nodes
       containers:
         - name: comfyui
           image: "{{ .Values.comfyui.image.repository }}:{{ .Values.comfyui.image.tag }}"
@@ -76,6 +104,8 @@ spec:
               mountPath: /app/extra_model_paths.yaml
               subPath: extra_model_paths.yaml
               readOnly: true
+            - name: custom-nodes
+              mountPath: /app/custom_nodes
           livenessProbe:
             httpGet:
               path: /system_stats
@@ -102,4 +132,6 @@ spec:
         - name: extra-model-paths
           configMap:
             name: {{ include "self-hosted-ai-gpu-worker.fullname" . }}-comfyui-config
+        - name: custom-nodes
+          emptyDir: {}
 {{- end }}
