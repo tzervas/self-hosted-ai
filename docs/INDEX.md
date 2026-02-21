@@ -53,6 +53,7 @@
 | **Add AI Model** | [config/models-manifest.yml](../config/models-manifest.yml) | `helm/ollama/values.yaml` | `scripts/sync_models.py` |
 | **Create Workflow** | [workflows/README.md](../workflows/README.md) | `config/n8n-workflows/*.json` | n8n UI at `https://n8n.vectorweight.com` |
 | **Debug Deployment** | [OPERATIONS.md](../OPERATIONS.md) Troubleshooting | [docs/VERIFICATION_REPORT.md](VERIFICATION_REPORT.md) | `kubectl logs`, `argocd app get` |
+| **Query Traces** | [OPERATIONS.md](../OPERATIONS.md) Distributed Tracing | Grafana Explore → Tempo datasource | TraceQL queries, trace correlation |
 | **Rotate Secrets** | [ARCHITECTURE.md](../ARCHITECTURE.md) ADR-006 | `argocd/sealed-secrets/` | `scripts/secrets_manager.py rotate` |
 | **Scale Resources** | [helm/resource-quotas/](../helm/resource-quotas/) | `helm/*/values.yaml` (resources sections) | `kubectl top`, `kubectl scale` |
 | **Monitor Cluster** | [OPERATIONS.md](../OPERATIONS.md) | Grafana dashboards | `https://grafana.vectorweight.com` |
@@ -85,12 +86,14 @@
 **Key Sections**:
 - **Service Endpoints** (7-20): All HTTPS URLs with purposes
 - **Internal Services** (22-30): ClusterIP services and ports
-- **GPU Worker** (32-48): Standalone workstation at 192.168.1.99
-- **Quick Commands** (77-): Cluster health, ArgoCD sync, logs
-- **Troubleshooting** (later): Common issues and solutions
+- **GPU Worker** (32-56): Standalone workstation at 192.168.1.99, rootless Podman runtime
+- **Quick Commands** (85-): Cluster health, ArgoCD sync, logs
+- **Distributed Tracing** (258-371): Tempo, OpenObserve, OTel Collector, TraceQL queries, trace-to-logs correlation
+- **Security** (374-444): Pod Security Standards (PSS baseline), NetworkPolicy, rootless Podman security model
+- **Troubleshooting** (168-): Common issues and solutions
 
 **Dependencies**: [ARCHITECTURE.md](../ARCHITECTURE.md)
-**When to Read**: First day on platform, debugging, ops tasks
+**When to Read**: First day on platform, debugging, ops tasks, tracing analysis, security review
 
 ### Getting Started
 
@@ -674,7 +677,9 @@ Open WebUI, n8n, SearXNG
 - `https://llm.vectorweight.com` → LiteLLM
 - `https://n8n.vectorweight.com` → n8n
 - `https://argocd.vectorweight.com` → ArgoCD
-- `https://grafana.vectorweight.com` → Grafana
+- `https://grafana.vectorweight.com` → Grafana (unified observability UI)
+- `https://prometheus.vectorweight.com` → Prometheus
+- `https://observe.vectorweight.com` → OpenObserve (logs, metrics, traces)
 - `https://search.vectorweight.com` → SearXNG
 - `https://git.vectorweight.com` → GitLab
 
@@ -683,11 +688,14 @@ Open WebUI, n8n, SearXNG
 - `ollama-gpu.gpu-workloads:11434` → Ollama GPU (forward to 192.168.1.99:11434)
 - `postgresql.self-hosted-ai:5432` → PostgreSQL
 - `redis.self-hosted-ai:6379` → Redis
+- `tempo.monitoring:3100` → Tempo (trace storage and query)
+- `otel-collector-opentelemetry-collector.monitoring:4318` → OTel Collector (OTLP/HTTP receiver)
 
-**GPU Worker** (Standalone Docker, 192.168.1.99):
+**GPU Worker** (Standalone Podman, 192.168.1.99):
 - `http://192.168.1.99:11434` → Ollama GPU
 - `http://192.168.1.99:8188` → ComfyUI
 - `http://192.168.1.99:9000` → Whisper STT
+- **Container Runtime**: Rootless Podman (migrated from Docker, PSS baseline hardening)
 
 ---
 
