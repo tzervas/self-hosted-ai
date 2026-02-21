@@ -38,11 +38,11 @@ metadata:
 spec:
   hard:
     # Compute - akula-prime has Intel 14700K (20 cores / 28 threads) + 48GB RAM
-    # Reduced from 32→12 cores: GPU workloads optimized (GPU does 95% of work)
-    requests.cpu: "8"   # Reduced from 20 (realistic for GPU workloads)
-    requests.memory: 20Gi  # Reduced from 40Gi (GPU uses VRAM, not RAM)
-    limits.cpu: "12"    # Reduced from 32 (homelab optimization, 60% headroom)
-    limits.memory: 48Gi  # Reduced from 128Gi (matches akula-prime physical RAM)
+    # Increased to allow all GPU services (ollama, comfyui, audio, video) to run simultaneously
+    requests.cpu: "16"   # Increased from 8 (allow multiple GPU workloads)
+    requests.memory: 32Gi  # Increased from 20Gi (allow larger model contexts)
+    limits.cpu: "24"    # Increased from 12 (use most of 28 cores, reserve 4 for system)
+    limits.memory: 42Gi  # Reduced from 48Gi (reserve 6GB for system/kubelet)
     # Pods - Ollama, ComfyUI, TTS, Audio
     pods: "20"
     # Storage - 600Gi to accommodate Ollama models + ComfyUI checkpoints
