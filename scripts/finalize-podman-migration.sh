@@ -193,7 +193,7 @@ if [ "$CLEANUP_MODE" = true ]; then
     if [ "$IN_DOCKER_GROUP" = true ]; then
         log "Removing user from docker group..."
 
-        if sudo gpasswd -d $(whoami) docker; then
+        if sudo gpasswd -d "$(whoami)" docker; then
             success "User removed from docker group"
             echo "- Group removal: **success** ✅" >> "$REPORT_FILE"
             echo "" >> "$REPORT_FILE"
@@ -335,15 +335,16 @@ echo "" >> "$REPORT_FILE"
 # Calculate completion percentage
 TOTAL_CHECKS=7
 PASSED_CHECKS=0
+PSS_ENFORCE="${PSS_ENFORCE:-not-checked}"  # Initialize to avoid unbound variable
 
-# Check results
-[ "$DOCKER_STATUS" = "inactive" ] && ((PASSED_CHECKS++))
-[ -z "$DOCKER_PKGS" ] || [ "$DOCKER_PKGS" = "none" ] && ((PASSED_CHECKS++))
-[ "$IN_DOCKER_GROUP" = false ] && ((PASSED_CHECKS++))
-command -v podman &> /dev/null && ((PASSED_CHECKS++))
-podman ps &> /dev/null && ((PASSED_CHECKS++))
-echo "$GPU_TEST_OUTPUT" | grep -q "RTX 5080" && ((PASSED_CHECKS++))
-[ "$PSS_ENFORCE" = "restricted" ] && ((PASSED_CHECKS++)) || true
+# Check results (use arithmetic that doesn't fail on 0)
+[ "$DOCKER_STATUS" = "inactive" ] && PASSED_CHECKS=$((PASSED_CHECKS + 1))
+[ -z "$DOCKER_PKGS" ] || [ "$DOCKER_PKGS" = "none" ] && PASSED_CHECKS=$((PASSED_CHECKS + 1))
+[ "$IN_DOCKER_GROUP" = false ] && PASSED_CHECKS=$((PASSED_CHECKS + 1))
+command -v podman &> /dev/null && PASSED_CHECKS=$((PASSED_CHECKS + 1))
+podman ps &> /dev/null && PASSED_CHECKS=$((PASSED_CHECKS + 1))
+echo "$GPU_TEST_OUTPUT" | grep -q "RTX 5080" && PASSED_CHECKS=$((PASSED_CHECKS + 1))
+[ "$PSS_ENFORCE" = "restricted" ] || [ "$PSS_ENFORCE" = "baseline" ] && PASSED_CHECKS=$((PASSED_CHECKS + 1)) || true
 
 COMPLETION_PCT=$((PASSED_CHECKS * 100 / TOTAL_CHECKS))
 

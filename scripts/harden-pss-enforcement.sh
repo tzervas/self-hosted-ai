@@ -91,13 +91,11 @@ enforce_pss() {
     fi
 
     # Label the namespace with PSS enforcement
-    kubectl label namespace "$namespace" \
+    if kubectl label namespace "$namespace" \
         pod-security.kubernetes.io/enforce="$policy" \
         pod-security.kubernetes.io/audit="$policy" \
         pod-security.kubernetes.io/warn="$policy" \
-        --overwrite
-
-    if [ $? -eq 0 ]; then
+        --overwrite; then
         success "PSS '$policy' enforced on namespace: $namespace"
     else
         error "Failed to enforce PSS on namespace: $namespace"
@@ -107,12 +105,13 @@ enforce_pss() {
 
 # Enforce PSS on AI/GPU namespaces
 echo ""
-log "Enforcing PSS 'restricted' on AI workload namespaces..."
+log "Enforcing PSS 'baseline' on AI workload namespaces..."
+log "(Using 'baseline' instead of 'restricted' due to upstream GPU image limitations)"
 echo ""
 
-enforce_pss "ai-services" "restricted"
-enforce_pss "gpu-workloads" "restricted"
-enforce_pss "automation" "restricted"
+enforce_pss "ai-services" "baseline"
+enforce_pss "gpu-workloads" "baseline"
+enforce_pss "automation" "baseline"
 
 # Verify enforcement
 echo ""

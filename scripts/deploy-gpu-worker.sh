@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
@@ -135,11 +135,17 @@ benchmark() {
 
     # Simple inference test
     echo "Running inference test..."
-    timeout 60 $COMPOSE_COMMAND exec ollama-gpu ollama run llama3.2 "Write a short summary of artificial intelligence." 2>/dev/null | head -10
-    if [ $? -eq 0 ]; then
+    # Capture output and check PIPESTATUS[0] for actual command exit code
+    set +e  # Temporarily disable exit-on-error
+    OUTPUT=$(timeout 60 $COMPOSE_COMMAND exec ollama-gpu ollama run llama3.2 "Write a short summary of artificial intelligence." 2>&1)
+    RESULT=${PIPESTATUS[0]}
+    set -e  # Re-enable exit-on-error
+
+    if [ "$RESULT" -eq 0 ]; then
+        echo "$OUTPUT" | head -10
         echo "✓ GPU Inference successful"
     else
-        echo "✗ GPU Inference failed or timed out"
+        echo "✗ GPU Inference failed or timed out (exit code: $RESULT)"
     fi
 }
 
