@@ -201,7 +201,7 @@ tts:
 
 # Audio Generation Server (AudioLDM2/MusicGen/Bark) configuration
 audio:
-  enabled: false  # Disabled by default; enable explicitly in ArgoCD app
+  enabled: true  # Enabled for music_generator_pro and audio_processor tools
   image:
     repository: ghcr.io/tzervas/audio-server
     tag: "1.1.0"
@@ -231,7 +231,7 @@ audio:
 
 # Video Generation Server (AnimateDiff-Lightning/SVD) configuration
 video:
-  enabled: false  # Disabled by default; enable explicitly in ArgoCD app
+  enabled: true  # Enabled for video_editor and video_generation tools
   image:
     repository: ghcr.io/tzervas/video-server
     tag: "1.0.0"

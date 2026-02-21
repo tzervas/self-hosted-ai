@@ -1,36 +1,28 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: openobserve
+  name: argocd-config
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "2"  # Deploy with monitoring stack
+    argocd.argoproj.io/sync-wave: "4"  # After Keycloak (wave 3), before apps
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  ignoreDifferences:
-    - group: apps
-      kind: StatefulSet
-      jqPathExpressions:
-        - .spec.volumeClaimTemplates[]?.metadata.creationTimestamp
   source:
     repoURL: https://github.com/tzervas/self-hosted-ai.git
     targetRevision: main
-    path: helm/openobserve
-    helm:
-      valueFiles:
-        - ../../argocd/helm/openobserve/values.yaml
+    path: helm/argocd-config
   destination:
     server: https://kubernetes.default.svc
-    namespace: monitoring
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - RespectIgnoreDifferences=true
+      - ServerSideApply=true
     retry:
       limit: 5
       backoff:

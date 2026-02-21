@@ -1,48 +1,25 @@
 replicaCount: 1
-
 image:
   repository: quay.io/oauth2-proxy/oauth2-proxy
   tag: v7.7.1
   pullPolicy: IfNotPresent
-
-# Keycloak OIDC configuration
 config:
-  # Provider
   provider: keycloak-oidc
-  providerDisplayName: "VectorWeight SSO"
-
-  # Keycloak realm URLs
-  oidcIssuerUrl: "https://auth.vectorweight.com/realms/vectorweight"
-
-  # Cookie settings
-  cookieName: "_oauth2_proxy"
+  providerDisplayName: VectorWeight SSO
+  oidcIssuerUrl: https://auth.vectorweight.com/realms/vectorweight
+  cookieName: _oauth2_proxy
   cookieSecure: true
   cookieDomains:
-    - ".vectorweight.com"
-
-  # Email domain restriction (allow all for homelab)
+  - .vectorweight.com
   emailDomains:
-    - "*"
-
-  # Skip TLS verification for OIDC provider (needed when using self-signed certs)
-  sslInsecureSkipVerify: true
-
-  # Upstream for reverse-proxy mode (used by vectorweight.com root domain)
-  # Non-/oauth2 requests are proxied here after authentication
-  upstream: "http://landing-page.default.svc.cluster.local:80/"
-
-  # Pass auth info upstream
+  - '*'
+  sslInsecureSkipVerify: false
+  upstream: http://landing-page.default.svc.cluster.local:80/
   passBasicAuth: false
   passAccessToken: true
   setXAuthRequest: true
   setAuthorizationHeader: true
-
-  # Cookie secret (must be exactly 16, 24, or 32 bytes for AES cipher)
-  # Generated with: openssl rand -base64 24 (produces 32-char output = 32 bytes)
-  cookieSecret: "b0/RvgHti3L6BkUSMSuuAbcPWDzuo1KG"
-
-# OIDC client credentials from K8s secret
-# Uses a single OIDC client for the proxy itself
+  cookieSecret: b0/RvgHti3L6BkUSMSuuAbcPWDzuo1KG
 secretEnv:
   OAUTH2_PROXY_CLIENT_ID:
     secretName: n8n-oidc-secret
@@ -50,26 +27,20 @@ secretEnv:
   OAUTH2_PROXY_CLIENT_SECRET:
     secretName: n8n-oidc-secret
     key: client-secret
-
 service:
   type: ClusterIP
   port: 4180
-
-# Services protected by oauth2-proxy forward-auth.
-# Each generates a Traefik ForwardAuth middleware named "<name>-forward-auth".
-# Reference in ingress annotations as:
-#   traefik.ingress.kubernetes.io/router.middlewares: <namespace>-<name>-forward-auth@kubernetescrd
 protectedServices:
-  - name: n8n
-  - name: searxng
-  - name: litellm
-  - name: traefik-dashboard
-  - name: dify
-  - name: prometheus
-  - name: longhorn
-  - name: openobserve
-  - name: landing-page
-
+- name: n8n
+- name: searxng
+- name: litellm
+- name: traefik-dashboard
+- name: dify
+- name: prometheus
+- name: longhorn
+- name: openobserve
+- name: jaeger
+- name: landing-page
 resources:
   requests:
     cpu: 50m
@@ -77,8 +48,20 @@ resources:
   limits:
     cpu: 200m
     memory: 128Mi
-
 nodeSelector:
   kubernetes.io/hostname: homelab
 tolerations: []
 affinity: {}
+extraVolumes:
+- name: ca-bundle
+  secret:
+    secretName: vectorweight-root-ca
+    defaultMode: 420
+extraVolumeMounts:
+- name: ca-bundle
+  mountPath: /etc/ssl/certs/vectorweight-ca.crt
+  subPath: tls.crt
+  readOnly: true
+extraEnv:
+- name: SSL_CERT_FILE
+  value: /etc/ssl/certs/vectorweight-ca.crt

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: argocd-config
+description: ArgoCD configuration with Keycloak SSO integration
+version: 0.1.0
+appVersion: "2.11.0"

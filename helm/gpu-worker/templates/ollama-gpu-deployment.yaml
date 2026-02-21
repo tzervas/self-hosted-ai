@@ -71,5 +71,5 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: {{ include "self-hosted-ai-gpu-worker.fullname" . }}-ollama-gpu
+            claimName: shared-models-nfs  # Use NFS storage from homelab (192.168.1.170)
 {{- end }}
