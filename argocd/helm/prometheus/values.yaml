@@ -157,20 +157,21 @@ grafana:
 
   # Datasource provisioning
   additionalDataSources:
-    - name: Loki
-      type: loki
-      uid: loki
-      url: http://loki-gateway.monitoring.svc.cluster.local:80
-      access: proxy
-      isDefault: false
-      jsonData:
-        maxLines: 1000
-        derivedFields:
-          - name: TraceID
-            matcherRegex: "(?:traceID|trace_id|traceId)[=:]\\s*(\\w+)"
-            url: "$${__value.raw}"
-            datasourceUid: tempo
-            urlDisplayLabel: View Trace
+    # Loki datasource disabled - Loki not deployed, OpenObserve used for logs instead
+    # - name: Loki
+    #   type: loki
+    #   uid: loki
+    #   url: http://loki-gateway.monitoring.svc.cluster.local:80
+    #   access: proxy
+    #   isDefault: false
+    #   jsonData:
+    #     maxLines: 1000
+    #     derivedFields:
+    #       - name: TraceID
+    #         matcherRegex: "(?:traceID|trace_id|traceId)[=:]\\s*(\\w+)"
+    #         url: "$${__value.raw}"
+    #         datasourceUid: tempo
+    #         urlDisplayLabel: View Trace
     - name: Tempo
       type: tempo
       uid: tempo
@@ -179,7 +180,8 @@ grafana:
       isDefault: false
       jsonData:
         tracesToLogsV2:
-          datasourceUid: loki
+          # Use OpenObserve for log correlation instead of Loki
+          datasourceUid: openobserve
           filterByTraceID: true
           filterBySpanID: true
         tracesToMetrics:
@@ -188,8 +190,7 @@ grafana:
           enabled: true
         serviceMap:
           datasourceUid: prometheus
-        lokiSearch:
-          datasourceUid: loki
+        # lokiSearch removed - Loki not deployed
     - name: OpenObserve
       type: elasticsearch
       uid: openobserve

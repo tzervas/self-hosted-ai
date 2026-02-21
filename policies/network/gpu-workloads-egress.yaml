@@ -1,0 +1,131 @@
+---
+# NetworkPolicy for gpu-workloads namespace
+# Allows specific egress traffic needed for AI services
+# Applied BEFORE hardening script enforces default-deny
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-model-downloads
+  namespace: gpu-workloads
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ollama
+  policyTypes:
+    - Egress
+  egress:
+    # Allow HuggingFace model downloads (HTTPS)
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-registry-pulls
+  namespace: gpu-workloads
+spec:
+  podSelector: {}  # Apply to all pods in namespace
+  policyTypes:
+    - Egress
+  egress:
+    # Allow container registry pulls (HTTPS)
+    # Needed for: ghcr.io, docker.io, registry.k8s.io
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80  # Some registries redirect HTTP to HTTPS
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-intra-namespace
+  namespace: gpu-workloads
+spec:
+  podSelector: {}  # Apply to all pods
+  policyTypes:
+    - Egress
+  egress:
+    # Allow pod-to-pod communication within namespace
+    - to:
+        - podSelector: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-comfyui-dependencies
+  namespace: gpu-workloads
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: comfyui
+  policyTypes:
+    - Egress
+  egress:
+    # Allow Git clone for custom nodes (GitHub)
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443  # HTTPS for git clone
+        - protocol: TCP
+          port: 9418  # Git protocol (if used)
+    # Allow PyPI for pip install
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443  # HTTPS for PyPI
+    # Allow DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-monitoring-egress
+  namespace: gpu-workloads
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    # Allow metrics export to monitoring namespace
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9090  # Prometheus
+        - protocol: TCP
+          port: 4317  # OTLP gRPC
+        - protocol: TCP
+          port: 4318  # OTLP HTTP

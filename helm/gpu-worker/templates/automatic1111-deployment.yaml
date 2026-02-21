@@ -26,6 +26,8 @@ spec:
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         app.kubernetes.io/component: automatic1111
     spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- with .Values.automatic1111.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -38,6 +40,8 @@ spec:
         - name: automatic1111
           image: "{{ .Values.automatic1111.image.repository }}:{{ .Values.automatic1111.image.tag }}"
           imagePullPolicy: {{ .Values.automatic1111.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
           ports:
             - name: http
               containerPort: 7860
