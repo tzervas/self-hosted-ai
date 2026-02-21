@@ -2,6 +2,22 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# Global security contexts for Pod Security Standards "baseline" compliance
+# Note: Using "baseline" instead of "restricted" due to upstream image limitations
+# Some GPU container images (ollama, tts) are not built for non-root execution
+# Applied to all pods/containers unless overridden per-service
+podSecurityContext:
+  runAsNonRoot: false  # Allow root for compatibility (PSS baseline)
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false  # GPU apps need writable /tmp, model caches
+
 # Create local storage PV/PVC for akula-prime (only needed once)
 createLocalStorage: false
 
@@ -70,12 +86,19 @@ comfyui:
   env:
     # VRAM optimization for 16GB GPU (RTX 5080)
     # lowvram: model offloading to RAM when not in use
-    # preview-method auto: optimized preview generation
+    # preview-method latent2rgb: fast progressive previews during generation
+    # enable-cors-header *: allow cross-origin requests from Open WebUI
     - name: COMMANDLINE_ARGS
-      value: "--lowvram --preview-method auto"
+      value: "--lowvram --preview-method latent2rgb --enable-cors-header *"
     # PyTorch CUDA memory optimization
     - name: PYTORCH_CUDA_ALLOC_CONF
       value: "max_split_size_mb:512"
+    # Enable progressive preview streaming
+    - name: COMFYUI_PREVIEW_METHOD
+      value: "latent2rgb"  # Fast latent-space previews (faster than auto/full decode)
+    # Preview JPEG quality (lower = faster, smaller files for streaming)
+    - name: COMFYUI_PREVIEW_QUALITY
+      value: "75"
   persistence:
     enabled: true
     size: 50Gi

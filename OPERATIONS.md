@@ -33,6 +33,8 @@ Quick reference for daily operations, troubleshooting, and service access.
 
 This is a **standalone workstation**, NOT a Kubernetes node. Services are accessed over LAN via HTTP.
 
+**Container Runtime**: Rootless Podman (migrated from Docker)
+
 | Service | Port | URL | Purpose |
 |---------|------|-----|---------|
 | Ollama | 11434 | http://192.168.1.99:11434 | GPU inference (RTX 5080) |
@@ -45,6 +47,12 @@ curl http://192.168.1.99:11434/api/tags
 
 # Check GPU status (SSH to akula-prime)
 ssh akula-prime nvidia-smi
+
+# Check Podman containers (rootless)
+ssh akula-prime podman ps
+
+# GPU access validation
+ssh akula-prime 'podman run --rm --device nvidia.com/gpu=all nvidia/cuda:12.8.0-base nvidia-smi'
 ```
 
 ---
@@ -243,6 +251,196 @@ curl -s https://llm.vectorweight.com/queue/status
 
 # Check rate limits
 kubectl logs deployment/litellm -n self-hosted-ai | grep rate
+```
+
+---
+
+## Distributed Tracing
+
+The platform uses **Tempo** (traces), **OpenObserve** (logs/metrics), and **Grafana** (visualization) for observability.
+
+### Architecture
+
+```
+Services → OpenTelemetry Collector → Tempo (traces) + OpenObserve (logs/metrics)
+                                   ↓
+                                Grafana (dashboards)
+```
+
+### Tracing Endpoints
+
+| Service | Endpoint | Purpose |
+|---------|----------|---------|
+| **Tempo** | http://tempo.monitoring:3100 | Trace storage and query |
+| **OpenObserve** | https://observe.vectorweight.com | Logs, metrics, traces UI |
+| **OTel Collector** | http://otel-collector-opentelemetry-collector.monitoring:4318 | OTLP/HTTP receiver |
+| **Grafana** | https://grafana.vectorweight.com | Unified observability UI |
+
+### Querying Traces
+
+**Via Grafana Explore**:
+1. Navigate to https://grafana.vectorweight.com/explore
+2. Select "Tempo" datasource
+3. Search by:
+   - Service name (e.g., `litellm`, `open-webui`)
+   - Trace ID
+   - Duration (slow requests)
+   - Tags (e.g., `http.status_code=500`)
+
+**Example TraceQL queries**:
+```traceql
+# Find slow LiteLLM requests (>5s)
+{service.name="litellm"} | duration > 5s
+
+# Find errors
+{service.name="litellm" && status=error}
+
+# Find specific model requests
+{service.name="litellm" && resource.model="qwen2.5-coder:14b"}
+
+# Trace by ID
+{trace_id="abc123"}
+```
+
+### Common Tracing Queries
+
+```bash
+# Query Tempo directly
+curl -G 'http://tempo.monitoring:3100/api/search' \
+  --data-urlencode 'q={service.name="litellm"}' \
+  --data-urlencode 'start=1640000000' \
+  --data-urlencode 'end=1640100000'
+
+# Get trace by ID
+curl 'http://tempo.monitoring:3100/api/traces/<trace-id>'
+
+# Check Tempo metrics
+curl 'http://tempo.monitoring:3100/metrics'
+```
+
+### Instrumented Services
+
+| Service | Status | Span Types |
+|---------|--------|------------|
+| **LiteLLM** | ✅ Enabled | HTTP requests, LLM inference, model routing |
+| **Open WebUI** | ✅ Enabled | HTTP requests, database queries, API calls |
+| **n8n** | ✅ Enabled | Workflow executions, node operations |
+
+### Trace-to-Logs Correlation
+
+Grafana supports jumping from traces to related logs:
+
+1. In Grafana Explore, view a trace
+2. Click "Logs for this span" button
+3. Automatically queries OpenObserve for logs matching:
+   - Same service name
+   - Same time range
+   - Same trace ID (if propagated)
+
+### Troubleshooting Tracing
+
+**No traces appearing**:
+```bash
+# Check OTel Collector is running
+kubectl get pods -n monitoring -l app.kubernetes.io/name=opentelemetry-collector
+
+# Check collector logs
+kubectl logs -n monitoring -l app.kubernetes.io/name=opentelemetry-collector -f
+
+# Verify service has OTEL env vars
+kubectl get deployment litellm -n ai-services -o yaml | grep OTEL
+```
+
+**Traces incomplete**:
+```bash
+# Check trace sampling rate (default 100%)
+kubectl get configmap -n monitoring otel-collector-config -o yaml | grep sampling
+
+# Check for dropped spans (too many traces)
+kubectl logs -n monitoring -l app.kubernetes.io/name=opentelemetry-collector | grep dropped
+```
+
+**Tempo query slow**:
+```bash
+# Check Tempo ingestion rate
+curl http://tempo.monitoring:3100/metrics | grep tempo_ingester_bytes_received_total
+
+# Check storage backend (should be local filesystem)
+kubectl exec -n monitoring deployment/tempo -- df -h /var/tempo
+```
+
+---
+
+## Security
+
+### Pod Security Standards (PSS)
+
+The platform enforces **PSS Baseline** on AI workload namespaces.
+
+**Enforced Namespaces**:
+- `ai-services`: baseline
+- `gpu-workloads`: baseline
+- `automation`: baseline
+
+**What's Enforced** (PSS Baseline):
+- ✅ `seccompProfile: RuntimeDefault`
+- ✅ `allowPrivilegeEscalation: false`
+- ✅ `capabilities.drop: ALL`
+- ✅ Prevents privileged containers
+- ✅ Prevents host namespace access (hostPID, hostNetwork, hostIPC)
+
+**Check PSS Status**:
+```bash
+# View PSS labels on namespace
+kubectl get namespace ai-services -o jsonpath='{.metadata.labels}' | jq
+
+# Test if a pod violates PSS (dry-run)
+kubectl apply --dry-run=server -f pod.yaml
+
+# View PSS warnings
+kubectl get events --field-selector reason=FailedCreate -n ai-services
+```
+
+### NetworkPolicy
+
+**Default-Deny Enforcement**:
+All AI namespaces have default-deny NetworkPolicies with explicit allow-rules.
+
+```bash
+# List NetworkPolicies
+kubectl get networkpolicies -n ai-services
+kubectl get networkpolicies -n gpu-workloads
+
+# Test network connectivity
+kubectl run -it --rm nettest --image=busybox -n ai-services -- wget -T 5 https://huggingface.co
+# Should succeed (allowed by allow-model-downloads policy)
+
+kubectl run -it --rm nettest --image=busybox -n ai-services -- wget -T 5 https://google.com
+# Should timeout (blocked by default-deny)
+```
+
+### Container Runtime (Podman)
+
+The GPU worker uses **rootless Podman** instead of Docker for enhanced security.
+
+**Security Benefits**:
+- No Docker daemon running as root
+- User namespace isolation (container UID 0 → host UID 100000+)
+- No docker group (eliminates root-equivalent access)
+- GPU access via CDI (no privileged mode needed)
+
+**Verification**:
+```bash
+# On GPU worker (akula-prime)
+podman info | grep -A 3 "rootless:"
+# Should show rootless: true
+
+# Verify user not in docker group
+groups | grep docker || echo "✓ Not in docker group"
+
+# Verify Docker daemon stopped
+systemctl is-active docker
+# Should show "inactive"
 ```
 
 ---
