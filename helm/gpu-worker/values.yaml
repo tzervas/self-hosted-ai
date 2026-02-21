@@ -74,7 +74,7 @@ ollama:
 # ComfyUI configuration (custom Blackwell image with PyTorch 2.7+cu128)
 # Enabled via ArgoCD app override; uses GPU time-slicing alongside ollama-gpu
 comfyui:
-  enabled: false
+  enabled: true
   image:
     repository: ghcr.io/tzervas/comfyui-blackwell
     tag: "latest"  # Latest build with ComfyUI + Manager + PyTorch 2.7+cu128 + CUDA 12.8
