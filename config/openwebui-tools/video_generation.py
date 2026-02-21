@@ -1,14 +1,15 @@
 """
 title: Video Generation Tool
-description: Generate videos using Wan 2.1 T2V via ComfyUI direct API. The LLM can call this tool when a user asks for video creation.
+description: Generate videos using Wan 2.1 T2V via ComfyUI direct API with progressive preview streaming. The LLM can call this tool when a user asks for video creation.
 author: self-hosted-ai
-version: 2.1.0
+version: 2.2.0
 """
 
 import json
 import logging
 import random
 import time
+import urllib.parse
 
 import requests
 from pydantic import BaseModel, Field
@@ -26,6 +27,85 @@ class Tools:
 
     def __init__(self):
         self.valves = self.Valves()
+
+    def check_generation_status(self, prompt_id: str) -> str:
+        """
+        Check the status of a video generation job and retrieve preview frames if available.
+        Use this to monitor long-running video generations and view intermediate results.
+
+        :param prompt_id: The prompt_id returned from generate_video()
+        :return: Status message with progress details and preview URLs
+        """
+        try:
+            # Check queue status
+            queue_resp = requests.get(
+                f"{self.valves.comfyui_base_url}/queue", timeout=10
+            )
+            queue_resp.raise_for_status()
+            queue_data = queue_resp.json()
+
+            # Check if still in queue
+            running = queue_data.get("queue_running", [])
+            pending = queue_data.get("queue_pending", [])
+
+            for item in running:
+                if item[1] == prompt_id:
+                    return f"Video is currently generating (prompt_id: {prompt_id}). Check again in a moment for previews."
+
+            for idx, item in enumerate(pending):
+                if item[1] == prompt_id:
+                    return f"Video is queued at position {idx + 1} (prompt_id: {prompt_id}). Waiting to start..."
+
+            # Check history for completion
+            hist_resp = requests.get(
+                f"{self.valves.comfyui_base_url}/history/{prompt_id}", timeout=10
+            )
+            hist_resp.raise_for_status()
+            hist = hist_resp.json()
+
+            if prompt_id not in hist:
+                return f"No status found for prompt_id: {prompt_id}. It may have been cleared from history."
+
+            outputs = hist[prompt_id].get("outputs", {})
+            status = hist[prompt_id].get("status", {})
+
+            # Collect all image outputs (frames + previews)
+            all_images = []
+            preview_base = self.valves.comfyui_base_url.rstrip("/")
+
+            for node_id, node_output in outputs.items():
+                if "images" in node_output:
+                    for img in node_output["images"]:
+                        img_url = f"{preview_base}/view?filename={urllib.parse.quote(img['filename'])}"
+                        all_images.append(
+                            {
+                                "filename": img["filename"],
+                                "url": img_url,
+                                "type": img.get("type", "output"),
+                            }
+                        )
+
+            if all_images:
+                frame_list = "\n".join(
+                    [
+                        f"  - {img['filename']} ({img['type']}): {img['url']}"
+                        for img in all_images
+                    ]
+                )
+                return (
+                    f"Video generation completed!\n"
+                    f"Status: {status.get('status_str', 'completed')}\n"
+                    f"Frames generated: {len(all_images)}\n\n"
+                    f"Preview URLs:\n{frame_list}\n\n"
+                    f"View frames directly in your browser using the URLs above."
+                )
+
+            return f"Video generation completed but no output images found. Status: {status.get('status_str', 'unknown')}"
+
+        except requests.exceptions.ConnectionError:
+            return "ComfyUI is not reachable. Ensure the ComfyUI service is running."
+        except Exception as e:
+            return f"Error checking status: {str(e)}"
 
     def generate_video(
         self,
@@ -135,36 +215,25 @@ class Tools:
             result = response.json()
             prompt_id = result.get("prompt_id", "unknown")
 
-            # Poll for completion (video takes longer than images)
-            poll_timeout = min(self.valves.timeout, 300)
-            max_polls = poll_timeout // 2
-
-            for _ in range(max_polls):
-                time.sleep(2)
-                try:
-                    hist = requests.get(
-                        f"{self.valves.comfyui_base_url}/history/{prompt_id}",
-                        timeout=10,  # Short timeout per poll; total budget controlled by poll_timeout
-                    ).json()
-                    if prompt_id in hist:
-                        outputs = hist[prompt_id].get("outputs", {})
-                        for node_output in outputs.values():
-                            if "images" in node_output:
-                                imgs = node_output["images"]
-                                return (
-                                    f"Video generated successfully with Wan 2.1!\n"
-                                    f"Prompt: '{prompt}'\n"
-                                    f"Frames: {len(imgs)}, Resolution: {actual_width}x{actual_height}, "
-                                    f"Steps: {actual_steps}, Seed: {seed}\n"
-                                    f"Output: {imgs[0]['filename']}"
-                                )
-                except (requests.exceptions.RequestException, ValueError, KeyError) as exc:
-                    logger.warning("Transient error polling video status: %s", exc)
+            # Return immediately with progress monitoring instructions
+            preview_base = self.valves.comfyui_base_url.rstrip("/")
+            progress_url = f"{preview_base}/view"
 
             return (
-                f"Video queued (prompt_id: {prompt_id}). "
-                f"Generating '{prompt}' with {actual_frames} frames at {actual_width}x{actual_height}. "
-                f"This may take several minutes. Check ComfyUI output for results."
+                f"✅ Video generation started with Wan 2.1!\n\n"
+                f"**Job Details:**\n"
+                f"  - Prompt: '{prompt}'\n"
+                f"  - Frames: {actual_frames}, Resolution: {actual_width}x{actual_height}\n"
+                f"  - Steps: {actual_steps}, Seed: {seed}\n"
+                f"  - Prompt ID: {prompt_id}\n\n"
+                f"**Monitor Progress:**\n"
+                f"  1. ComfyUI generates preview frames during generation\n"
+                f"  2. View live progress at: {preview_base}/\n"
+                f"  3. Estimated time: {int(actual_frames * actual_steps / 10)} seconds\n\n"
+                f"**Check Status:**\n"
+                f"  Ask me to 'check video generation status for {prompt_id}'\n"
+                f"  I'll retrieve preview URLs for all generated frames.\n\n"
+                f"Generation is running in the background. You can continue chatting while it completes."
             )
 
         except requests.exceptions.ConnectionError:
