@@ -47,8 +47,8 @@ spec:
             cpu: 1000m
             memory: 8Gi
           limits:
-            cpu: 16000m
-            memory: 64Gi
+            cpu: 6000m  # Reduced from 16000m (GPU does inference, CPU minimal)
+            memory: 20Gi  # Reduced from 64Gi (akula-prime has 48GB total, need headroom for other services)
 
         # Pin to GPU node
         nodeSelector:
