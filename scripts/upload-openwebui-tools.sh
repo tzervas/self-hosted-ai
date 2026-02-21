@@ -35,10 +35,25 @@ if [ -z "$OPENWEBUI_API_KEY" ]; then
     exit 1
 fi
 
-# Tools to upload
+# Tools to upload (all tools in config/openwebui-tools/)
 TOOLS=(
+    # Core generative tools
     "image_generation.py"
     "video_generation.py"
+    "text_to_speech.py"
+    "music_generator_pro.py"
+
+    # Editing and processing tools
+    "image_upscaler.py"
+    "background_remover.py"
+    "video_editor.py"
+    "audio_processor.py"
+
+    # Utility and integration tools
+    "searxng_search.py"
+    "web_fetch.py"
+    "memory_store.py"
+    "n8n_workflow_runner.py"
 )
 
 echo "╔═══════════════════════════════════════════════════════════════╗"
