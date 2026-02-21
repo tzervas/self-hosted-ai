@@ -1,0 +1,17 @@
+# This file provides default values for the openobserve wrapper chart
+# Actual configuration is in argocd/helm/openobserve/values.yaml
+
+# Pass all values to the openobserve-standalone subchart
+openobserve-standalone:
+  # Values will be overridden by ArgoCD from argocd/helm/openobserve/values.yaml
+  auth:
+    ZO_ROOT_USER_EMAIL: "admin@vectorweight.com"
+    ZO_ROOT_USER_PASSWORD: "changeme"
+
+  service:
+    type: ClusterIP
+    http_port: 5080
+    grpc_port: 5081
+
+  ingress:
+    enabled: false  # Using IngressRoute template instead

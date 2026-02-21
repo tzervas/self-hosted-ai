@@ -41,16 +41,18 @@ ingress:
   enabled: true
   className: traefik
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Use wildcard certificate instead of generating separate cert
+    # Forward authentication via oauth2-proxy for SSO
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: automation-jaeger-forward-auth@kubernetescrd
   hosts:
     - host: traces.vectorweight.com
       paths:
         - path: /
           pathType: Prefix
   tls:
-    - secretName: jaeger-tls
+    - secretName: vectorweight-wildcard-tls
       hosts:
         - traces.vectorweight.com
 

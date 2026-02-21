@@ -195,11 +195,11 @@ else
       "lastName": "",
       "credentials": [{
         "type": "password",
-        "value": "ChangeMe123",
-        "temporary": true
+        "value": "banana12",
+        "temporary": false
       }]
     }'
-  echo "  User 'kang' created (password: 'ChangeMe123', must change on first login)."
+  echo "  User 'kang' created (password: 'banana12')."
 
   # Assign admin realm role for Grafana/service role mapping
   USER_ID=$(curl -sf \
@@ -234,6 +234,34 @@ kubectl create secret generic gitlab-oidc-secret -n gitlab \
   --from-literal=client-id=gitlab \
   --from-literal=client-secret="$GITLAB_SECRET" \
   --dry-run=client -o yaml | kubectl apply -f -
+
+# Create GitLab OmniAuth provider secret (full provider configuration)
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gitlab-oidc-provider
+  namespace: gitlab
+type: Opaque
+stringData:
+  provider: |
+    name: 'openid_connect'
+    label: 'Keycloak SSO'
+    args:
+      name: 'openid_connect'
+      scope: ['openid', 'profile', 'email']
+      response_type: 'code'
+      issuer: 'https://auth.vectorweight.com/realms/vectorweight'
+      discovery: true
+      client_auth_method: 'query'
+      uid_field: 'preferred_username'
+      send_scope_to_token_endpoint: false
+      pkce: true
+      client_options:
+        identifier: 'gitlab'
+        secret: '$GITLAB_SECRET'
+        redirect_uri: 'https://git.vectorweight.com/users/auth/openid_connect/callback'
+EOF
 
 kubectl create secret generic n8n-oidc-secret -n automation \
   --from-literal=client-id=n8n \

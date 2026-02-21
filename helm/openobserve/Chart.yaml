@@ -1,0 +1,10 @@
+apiVersion: v2
+name: openobserve
+description: OpenObserve wrapper chart with IngressRoute for SSO integration
+version: 0.1.0
+appVersion: "2.1.0"
+
+dependencies:
+  - name: openobserve-standalone
+    version: 0.60.0
+    repository: https://charts.openobserve.ai

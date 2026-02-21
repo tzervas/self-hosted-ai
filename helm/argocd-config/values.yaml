@@ -1,0 +1,17 @@
+# ArgoCD SSO Configuration
+# This chart configures ArgoCD's OIDC integration with Keycloak
+
+# OIDC settings
+oidc:
+  enabled: true
+  issuer: https://auth.vectorweight.com/realms/vectorweight
+  clientID: argocd
+  # Client secret is read from argocd-oidc-secret K8s secret
+
+# Server settings  server:
+  url: https://argocd.vectorweight.com
+  insecure: false
+
+# Admin access
+admin:
+  enabled: true
