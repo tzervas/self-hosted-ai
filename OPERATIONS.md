@@ -31,28 +31,38 @@ Quick reference for daily operations, troubleshooting, and service access.
 
 ### GPU Worker (192.168.1.99 - akula-prime)
 
-This is a **standalone workstation**, NOT a Kubernetes node. Services are accessed over LAN via HTTP.
+This is the **k3s control-plane node** with GPU resources (RTX 5080 16GB).
 
-**Container Runtime**: Rootless Podman (migrated from Docker)
+**Hardware**: 4x NVIDIA GPUs available (`nvidia.com/gpu: 4`)
+**Role**: Kubernetes control-plane + GPU workload execution
+**Container Runtime**: containerd 2.1.5-k3s1
 
-| Service | Port | URL | Purpose |
-|---------|------|-----|---------|
-| Ollama | 11434 | http://192.168.1.99:11434 | GPU inference (RTX 5080) |
-| ComfyUI | 8188 | http://192.168.1.99:8188 | Image generation |
-| Whisper | 9000 | http://192.168.1.99:9000 | Speech-to-text |
+GPU workloads run in the `gpu-workloads` namespace with nvidia-gpu-operator managing device plugins.
+
+| Service | Namespace | Port | Access | Purpose |
+|---------|-----------|------|--------|---------|
+| Ollama GPU | gpu-workloads | 11434 | ClusterIP (ollama-gpu.gpu-workloads) | GPU inference (RTX 5080) |
+| ComfyUI | gpu-workloads | 8188 | ClusterIP | Image generation |
+| Audio Server | gpu-workloads | 8000 | ClusterIP | TTS/Audio generation |
+| Video Server | gpu-workloads | 8000 | ClusterIP | Video generation |
+
+**Model Storage**: NFS-backed shared-models-nfs PVC (500Gi) stored on homelab (192.168.1.170)
 
 ```bash
-# Test GPU worker connectivity from homelab
-curl http://192.168.1.99:11434/api/tags
+# Check GPU workloads
+kubectl get pods -n gpu-workloads
 
-# Check GPU status (SSH to akula-prime)
-ssh akula-prime nvidia-smi
+# Check GPU availability
+kubectl get node akula-prime -o json | jq '.status.allocatable | with_entries(select(.key | contains("nvidia")))'
 
-# Check Podman containers (rootless)
-ssh akula-prime podman ps
+# Test Ollama GPU service
+kubectl exec -n ai-services deployment/ollama -- curl http://ollama-gpu.gpu-workloads:11434/api/tags
 
-# GPU access validation
-ssh akula-prime 'podman run --rm --device nvidia.com/gpu=all nvidia/cuda:12.8.0-base nvidia-smi'
+# GPU operator status
+kubectl get pods -n gpu-operator
+
+# Restart ollama-gpu if needed
+kubectl rollout restart deployment/ollama-gpu -n gpu-workloads
 ```
 
 ---

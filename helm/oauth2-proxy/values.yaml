@@ -68,6 +68,7 @@ protectedServices:
   - name: prometheus
   - name: longhorn
   - name: openobserve
+  - name: jaeger
   - name: landing-page
 
 resources:

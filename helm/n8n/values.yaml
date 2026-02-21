@@ -47,12 +47,8 @@ secretEnv:
   N8N_ENCRYPTION_KEY:
     secretName: n8n-secret
     key: N8N_ENCRYPTION_KEY
-  N8N_BASIC_AUTH_USER:
-    secretName: n8n-secret
-    key: N8N_BASIC_AUTH_USER
-  N8N_BASIC_AUTH_PASSWORD:
-    secretName: n8n-secret
-    key: N8N_BASIC_AUTH_PASSWORD
+  # Basic auth disabled - using oauth2-proxy forward-auth for SSO
+  # Authentication handled at ingress level via Keycloak
 
 persistence:
   enabled: true
