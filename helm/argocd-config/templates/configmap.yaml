@@ -17,8 +17,9 @@ data:
     clientID: argocd
     clientSecret: $oidc.keycloak.clientSecret
     requestedScopes: ["openid", "profile", "email", "groups"]
-    # Skip TLS verification for self-signed certificates
-    insecureSkipVerify: true
+    # Trust self-signed CA certificate (SECURITY: Never use insecureSkipVerify!)
+    rootCA: |
+{{- include "argocd-config.rootCA" . | nindent 6 }}
 
   # Admin settings
   admin.enabled: "true"

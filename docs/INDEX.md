@@ -1,6 +1,6 @@
 # Self-Hosted AI Platform - Documentation Index
 
-**Last Updated**: 2026-02-06
+**Last Updated**: 2026-02-21
 **Purpose**: Token-efficient navigation guide for Claude Code and AI agents
 **Index Token Count**: ~3,000 tokens (vs ~13,600 for full corpus = 78% reduction)
 
@@ -50,6 +50,8 @@
 |------|--------------|------------------|-----------|
 | **Deploy New Service** | [ARCHITECTURE.md](../ARCHITECTURE.md) ADR-002 (GitOps) | `argocd/applications/*.yaml`, `helm/*/` | `kubectl apply`, `argocd app sync` |
 | **Configure SSO** | [GITLAB_ACCESS_INSTRUCTIONS.md](../GITLAB_ACCESS_INSTRUCTIONS.md) | `scripts/setup-keycloak-*.sh`, `argocd/sealed-secrets/*-oidc-secret.yaml` | `scripts/setup-keycloak-realm.sh` |
+| **Install CA Certificate** | [docs/CERTIFICATE_TRUST_GUIDE.md](CERTIFICATE_TRUST_GUIDE.md) | [docs/CERTIFICATE_QUICK_REFERENCE.md](CERTIFICATE_QUICK_REFERENCE.md) | `scripts/install-ca-certificate.sh all` |
+| **Fix TLS Validation** | [docs/SECURITY_TLS_VALIDATION_AUDIT.md](SECURITY_TLS_VALIDATION_AUDIT.md) | `scripts/fix-tls-validation.py` | `uv run scripts/fix-tls-validation.py fix` |
 | **Add AI Model** | [config/models-manifest.yml](../config/models-manifest.yml) | `helm/ollama/values.yaml` | `scripts/sync_models.py` |
 | **Create Workflow** | [workflows/README.md](../workflows/README.md) | `config/n8n-workflows/*.json` | n8n UI at `https://n8n.vectorweight.com` |
 | **Debug Deployment** | [OPERATIONS.md](../OPERATIONS.md) Troubleshooting | [docs/VERIFICATION_REPORT.md](VERIFICATION_REPORT.md) | `kubectl logs`, `argocd app get` |
@@ -172,6 +174,56 @@
 
 **Dependencies**: [ARCHITECTURE.md](../ARCHITECTURE.md) ADR-006
 **When to Read**: Setting up GitLab, configuring SSO
+
+#### [docs/CERTIFICATE_TRUST_GUIDE.md](CERTIFICATE_TRUST_GUIDE.md) (~3,200 tokens)
+**Purpose**: Complete guide for CA certificate installation and TLS validation
+**Key Sections**:
+- **Automated Installation**: `install-ca-certificate.sh` for all platforms
+- **Service Configuration**: Fix oauth2-proxy and Grafana TLS validation
+- **Browser Setup**: Firefox, Chrome certificate import
+- **Verification**: Testing and troubleshooting TLS trust
+- **Certificate Rotation**: Maintenance procedures
+
+**Dependencies**: [docs/SECURITY_TLS_VALIDATION_AUDIT.md](SECURITY_TLS_VALIDATION_AUDIT.md)
+**When to Read**: Setting up workstations, fixing TLS errors, certificate rotation
+**Quick Reference**: [docs/CERTIFICATE_QUICK_REFERENCE.md](CERTIFICATE_QUICK_REFERENCE.md) (printable cheat sheet)
+
+#### [docs/SECURITY_TLS_VALIDATION_AUDIT.md](SECURITY_TLS_VALIDATION_AUDIT.md) (~2,800 tokens)
+**Purpose**: Security audit findings for CWE-295 vulnerabilities
+**Severity**: HIGH (MITM attack vectors from disabled TLS validation)
+**Key Sections**:
+- **Vulnerability Summary**: 3 services with insecureSkipVerify (ArgoCD fixed, 2 remain)
+- **Attack Scenarios**: Detailed MITM attack paths
+- **Remediation Plan**: Automated fixes via `fix-tls-validation.py`
+- **Compliance**: CIS, NIST, PCI-DSS, SOC 2 implications
+
+**Dependencies**: None (foundational security)
+**When to Read**: Security review, compliance audit, before deploying authentication changes
+**Automation**: `uv run scripts/fix-tls-validation.py fix`
+
+#### [docs/SECURITY_ARGOCD_TLS_FIX.md](SECURITY_ARGOCD_TLS_FIX.md) (~1,800 tokens)
+**Purpose**: Detailed ArgoCD TLS validation fix documentation
+**Status**: ✅ FIXED (replaced `insecureSkipVerify: true` with `rootCA`)
+**Key Sections**:
+- **Vulnerability**: CWE-295, MITM attack vector
+- **Fix Implementation**: Helm template helper for CA trust
+- **Verification**: Testing procedures
+- **Migration Guide**: Steps for other services
+
+**Dependencies**: [docs/SECURITY_TLS_VALIDATION_AUDIT.md](SECURITY_TLS_VALIDATION_AUDIT.md)
+**When to Read**: Understanding ArgoCD security fix, applying to other services
+
+#### [docs/CERTIFICATE_QUICK_REFERENCE.md](CERTIFICATE_QUICK_REFERENCE.md) (~600 tokens)
+**Purpose**: Quick reference cheat sheet for certificate operations
+**Format**: Command tables, one-liners, emergency procedures
+**Key Sections**:
+- **Common Commands**: Installation, verification, troubleshooting
+- **Status Dashboard**: Check TLS validation across services
+- **Security Checklist**: Pre/post deployment validation
+- **Emergency Procedures**: Certificate expiry, MITM detection
+
+**Dependencies**: [docs/CERTIFICATE_TRUST_GUIDE.md](CERTIFICATE_TRUST_GUIDE.md)
+**When to Read**: Quick lookups, printable reference
 
 ### AI-Specific Documentation
 

@@ -107,6 +107,12 @@ exclude_lines = [
     "@abstractmethod",
 ]
 
+[tool.setuptools]
+packages = ["agents"]
+
+[tool.setuptools.package-data]
+agents = ["py.typed"]
+
 [build-system]
 requires = ["setuptools>=65.0", "wheel"]
 build-backend = "setuptools.build_meta"

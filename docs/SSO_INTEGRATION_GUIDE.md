@@ -224,20 +224,46 @@ git push origin dev
 
 **Cause**: ArgoCD doesn't trust the self-signed `vectorweight-ca-issuer` certificate.
 
-**Fix**: The `helm/argocd-config` chart sets `insecureSkipVerify: true` in the OIDC config. If you prefer to trust the CA:
+**⚠️ SECURITY CRITICAL: Proper Fix (Required)**
 
+The `helm/argocd-config` chart configures ArgoCD to **trust the root CA certificate** using the `rootCA` setting. This maintains TLS security while working with self-signed certificates.
+
+**✅ Correct Configuration** (already implemented):
 ```yaml
 # helm/argocd-config/templates/configmap.yaml
 oidc.config: |
   name: Keycloak
   issuer: https://auth.vectorweight.com/realms/vectorweight
+  clientID: argocd
+  clientSecret: $oidc.keycloak.clientSecret
+  requestedScopes: ["openid", "profile", "email", "groups"]
+  # Trust self-signed CA certificate (SECURITY: Never use insecureSkipVerify!)
   rootCA: |
     -----BEGIN CERTIFICATE-----
-    <contents of vectorweight-root-ca certificate>
+    <vectorweight-root-ca certificate loaded from cert-manager secret>
     -----END CERTIFICATE-----
 ```
 
-Get the CA cert:
+The Helm chart automatically loads the CA certificate from the `vectorweight-root-ca` secret in the `cert-manager` namespace.
+
+**❌ INSECURE Alternative (Never Use in Production)**:
+
+```yaml
+# DANGEROUS - Disables TLS verification entirely!
+oidc.config: |
+  name: Keycloak
+  insecureSkipVerify: true  # ← SECURITY VULNERABILITY!
+```
+
+**Why `insecureSkipVerify: true` is Dangerous**:
+- **MITM Attacks**: An attacker on the network can impersonate Keycloak
+- **Token Theft**: Authentication tokens can be intercepted
+- **Cluster Compromise**: Fake identities can gain ArgoCD/cluster access
+- **Zero Trust Violation**: Defeats the purpose of TLS
+
+**Always use `rootCA` for self-signed certificates, never `insecureSkipVerify`!**
+
+**Manual CA Certificate Retrieval** (if needed):
 ```bash
 kubectl get secret vectorweight-root-ca -n cert-manager -o jsonpath='{.data.tls\.crt}' | base64 -d
 ```
