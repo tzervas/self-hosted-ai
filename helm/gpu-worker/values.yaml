@@ -86,12 +86,19 @@ comfyui:
   env:
     # VRAM optimization for 16GB GPU (RTX 5080)
     # lowvram: model offloading to RAM when not in use
-    # preview-method auto: optimized preview generation
+    # preview-method latent2rgb: fast progressive previews during generation
+    # enable-cors-header *: allow cross-origin requests from Open WebUI
     - name: COMMANDLINE_ARGS
-      value: "--lowvram --preview-method auto"
+      value: "--lowvram --preview-method latent2rgb --enable-cors-header *"
     # PyTorch CUDA memory optimization
     - name: PYTORCH_CUDA_ALLOC_CONF
       value: "max_split_size_mb:512"
+    # Enable progressive preview streaming
+    - name: COMFYUI_PREVIEW_METHOD
+      value: "latent2rgb"  # Fast latent-space previews (faster than auto/full decode)
+    # Preview JPEG quality (lower = faster, smaller files for streaming)
+    - name: COMFYUI_PREVIEW_QUALITY
+      value: "75"
   persistence:
     enabled: true
     size: 50Gi
