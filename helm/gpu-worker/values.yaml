@@ -2,6 +2,22 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# Global security contexts for Pod Security Standards "baseline" compliance
+# Note: Using "baseline" instead of "restricted" due to upstream image limitations
+# Some GPU container images (ollama, tts) are not built for non-root execution
+# Applied to all pods/containers unless overridden per-service
+podSecurityContext:
+  runAsNonRoot: false  # Allow root for compatibility (PSS baseline)
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false  # GPU apps need writable /tmp, model caches
+
 # Create local storage PV/PVC for akula-prime (only needed once)
 createLocalStorage: false
 

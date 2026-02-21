@@ -35,13 +35,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       securityContext:
-        runAsUser: 0
-        runAsGroup: 0
-        fsGroup: 0
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: tts
           image: "{{ .Values.tts.image.repository }}:{{ .Values.tts.image.tag }}"
           imagePullPolicy: {{ .Values.tts.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
           command: ["tts-server"]
           args:
             - "--model_name"

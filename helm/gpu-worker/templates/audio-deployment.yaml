@@ -26,6 +26,8 @@ spec:
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         app.kubernetes.io/component: audio
     spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- with .Values.audio.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -42,6 +44,8 @@ spec:
         - name: audio
           image: "{{ .Values.audio.image.repository }}:{{ .Values.audio.image.tag }}"
           imagePullPolicy: {{ .Values.audio.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
           ports:
             - name: http
               containerPort: 5004
