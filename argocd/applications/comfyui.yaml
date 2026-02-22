@@ -39,7 +39,7 @@ spec:
           enabled: false
 
         comfyui:
-          enabled: true
+          enabled: false  # Disabled: NFS mount from homelab (192.168.1.170) fails on akula-prime
           image:
             repository: ghcr.io/tzervas/comfyui-blackwell
             tag: "latest"  # Latest build with ComfyUI + Manager + PyTorch 2.7+cu128 + CUDA 12.8
