@@ -34,6 +34,8 @@ env:
   WEBHOOK_URL: "https://n8n.vectorweight.com/"
   N8N_EDITOR_BASE_URL: "https://n8n.vectorweight.com/"
   GENERIC_TIMEZONE: "America/New_York"
+  # Proxy trust (required behind Traefik reverse proxy)
+  N8N_PROXY_HOPS: "1"
   # Execution settings
   EXECUTIONS_PROCESS: "main"
   EXECUTIONS_DATA_PRUNE: "true"
