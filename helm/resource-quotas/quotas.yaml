@@ -42,7 +42,7 @@ spec:
     requests.cpu: "16"   # Increased from 8 (allow multiple GPU workloads)
     requests.memory: 32Gi  # Increased from 20Gi (allow larger model contexts)
     limits.cpu: "24"    # Increased from 12 (use most of 28 cores, reserve 4 for system)
-    limits.memory: 42Gi  # Reduced from 48Gi (reserve 6GB for system/kubelet)
+    limits.memory: 64Gi  # Allow all GPU workloads to be scheduled; node RAM (48GB) is the real constraint
     # Pods - Ollama, ComfyUI, TTS, Audio
     pods: "20"
     # Storage - 600Gi to accommodate Ollama models + ComfyUI checkpoints

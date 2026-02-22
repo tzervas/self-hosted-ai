@@ -240,7 +240,7 @@ grafana:
   # Mount CA certificate for TLS validation
   extraSecretMounts:
     - name: ca-cert
-      secretName: vectorweight-root-ca
+      secretName: vectorweight-selfsigned-tls
       defaultMode: 0444
       mountPath: /etc/grafana/ca
       readOnly: true
