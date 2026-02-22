@@ -18,7 +18,7 @@ Never use insecureSkipVerify in production - it allows MITM attacks!
 {{- define "argocd-config.rootCA" -}}
 {{- $secret := lookup "v1" "Secret" "cert-manager" "vectorweight-root-ca" -}}
 {{- if $secret -}}
-{{- $secret.data.tls\.crt | b64dec -}}
+{{- index $secret.data "tls.crt" | b64dec -}}
 {{- else -}}
 -----BEGIN CERTIFICATE-----
 MIIDLzCCAhegAwIBAgIUAJl2xR1OaKfgTNTC4KhjdhTa2ugwDQYJKoZIhvcNAQEL

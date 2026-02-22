@@ -16,23 +16,24 @@ class TestSearXNGHealth:
     """Validate SearXNG is reachable."""
 
     def test_searxng_reachable(self, searxng_client):
-        """SearXNG should be reachable."""
+        """SearXNG should be reachable (401 = behind SSO, still alive)."""
         try:
             response = searxng_client.get("/")
-            assert response.status_code in (200, 302), (
-                f"SearXNG returned {response.status_code}"
+            # 401 = oauth2-proxy SSO is protecting the endpoint (expected)
+            assert response.status_code in (200, 302, 401), (
+                f"SearXNG returned unexpected {response.status_code}"
             )
         except Exception as e:
             pytest.fail(f"Cannot reach SearXNG: {e}")
 
     def test_searxng_healthcheck(self, searxng_client):
-        """SearXNG healthcheck endpoint should respond."""
+        """SearXNG endpoint should respond (even with auth redirect)."""
         try:
             response = searxng_client.get("/healthz")
-            # Some versions use /healthz, others just /
             if response.status_code == 404:
                 response = searxng_client.get("/")
-            assert response.status_code in (200, 302)
+            # 401 = behind SSO, service is alive
+            assert response.status_code in (200, 302, 401)
         except Exception as e:
             pytest.fail(f"SearXNG health check failed: {e}")
 
