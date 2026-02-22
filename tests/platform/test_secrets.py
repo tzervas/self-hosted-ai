@@ -12,20 +12,22 @@ pytestmark = [pytest.mark.platform, pytest.mark.critical]
 
 # Secrets required for core platform functionality
 REQUIRED_SECRETS = {
-    "self-hosted-ai": [
+    "ai-services": [
         "webui-secret",
         "postgresql-secret",
+        "litellm-secret",
     ],
-    "sso": [
-        "keycloak-oidc-secret",
+    "auth": [
+        "keycloak-admin-secret",
     ],
 }
 
 # Secrets that should exist but are not blocking
 RECOMMENDED_SECRETS = {
-    "self-hosted-ai": [
-        "litellm-secret",
+    "ai-services": [
         "keycloak-oidc-secret",
+        "redis-secret",
+        "searxng-secret",
     ],
     "automation": [
         "n8n-secret",
