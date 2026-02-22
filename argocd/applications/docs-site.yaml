@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: docs-site
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"  # Deploy with frontend services
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/tzervas/self-hosted-ai.git
+    targetRevision: main
+    path: helm/docs-site
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: self-hosted-ai
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

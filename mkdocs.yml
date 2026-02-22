@@ -1,0 +1,174 @@
+# Self-Hosted AI Platform - Documentation Site
+# Build: docker build -f containers/docs-site/Dockerfile -t docs-site .
+# Serve locally: mkdocs serve (requires: pip install mkdocs-material)
+
+site_name: Self-Hosted AI Platform
+site_description: Secure, private, self-hosted AI infrastructure on Kubernetes
+site_url: https://docs.vectorweight.com
+repo_url: https://github.com/tzervas/self-hosted-ai
+repo_name: tzervas/self-hosted-ai
+edit_uri: edit/dev/
+
+# Theme configuration
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.action.edit
+    - content.action.view
+    - content.tabs.link
+    - toc.follow
+    - header.autohide
+  palette:
+    # Dark mode (default - matches platform aesthetic)
+    - scheme: slate
+      primary: deep purple
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    # Light mode
+    - scheme: default
+      primary: deep purple
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+  logo: assets/logo.svg
+  favicon: assets/favicon.png
+
+# Extensions
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets:
+      auto_append:
+        - docs/includes/abbreviations.md
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+# Plugins
+plugins:
+  - search:
+      separator: '[\s\-\.]+'
+      lang: en
+  - tags
+  - minify:
+      minify_html: true
+
+# Extra configuration
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/tzervas/self-hosted-ai
+      name: GitHub Repository
+  generator: false
+  status:
+    new: Recently added
+    deprecated: Deprecated
+
+extra_css:
+  - assets/stylesheets/custom.css
+
+# Navigation structure
+nav:
+  - Home:
+    - Overview: index.md
+    - Quick Start: getting-started.md
+    - Service Endpoints: endpoints.md
+  - Architecture:
+    - System Design: architecture/index.md
+    - Architecture Decisions: architecture/adrs.md
+    - Technology Stack: architecture/tech-stack.md
+    - Network Topology: architecture/network.md
+    - Resource Management: architecture/resources.md
+  - Deployment:
+    - Deployment Guide: deployment/index.md
+    - ArgoCD & GitOps: deployment/argocd.md
+    - Sync Waves: deployment/sync-waves.md
+    - GPU Worker Setup: deployment/gpu-worker.md
+    - Verification: deployment/verification.md
+  - Operations:
+    - Runbook: operations/index.md
+    - Monitoring: operations/monitoring.md
+    - Troubleshooting: operations/troubleshooting.md
+    - Backup & Recovery: operations/backup.md
+  - Security:
+    - Overview: security/index.md
+    - TLS & Certificates: security/tls-certificates.md
+    - Secrets Management: security/secrets.md
+    - SSO Integration: security/sso.md
+    - Security Audit: security/audit.md
+  - AI Services:
+    - Overview: ai/index.md
+    - Model Management: ai/models.md
+    - LiteLLM Gateway: ai/litellm.md
+    - MCP Servers: ai/mcp-servers.md
+    - Workflows: ai/workflows.md
+    - Image & Video: ai/image-video.md
+  - Development:
+    - Contributing: development/contributing.md
+    - Testing: development/testing.md
+    - Automation: development/automation.md
+    - CLI Tools: development/cli-tools.md
+    - Agents: development/agents.md
+    - Roadmap: development/roadmap.md
+  - Reference:
+    - API Rate Limits: reference/api-rate-limits.md
+    - Namespace Reference: reference/namespaces.md
+    - Quick Reference: reference/quick-reference.md

@@ -27,8 +27,8 @@ config:
   # Use Tempo as storage backend via gRPC plugin
   grpcStoragePlugin:
     enabled: true
-    # Connect to Tempo's Jaeger-compatible query endpoint
-    server: tempo.monitoring.svc.cluster.local:16685
+    # Connect to Tempo's Jaeger-compatible query endpoint (gRPC port 14250)
+    server: tempo.monitoring.svc.cluster.local:14250
 
   # UI configuration
   queryBasePath: /
@@ -115,6 +115,6 @@ env:
   - name: SPAN_STORAGE_TYPE
     value: "grpc-plugin"
   - name: GRPC_STORAGE_SERVER
-    value: "tempo.monitoring.svc.cluster.local:16685"
+    value: "tempo.monitoring.svc.cluster.local:14250"
   - name: GRPC_STORAGE_TLS
     value: "false"

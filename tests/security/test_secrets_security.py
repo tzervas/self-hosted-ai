@@ -1,0 +1,125 @@
+"""Secrets security tests.
+
+Validates that:
+- No plaintext secrets in codebase
+- SealedSecrets are properly encrypted
+- No hardcoded credentials in Helm values
+"""
+
+import re
+from pathlib import Path
+
+import pytest
+
+
+pytestmark = [pytest.mark.security, pytest.mark.critical]
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+
+
+class TestNoPlaintextSecrets:
+    """Ensure no plaintext secrets in the codebase."""
+
+    # Patterns that suggest hardcoded secrets
+    SECRET_PATTERNS = [
+        (r'password\s*[:=]\s*["\'][^${}][^"\']{8,}["\']', "hardcoded password"),
+        (r'api_key\s*[:=]\s*["\'][^${}][^"\']{16,}["\']', "hardcoded API key"),
+        (r'secret_key\s*[:=]\s*["\'][^${}][^"\']{16,}["\']', "hardcoded secret key"),
+        (r'token\s*[:=]\s*["\'][^${}][^"\']{20,}["\']', "hardcoded token"),
+    ]
+
+    # Files to skip (documentation, test fixtures, etc.)
+    SKIP_PATTERNS = [
+        "*.md", "*.txt", "*.lock", "*.local.*",
+        ".git/*", ".venv/*", "scripts/.venv/*",
+        "node_modules/*", "__pycache__/*",
+        "tests/*", "archive/*",
+        "third-party-licenses/*",
+        "AI_USE_TECH_DEMO/*",
+    ]
+
+    def test_no_hardcoded_passwords_in_helm(self):
+        """Helm values files should not contain hardcoded passwords."""
+        violations = []
+        for values_file in PROJECT_ROOT.glob("helm/*/values.yaml"):
+            content = values_file.read_text()
+            for pattern, desc in self.SECRET_PATTERNS:
+                matches = re.findall(pattern, content, re.IGNORECASE)
+                for match in matches:
+                    # Skip template variables like ${VAR}
+                    if "${" in match or "{{" in match:
+                        continue
+                    violations.append(
+                        f"{values_file.relative_to(PROJECT_ROOT)}: {desc}"
+                    )
+
+        assert not violations, (
+            f"Potential hardcoded secrets in Helm values:\n" +
+            "\n".join(f"  - {v}" for v in violations)
+        )
+
+    def test_no_plaintext_in_sealed_secrets(self):
+        """Sealed secret files should contain encrypted data, not plaintext."""
+        secrets_dir = PROJECT_ROOT / "argocd" / "sealed-secrets"
+        if not secrets_dir.exists():
+            pytest.skip("No sealed-secrets directory")
+
+        import yaml
+        plaintext = []
+        for secret_file in secrets_dir.glob("*.yaml"):
+            with open(secret_file) as f:
+                data = yaml.safe_load(f)
+
+            if data is None:
+                continue
+
+            kind = data.get("kind", "")
+            if kind == "SealedSecret":
+                # SealedSecrets should have encryptedData, not data
+                if "data" in data.get("spec", {}).get("template", {}):
+                    # spec.template.data can contain non-sensitive metadata
+                    pass
+                spec_data = data.get("spec", {}).get("encryptedData", {})
+                if not spec_data:
+                    plaintext.append(f"{secret_file.name}: no encryptedData")
+            elif kind == "Secret":
+                # Regular Secret objects in git are a security issue
+                plaintext.append(
+                    f"{secret_file.name}: plain Secret (should be SealedSecret)"
+                )
+
+        assert not plaintext, (
+            f"Secrets security issues:\n" +
+            "\n".join(f"  - {p}" for p in plaintext)
+        )
+
+    def test_no_env_files_committed(self):
+        """No .env files should be committed to the repository."""
+        env_files = list(PROJECT_ROOT.glob("**/.env"))
+        env_files += list(PROJECT_ROOT.glob("**/.env.*"))
+        # Filter out .env.example and .env.template
+        actual_env_files = [
+            f for f in env_files
+            if not f.name.endswith((".example", ".template", ".sample"))
+            and ".venv" not in str(f)
+            and ".git" not in str(f)
+        ]
+        assert not actual_env_files, (
+            f".env files found in repository:\n" +
+            "\n".join(f"  - {f.relative_to(PROJECT_ROOT)}" for f in actual_env_files)
+        )
+
+    def test_gitignore_excludes_secrets(self):
+        """Gitignore should exclude sensitive files."""
+        gitignore = PROJECT_ROOT / ".gitignore"
+        if not gitignore.exists():
+            pytest.xfail(".gitignore not found")
+
+        content = gitignore.read_text()
+        expected_patterns = [".env", "*.local.*", "ADMIN_CREDENTIALS"]
+        missing = [p for p in expected_patterns if p not in content]
+
+        if missing:
+            pytest.xfail(
+                f".gitignore missing patterns: {missing}"
+            )

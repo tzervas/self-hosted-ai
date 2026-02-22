@@ -1,0 +1,58 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/tzervas/self-hosted-ai-docs
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 8080
+
+# Traefik IngressRoute CRD
+ingressRoute:
+  enabled: true
+  host: docs.vectorweight.com
+  entryPoints:
+    - websecure
+  # No auth middleware - docs are public within the network
+  middlewares: []
+  tls:
+    secretName: vectorweight-wildcard-tls
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+# Security context for rootless execution
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+
+podLabels:
+  network.policy/traefik-ingress: "true"
+
+nodeSelector:
+  kubernetes.io/hostname: homelab
+
+tolerations: []
+affinity: {}
+
+# Image pull secret for GHCR
+imagePullSecrets:
+  - name: ghcr-pull-secret
