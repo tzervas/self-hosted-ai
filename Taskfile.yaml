@@ -127,8 +127,8 @@ tasks:
       - kyverno validate policies/kyverno/
 
   validate:all:
-    desc: Run all validation checks
-    deps: [validate:helm, validate:manifests, validate:policies]
+    desc: Run all validation checks (Helm, manifests, policies, config tests)
+    deps: [validate:helm, validate:manifests, validate:policies, test:config]
 
   # ==========================================================================
   # SECURITY
@@ -400,6 +400,70 @@ tasks:
     cmds:
       - echo "Opening Prometheus at http://localhost:9090"
       - kubectl port-forward svc/prometheus-kube-prometheus-prometheus -n monitoring 9090:9090
+
+  # ==========================================================================
+  # TESTING
+  # ==========================================================================
+
+  test:unit:
+    desc: "Run unit tests only (no cluster required)"
+    cmds:
+      - uv run pytest tests/test_core_base.py tests/test_core_task.py -v -m "not platform and not api and not integration and not security and not performance and not e2e"
+
+  test:platform:
+    desc: "Validate cluster infrastructure (nodes, pods, ArgoCD, certs)"
+    cmds:
+      - uv run pytest tests/platform/ -v --tb=short
+
+  test:api:
+    desc: "Test all service API endpoints"
+    cmds:
+      - uv run pytest tests/api/ -v --tb=short
+
+  test:integration:
+    desc: "Test service-to-service integrations"
+    cmds:
+      - uv run pytest tests/integration/ -v --tb=short
+
+  test:security:
+    desc: "Run security validation tests"
+    cmds:
+      - uv run pytest tests/security/ -v --tb=short
+
+  test:performance:
+    desc: "Run performance benchmark tests"
+    cmds:
+      - uv run pytest tests/performance/ -v --tb=short
+
+  test:e2e:
+    desc: "Run end-to-end workflow tests"
+    cmds:
+      - uv run pytest tests/e2e/ -v --tb=short
+
+  test:critical:
+    desc: "Run deployment readiness gate tests only"
+    cmds:
+      - uv run pytest -m critical -v --tb=short
+
+  test:fast:
+    desc: "Run all tests except slow ones"
+    cmds:
+      - uv run pytest -m "not slow" -v --tb=short
+
+  test:all:
+    desc: "Run the complete test suite"
+    cmds:
+      - uv run pytest tests/ -v --tb=short --cov=agents --cov-report=term-missing
+
+  test:report:
+    desc: "Run full suite and generate HTML report"
+    cmds:
+      - uv run pytest tests/ -v --tb=short --html=test-report.html --self-contained-html --cov=agents --cov-report=html
+
+  test:config:
+    desc: "Validate configs offline (Helm lint, YAML, manifests)"
+    cmds:
+      - uv run pytest tests/platform/test_config_validation.py -v --tb=short
 
   # ==========================================================================
   # CLEANUP
