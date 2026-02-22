@@ -29,7 +29,7 @@ spec:
             capabilities:
               drop:
                 - ALL
-            readOnlyRootFilesystem: true
+            readOnlyRootFilesystem: false
           args:
             - --http-address=0.0.0.0:4180
             - --provider={{ .Values.config.provider }}
