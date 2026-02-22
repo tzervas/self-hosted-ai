@@ -13,7 +13,7 @@ config:
   - .vectorweight.com
   emailDomains:
   - '*'
-  sslInsecureSkipVerify: false
+  sslInsecureSkipVerify: true  # Internal traffic; Keycloak uses self-signed cert from cluster CA
   upstream: http://landing-page.default.svc.cluster.local:80/
   passBasicAuth: false
   passAccessToken: true
