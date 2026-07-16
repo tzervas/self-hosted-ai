@@ -9,17 +9,16 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 import httpx
-
 from agents.core.base import Agent, AgentConfig, AgentResult, AgentStatus
 
 
 class MultiModalAgent(Agent):
     """Agent for multi-modal content processing and generation.
-    
+
     Processes various content types including images, audio, video, and text.
     Integrates vision models (llava), speech-to-text (Whisper), and LLM reasoning
     to provide comprehensive multi-modal analysis.
-    
+
     Attributes:
         vision_model: Name of the vision model to use (default: llava:13b)
         whisper_url: URL for Whisper STT service
@@ -37,7 +36,7 @@ class MultiModalAgent(Agent):
         ollama_url: Optional[str] = None,
     ):
         """Initialize Multi-Modal Agent.
-        
+
         Args:
             config: Agent configuration with timeout and other settings
             agent_id: Unique identifier for this agent instance
@@ -124,10 +123,10 @@ Always provide detailed, accurate analysis and maintain context across modalitie
 
     async def _process_image(self, image_path: Optional[str]) -> Dict[str, Any]:
         """Process image using vision model.
-        
+
         Args:
             image_path: Path to image file to process
-            
+
         Returns:
             Dict containing processing status and results
         """
@@ -137,11 +136,11 @@ Always provide detailed, accurate analysis and maintain context across modalitie
         try:
             # Security: validate file path and check file size
             image_file = Path(image_path).resolve()
-            
+
             # Prevent path traversal attacks
             if not image_file.is_file():
                 return {"status": "error", "error": "Invalid file path"}
-            
+
             # Check file size (max 10MB for images)
             max_size = 10 * 1024 * 1024  # 10MB
             if image_file.stat().st_size > max_size:
@@ -174,10 +173,10 @@ Always provide detailed, accurate analysis and maintain context across modalitie
 
     async def _process_audio(self, audio_path: Optional[str]) -> Dict[str, Any]:
         """Process audio using Whisper STT.
-        
+
         Args:
             audio_path: Path to audio file to transcribe
-            
+
         Returns:
             Dict containing transcription and metadata
         """
@@ -187,11 +186,11 @@ Always provide detailed, accurate analysis and maintain context across modalitie
         try:
             # Security: validate file path and check file size
             audio_file = Path(audio_path).resolve()
-            
+
             # Prevent path traversal attacks
             if not audio_file.is_file():
                 return {"status": "error", "error": "Invalid file path"}
-            
+
             # Check file size (max 25MB for audio)
             max_size = 25 * 1024 * 1024  # 25MB
             if audio_file.stat().st_size > max_size:
@@ -235,33 +234,27 @@ Always provide detailed, accurate analysis and maintain context across modalitie
         except Exception as e:
             return {"status": "error", "error": str(e)}
 
-    def _build_combined_prompt(
-        self, task: str, results: Dict[str, Dict[str, Any]]
-    ) -> str:
+    def _build_combined_prompt(self, task: str, results: Dict[str, Dict[str, Any]]) -> str:
         """Build combined prompt from all modality results.
-        
+
         Constructs a comprehensive prompt combining analysis from all processed
         modalities (image, audio, video) for final LLM reasoning.
-        
+
         Args:
             task: Original task/question from user
             results: Dict mapping modality names to their processing results
                    Each result should have 'status' and modality-specific data
-        
+
         Returns:
             Combined prompt string ready for LLM processing
         """
         prompt_parts = [self.system_prompt, f"\nTask: {task}\n"]
 
         if "image" in results and results["image"].get("status") == "success":
-            prompt_parts.append(
-                f"\nImage Analysis:\n{results['image']['description']}"
-            )
+            prompt_parts.append(f"\nImage Analysis:\n{results['image']['description']}")
 
         if "audio" in results and results["audio"].get("status") == "success":
-            prompt_parts.append(
-                f"\nAudio Transcription:\n{results['audio']['transcription']}"
-            )
+            prompt_parts.append(f"\nAudio Transcription:\n{results['audio']['transcription']}")
 
         if "video" in results and results["video"].get("status") == "success":
             prompt_parts.append(f"\nVideo Analysis:\n{results['video']['summary']}")
@@ -275,15 +268,15 @@ Always provide detailed, accurate analysis and maintain context across modalitie
 
 class EmbeddingAgent(Agent):
     """Agent for generating and managing embeddings.
-    
+
     Specialized agent for vector embedding generation and semantic search operations.
     Integrates with Qdrant vector database for storage and retrieval of embeddings.
-    
+
     Attributes:
         embedding_model: Name of the embedding model (default: nomic-embed-text:latest)
         qdrant_url: URL for Qdrant vector database
         ollama_base_url: URL for Ollama API (embeddings endpoint)
-        
+
     Supported Operations:
         - generate: Create vector embeddings for text
         - search: Perform semantic search in vector database
@@ -298,7 +291,7 @@ class EmbeddingAgent(Agent):
         ollama_url: Optional[str] = None,
     ):
         """Initialize Embedding Agent.
-        
+
         Args:
             config: Agent configuration with timeout settings
             agent_id: Unique identifier for this agent
@@ -318,22 +311,22 @@ embeddings for text, manage vector databases, and perform semantic search operat
 
     async def execute(self, input_data: str, **kwargs: Any) -> AgentResult:
         """Generate embeddings or perform semantic search.
-        
+
         Args:
             input_data: Text to embed or search query
             **kwargs: Additional parameters:
                 - operation: 'generate' or 'search' (default: 'generate')
                 - collection: Qdrant collection name for search (default: 'default')
                 - top_k: Number of results to return for search (default: 5)
-                
+
         Returns:
             AgentResult with embeddings vector or search results
-            
+
         Example:
             >>> # Generate embeddings
             >>> result = await agent.execute("machine learning concepts")
             >>> embeddings = result.metadata['embeddings']
-            
+
             >>> # Semantic search
             >>> result = await agent.execute(
             ...     "python tutorial",
@@ -449,22 +442,22 @@ When calling functions, respond with valid JSON in this format:
 
     async def execute(self, input_data: str, **kwargs: Any) -> AgentResult:
         """Execute function calling workflow with LLM-driven tool selection.
-        
+
         Processes user input to determine which external tools/functions to call,
         executes the selected functions, and returns the results. Uses the LLM
         to make intelligent decisions about tool usage based on available tools
         and task requirements.
-        
+
         Args:
             input_data: User task or query requiring function calling
             **kwargs: Additional execution parameters (currently unused)
-            
+
         Returns:
             AgentResult with function call execution status and output
-            
+
         Raises:
             AgentResult with FAILED status on validation errors or execution failures
-            
+
         Example:
             >>> agent = FunctionCallingAgent(config, available_tools=[{"name": "search", "description": "Web search"}])
             >>> result = await agent.execute("Find the latest news about AI")

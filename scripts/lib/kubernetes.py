@@ -118,9 +118,7 @@ class KubernetesClient:
             {
                 "name": pod.metadata.name,
                 "status": pod.status.phase,
-                "ready": all(
-                    cs.ready for cs in (pod.status.container_statuses or [])
-                ),
+                "ready": all(cs.ready for cs in (pod.status.container_statuses or [])),
             }
             for pod in result.items
         ]
@@ -251,7 +249,12 @@ class KubernetesClient:
             "type": svc.spec.type,
             "cluster_ip": svc.spec.cluster_ip,
             "ports": [
-                {"name": p.name, "port": p.port, "target_port": p.target_port, "protocol": p.protocol}
+                {
+                    "name": p.name,
+                    "port": p.port,
+                    "target_port": p.target_port,
+                    "protocol": p.protocol,
+                }
                 for p in svc.spec.ports
             ],
         }
@@ -273,14 +276,15 @@ class KubernetesClient:
             for item in result.get("items", []):
                 conditions = item.get("status", {}).get("conditions", [])
                 ready = any(
-                    c.get("type") == "Ready" and c.get("status") == "True"
-                    for c in conditions
+                    c.get("type") == "Ready" and c.get("status") == "True" for c in conditions
                 )
-                certs.append({
-                    "name": item["metadata"]["name"],
-                    "ready": ready,
-                    "secret": item["spec"]["secretName"],
-                })
+                certs.append(
+                    {
+                        "name": item["metadata"]["name"],
+                        "ready": ready,
+                        "secret": item["spec"]["secretName"],
+                    }
+                )
             return certs
         except client.ApiException:
             return []

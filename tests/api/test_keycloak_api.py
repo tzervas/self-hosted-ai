@@ -8,7 +8,6 @@ Tests the Keycloak SSO identity provider:
 
 import pytest
 
-
 pytestmark = [pytest.mark.api]
 
 
@@ -44,9 +43,7 @@ class TestKeycloakOIDC:
                 if response.status_code == 200:
                     data = response.json()
                     assert "issuer" in data, "Missing 'issuer' in OIDC config"
-                    assert "authorization_endpoint" in data, (
-                        "Missing 'authorization_endpoint'"
-                    )
+                    assert "authorization_endpoint" in data, "Missing 'authorization_endpoint'"
                     assert "token_endpoint" in data, "Missing 'token_endpoint'"
                     assert "jwks_uri" in data, "Missing 'jwks_uri'"
                     return
@@ -67,8 +64,6 @@ class TestKeycloakOIDC:
                     f"Realm name mismatch: {data.get('realm')}"
                 )
             else:
-                pytest.skip(
-                    f"Realm endpoint returned {response.status_code}"
-                )
+                pytest.skip(f"Realm endpoint returned {response.status_code}")
         except Exception as e:
             pytest.skip(f"Cannot verify realm: {e}")

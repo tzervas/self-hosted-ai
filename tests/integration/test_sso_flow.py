@@ -5,7 +5,6 @@ Tests the Keycloak -> OAuth2-proxy -> Service authentication chain.
 
 import pytest
 
-
 pytestmark = [pytest.mark.integration]
 
 

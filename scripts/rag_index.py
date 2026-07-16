@@ -38,7 +38,9 @@ COLLECTION_NAME = "self-hosted-ai-docs"
 
 # Ollama configuration - use local instance when available
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://192.168.1.170:11434")
-EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")  # Local sentence-transformers model
+EMBEDDING_MODEL = os.getenv(
+    "EMBEDDING_MODEL", "all-MiniLM-L6-v2"
+)  # Local sentence-transformers model
 CHAT_MODEL = os.getenv("CHAT_MODEL", "llama3.2:3b")
 
 # File patterns to index
@@ -101,53 +103,70 @@ def get_collection(client: chromadb.PersistentClient) -> chromadb.Collection:
 def should_include_file(file_path: Path) -> bool:
     """Check if file should be indexed."""
     rel_path = str(file_path.relative_to(PROJECT_ROOT))
-    
+
     # Check excludes first using string matching
     exclude_dirs = [
-        "node_modules", ".git", ".venv", "venv", "target", "__pycache__",
-        ".egg-info", "htmlcov", ".rag_index", "docs/api", "third-party-licenses",
-        ".mypy_cache", ".ruff_cache", ".pytest_cache", "dist", "build",
+        "node_modules",
+        ".git",
+        ".venv",
+        "venv",
+        "target",
+        "__pycache__",
+        ".egg-info",
+        "htmlcov",
+        ".rag_index",
+        "docs/api",
+        "third-party-licenses",
+        ".mypy_cache",
+        ".ruff_cache",
+        ".pytest_cache",
+        "dist",
+        "build",
     ]
-    
+
     for exclude_dir in exclude_dirs:
         if f"/{exclude_dir}/" in f"/{rel_path}":
             return False
         if rel_path.startswith(f"{exclude_dir}/"):
             return False
-    
+
     # Exclude specific file patterns
     if rel_path.endswith((".min.js", ".min.css", "package-lock.json", "uv.lock")):
         return False
-    
+
     # Check includes
     for pattern in INCLUDE_PATTERNS:
         if file_path.match(pattern):
             return True
-    
+
     return False
 
 
-def chunk_document(content: str, file_path: Path, chunk_size: int = 1500, overlap: int = 200) -> list[dict[str, Any]]:
+def chunk_document(
+    content: str, file_path: Path, chunk_size: int = 1500, overlap: int = 200
+) -> list[dict[str, Any]]:
     """Split document into overlapping chunks with metadata."""
     chunks = []
     file_type = file_path.suffix.lstrip(".")
     rel_path = str(file_path.relative_to(PROJECT_ROOT))
-    
+
     # For small files, keep as single chunk
     if len(content) <= chunk_size:
-        return [{
-            "content": content,
-            "file_path": rel_path,
-            "file_type": file_type,
-            "chunk_index": 0,
-            "total_chunks": 1,
-        }]
-    
+        return [
+            {
+                "content": content,
+                "file_path": rel_path,
+                "file_type": file_type,
+                "chunk_index": 0,
+                "total_chunks": 1,
+            }
+        ]
+
     # Split by sections for markdown
     if file_type == "md":
-        sections = re.split(r'\n(?=#{1,3}\s)', content)
+        sections = re.split(r"\n(?=#{1,3}\s)", content)
         current_chunk = ""
-        
+
         for section in sections:
             if len(current_chunk) + len(section) <= chunk_size:
                 current_chunk += section
@@ -155,7 +174,7 @@ def chunk_document(content: str, file_path: Path, chunk_size: int = 1500, overla
                 if current_chunk:
                     chunks.append(current_chunk)
                 current_chunk = section
-        
+
         if current_chunk:
             chunks.append(current_chunk)
     else:
@@ -164,24 +183,27 @@ def chunk_document(content: str, file_path: Path, chunk_size: int = 1500, overla
         while start < len(content):
             end = start + chunk_size
             chunk = content[start:end]
-            
+
             # Try to end at a newline
             if end < len(content):
-                last_newline = chunk.rfind('\n')
+                last_newline = chunk.rfind("\n")
                 if last_newline > chunk_size // 2:
-                    chunk = chunk[:last_newline + 1]
+                    chunk = chunk[: last_newline + 1]
                     end = start + last_newline + 1
-            
+
             chunks.append(chunk)
             start = end - overlap
-    
-    return [{
-        "content": chunk,
-        "file_path": rel_path,
-        "file_type": file_type,
-        "chunk_index": i,
-        "total_chunks": len(chunks),
-    } for i, chunk in enumerate(chunks)]
+
+    return [
+        {
+            "content": chunk,
+            "file_path": rel_path,
+            "file_type": file_type,
+            "chunk_index": i,
+            "total_chunks": len(chunks),
+        }
+        for i, chunk in enumerate(chunks)
+    ]
 
 
 def compute_hash(content: str) -> str:
@@ -195,10 +217,10 @@ def index(
     dry_run: bool = typer.Option(False, "--dry-run", "-n", help="Show what would be indexed"),
 ):
     """Index all project documentation and code for RAG search."""
-    
+
     client = get_client()
     collection = get_collection(client)
-    
+
     # Get existing document hashes
     existing_hashes: dict[str, str] = {}
     if not force:
@@ -206,13 +228,15 @@ def index(
             existing = collection.get(include=["metadatas"])
             for i, metadata in enumerate(existing.get("metadatas", [])):
                 if metadata:
-                    existing_hashes[metadata.get("file_path", "")] = metadata.get("content_hash", "")
+                    existing_hashes[metadata.get("file_path", "")] = metadata.get(
+                        "content_hash", ""
+                    )
         except Exception:
             pass
-    
+
     files_to_index: list[Path] = []
     skipped_files: list[Path] = []
-    
+
     # Find all files to index
     for pattern in INCLUDE_PATTERNS:
         for file_path in PROJECT_ROOT.glob(pattern):
@@ -221,14 +245,14 @@ def index(
                     content = file_path.read_text(errors="ignore")
                     content_hash = compute_hash(content)
                     rel_path = str(file_path.relative_to(PROJECT_ROOT))
-                    
+
                     if force or existing_hashes.get(rel_path) != content_hash:
                         files_to_index.append(file_path)
                     else:
                         skipped_files.append(file_path)
                 except Exception:
                     pass
-    
+
     if dry_run:
         console.print(f"\n[bold]Would index {len(files_to_index)} files[/bold]")
         for f in files_to_index[:20]:
@@ -237,50 +261,49 @@ def index(
             console.print(f"  ... and {len(files_to_index) - 20} more")
         console.print(f"\n[dim]Skipped {len(skipped_files)} unchanged files[/dim]")
         return
-    
+
     console.print(f"\n[bold green]Indexing {len(files_to_index)} files[/bold green]")
     console.print(f"[dim]Skipping {len(skipped_files)} unchanged files[/dim]\n")
-    
+
     all_chunks = []
-    
+
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         console=console,
     ) as progress:
         task = progress.add_task("Processing files...", total=len(files_to_index))
-        
+
         for file_path in files_to_index:
             try:
                 content = file_path.read_text(errors="ignore")
                 chunks = chunk_document(content, file_path)
-                
+
                 for chunk in chunks:
                     chunk["content_hash"] = compute_hash(content)
                     all_chunks.append(chunk)
-                
+
                 progress.advance(task)
             except Exception as e:
                 console.print(f"[red]Error processing {file_path}: {e}[/red]")
-    
+
     if all_chunks:
         # Delete existing chunks for files being re-indexed
         files_being_indexed = {str(f.relative_to(PROJECT_ROOT)) for f in files_to_index}
         try:
             existing = collection.get(include=["metadatas"])
             ids_to_delete = []
-            for i, (doc_id, metadata) in enumerate(zip(
-                existing.get("ids", []),
-                existing.get("metadatas", [])
-            )):
+            for i, (doc_id, metadata) in enumerate(
+                zip(existing.get("ids", []), existing.get("metadatas", []))
+            ):
                 if metadata and metadata.get("file_path") in files_being_indexed:
                     ids_to_delete.append(doc_id)
-            
+
             if ids_to_delete:
                 collection.delete(ids=ids_to_delete)
         except Exception:
             pass
-        
+
         # Add new chunks
         with Progress(
             SpinnerColumn(),
@@ -288,25 +311,28 @@ def index(
             console=console,
         ) as progress:
             task = progress.add_task("Creating embeddings...", total=len(all_chunks))
-            
+
             # Process in batches
             batch_size = 50
             for i in range(0, len(all_chunks), batch_size):
-                batch = all_chunks[i:i + batch_size]
-                
+                batch = all_chunks[i : i + batch_size]
+
                 ids = [f"{chunk['file_path']}#{chunk['chunk_index']}" for chunk in batch]
                 documents = [chunk["content"] for chunk in batch]
-                metadatas = [{
-                    "file_path": chunk["file_path"],
-                    "file_type": chunk["file_type"],
-                    "chunk_index": chunk["chunk_index"],
-                    "total_chunks": chunk["total_chunks"],
-                    "content_hash": chunk["content_hash"],
-                } for chunk in batch]
-                
+                metadatas = [
+                    {
+                        "file_path": chunk["file_path"],
+                        "file_type": chunk["file_type"],
+                        "chunk_index": chunk["chunk_index"],
+                        "total_chunks": chunk["total_chunks"],
+                        "content_hash": chunk["content_hash"],
+                    }
+                    for chunk in batch
+                ]
+
                 collection.add(ids=ids, documents=documents, metadatas=metadatas)
                 progress.advance(task, len(batch))
-    
+
     # Summary
     total_docs = collection.count()
     console.print(f"\n[bold green]✓ Indexed successfully![/bold green]")
@@ -321,28 +347,28 @@ def search(
     file_type: str | None = typer.Option(None, "--type", "-t", help="Filter by file type"),
 ):
     """Search the indexed documentation."""
-    
+
     client = get_client()
     collection = get_collection(client)
-    
+
     where_filter = {"file_type": file_type} if file_type else None
-    
+
     results = collection.query(
         query_texts=[query],
         n_results=limit,
         where=where_filter,
         include=["documents", "metadatas", "distances"],
     )
-    
+
     if not results["documents"][0]:
         console.print("[yellow]No results found.[/yellow]")
         return
-    
+
     table = Table(title=f"Search Results: '{query}'", show_lines=True)
     table.add_column("Score", style="cyan", width=8)
     table.add_column("File", style="green")
     table.add_column("Preview", style="white", max_width=80)
-    
+
     for doc, metadata, distance in zip(
         results["documents"][0],
         results["metadatas"][0],
@@ -350,15 +376,17 @@ def search(
     ):
         score = f"{1 - distance:.2f}"  # Convert distance to similarity
         file_path = metadata.get("file_path", "unknown")
-        chunk_info = f" (chunk {metadata.get('chunk_index', 0) + 1}/{metadata.get('total_chunks', 1)})"
-        
+        chunk_info = (
+            f" (chunk {metadata.get('chunk_index', 0) + 1}/{metadata.get('total_chunks', 1)})"
+        )
+
         # Truncate preview
         preview = doc[:200].replace("\n", " ").strip()
         if len(doc) > 200:
             preview += "..."
-        
+
         table.add_row(score, file_path + chunk_info, preview)
-    
+
     console.print(table)
 
 
@@ -369,21 +397,21 @@ def ask(
     model: str = typer.Option(CHAT_MODEL, "--model", "-m", help="Chat model to use"),
 ):
     """Ask a question using RAG (retrieval-augmented generation)."""
-    
+
     client = get_client()
     collection = get_collection(client)
-    
+
     # Retrieve relevant context
     results = collection.query(
         query_texts=[question],
         n_results=context_chunks,
         include=["documents", "metadatas"],
     )
-    
+
     if not results["documents"][0]:
         console.print("[yellow]No relevant documentation found.[/yellow]")
         return
-    
+
     # Build context
     context_parts = []
     sources = []
@@ -391,9 +419,9 @@ def ask(
         file_path = metadata.get("file_path", "unknown")
         sources.append(file_path)
         context_parts.append(f"=== From {file_path} ===\n{doc}")
-    
+
     context = "\n\n".join(context_parts)
-    
+
     # Create prompt
     system_prompt = """You are a helpful assistant for the Self-Hosted AI Platform project.
 Answer questions based on the provided documentation context.
@@ -413,7 +441,7 @@ Answer based on the above context:"""
     for src in set(sources):
         console.print(f"  [dim]• {src}[/dim]")
     console.print()
-    
+
     # Call Ollama
     try:
         with httpx.Client(timeout=120.0) as http_client:
@@ -430,12 +458,14 @@ Answer based on the above context:"""
             )
             response.raise_for_status()
             answer = response.json()["message"]["content"]
-            
-            console.print(Panel(
-                Markdown(answer),
-                title="[bold green]Answer[/bold green]",
-                border_style="green",
-            ))
+
+            console.print(
+                Panel(
+                    Markdown(answer),
+                    title="[bold green]Answer[/bold green]",
+                    border_style="green",
+                )
+            )
     except httpx.HTTPError as e:
         console.print(f"[red]Error calling Ollama: {e}[/red]")
         console.print(f"[dim]Make sure Ollama is running at {OLLAMA_BASE_URL}[/dim]")
@@ -444,47 +474,47 @@ Answer based on the above context:"""
 @app.command()
 def stats():
     """Show index statistics."""
-    
+
     client = get_client()
     collection = get_collection(client)
-    
+
     total_chunks = collection.count()
-    
+
     # Get file type breakdown
     results = collection.get(include=["metadatas"])
-    
+
     file_types: dict[str, int] = {}
     files: set[str] = set()
-    
+
     for metadata in results.get("metadatas", []):
         if metadata:
             ft = metadata.get("file_type", "unknown")
             file_types[ft] = file_types.get(ft, 0) + 1
             files.add(metadata.get("file_path", ""))
-    
+
     console.print("\n[bold]RAG Index Statistics[/bold]\n")
     console.print(f"  Total chunks: {total_chunks}")
     console.print(f"  Total files:  {len(files)}")
     console.print(f"  Index path:   {CHROMA_DIR}")
-    
+
     console.print("\n[bold]By File Type:[/bold]")
     table = Table()
     table.add_column("Type", style="cyan")
     table.add_column("Chunks", style="green", justify="right")
-    
+
     for ft, count in sorted(file_types.items(), key=lambda x: -x[1]):
         table.add_row(ft or "none", str(count))
-    
+
     console.print(table)
 
 
 @app.command()
 def clear():
     """Clear the entire index."""
-    
+
     if not typer.confirm("Are you sure you want to clear the index?"):
         raise typer.Abort()
-    
+
     client = get_client()
     try:
         client.delete_collection(COLLECTION_NAME)

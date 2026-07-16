@@ -10,11 +10,11 @@ __author__ = "tzervas"
 
 from agents.core.base import Agent, AgentConfig, AgentResult, AgentStatus
 from agents.core.workflow import Workflow, WorkflowConfig, WorkflowOrchestrator
-from agents.specialized.research import ResearchAgent
-from agents.specialized.development import DevelopmentAgent
 from agents.specialized.code_review import CodeReviewAgent
-from agents.specialized.testing import TestingAgent
+from agents.specialized.development import DevelopmentAgent
 from agents.specialized.documentation import DocumentationAgent
+from agents.specialized.research import ResearchAgent
+from agents.specialized.testing import TestingAgent
 
 __all__ = [
     # Core

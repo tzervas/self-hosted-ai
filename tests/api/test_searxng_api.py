@@ -8,7 +8,6 @@ Tests the privacy-focused search engine:
 
 import pytest
 
-
 pytestmark = [pytest.mark.api]
 
 
@@ -56,9 +55,7 @@ class TestSearXNGSearch:
             )
             if response.status_code == 429:
                 pytest.skip("SearXNG rate limited")
-            assert response.status_code == 200, (
-                f"Search failed: {response.status_code}"
-            )
+            assert response.status_code == 200, f"Search failed: {response.status_code}"
             data = response.json()
             assert "results" in data, "Missing 'results' in search response"
         except Exception as e:

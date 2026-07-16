@@ -11,7 +11,6 @@ import subprocess
 
 import pytest
 
-
 pytestmark = [pytest.mark.security]
 
 
@@ -35,7 +34,9 @@ class TestPodSecurityContext:
         for ns in PSS_NAMESPACES:
             result = subprocess.run(
                 ["kubectl", "get", "pods", "-n", ns, "-o", "json"],
-                capture_output=True, text=True, timeout=30,
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
             if result.returncode != 0:
                 continue
@@ -46,17 +47,13 @@ class TestPodSecurityContext:
                 spec = pod.get("spec", {})
 
                 # Check init containers and regular containers
-                for container in (
-                    spec.get("containers", []) +
-                    spec.get("initContainers", [])
-                ):
+                for container in spec.get("containers", []) + spec.get("initContainers", []):
                     sc = container.get("securityContext", {})
                     if sc.get("privileged"):
                         privileged.append(f"{ns}/{name}/{container['name']}")
 
-        assert not privileged, (
-            f"Privileged containers found:\n" +
-            "\n".join(f"  - {p}" for p in privileged)
+        assert not privileged, f"Privileged containers found:\n" + "\n".join(
+            f"  - {p}" for p in privileged
         )
 
     def test_no_host_network(self, kubectl_available):
@@ -68,7 +65,9 @@ class TestPodSecurityContext:
         for ns in PSS_NAMESPACES:
             result = subprocess.run(
                 ["kubectl", "get", "pods", "-n", ns, "-o", "json"],
-                capture_output=True, text=True, timeout=30,
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
             if result.returncode != 0:
                 continue
@@ -79,10 +78,7 @@ class TestPodSecurityContext:
                 if pod.get("spec", {}).get("hostNetwork"):
                     host_net.append(f"{ns}/{name}")
 
-        assert not host_net, (
-            f"Pods using host network:\n" +
-            "\n".join(f"  - {p}" for p in host_net)
-        )
+        assert not host_net, f"Pods using host network:\n" + "\n".join(f"  - {p}" for p in host_net)
 
     def test_containers_drop_all_capabilities(self, kubectl_available):
         """Containers should drop ALL capabilities."""
@@ -93,7 +89,9 @@ class TestPodSecurityContext:
         for ns in PSS_NAMESPACES:
             result = subprocess.run(
                 ["kubectl", "get", "pods", "-n", ns, "-o", "json"],
-                capture_output=True, text=True, timeout=30,
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
             if result.returncode != 0:
                 continue
@@ -106,14 +104,12 @@ class TestPodSecurityContext:
                     caps = sc.get("capabilities", {})
                     drop = caps.get("drop", [])
                     if "ALL" not in drop:
-                        missing_drop.append(
-                            f"{ns}/{name}/{container['name']}"
-                        )
+                        missing_drop.append(f"{ns}/{name}/{container['name']}")
 
         if missing_drop:
             pytest.xfail(
-                f"Containers not dropping ALL capabilities (PSS recommendation):\n" +
-                "\n".join(f"  - {m}" for m in missing_drop[:10])
+                f"Containers not dropping ALL capabilities (PSS recommendation):\n"
+                + "\n".join(f"  - {m}" for m in missing_drop[:10])
             )
 
 
@@ -129,7 +125,9 @@ class TestPSSLabels:
         for ns in PSS_NAMESPACES:
             result = subprocess.run(
                 ["kubectl", "get", "namespace", ns, "-o", "json"],
-                capture_output=True, text=True, timeout=30,
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
             if result.returncode != 0:
                 missing_pss.append(f"{ns}: namespace not found")
@@ -139,15 +137,11 @@ class TestPSSLabels:
             labels = data.get("metadata", {}).get("labels", {})
 
             # Check for pod-security.kubernetes.io labels
-            pss_labels = {
-                k: v for k, v in labels.items()
-                if "pod-security.kubernetes.io" in k
-            }
+            pss_labels = {k: v for k, v in labels.items() if "pod-security.kubernetes.io" in k}
             if not pss_labels:
                 missing_pss.append(f"{ns}: no PSS labels")
 
         if missing_pss:
             pytest.xfail(
-                f"Namespaces without PSS labels:\n" +
-                "\n".join(f"  - {m}" for m in missing_pss)
+                f"Namespaces without PSS labels:\n" + "\n".join(f"  - {m}" for m in missing_pss)
             )

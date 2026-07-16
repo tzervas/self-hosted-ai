@@ -6,11 +6,10 @@ Validates that:
 - Certificate chain is complete
 """
 
-import ssl
 import socket
+import ssl
 
 import pytest
-
 
 pytestmark = [pytest.mark.security, pytest.mark.critical]
 
@@ -30,9 +29,8 @@ class TestExternalTLS:
             except Exception as e:
                 failures.append(f"{name} ({url}): {e}")
 
-        assert not failures, (
-            f"Endpoints with TLS issues:\n" +
-            "\n".join(f"  - {f}" for f in failures)
+        assert not failures, f"Endpoints with TLS issues:\n" + "\n".join(
+            f"  - {f}" for f in failures
         )
 
     def test_tls_certificate_valid(self, platform_config):
@@ -59,6 +57,7 @@ class TestNoInsecureSkipVerify:
     def test_helm_values_no_insecure_skip(self):
         """Helm values files should not contain insecureSkipVerify: true."""
         from pathlib import Path
+
         project_root = Path(__file__).parent.parent.parent
 
         violations = []
@@ -69,14 +68,14 @@ class TestNoInsecureSkipVerify:
             if "insecure_skip_verify: true" in content:
                 violations.append(values_file.relative_to(project_root))
 
-        assert not violations, (
-            f"Files with insecureSkipVerify enabled:\n" +
-            "\n".join(f"  - {v}" for v in violations)
+        assert not violations, f"Files with insecureSkipVerify enabled:\n" + "\n".join(
+            f"  - {v}" for v in violations
         )
 
     def test_argocd_no_insecure_skip(self):
         """ArgoCD config should not use insecureSkipVerify."""
         from pathlib import Path
+
         project_root = Path(__file__).parent.parent.parent
 
         violations = []
@@ -87,12 +86,10 @@ class TestNoInsecureSkipVerify:
                 if "insecureSkipVerify: true" in content:
                     # Check if it's been properly replaced with rootCA
                     if "rootCA" not in content:
-                        violations.append(
-                            yaml_file.relative_to(project_root)
-                        )
+                        violations.append(yaml_file.relative_to(project_root))
 
         if violations:
             pytest.xfail(
-                f"ArgoCD configs with insecureSkipVerify (review needed):\n" +
-                "\n".join(f"  - {v}" for v in violations)
+                f"ArgoCD configs with insecureSkipVerify (review needed):\n"
+                + "\n".join(f"  - {v}" for v in violations)
             )

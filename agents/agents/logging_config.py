@@ -18,7 +18,9 @@ DEFAULT_LOG_FORMAT = (
     "<level>{message}</level>"
 )
 
-DEFAULT_JSON_FORMAT = "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level} | {name}:{function}:{line} | {message}"
+DEFAULT_JSON_FORMAT = (
+    "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level} | {name}:{function}:{line} | {message}"
+)
 
 
 def setup_logging(

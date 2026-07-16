@@ -1,8 +1,9 @@
 // Rust-based agent runtime for performance-critical operations
 
+use std::time::Duration;
+
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use std::time::Duration;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AgentConfig {
@@ -77,7 +78,7 @@ pub async fn execute_parallel(
 
     let mut set = JoinSet::new();
 
-    for (agent, task) in agents.into_iter().zip(tasks.into_iter()) {
+    for (agent, task) in agents.into_iter().zip(tasks) {
         set.spawn(async move { agent.execute(&task).await });
     }
 

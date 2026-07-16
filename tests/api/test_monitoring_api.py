@@ -9,7 +9,6 @@ Tests Grafana, Prometheus, and Tempo endpoints:
 
 import pytest
 
-
 pytestmark = [pytest.mark.api]
 
 
@@ -20,13 +19,9 @@ class TestGrafanaHealth:
         """Grafana should be reachable."""
         try:
             response = grafana_client.get("/api/health")
-            assert response.status_code == 200, (
-                f"Grafana health returned {response.status_code}"
-            )
+            assert response.status_code == 200, f"Grafana health returned {response.status_code}"
             data = response.json()
-            assert data.get("database") == "ok", (
-                f"Grafana database not ok: {data}"
-            )
+            assert data.get("database") == "ok", f"Grafana database not ok: {data}"
         except Exception as e:
             pytest.fail(f"Cannot reach Grafana: {e}")
 
@@ -57,9 +52,7 @@ class TestPrometheusHealth:
                 response = http_client.get(
                     f"{platform_config.GRAFANA_EXTERNAL.replace('grafana', 'prometheus')}/api/v1/status/runtimeinfo"
                 )
-            assert response.status_code == 200, (
-                f"Prometheus health returned {response.status_code}"
-            )
+            assert response.status_code == 200, f"Prometheus health returned {response.status_code}"
         except Exception as e:
             pytest.skip(f"Cannot reach Prometheus: {e}")
 

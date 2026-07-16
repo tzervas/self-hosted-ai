@@ -155,7 +155,9 @@ async def _bootstrap_all(dry_run: bool, skip_models: bool) -> None:
     ]
 
     if not skip_models:
-        steps.append(("Pulling AI models", lambda dr: _bootstrap_models(settings.models_manifest, False)))
+        steps.append(
+            ("Pulling AI models", lambda dr: _bootstrap_models(settings.models_manifest, False))
+        )
 
     with Progress(
         SpinnerColumn(),
@@ -283,7 +285,9 @@ async def _bootstrap_n8n(import_workflows: bool, dry_run: bool) -> None:
                         await client.import_workflow(workflow)
                         console.print(f"    Imported workflow: {workflow_file.stem}")
                     except Exception as e:
-                        console.print(f"    [yellow]⚠[/yellow] Failed to import {workflow_file.stem}: {e}")
+                        console.print(
+                            f"    [yellow]⚠[/yellow] Failed to import {workflow_file.stem}: {e}"
+                        )
 
 
 async def _bootstrap_grafana(dry_run: bool) -> None:

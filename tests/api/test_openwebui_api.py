@@ -9,7 +9,6 @@ Tests the Open WebUI chat interface:
 
 import pytest
 
-
 pytestmark = [pytest.mark.api, pytest.mark.critical]
 
 
@@ -20,9 +19,7 @@ class TestOpenWebUIHealth:
         """Open WebUI health endpoint should return 200."""
         try:
             response = openwebui_client.get("/health")
-            assert response.status_code == 200, (
-                f"Open WebUI health returned {response.status_code}"
-            )
+            assert response.status_code == 200, f"Open WebUI health returned {response.status_code}"
         except Exception as e:
             pytest.fail(f"Cannot reach Open WebUI: {e}")
 

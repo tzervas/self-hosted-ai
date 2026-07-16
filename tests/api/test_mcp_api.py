@@ -8,7 +8,6 @@ Tests the Model Context Protocol servers via MCPO proxy:
 
 import pytest
 
-
 pytestmark = [pytest.mark.api]
 
 
@@ -27,9 +26,7 @@ class TestMCPHealth:
                 # Accessible
                 pass
             else:
-                pytest.skip(
-                    f"MCP proxy not externally accessible ({response.status_code})"
-                )
+                pytest.skip(f"MCP proxy not externally accessible ({response.status_code})")
         except Exception as e:
             pytest.skip(f"MCP proxy not reachable: {e}")
 
@@ -38,27 +35,37 @@ class TestMCPHealth:
         if not kubectl_available:
             pytest.skip("kubectl not available")
 
-        import subprocess
         import json
+        import subprocess
 
         result = subprocess.run(
-            ["kubectl", "get", "pods", "-n", "self-hosted-ai",
-             "-l", "app=mcp-servers", "-o", "json"],
-            capture_output=True, text=True, timeout=30,
+            [
+                "kubectl",
+                "get",
+                "pods",
+                "-n",
+                "self-hosted-ai",
+                "-l",
+                "app=mcp-servers",
+                "-o",
+                "json",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         if result.returncode != 0:
             # Try broader search
             result = subprocess.run(
                 ["kubectl", "get", "pods", "-n", "self-hosted-ai", "-o", "json"],
-                capture_output=True, text=True, timeout=30,
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
             if result.returncode != 0:
                 pytest.skip("Cannot query pods")
 
             data = json.loads(result.stdout)
-            mcp_pods = [
-                p for p in data.get("items", [])
-                if "mcp" in p["metadata"]["name"]
-            ]
+            mcp_pods = [p for p in data.get("items", []) if "mcp" in p["metadata"]["name"]]
             if not mcp_pods:
                 pytest.skip("No MCP server pods found")

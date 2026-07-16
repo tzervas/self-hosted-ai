@@ -7,8 +7,8 @@ Tests in this module require cluster access (services must be reachable).
 import os
 import subprocess
 
-import pytest
 import httpx
+import pytest
 
 
 def _port_forward_or_skip(namespace, service, local_port, remote_port):

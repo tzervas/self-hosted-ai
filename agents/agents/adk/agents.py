@@ -15,10 +15,10 @@ from agents.adk.base import ADKAgent, ADKConfig, ADKResult
 
 class DevelopmentADKAgent(ADKAgent):
     """Agent specialized in code development and generation."""
-    
+
     def get_agent_type(self) -> str:
         return "development"
-    
+
     def get_system_prompt(self) -> str:
         return """You are an expert software developer with deep expertise across multiple programming languages and frameworks.
 
@@ -48,16 +48,16 @@ When generating code:
         description: str,
         language: str,
         framework: Optional[str] = None,
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[Dict[str, Any]] = None,
     ) -> ADKResult:
         """Generate code based on description.
-        
+
         Args:
             description: What to implement
             language: Programming language
             framework: Optional framework
             context: Additional context
-            
+
         Returns:
             ADKResult with generated code
         """
@@ -65,27 +65,22 @@ When generating code:
         ctx["language"] = language
         if framework:
             ctx["framework"] = framework
-        
+
         task = f"Implement the following in {language}"
         if framework:
             task += f" using {framework}"
         task += f":\n\n{description}"
-        
+
         return await self.execute(task, ctx)
-    
-    async def refactor_code(
-        self,
-        code: str,
-        instructions: str,
-        language: str
-    ) -> ADKResult:
+
+    async def refactor_code(self, code: str, instructions: str, language: str) -> ADKResult:
         """Refactor existing code.
-        
+
         Args:
             code: Code to refactor
             instructions: Refactoring instructions
             language: Programming language
-            
+
         Returns:
             ADKResult with refactored code
         """
@@ -99,16 +94,16 @@ Code:
 ```
 
 Provide the refactored code with explanations of changes made."""
-        
+
         return await self.execute(task)
 
 
 class CodeReviewADKAgent(ADKAgent):
     """Agent specialized in code review and analysis."""
-    
+
     def get_agent_type(self) -> str:
         return "code_review"
-    
+
     def get_system_prompt(self) -> str:
         return """You are an expert code reviewer with extensive experience in software quality and security.
 
@@ -130,41 +125,34 @@ Review Format:
 Be constructive and specific. Focus on issues that matter most."""
 
     async def review_code(
-        self,
-        code: str,
-        language: str,
-        focus_areas: Optional[List[str]] = None
+        self, code: str, language: str, focus_areas: Optional[List[str]] = None
     ) -> ADKResult:
         """Review code for quality and issues.
-        
+
         Args:
             code: Code to review
             language: Programming language
             focus_areas: Specific areas to focus on
-            
+
         Returns:
             ADKResult with review feedback
         """
         task = f"Review the following {language} code:\n\n```{language}\n{code}\n```"
-        
+
         context = {"language": language}
         if focus_areas:
             context["focus_areas"] = ", ".join(focus_areas)
             task += f"\n\nFocus especially on: {', '.join(focus_areas)}"
-        
+
         return await self.execute(task, context)
-    
-    async def security_audit(
-        self,
-        code: str,
-        language: str
-    ) -> ADKResult:
+
+    async def security_audit(self, code: str, language: str) -> ADKResult:
         """Perform security-focused code audit.
-        
+
         Args:
             code: Code to audit
             language: Programming language
-            
+
         Returns:
             ADKResult with security findings
         """
@@ -184,16 +172,16 @@ Code:
 ```
 
 Provide findings with severity levels and remediation steps."""
-        
+
         return await self.execute(task, {"language": language, "focus": "security"})
 
 
 class TestingADKAgent(ADKAgent):
     """Agent specialized in test generation and quality assurance."""
-    
+
     def get_agent_type(self) -> str:
         return "testing"
-    
+
     def get_system_prompt(self) -> str:
         return """You are an expert software tester specializing in comprehensive test coverage.
 
@@ -219,46 +207,42 @@ Use appropriate testing frameworks for the language (pytest, Jest, JUnit, etc.).
         code: str,
         language: str,
         framework: Optional[str] = None,
-        test_types: Optional[List[str]] = None
+        test_types: Optional[List[str]] = None,
     ) -> ADKResult:
         """Generate tests for code.
-        
+
         Args:
             code: Code to test
             language: Programming language
             framework: Testing framework
             test_types: Types of tests to generate
-            
+
         Returns:
             ADKResult with generated tests
         """
         task = f"Generate comprehensive tests for the following {language} code"
-        
+
         if framework:
             task += f" using {framework}"
-        
+
         if test_types:
             task += f"\n\nInclude these test types: {', '.join(test_types)}"
-        
+
         task += f"\n\nCode:\n```{language}\n{code}\n```"
-        
+
         context = {"language": language}
         if framework:
             context["framework"] = framework
-        
+
         return await self.execute(task, context)
-    
-    async def suggest_edge_cases(
-        self,
-        function_signature: str,
-        description: str
-    ) -> ADKResult:
+
+    async def suggest_edge_cases(self, function_signature: str, description: str) -> ADKResult:
         """Suggest edge cases for testing.
-        
+
         Args:
             function_signature: Function to analyze
             description: What the function does
-            
+
         Returns:
             ADKResult with edge case suggestions
         """
@@ -275,16 +259,16 @@ List potential edge cases including:
 - Concurrent access scenarios
 - Resource exhaustion
 - Error conditions"""
-        
+
         return await self.execute(task)
 
 
 class DocumentationADKAgent(ADKAgent):
     """Agent specialized in documentation generation."""
-    
+
     def get_agent_type(self) -> str:
         return "documentation"
-    
+
     def get_system_prompt(self) -> str:
         return """You are an expert technical writer creating clear, comprehensive documentation.
 
@@ -310,18 +294,15 @@ Format guidelines:
 - Include diagrams descriptions where helpful"""
 
     async def generate_api_docs(
-        self,
-        code: str,
-        language: str,
-        format: str = "markdown"
+        self, code: str, language: str, format: str = "markdown"
     ) -> ADKResult:
         """Generate API documentation.
-        
+
         Args:
             code: Code to document
             language: Programming language
             format: Output format
-            
+
         Returns:
             ADKResult with API documentation
         """
@@ -337,27 +318,24 @@ Include:
 - Return value descriptions
 - Usage examples
 - Error conditions"""
-        
+
         return await self.execute(task, {"language": language, "format": format})
-    
-    async def generate_readme(
-        self,
-        project_info: Dict[str, Any]
-    ) -> ADKResult:
+
+    async def generate_readme(self, project_info: Dict[str, Any]) -> ADKResult:
         """Generate README file.
-        
+
         Args:
             project_info: Project information dict
-            
+
         Returns:
             ADKResult with README content
         """
         task = f"""Generate a comprehensive README.md for this project:
 
-Project Name: {project_info.get('name', 'Unknown')}
-Description: {project_info.get('description', 'No description')}
-Language: {project_info.get('language', 'Unknown')}
-Features: {', '.join(project_info.get('features', []))}
+Project Name: {project_info.get("name", "Unknown")}
+Description: {project_info.get("description", "No description")}
+Language: {project_info.get("language", "Unknown")}
+Features: {", ".join(project_info.get("features", []))}
 
 Include sections:
 - Project title and badges
@@ -369,16 +347,16 @@ Include sections:
 - Configuration
 - Contributing
 - License"""
-        
+
         return await self.execute(task, project_info)
 
 
 class ResearchADKAgent(ADKAgent):
     """Agent specialized in research and information synthesis."""
-    
+
     def get_agent_type(self) -> str:
         return "research"
-    
+
     def get_system_prompt(self) -> str:
         return """You are an expert researcher skilled at gathering, analyzing, and synthesizing information.
 
@@ -400,26 +378,23 @@ Be thorough but concise. Distinguish between facts and opinions.
 Acknowledge uncertainty where it exists."""
 
     async def research_topic(
-        self,
-        topic: str,
-        depth: str = "comprehensive",
-        aspects: Optional[List[str]] = None
+        self, topic: str, depth: str = "comprehensive", aspects: Optional[List[str]] = None
     ) -> ADKResult:
         """Research a topic.
-        
+
         Args:
             topic: Topic to research
             depth: Research depth (brief, comprehensive, exhaustive)
             aspects: Specific aspects to cover
-            
+
         Returns:
             ADKResult with research findings
         """
         task = f"Research the following topic ({depth} analysis): {topic}"
-        
+
         if aspects:
             task += f"\n\nFocus on these aspects: {', '.join(aspects)}"
-        
+
         task += """
 
 Provide:
@@ -428,33 +403,30 @@ Provide:
 3. Different perspectives
 4. Best practices or recommendations
 5. Potential challenges or considerations"""
-        
+
         return await self.execute(task, {"topic": topic, "depth": depth})
-    
+
     async def compare_options(
-        self,
-        options: List[str],
-        criteria: List[str],
-        context: Optional[str] = None
+        self, options: List[str], criteria: List[str], context: Optional[str] = None
     ) -> ADKResult:
         """Compare multiple options.
-        
+
         Args:
             options: Options to compare
             criteria: Comparison criteria
             context: Additional context
-            
+
         Returns:
             ADKResult with comparison analysis
         """
-        task = f"""Compare these options: {', '.join(options)}
+        task = f"""Compare these options: {", ".join(options)}
 
 Criteria for comparison:
-{chr(10).join(f'- {c}' for c in criteria)}"""
-        
+{chr(10).join(f"- {c}" for c in criteria)}"""
+
         if context:
             task += f"\n\nContext: {context}"
-        
+
         task += """
 
 Provide:
@@ -462,5 +434,5 @@ Provide:
 2. Comparison table/matrix
 3. Pros and cons of each
 4. Recommendation with reasoning"""
-        
+
         return await self.execute(task)

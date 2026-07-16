@@ -1,8 +1,8 @@
 """Core agent framework components."""
 
 from agents.core.base import Agent, AgentConfig, AgentResult, AgentStatus
-from agents.core.workflow import Workflow, WorkflowConfig, WorkflowOrchestrator
 from agents.core.task import Task, TaskConfig, TaskResult, TaskStatus
+from agents.core.workflow import Workflow, WorkflowConfig, WorkflowOrchestrator
 
 __all__ = [
     "Agent",

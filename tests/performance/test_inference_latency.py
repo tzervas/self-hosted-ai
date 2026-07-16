@@ -10,16 +10,15 @@ import time
 
 import pytest
 
-
 pytestmark = [pytest.mark.performance, pytest.mark.slow]
 
 
 # Latency thresholds in seconds
 THRESHOLDS = {
-    "small_model_p95": 30.0,      # 8B model, short prompt
-    "large_model_p95": 60.0,      # 14B model, short prompt
-    "embedding_p95": 5.0,         # Embedding generation
-    "health_check_p95": 2.0,      # Health endpoint
+    "small_model_p95": 30.0,  # 8B model, short prompt
+    "large_model_p95": 60.0,  # 14B model, short prompt
+    "embedding_p95": 5.0,  # Embedding generation
+    "health_check_p95": 2.0,  # Health endpoint
 }
 
 
@@ -124,9 +123,12 @@ class TestResourceUsage:
             pytest.skip("kubectl not available")
 
         import subprocess
+
         result = subprocess.run(
             ["kubectl", "top", "nodes", "--no-headers"],
-            capture_output=True, text=True, timeout=30,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         if result.returncode != 0:
             pytest.skip("kubectl top not available (metrics-server required)")

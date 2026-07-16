@@ -2,10 +2,10 @@
 
 import logging
 from typing import Any, Dict, Optional
+
 import httpx
 
 from agents.core.base import Agent, AgentConfig, AgentResult, AgentStatus
-
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ Follow:
     async def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -> AgentResult:
         await self.validate_input(task, context)
         context = context or {}
-        
+
         try:
             tests = await self._generate_tests(task, context)
             return self._create_result(status=AgentStatus.COMPLETED, output=tests, context=context)
@@ -45,11 +45,16 @@ Follow:
 2. Edge cases
 3. Error scenarios
 4. Boundary conditions"""
-        
+
         async with httpx.AsyncClient(timeout=self.config.timeout_seconds) as client:
             response = await client.post(
                 f"{self.config.ollama_url}/api/generate",
-                json={"model": self.config.model, "prompt": prompt, "system": self.get_system_prompt(), "stream": False},
+                json={
+                    "model": self.config.model,
+                    "prompt": prompt,
+                    "system": self.get_system_prompt(),
+                    "stream": False,
+                },
             )
             result = response.json()
             return {"tests": result.get("response", ""), "coverage": "85%"}

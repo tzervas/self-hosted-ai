@@ -35,8 +35,10 @@ def download_from_huggingface(repo_id: str, filename: str, output_dir: Path) -> 
         "download",
         repo_id,
         filename,
-        "--local-dir", str(output_dir),
-        "--local-dir-use-symlinks", "False"
+        "--local-dir",
+        str(output_dir),
+        "--local-dir-use-symlinks",
+        "False",
     ]
 
     try:
@@ -56,8 +58,8 @@ def quantize_model_fp8(model_path: Path, output_path: Path):
     """
     try:
         import torch
+        from optimum.quanto import freeze, qfloat8, quantize
         from safetensors.torch import load_file, save_file
-        from optimum.quanto import quantize, freeze, qfloat8
     except ImportError:
         logger.error("Required packages not installed. Run: pip install optimum-quanto safetensors")
         sys.exit(1)
@@ -94,19 +96,19 @@ def main():
         "--model",
         choices=["i2v", "t2v", "both"],
         default="i2v",
-        help="Which model to download (image-to-video, text-to-video, or both)"
+        help="Which model to download (image-to-video, text-to-video, or both)",
     )
     parser.add_argument(
         "--quantize",
         choices=["none", "fp8", "gguf"],
         default="fp8",
-        help="Quantization format (none=keep FP16, fp8=half VRAM, gguf=GGUF format)"
+        help="Quantization format (none=keep FP16, fp8=half VRAM, gguf=GGUF format)",
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
         default=Path("/data/models/diffusion_models"),
-        help="Output directory for models (default: /data/models/diffusion_models)"
+        help="Output directory for models (default: /data/models/diffusion_models)",
     )
 
     args = parser.parse_args()
@@ -115,16 +117,28 @@ def main():
 
     models_to_download = []
     if args.model in ["i2v", "both"]:
-        models_to_download.append(("ali-vilab/Wan2.2-I2V-A14B", "transformer/diffusion_pytorch_model.safetensors", "wan2.2-i2v-a14b.safetensors"))
+        models_to_download.append(
+            (
+                "ali-vilab/Wan2.2-I2V-A14B",
+                "transformer/diffusion_pytorch_model.safetensors",
+                "wan2.2-i2v-a14b.safetensors",
+            )
+        )
     if args.model in ["t2v", "both"]:
-        models_to_download.append(("ali-vilab/Wan2.2-T2V-A14B", "transformer/diffusion_pytorch_model.safetensors", "wan2.2-t2v-a14b.safetensors"))
+        models_to_download.append(
+            (
+                "ali-vilab/Wan2.2-T2V-A14B",
+                "transformer/diffusion_pytorch_model.safetensors",
+                "wan2.2-t2v-a14b.safetensors",
+            )
+        )
 
     # Download VAE (shared by both models)
     logger.info("Downloading shared VAE...")
     vae_path = download_from_huggingface(
         "ali-vilab/Wan2.2-I2V-A14B",
         "vae/diffusion_pytorch_model.safetensors",
-        args.output_dir.parent / "vae"
+        args.output_dir.parent / "vae",
     )
 
     # Download and process each model

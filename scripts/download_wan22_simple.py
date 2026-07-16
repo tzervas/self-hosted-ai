@@ -22,10 +22,7 @@ def check_hf_auth():
     """Verify HuggingFace CLI is authenticated."""
     try:
         result = subprocess.run(
-            ["hf", "auth", "whoami"],
-            capture_output=True,
-            text=True,
-            check=False
+            ["hf", "auth", "whoami"], capture_output=True, text=True, check=False
         )
         if result.returncode != 0 or "Not logged in" in result.stdout:
             print("❌ Not authenticated with HuggingFace")
@@ -54,12 +51,7 @@ def download_model(repo: str, filename: str, output_dir: Path) -> Path:
     print(f"  From: {repo}")
     print(f"  To: {output_dir}/")
 
-    cmd = [
-        "hf", "download",
-        repo,
-        filename,
-        "--local-dir", str(output_dir)
-    ]
+    cmd = ["hf", "download", repo, filename, "--local-dir", str(output_dir)]
 
     try:
         subprocess.run(cmd, check=True)
@@ -100,7 +92,7 @@ def main():
     if free_gb < needed_gb + 10:
         print(f"\n⚠️  WARNING: Low disk space! Recommended: {needed_gb + 10:.1f}GB")
         response = input("Continue anyway? (yes/no): ")
-        if response.lower() != 'yes':
+        if response.lower() != "yes":
             sys.exit(1)
     print()
 
@@ -113,24 +105,16 @@ def main():
 
     # Image-to-Video (HIGH quality)
     i2v_path = download_model(
-        repo_fp8,
-        "I2V/Wan2_2-I2V-A14B-HIGH_fp8_e4m3fn_scaled_KJ.safetensors",
-        models_dir
+        repo_fp8, "I2V/Wan2_2-I2V-A14B-HIGH_fp8_e4m3fn_scaled_KJ.safetensors", models_dir
     )
 
     # Text-to-Video (HIGH quality)
     t2v_path = download_model(
-        repo_fp8,
-        "T2V/Wan2_2-T2V-A14B_HIGH_fp8_e4m3fn_scaled_KJ.safetensors",
-        models_dir
+        repo_fp8, "T2V/Wan2_2-T2V-A14B_HIGH_fp8_e4m3fn_scaled_KJ.safetensors", models_dir
     )
 
     # VAE (shared by both models)
-    vae_path = download_model(
-        repo_vae,
-        "Wan2_2_VAE_bf16.safetensors",
-        vae_dir
-    )
+    vae_path = download_model(repo_vae, "Wan2_2_VAE_bf16.safetensors", vae_dir)
 
     print("\n" + "=" * 70)
     print("✅ Download complete!")

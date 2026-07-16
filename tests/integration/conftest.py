@@ -1,7 +1,7 @@
 """Integration test fixtures."""
 
-import pytest
 import httpx
+import pytest
 
 
 @pytest.fixture(scope="module")

@@ -3,10 +3,10 @@
 import asyncio
 import logging
 from typing import Any, Dict, Optional
+
 import httpx
 
 from agents.core.base import Agent, AgentConfig, AgentResult, AgentStatus
-
 
 logger = logging.getLogger(__name__)
 
@@ -99,9 +99,7 @@ Be thorough, objective, and cite your reasoning."""
                 context=context,
             )
 
-    async def _conduct_research(
-        self, query: str, scope: str, depth: str
-    ) -> Dict[str, Any]:
+    async def _conduct_research(self, query: str, scope: str, depth: str) -> Dict[str, Any]:
         """Conduct research using LLM.
 
         Args:

@@ -43,13 +43,13 @@ Model Types:
 Usage:
     # Sync all models to GPU worker
     uv run scripts/sync_models.py push --all
-    
+
     # Pull models from GPU worker to local
     uv run scripts/sync_models.py pull ollama
-    
+
     # List models across all locations
     uv run scripts/sync_models.py list
-    
+
     # Verify model integrity
     uv run scripts/sync_models.py verify
 
@@ -77,12 +77,12 @@ import typer
 import yaml
 from rich.console import Console
 from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
 # HuggingFace Hub integration
 try:
-    from huggingface_hub import snapshot_download, HfApi, login
+    from huggingface_hub import HfApi, login, snapshot_download
 except ImportError:
     snapshot_download = None
     HfApi = None
@@ -98,9 +98,10 @@ console = Console()
 
 class ModelType(str, Enum):
     """Types of AI models managed by this system.
-    
+
     Each type has different storage locations and sync strategies.
     """
+
     OLLAMA = "ollama"
     CHECKPOINTS = "checkpoints"
     LORAS = "loras"
@@ -113,6 +114,7 @@ class ModelType(str, Enum):
 
 class SyncDirection(str, Enum):
     """Direction of model synchronization."""
+
     PUSH = "push"  # Local → Remote
     PULL = "pull"  # Remote → Local
 
@@ -120,7 +122,7 @@ class SyncDirection(str, Enum):
 @dataclass
 class ModelLocation:
     """Represents a location where models can be stored.
-    
+
     Attributes:
         name: Human-readable location name
         host: Hostname or IP address (None for local)
@@ -128,17 +130,18 @@ class ModelLocation:
         ollama_port: Port for Ollama API
         base_path: Base path for model storage
     """
+
     name: str
     host: str | None
     user: str = "kang"
     ollama_port: int = 11434
     base_path: Path = field(default_factory=lambda: Path("/data/models"))
-    
+
     @property
     def is_local(self) -> bool:
         """Check if this is the local machine."""
         return self.host is None
-    
+
     @property
     def ollama_url(self) -> str:
         """Get Ollama API URL for this location."""
@@ -149,7 +152,7 @@ class ModelLocation:
 @dataclass
 class ModelInfo:
     """Information about a single model.
-    
+
     Attributes:
         name: Model name (e.g., 'qwen2.5-coder:14b')
         type: Model type (ollama, checkpoint, etc.)
@@ -158,6 +161,7 @@ class ModelInfo:
         modified: Last modification timestamp
         location: Where this model is stored
     """
+
     name: str
     type: ModelType
     size_bytes: int = 0
@@ -169,59 +173,59 @@ class ModelInfo:
 @dataclass
 class SyncConfig:
     """Configuration for model synchronization.
-    
+
     Loaded from config/models-manifest.yml and environment variables.
     """
+
     local_models_dir: Path = field(
-        default_factory=lambda: Path(os.environ.get(
-            "LOCAL_MODELS_DIR",
-            str(Path.home() / "Documents/projects/2026/models")
-        ))
+        default_factory=lambda: Path(
+            os.environ.get("LOCAL_MODELS_DIR", str(Path.home() / "Documents/projects/2026/models"))
+        )
     )
     gpu_worker_host: str = field(
         default_factory=lambda: os.environ.get("GPU_WORKER_HOST", "192.168.1.99")
     )
-    gpu_worker_user: str = field(
-        default_factory=lambda: os.environ.get("REMOTE_USER", "kang")
-    )
+    gpu_worker_user: str = field(default_factory=lambda: os.environ.get("REMOTE_USER", "kang"))
     cluster_host: str = field(
         default_factory=lambda: os.environ.get("CLUSTER_HOST", "192.168.1.170")
     )
     remote_models_dir: Path = field(
         default_factory=lambda: Path(os.environ.get("REMOTE_MODELS_DIR", "/data/models"))
     )
-    rsync_options: list[str] = field(default_factory=lambda: [
-        "-avz",
-        "--progress",
-        "--checksum",
-        "--human-readable",
-    ])
+    rsync_options: list[str] = field(
+        default_factory=lambda: [
+            "-avz",
+            "--progress",
+            "--checksum",
+            "--human-readable",
+        ]
+    )
 
 
 class ModelSyncManager:
     """Manages model synchronization across homelab infrastructure.
-    
+
     This class provides methods to list, sync, and verify models across
     different locations in the homelab. It supports both Ollama models
     (via API) and file-based models (via rsync).
-    
+
     Why Separate Sync Strategies:
         - Ollama models: Managed through Ollama API (pull/push commands)
         - File models: Synced via rsync for efficiency with large files
-    
+
     Attributes:
         config: Sync configuration
         locations: Available model storage locations
     """
-    
+
     def __init__(self, config: SyncConfig | None = None) -> None:
         """Initialize the model sync manager.
-        
+
         Args:
             config: Sync configuration. Uses defaults from environment if None.
         """
         self.config = config or SyncConfig()
-        
+
         # Define standard locations
         self.locations = {
             "local": ModelLocation(
@@ -241,7 +245,7 @@ class ModelSyncManager:
                 base_path=Path("/var/lib/ollama"),
             ),
         }
-        
+
         # Model type to subdirectory mapping
         self.type_paths = {
             ModelType.CHECKPOINTS: "comfyui/checkpoints",
@@ -252,102 +256,107 @@ class ModelSyncManager:
             ModelType.WHISPER: "whisper",
             ModelType.OLLAMA: "ollama",
         }
-    
+
     async def list_ollama_models(self, location: ModelLocation) -> list[ModelInfo]:
         """List Ollama models at a specific location via API.
-        
+
         Args:
             location: Where to query for models.
-            
+
         Returns:
             List of ModelInfo for each installed model.
         """
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.get(f"{location.ollama_url}/api/tags")
-                
+
                 if response.status_code != 200:
                     return []
-                
+
                 data = response.json()
                 models = []
-                
+
                 for model in data.get("models", []):
-                    models.append(ModelInfo(
-                        name=model.get("name", ""),
-                        type=ModelType.OLLAMA,
-                        size_bytes=model.get("size", 0),
-                        digest=model.get("digest", ""),
-                        modified=model.get("modified_at", ""),
-                        location=location.name,
-                    ))
-                
+                    models.append(
+                        ModelInfo(
+                            name=model.get("name", ""),
+                            type=ModelType.OLLAMA,
+                            size_bytes=model.get("size", 0),
+                            digest=model.get("digest", ""),
+                            modified=model.get("modified_at", ""),
+                            location=location.name,
+                        )
+                    )
+
                 return models
-                
+
         except Exception as e:
             console.print(f"[yellow]Warning:[/yellow] Cannot reach {location.name}: {e}")
             return []
-    
+
     async def list_file_models(
-        self, 
-        location: ModelLocation, 
-        model_type: ModelType
+        self, location: ModelLocation, model_type: ModelType
     ) -> list[ModelInfo]:
         """List file-based models at a location.
-        
+
         Args:
             location: Where to list models.
             model_type: Type of models to list.
-            
+
         Returns:
             List of ModelInfo for found models.
         """
         if model_type == ModelType.OLLAMA or model_type == ModelType.ALL:
             return []  # Use list_ollama_models instead
-        
+
         subpath = self.type_paths.get(model_type, "")
         base_path = location.base_path / subpath
-        
+
         models = []
-        
+
         if location.is_local:
             # List local files
             if base_path.exists():
                 for file in base_path.iterdir():
                     if file.is_file() and not file.name.startswith("."):
                         stat = file.stat()
-                        models.append(ModelInfo(
-                            name=file.name,
-                            type=model_type,
-                            size_bytes=stat.st_size,
-                            location=location.name,
-                        ))
+                        models.append(
+                            ModelInfo(
+                                name=file.name,
+                                type=model_type,
+                                size_bytes=stat.st_size,
+                                location=location.name,
+                            )
+                        )
         else:
             # List remote files via SSH
             try:
                 cmd = [
-                    "ssh", f"{location.user}@{location.host}",
-                    f"ls -la {base_path} 2>/dev/null || echo ''"
+                    "ssh",
+                    f"{location.user}@{location.host}",
+                    f"ls -la {base_path} 2>/dev/null || echo ''",
                 ]
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-                
+
                 for line in result.stdout.strip().split("\n"):
                     parts = line.split()
                     if len(parts) >= 9 and parts[0][0] != "d":
                         name = " ".join(parts[8:])
                         size = int(parts[4]) if parts[4].isdigit() else 0
-                        models.append(ModelInfo(
-                            name=name,
-                            type=model_type,
-                            size_bytes=size,
-                            location=location.name,
-                        ))
-                        
+                        models.append(
+                            ModelInfo(
+                                name=name,
+                                type=model_type,
+                                size_bytes=size,
+                                location=location.name,
+                            )
+                        )
+
             except Exception as e:
                 console.print(f"[yellow]Warning:[/yellow] Cannot list {location.name}: {e}")
-        
+
         return models
-    
+
     async def sync_ollama_model(
         self,
         model_name: str,
@@ -355,16 +364,16 @@ class ModelSyncManager:
         destination: ModelLocation,
     ) -> bool:
         """Sync an Ollama model between locations.
-        
+
         For Ollama models, we trigger a pull on the destination.
         The model is downloaded from the Ollama registry, not copied
         directly between hosts.
-        
+
         Args:
             model_name: Name of model to sync (e.g., 'qwen2.5-coder:14b')
             source: Source location (used for verification)
             destination: Where to sync the model
-            
+
         Returns:
             True if sync succeeded.
         """
@@ -375,13 +384,13 @@ class ModelSyncManager:
                     f"{destination.ollama_url}/api/pull",
                     json={"name": model_name, "stream": False},
                 )
-                
+
                 return response.status_code == 200
-                
+
         except Exception as e:
             console.print(f"[red]Error syncing {model_name}:[/red] {e}")
             return False
-    
+
     def sync_file_models(
         self,
         model_type: ModelType,
@@ -389,65 +398,65 @@ class ModelSyncManager:
         dry_run: bool = False,
     ) -> bool:
         """Sync file-based models using rsync.
-        
+
         Uses rsync for efficient delta transfers of large model files.
         Supports both push (local → remote) and pull (remote → local).
-        
+
         Args:
             model_type: Type of models to sync.
             direction: Push or pull.
             dry_run: If True, show what would be synced without doing it.
-            
+
         Returns:
             True if sync succeeded.
         """
         subpath = self.type_paths.get(model_type, "")
         if not subpath:
             return False
-        
+
         local_path = self.config.local_models_dir / subpath
         remote_path = f"{self.config.gpu_worker_user}@{self.config.gpu_worker_host}:{self.config.remote_models_dir}/{subpath}"
-        
+
         # Ensure local directory exists
         local_path.mkdir(parents=True, exist_ok=True)
-        
+
         # Build rsync command
         cmd = ["rsync"] + self.config.rsync_options
-        
+
         if dry_run:
             cmd.append("--dry-run")
-        
+
         if direction == SyncDirection.PUSH:
             cmd.extend([f"{local_path}/", remote_path])
         else:
             cmd.extend([f"{remote_path}/", str(local_path)])
-        
+
         try:
             result = subprocess.run(cmd, capture_output=True, text=True)
-            
+
             if result.returncode != 0:
                 console.print(f"[red]rsync error:[/red] {result.stderr}")
                 return False
-            
+
             if result.stdout:
                 console.print(result.stdout)
-            
+
             return True
-            
+
         except Exception as e:
             console.print(f"[red]Sync error:[/red] {e}")
             return False
-    
+
     async def verify_model(self, model: ModelInfo, location: ModelLocation) -> bool:
         """Verify model integrity at a location.
-        
+
         For Ollama models, checks the API for model availability.
         For file models, verifies the file exists and size matches.
-        
+
         Args:
             model: Model to verify.
             location: Location to check.
-            
+
         Returns:
             True if model is valid and accessible.
         """
@@ -458,14 +467,15 @@ class ModelSyncManager:
             # File-based verification
             subpath = self.type_paths.get(model.type, "")
             full_path = location.base_path / subpath / model.name
-            
+
             if location.is_local:
                 return full_path.exists()
             else:
                 # Remote check via SSH
                 cmd = [
-                    "ssh", f"{location.user}@{location.host}",
-                    f"test -f {full_path} && echo 'exists'"
+                    "ssh",
+                    f"{location.user}@{location.host}",
+                    f"test -f {full_path} && echo 'exists'",
                 ]
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
                 return "exists" in result.stdout
@@ -493,35 +503,35 @@ def list_models(
     ] = ModelType.OLLAMA,
     location: Annotated[
         str,
-        typer.Option("--location", "-l", help="Location to query (local, gpu_worker, cluster, all)"),
+        typer.Option(
+            "--location", "-l", help="Location to query (local, gpu_worker, cluster, all)"
+        ),
     ] = "all",
 ) -> None:
     """List available models across locations.
-    
+
     Shows models installed at each location with size and status information.
     Use --location to filter to a specific location.
     """
     console.print(Panel("[bold blue]Model Inventory[/bold blue]"))
-    
+
     manager = ModelSyncManager()
-    
+
     async def _list() -> dict[str, list[ModelInfo]]:
         results: dict[str, list[ModelInfo]] = {}
-        
+
         locations_to_check = (
-            [manager.locations[location]] 
-            if location != "all" 
-            else list(manager.locations.values())
+            [manager.locations[location]] if location != "all" else list(manager.locations.values())
         )
-        
+
         for loc in locations_to_check:
             if model_type == ModelType.OLLAMA or model_type == ModelType.ALL:
                 results[loc.name] = await manager.list_ollama_models(loc)
             else:
                 results[loc.name] = await manager.list_file_models(loc, model_type)
-        
+
         return results
-    
+
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -530,21 +540,21 @@ def list_models(
         task = progress.add_task("Querying locations...", total=1)
         all_models = asyncio.run(_list())
         progress.update(task, completed=1)
-    
+
     # Display results by location
     for loc_name, models in all_models.items():
         table = Table(title=f"{loc_name} - {len(models)} models")
         table.add_column("Model")
         table.add_column("Size", justify="right")
         table.add_column("Digest", max_width=12)
-        
+
         for model in sorted(models, key=lambda m: m.name):
             table.add_row(
                 model.name,
                 _format_size(model.size_bytes),
                 model.digest[:12] if model.digest else "-",
             )
-        
+
         console.print(table)
         console.print()
 
@@ -565,28 +575,28 @@ def push(
     ] = False,
 ) -> None:
     """Push models from local to GPU worker.
-    
+
     Syncs models from your local development machine to the GPU worker
     (akula-prime). For Ollama models, triggers a pull on the remote.
     For file models, uses rsync for efficient transfer.
     """
     console.print(Panel("[bold blue]Push Models → GPU Worker[/bold blue]"))
-    
+
     manager = ModelSyncManager()
-    
+
     if model_type == ModelType.OLLAMA and model_name:
         # Push specific Ollama model
         console.print(f"Pushing Ollama model: {model_name}")
-        
+
         async def _push_ollama():
             return await manager.sync_ollama_model(
                 model_name,
                 manager.locations["local"],
                 manager.locations["gpu_worker"],
             )
-        
+
         success = asyncio.run(_push_ollama())
-        
+
         if success:
             console.print(f"[green]✓[/green] Pushed {model_name}")
         else:
@@ -595,15 +605,22 @@ def push(
     else:
         # Push file models
         types_to_push = (
-            [model_type] if model_type != ModelType.ALL 
-            else [ModelType.CHECKPOINTS, ModelType.LORAS, ModelType.VAE, 
-                  ModelType.EMBEDDINGS, ModelType.UPSCALE, ModelType.WHISPER]
+            [model_type]
+            if model_type != ModelType.ALL
+            else [
+                ModelType.CHECKPOINTS,
+                ModelType.LORAS,
+                ModelType.VAE,
+                ModelType.EMBEDDINGS,
+                ModelType.UPSCALE,
+                ModelType.WHISPER,
+            ]
         )
-        
+
         for mtype in types_to_push:
             console.print(f"\n[bold]Syncing {mtype.value}...[/bold]")
             success = manager.sync_file_models(mtype, SyncDirection.PUSH, dry_run)
-            
+
             if success:
                 console.print(f"[green]✓[/green] {mtype.value} synced")
             else:
@@ -626,29 +643,38 @@ def pull(
     ] = False,
 ) -> None:
     """Pull models from GPU worker to local.
-    
+
     Syncs models from the GPU worker (akula-prime) to your local machine.
     Useful for local development and testing.
     """
     console.print(Panel("[bold blue]Pull Models ← GPU Worker[/bold blue]"))
-    
+
     manager = ModelSyncManager()
-    
+
     if model_type == ModelType.OLLAMA:
-        console.print("[yellow]Note:[/yellow] Ollama models should be pulled via 'ollama pull' command")
+        console.print(
+            "[yellow]Note:[/yellow] Ollama models should be pulled via 'ollama pull' command"
+        )
         console.print("Use 'shai-models list ollama' to see available models")
         return
-    
+
     types_to_pull = (
-        [model_type] if model_type != ModelType.ALL
-        else [ModelType.CHECKPOINTS, ModelType.LORAS, ModelType.VAE,
-              ModelType.EMBEDDINGS, ModelType.UPSCALE, ModelType.WHISPER]
+        [model_type]
+        if model_type != ModelType.ALL
+        else [
+            ModelType.CHECKPOINTS,
+            ModelType.LORAS,
+            ModelType.VAE,
+            ModelType.EMBEDDINGS,
+            ModelType.UPSCALE,
+            ModelType.WHISPER,
+        ]
     )
-    
+
     for mtype in types_to_pull:
         console.print(f"\n[bold]Pulling {mtype.value}...[/bold]")
         success = manager.sync_file_models(mtype, SyncDirection.PULL, dry_run)
-        
+
         if success:
             console.print(f"[green]✓[/green] {mtype.value} pulled")
         else:
@@ -663,19 +689,19 @@ def diff(
     ] = ModelType.OLLAMA,
 ) -> None:
     """Compare models between local and GPU worker.
-    
+
     Shows which models exist in each location and highlights differences.
     Useful for identifying what needs to be synced.
     """
     console.print(Panel("[bold blue]Model Diff: Local ↔ GPU Worker[/bold blue]"))
-    
+
     manager = ModelSyncManager()
-    
+
     async def _diff():
         local_models = await manager.list_ollama_models(manager.locations["local"])
         remote_models = await manager.list_ollama_models(manager.locations["gpu_worker"])
         return local_models, remote_models
-    
+
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -684,27 +710,29 @@ def diff(
         task = progress.add_task("Comparing...", total=1)
         local, remote = asyncio.run(_diff())
         progress.update(task, completed=1)
-    
+
     local_names = {m.name for m in local}
     remote_names = {m.name for m in remote}
-    
+
     only_local = local_names - remote_names
     only_remote = remote_names - local_names
     both = local_names & remote_names
-    
+
     table = Table(title="Model Comparison")
     table.add_column("Model")
     table.add_column("Local")
     table.add_column("GPU Worker")
-    
+
     for name in sorted(local_names | remote_names):
         local_status = "[green]✓[/green]" if name in local_names else "[red]✗[/red]"
         remote_status = "[green]✓[/green]" if name in remote_names else "[red]✗[/red]"
         table.add_row(name, local_status, remote_status)
-    
+
     console.print(table)
     console.print()
-    console.print(f"Only local: {len(only_local)} | Only remote: {len(only_remote)} | Both: {len(both)}")
+    console.print(
+        f"Only local: {len(only_local)} | Only remote: {len(only_remote)} | Both: {len(both)}"
+    )
 
 
 @app.command()
@@ -715,19 +743,19 @@ def verify(
     ] = "gpu_worker",
 ) -> None:
     """Verify model integrity at a location.
-    
+
     Checks that all expected models are accessible and responding.
     Reports any models that are missing or corrupted.
     """
     console.print(Panel(f"[bold blue]Verifying Models at {location}[/bold blue]"))
-    
+
     manager = ModelSyncManager()
     loc = manager.locations.get(location)
-    
+
     if not loc:
         console.print(f"[red]Error:[/red] Unknown location: {location}")
         raise typer.Exit(1)
-    
+
     async def _verify():
         models = await manager.list_ollama_models(loc)
         results = []
@@ -735,7 +763,7 @@ def verify(
             valid = await manager.verify_model(model, loc)
             results.append((model, valid))
         return results
-    
+
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -744,20 +772,20 @@ def verify(
         task = progress.add_task("Verifying...", total=1)
         results = asyncio.run(_verify())
         progress.update(task, completed=1)
-    
+
     table = Table(title="Verification Results")
     table.add_column("Model")
     table.add_column("Status")
-    
+
     all_valid = True
     for model, valid in results:
         status = "[green]✓ Valid[/green]" if valid else "[red]✗ Invalid[/red]"
         table.add_row(model.name, status)
         if not valid:
             all_valid = False
-    
+
     console.print(table)
-    
+
     if not all_valid:
         raise typer.Exit(1)
 
@@ -766,7 +794,9 @@ def verify(
 def download_huggingface(
     repo_id: Annotated[
         str,
-        typer.Argument(help="HuggingFace repo ID (e.g., cognitivecomputations/Wan2.5-14B-Instruct-Uncensored)"),
+        typer.Argument(
+            help="HuggingFace repo ID (e.g., cognitivecomputations/Wan2.5-14B-Instruct-Uncensored)"
+        ),
     ],
     output_dir: Annotated[
         str,
@@ -778,17 +808,17 @@ def download_huggingface(
     ] = None,
 ) -> None:
     """Download a model from HuggingFace Hub.
-    
+
     Downloads uncensored models and other specialized models from HuggingFace.
     Requires HF_TOKEN environment variable or --token for gated models.
-    
+
     Examples:
         # Download Wan2.5 uncensored model
         shai-models download-hf cognitivecomputations/Wan2.5-14B-Instruct-Uncensored
-        
+
         # Download XTTS voice model
         shai-models download-hf coqui/XTTS-v2
-        
+
         # Download with explicit token
         shai-models download-hf myrepo/mymodel --token YOUR_TOKEN
     """
@@ -796,28 +826,32 @@ def download_huggingface(
         console.print("[red]Error:[/red] huggingface-hub not installed")
         console.print("Install with: uv pip install huggingface-hub")
         raise typer.Exit(1)
-    
+
     # Get token from parameter or environment
     hf_token = token or os.environ.get("HF_TOKEN")
-    
+
     if hf_token:
         login(token=hf_token)
         console.print("[green]✓[/green] Authenticated with HuggingFace Hub")
     else:
-        console.print("[yellow]Note:[/yellow] No token provided. Downloads limited to public models.")
-    
+        console.print(
+            "[yellow]Note:[/yellow] No token provided. Downloads limited to public models."
+        )
+
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
-    
-    console.print(Panel(f"[bold blue]Downloading from HuggingFace Hub[/bold blue]\nRepo: {repo_id}"))
-    
+
+    console.print(
+        Panel(f"[bold blue]Downloading from HuggingFace Hub[/bold blue]\nRepo: {repo_id}")
+    )
+
     try:
         # Extract model name from repo_id
         model_name = repo_id.split("/")[-1]
         local_dir = output_path / model_name
-        
+
         console.print(f"Downloading to: {local_dir}")
-        
+
         # Download the model
         snapshot_download(
             repo_id=repo_id,
@@ -825,10 +859,10 @@ def download_huggingface(
             token=hf_token,
             cache_dir=str(output_path),
         )
-        
+
         console.print(f"[green]✓[/green] Successfully downloaded {model_name}")
         console.print(f"Location: {local_dir}")
-        
+
     except Exception as e:
         console.print(f"[red]Error downloading model:[/red] {e}")
         raise typer.Exit(1)
@@ -854,41 +888,45 @@ def sync_huggingface_to_gpu(
     ] = False,
 ) -> None:
     """Sync HuggingFace models to GPU worker.
-    
+
     Transfers downloaded HuggingFace models to the GPU worker (akula-prime)
     using rsync for efficient transfer.
-    
+
     Example:
         shai-models sync-hf wan2.5-14b-uncensored
     """
     source_path = Path(source_dir) / model_name
-    
+
     if not source_path.exists():
         console.print(f"[red]Error:[/red] Model not found: {source_path}")
         raise typer.Exit(1)
-    
-    console.print(Panel(f"[bold blue]Syncing HuggingFace Model to GPU Worker[/bold blue]\nModel: {model_name}"))
-    
+
+    console.print(
+        Panel(
+            f"[bold blue]Syncing HuggingFace Model to GPU Worker[/bold blue]\nModel: {model_name}"
+        )
+    )
+
     config = SyncConfig()
     remote_path = f"{config.gpu_worker_user}@{config.gpu_worker_host}:{remote_dir}/{model_name}"
-    
+
     cmd = ["rsync"] + config.rsync_options
-    
+
     if dry_run:
         cmd.append("--dry-run")
-    
+
     cmd.extend([f"{source_path}/", remote_path])
-    
+
     try:
         result = subprocess.run(cmd, capture_output=True, text=True)
-        
+
         if result.returncode != 0:
             console.print(f"[red]rsync error:[/red] {result.stderr}")
             raise typer.Exit(1)
-        
+
         console.print(result.stdout)
         console.print(f"[green]✓[/green] Model synced to GPU worker")
-        
+
     except Exception as e:
         console.print(f"[red]Sync error:[/red] {e}")
         raise typer.Exit(1)
@@ -910,37 +948,37 @@ def quantize_model(
     ] = None,
 ) -> None:
     """Quantize a model for better VRAM efficiency.
-    
+
     Reduces model size using llama.cpp quantization, making large models
     fit in limited VRAM (e.g., 28GB → 8GB with Q4_K_M quantization).
-    
+
     Requires: llama-cpp-python installed
-    
+
     Examples:
         shai-models quantize /data/models/wan2.5-14b.gguf --method Q4_K_M
     """
     console.print(Panel(f"[bold blue]Quantizing Model[/bold blue]\nMethod: {quantization_method}"))
-    
+
     try:
         from llama_cpp import llama_cpp
     except ImportError:
         console.print("[red]Error:[/red] llama-cpp-python not installed")
         console.print("Install with: pip install llama-cpp-python")
         raise typer.Exit(1)
-    
+
     model_path_obj = Path(model_path)
     if not model_path_obj.exists():
         console.print(f"[red]Error:[/red] Model not found: {model_path}")
         raise typer.Exit(1)
-    
+
     if not output_path:
         stem = model_path_obj.stem
         output_path = str(model_path_obj.parent / f"{stem}-{quantization_method}.gguf")
-    
+
     console.print(f"Input: {model_path}")
     console.print(f"Output: {output_path}")
     console.print(f"This may take a while...")
-    
+
     try:
         # Use llama.cpp for quantization
         cmd = [
@@ -949,17 +987,17 @@ def quantize_model(
             output_path,
             quantization_method,
         ]
-        
+
         result = subprocess.run(cmd, capture_output=True, text=True)
-        
+
         if result.returncode != 0:
             console.print(f"[red]Quantization failed:[/red] {result.stderr}")
             raise typer.Exit(1)
-        
+
         output_size = Path(output_path).stat().st_size
         console.print(f"[green]✓[/green] Quantized successfully")
         console.print(f"Output size: {_format_size(output_size)}")
-        
+
     except FileNotFoundError:
         console.print("[red]Error:[/red] llama-quantize command not found")
         console.print("Install llama.cpp: https://github.com/ggerganov/llama.cpp")

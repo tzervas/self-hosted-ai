@@ -1,7 +1,8 @@
 """Tests for core agent functionality."""
 
-import pytest
 from datetime import datetime
+
+import pytest
 
 from agents.core.base import Agent, AgentConfig, AgentResult, AgentStatus
 
@@ -84,6 +85,7 @@ class TestAgent:
 
     def test_agent_initialization(self, agent_config):
         """Test agent initialization."""
+
         # We need a concrete implementation to test
         class TestAgent(Agent):
             def _get_default_system_prompt(self) -> str:
@@ -100,6 +102,7 @@ class TestAgent:
     @pytest.mark.asyncio
     async def test_validate_input_empty_task(self, agent_config):
         """Test input validation with empty task."""
+
         class TestAgent(Agent):
             def _get_default_system_prompt(self) -> str:
                 return "Test prompt"
@@ -114,6 +117,7 @@ class TestAgent:
     @pytest.mark.asyncio
     async def test_validate_input_valid_task(self, agent_config):
         """Test input validation with valid task."""
+
         class TestAgent(Agent):
             def _get_default_system_prompt(self) -> str:
                 return "Test prompt"
@@ -145,6 +149,7 @@ class TestAgent:
 
     def test_system_prompt_default(self, agent_config):
         """Test default system prompt."""
+
         class TestAgent(Agent):
             def _get_default_system_prompt(self) -> str:
                 return "Default prompt"

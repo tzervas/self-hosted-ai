@@ -9,7 +9,6 @@ Tests the complete inference path:
 
 import pytest
 
-
 pytestmark = [pytest.mark.integration, pytest.mark.critical, pytest.mark.slow]
 
 
@@ -26,9 +25,7 @@ class TestLiteLLMToOllama:
                 "/v1/chat/completions",
                 json={
                     "model": platform_config.TEST_GPU_MODEL,
-                    "messages": [
-                        {"role": "user", "content": "Reply with just: GPU OK"}
-                    ],
+                    "messages": [{"role": "user", "content": "Reply with just: GPU OK"}],
                     "max_tokens": 16,
                     "stream": False,
                 },
@@ -50,9 +47,7 @@ class TestLiteLLMToOllama:
                 "/v1/chat/completions",
                 json={
                     "model": "mistral:7b",
-                    "messages": [
-                        {"role": "user", "content": "Reply with just: CPU OK"}
-                    ],
+                    "messages": [{"role": "user", "content": "Reply with just: CPU OK"}],
                     "max_tokens": 16,
                     "stream": False,
                 },
@@ -81,9 +76,7 @@ class TestLiteLLMToOllama:
                 assert len(data["data"]) > 0, "Empty embedding response"
                 assert "embedding" in data["data"][0], "Missing embedding vector"
             else:
-                pytest.xfail(
-                    f"Embedding via LiteLLM returned {response.status_code}"
-                )
+                pytest.xfail(f"Embedding via LiteLLM returned {response.status_code}")
         except Exception as e:
             pytest.xfail(f"Embedding routing test: {e}")
 
@@ -97,9 +90,7 @@ class TestOpenWebUIToOllama:
             response = authenticated_webui_client.get("/api/models")
             if response.status_code == 404:
                 response = authenticated_webui_client.get("/api/v1/models")
-            assert response.status_code == 200, (
-                f"Model list failed: {response.status_code}"
-            )
+            assert response.status_code == 200, f"Model list failed: {response.status_code}"
             data = response.json()
             # Open WebUI returns models in various formats
             models = data if isinstance(data, list) else data.get("data", data.get("models", []))
@@ -114,9 +105,7 @@ class TestOpenWebUIToOllama:
                 "/api/chat/completions",
                 json={
                     "model": platform_config.TEST_MODEL,
-                    "messages": [
-                        {"role": "user", "content": "Reply with: WEBUI OK"}
-                    ],
+                    "messages": [{"role": "user", "content": "Reply with: WEBUI OK"}],
                     "max_tokens": 16,
                     "stream": False,
                 },
@@ -128,16 +117,12 @@ class TestOpenWebUIToOllama:
                     "/ollama/api/chat",
                     json={
                         "model": platform_config.TEST_MODEL,
-                        "messages": [
-                            {"role": "user", "content": "Reply with: WEBUI OK"}
-                        ],
+                        "messages": [{"role": "user", "content": "Reply with: WEBUI OK"}],
                         "stream": False,
                     },
                     timeout=120,
                 )
-            assert response.status_code == 200, (
-                f"WebUI chat failed: {response.status_code}"
-            )
+            assert response.status_code == 200, f"WebUI chat failed: {response.status_code}"
         except Exception as e:
             pytest.fail(f"Open WebUI chat completion failed: {e}")
 
@@ -171,8 +156,6 @@ class TestModelRouting:
         passed = [m for m, ok in results.items() if ok]
         failed = [m for m, ok in results.items() if not ok]
 
-        assert len(passed) > 0, (
-            f"No models responded. Failed: {failed}"
-        )
+        assert len(passed) > 0, f"No models responded. Failed: {failed}"
         if failed:
             pytest.xfail(f"Some models did not respond: {failed}")

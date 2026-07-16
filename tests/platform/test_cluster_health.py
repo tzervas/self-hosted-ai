@@ -9,7 +9,6 @@ Validates that the Kubernetes cluster infrastructure is healthy:
 
 import pytest
 
-
 pytestmark = [pytest.mark.platform, pytest.mark.critical]
 
 
@@ -18,13 +17,10 @@ class TestNodeHealth:
 
     def test_expected_nodes_exist(self, cluster_nodes, platform_config):
         """All expected nodes should be present in the cluster."""
-        node_names = [
-            n["metadata"]["name"] for n in cluster_nodes["items"]
-        ]
+        node_names = [n["metadata"]["name"] for n in cluster_nodes["items"]]
         for expected in platform_config.EXPECTED_NODES:
             assert expected in node_names, (
-                f"Expected node '{expected}' not found. "
-                f"Available nodes: {node_names}"
+                f"Expected node '{expected}' not found. Available nodes: {node_names}"
             )
 
     def test_all_nodes_ready(self, cluster_nodes):
@@ -32,9 +28,7 @@ class TestNodeHealth:
         for node in cluster_nodes["items"]:
             name = node["metadata"]["name"]
             conditions = node["status"].get("conditions", [])
-            ready_conditions = [
-                c for c in conditions if c["type"] == "Ready"
-            ]
+            ready_conditions = [c for c in conditions if c["type"] == "Ready"]
             assert ready_conditions, f"Node {name} has no Ready condition"
             assert ready_conditions[0]["status"] == "True", (
                 f"Node {name} is not Ready: {ready_conditions[0].get('message', 'unknown')}"
@@ -67,17 +61,12 @@ class TestNamespaces:
 
     def test_expected_namespaces_exist(self, cluster_namespaces, platform_config):
         """All expected namespaces should be created."""
-        ns_names = [
-            ns["metadata"]["name"] for ns in cluster_namespaces["items"]
-        ]
+        ns_names = [ns["metadata"]["name"] for ns in cluster_namespaces["items"]]
         missing = []
         for expected in platform_config.EXPECTED_NAMESPACES:
             if expected not in ns_names:
                 missing.append(expected)
-        assert not missing, (
-            f"Missing namespaces: {missing}. "
-            f"Available: {sorted(ns_names)}"
-        )
+        assert not missing, f"Missing namespaces: {missing}. Available: {sorted(ns_names)}"
 
     def test_namespaces_are_active(self, cluster_namespaces, platform_config):
         """Expected namespaces should be in Active phase."""
@@ -102,9 +91,7 @@ class TestPodHealth:
                 waiting = cs.get("state", {}).get("waiting", {})
                 if waiting.get("reason") == "CrashLoopBackOff":
                     crashing.append(f"{ns}/{name}")
-        assert not crashing, (
-            f"Pods in CrashLoopBackOff: {crashing}"
-        )
+        assert not crashing, f"Pods in CrashLoopBackOff: {crashing}"
 
     def test_critical_services_running(self, cluster_pods, platform_config):
         """Critical service pods should be Running."""
@@ -128,17 +115,11 @@ class TestPodHealth:
                         for pname, phase in ns_pods
                     )
                     if not running:
-                        matching = [
-                            (pname, phase) for pname, phase in ns_pods
-                            if svc in pname
-                        ]
-                        missing.append(
-                            f"{ns}/{svc} (found but not running: {matching})"
-                        )
+                        matching = [(pname, phase) for pname, phase in ns_pods if svc in pname]
+                        missing.append(f"{ns}/{svc} (found but not running: {matching})")
 
-        assert not missing, (
-            f"Critical services not running:\n" +
-            "\n".join(f"  - {m}" for m in missing)
+        assert not missing, f"Critical services not running:\n" + "\n".join(
+            f"  - {m}" for m in missing
         )
 
     def test_pods_have_ready_containers(self, cluster_pods, platform_config):
@@ -156,10 +137,7 @@ class TestPodHealth:
                 if not cs.get("ready", False):
                     not_ready.append(f"{ns}/{name}/{cs['name']}")
 
-        assert not not_ready, (
-            f"Containers not ready:\n" +
-            "\n".join(f"  - {c}" for c in not_ready)
-        )
+        assert not not_ready, f"Containers not ready:\n" + "\n".join(f"  - {c}" for c in not_ready)
 
 
 class TestPersistentVolumes:
@@ -186,6 +164,6 @@ class TestPersistentVolumes:
         all_unbound = critical_unbound + other_unbound
         if all_unbound:
             pytest.xfail(
-                f"Unbound PVCs (may be WaitForFirstConsumer):\n" +
-                "\n".join(f"  - {p}" for p in all_unbound)
+                f"Unbound PVCs (may be WaitForFirstConsumer):\n"
+                + "\n".join(f"  - {p}" for p in all_unbound)
             )

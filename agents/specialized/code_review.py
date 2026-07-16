@@ -2,10 +2,10 @@
 
 import logging
 from typing import Any, Dict, Optional
+
 import httpx
 
 from agents.core.base import Agent, AgentConfig, AgentResult, AgentStatus
-
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ Provide:
     async def execute(self, task: str, context: Optional[Dict[str, Any]] = None) -> AgentResult:
         await self.validate_input(task, context)
         context = context or {}
-        
+
         try:
             review = await self._review_code(task, context)
             return self._create_result(status=AgentStatus.COMPLETED, output=review, context=context)
@@ -47,11 +47,16 @@ Provide:
 3. Performance suggestions
 4. Best practice violations
 5. Overall score (0-10)"""
-        
+
         async with httpx.AsyncClient(timeout=self.config.timeout_seconds) as client:
             response = await client.post(
                 f"{self.config.ollama_url}/api/generate",
-                json={"model": self.config.model, "prompt": prompt, "system": self.get_system_prompt(), "stream": False},
+                json={
+                    "model": self.config.model,
+                    "prompt": prompt,
+                    "system": self.get_system_prompt(),
+                    "stream": False,
+                },
             )
             result = response.json()
             return {"review": result.get("response", ""), "score": 8.5}
