@@ -2,15 +2,9 @@
 # Automatically refreshes ArgoCD applications on push to main
 name: ArgoCD Sync
 
+# Manual only — no push/pull_request CI triggers
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'helm/**'
-      - 'argocd/applications/**'
-      - 'policies/**'
-
+  workflow_dispatch:
 jobs:
   trigger-sync:
     runs-on: ubuntu-latest

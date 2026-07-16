@@ -1,12 +1,7 @@
 name: Build Documentation Site
 
+# Manual only — no push/pull_request CI triggers
 on:
-  push:
-    branches: [main, dev]
-    paths:
-      - 'mkdocs-docs/**'
-      - 'mkdocs.yml'
-      - 'containers/docs-site/**'
   workflow_dispatch:
 
 env:
