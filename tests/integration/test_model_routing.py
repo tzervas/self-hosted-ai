@@ -8,7 +8,6 @@ Tests LiteLLM's model routing capabilities:
 
 import pytest
 
-
 pytestmark = [pytest.mark.integration, pytest.mark.slow]
 
 
@@ -25,9 +24,7 @@ class TestModelFallback:
                 "/v1/chat/completions",
                 json={
                     "model": platform_config.TEST_MODEL,
-                    "messages": [
-                        {"role": "user", "content": "Reply with: FALLBACK OK"}
-                    ],
+                    "messages": [{"role": "user", "content": "Reply with: FALLBACK OK"}],
                     "max_tokens": 16,
                     "stream": False,
                 },
@@ -59,8 +56,6 @@ class TestEmbeddingRouting:
 
             data = response.json()
             embedding = data.get("embedding", [])
-            assert len(embedding) >= 128, (
-                f"Embedding dimension too low: {len(embedding)}"
-            )
+            assert len(embedding) >= 128, f"Embedding dimension too low: {len(embedding)}"
         except Exception as e:
             pytest.skip(f"Embedding routing test failed: {e}")

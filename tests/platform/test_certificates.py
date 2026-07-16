@@ -11,7 +11,6 @@ from datetime import datetime, timezone
 
 import pytest
 
-
 pytestmark = [pytest.mark.platform, pytest.mark.critical]
 
 
@@ -32,8 +31,8 @@ class TestCertificateResources:
         # Certificates known to be replaced by wildcard or not configured
         KNOWN_NON_READY = {
             "vectorweight-letsencrypt-wildcard",  # Let's Encrypt not configured
-            "jaeger-tls",         # Replaced by wildcard cert
-            "gitlab-tls",         # Replaced by wildcard cert
+            "jaeger-tls",  # Replaced by wildcard cert
+            "gitlab-tls",  # Replaced by wildcard cert
         }
 
         not_ready = []
@@ -62,18 +61,16 @@ class TestCertificateResources:
                 )
             ]
             has_core = (
-                "vectorweight-root-ca" in ready_certs
-                or "vectorweight-wildcard-tls" in ready_certs
+                "vectorweight-root-ca" in ready_certs or "vectorweight-wildcard-tls" in ready_certs
             )
             if has_core:
                 pytest.xfail(
-                    f"Non-core certificates not ready (core CA/wildcard is healthy):\n" +
-                    "\n".join(f"  - {c}" for c in not_ready)
+                    f"Non-core certificates not ready (core CA/wildcard is healthy):\n"
+                    + "\n".join(f"  - {c}" for c in not_ready)
                 )
             else:
-                assert False, (
-                    f"Certificates not ready (including core certs):\n" +
-                    "\n".join(f"  - {c}" for c in not_ready)
+                assert False, f"Certificates not ready (including core certs):\n" + "\n".join(
+                    f"  - {c}" for c in not_ready
                 )
 
     def test_certificates_not_expiring_soon(self, cluster_certificates):
@@ -86,20 +83,15 @@ class TestCertificateResources:
             not_after = cert.get("status", {}).get("notAfter")
             if not_after:
                 try:
-                    expiry = datetime.fromisoformat(
-                        not_after.replace("Z", "+00:00")
-                    )
+                    expiry = datetime.fromisoformat(not_after.replace("Z", "+00:00"))
                     days_until = (expiry - now).days
                     if days_until < 7:
-                        expiring_soon.append(
-                            f"{ns}/{name}: expires in {days_until} days"
-                        )
+                        expiring_soon.append(f"{ns}/{name}: expires in {days_until} days")
                 except (ValueError, TypeError):
                     pass
 
-        assert not expiring_soon, (
-            f"Certificates expiring within 7 days:\n" +
-            "\n".join(f"  - {c}" for c in expiring_soon)
+        assert not expiring_soon, f"Certificates expiring within 7 days:\n" + "\n".join(
+            f"  - {c}" for c in expiring_soon
         )
 
 
@@ -112,12 +104,15 @@ class TestCertManagerIssuers:
             pytest.skip("kubectl not available")
         result = subprocess.run(
             ["kubectl", "get", "clusterissuers", "-o", "json"],
-            capture_output=True, text=True, timeout=30,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         if result.returncode != 0:
             pytest.skip("Cannot query ClusterIssuers (CRD may not exist)")
 
         import json
+
         data = json.loads(result.stdout)
         issuers = data.get("items", [])
         assert len(issuers) > 0, "No ClusterIssuers configured"
@@ -128,12 +123,15 @@ class TestCertManagerIssuers:
             pytest.skip("kubectl not available")
         result = subprocess.run(
             ["kubectl", "get", "clusterissuers", "-o", "json"],
-            capture_output=True, text=True, timeout=30,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         if result.returncode != 0:
             pytest.skip("Cannot query ClusterIssuers")
 
         import json
+
         data = json.loads(result.stdout)
         not_ready = []
         for issuer in data.get("items", []):
@@ -143,9 +141,7 @@ class TestCertManagerIssuers:
             if not ready or ready[0]["status"] != "True":
                 not_ready.append(name)
 
-        assert not not_ready, (
-            f"ClusterIssuers not ready: {not_ready}"
-        )
+        assert not not_ready, f"ClusterIssuers not ready: {not_ready}"
 
 
 class TestTLSIngress:
@@ -158,12 +154,15 @@ class TestTLSIngress:
 
         result = subprocess.run(
             ["kubectl", "get", "ingress", "-A", "-o", "json"],
-            capture_output=True, text=True, timeout=30,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         if result.returncode != 0:
             pytest.skip("Cannot query ingress resources")
 
         import json
+
         data = json.loads(result.stdout)
         no_tls = []
         for ingress in data.get("items", []):
@@ -175,6 +174,4 @@ class TestTLSIngress:
 
         # Some ingress resources may intentionally not have TLS
         if no_tls:
-            pytest.xfail(
-                f"Ingress without TLS (may be intentional): {no_tls}"
-            )
+            pytest.xfail(f"Ingress without TLS (may be intentional): {no_tls}")

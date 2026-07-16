@@ -23,13 +23,13 @@ from rich.table import Table
 from lib.config import Settings, get_settings
 from lib.kubernetes import kubernetes_client
 from lib.services import (
+    GitLabClient,
     GrafanaClient,
     LiteLLMClient,
     N8NClient,
     OllamaClient,
     OpenWebUIClient,
     SearXNGClient,
-    GitLabClient,
 )
 
 app = typer.Typer(
@@ -210,18 +210,22 @@ async def _check_dns() -> list[CheckResult]:
     for hostname in hostnames:
         try:
             ip = socket.gethostbyname(hostname)
-            results.append(CheckResult(
-                name=hostname,
-                status=CheckStatus.PASS,
-                message=f"resolves to {ip}",
-            ))
+            results.append(
+                CheckResult(
+                    name=hostname,
+                    status=CheckStatus.PASS,
+                    message=f"resolves to {ip}",
+                )
+            )
         except socket.gaierror as e:
-            results.append(CheckResult(
-                name=hostname,
-                status=CheckStatus.FAIL,
-                message="DNS resolution failed",
-                details=str(e),
-            ))
+            results.append(
+                CheckResult(
+                    name=hostname,
+                    status=CheckStatus.FAIL,
+                    message="DNS resolution failed",
+                    details=str(e),
+                )
+            )
 
     return results
 
@@ -243,25 +247,31 @@ async def _check_tls() -> list[CheckResult]:
             # Allow self-signed certs for now
             async with httpx.AsyncClient(verify=False, timeout=10.0) as client:
                 response = await client.get(endpoint, follow_redirects=True)
-                results.append(CheckResult(
-                    name=endpoint,
-                    status=CheckStatus.PASS,
-                    message=f"TLS working (status {response.status_code})",
-                ))
+                results.append(
+                    CheckResult(
+                        name=endpoint,
+                        status=CheckStatus.PASS,
+                        message=f"TLS working (status {response.status_code})",
+                    )
+                )
         except httpx.ConnectError as e:
-            results.append(CheckResult(
-                name=endpoint,
-                status=CheckStatus.FAIL,
-                message="Connection failed",
-                details=str(e),
-            ))
+            results.append(
+                CheckResult(
+                    name=endpoint,
+                    status=CheckStatus.FAIL,
+                    message="Connection failed",
+                    details=str(e),
+                )
+            )
         except Exception as e:
-            results.append(CheckResult(
-                name=endpoint,
-                status=CheckStatus.WARN,
-                message="TLS issue",
-                details=str(e),
-            ))
+            results.append(
+                CheckResult(
+                    name=endpoint,
+                    status=CheckStatus.WARN,
+                    message="TLS issue",
+                    details=str(e),
+                )
+            )
 
     return results
 
@@ -276,23 +286,29 @@ async def _check_kubernetes() -> list[CheckResult]:
             try:
                 namespace = await client.get_namespace(ns)
                 if namespace:
-                    results.append(CheckResult(
-                        name=f"namespace/{ns}",
-                        status=CheckStatus.PASS,
-                        message="exists",
-                    ))
+                    results.append(
+                        CheckResult(
+                            name=f"namespace/{ns}",
+                            status=CheckStatus.PASS,
+                            message="exists",
+                        )
+                    )
                 else:
-                    results.append(CheckResult(
+                    results.append(
+                        CheckResult(
+                            name=f"namespace/{ns}",
+                            status=CheckStatus.FAIL,
+                            message="not found",
+                        )
+                    )
+            except Exception as e:
+                results.append(
+                    CheckResult(
                         name=f"namespace/{ns}",
                         status=CheckStatus.FAIL,
-                        message="not found",
-                    ))
-            except Exception as e:
-                results.append(CheckResult(
-                    name=f"namespace/{ns}",
-                    status=CheckStatus.FAIL,
-                    message=str(e),
-                ))
+                        message=str(e),
+                    )
+                )
 
         # Check critical pods
         pods = await client.list_pods("self-hosted-ai")
@@ -301,34 +317,42 @@ async def _check_kubernetes() -> list[CheckResult]:
         running = len(running_pods)
 
         if running == total and total > 0:
-            results.append(CheckResult(
-                name="pods/self-hosted-ai",
-                status=CheckStatus.PASS,
-                message=f"{running}/{total} running",
-            ))
+            results.append(
+                CheckResult(
+                    name="pods/self-hosted-ai",
+                    status=CheckStatus.PASS,
+                    message=f"{running}/{total} running",
+                )
+            )
         elif running > 0:
-            results.append(CheckResult(
-                name="pods/self-hosted-ai",
-                status=CheckStatus.WARN,
-                message=f"{running}/{total} running",
-            ))
+            results.append(
+                CheckResult(
+                    name="pods/self-hosted-ai",
+                    status=CheckStatus.WARN,
+                    message=f"{running}/{total} running",
+                )
+            )
         else:
-            results.append(CheckResult(
-                name="pods/self-hosted-ai",
-                status=CheckStatus.FAIL,
-                message=f"{running}/{total} running",
-            ))
+            results.append(
+                CheckResult(
+                    name="pods/self-hosted-ai",
+                    status=CheckStatus.FAIL,
+                    message=f"{running}/{total} running",
+                )
+            )
 
         # Check certificates
         certs = await client.list_certificates("self-hosted-ai")
         for cert in certs:
             name = cert.get("name", "unknown")
             ready = cert.get("ready", False)
-            results.append(CheckResult(
-                name=f"certificate/{name}",
-                status=CheckStatus.PASS if ready else CheckStatus.FAIL,
-                message="ready" if ready else "not ready",
-            ))
+            results.append(
+                CheckResult(
+                    name=f"certificate/{name}",
+                    status=CheckStatus.PASS if ready else CheckStatus.FAIL,
+                    message="ready" if ready else "not ready",
+                )
+            )
 
     return results
 
@@ -351,26 +375,32 @@ async def _check_services() -> list[CheckResult]:
             async with client:
                 health = await client.health_check()
                 if health.get("status") == "healthy":
-                    results.append(CheckResult(
-                        name=name,
-                        status=CheckStatus.PASS,
-                        message="healthy",
-                        details=health.get("details"),
-                    ))
+                    results.append(
+                        CheckResult(
+                            name=name,
+                            status=CheckStatus.PASS,
+                            message="healthy",
+                            details=health.get("details"),
+                        )
+                    )
                 else:
-                    results.append(CheckResult(
-                        name=name,
-                        status=CheckStatus.WARN,
-                        message=health.get("status", "unknown"),
-                        details=health.get("error"),
-                    ))
+                    results.append(
+                        CheckResult(
+                            name=name,
+                            status=CheckStatus.WARN,
+                            message=health.get("status", "unknown"),
+                            details=health.get("error"),
+                        )
+                    )
         except Exception as e:
-            results.append(CheckResult(
-                name=name,
-                status=CheckStatus.FAIL,
-                message="unreachable",
-                details=str(e),
-            ))
+            results.append(
+                CheckResult(
+                    name=name,
+                    status=CheckStatus.FAIL,
+                    message="unreachable",
+                    details=str(e),
+                )
+            )
 
     return results
 
@@ -391,25 +421,31 @@ async def _check_models() -> list[CheckResult]:
                 models = await client.list_models()
                 if models:
                     model_names = [m.get("name", "unknown") for m in models[:3]]
-                    results.append(CheckResult(
-                        name=name,
-                        status=CheckStatus.PASS,
-                        message=f"{len(models)} models",
-                        details=", ".join(model_names),
-                    ))
+                    results.append(
+                        CheckResult(
+                            name=name,
+                            status=CheckStatus.PASS,
+                            message=f"{len(models)} models",
+                            details=", ".join(model_names),
+                        )
+                    )
                 else:
-                    results.append(CheckResult(
-                        name=name,
-                        status=CheckStatus.WARN,
-                        message="no models loaded",
-                    ))
+                    results.append(
+                        CheckResult(
+                            name=name,
+                            status=CheckStatus.WARN,
+                            message="no models loaded",
+                        )
+                    )
         except Exception as e:
-            results.append(CheckResult(
-                name=name,
-                status=CheckStatus.FAIL,
-                message="unreachable",
-                details=str(e),
-            ))
+            results.append(
+                CheckResult(
+                    name=name,
+                    status=CheckStatus.FAIL,
+                    message="unreachable",
+                    details=str(e),
+                )
+            )
 
     return results
 

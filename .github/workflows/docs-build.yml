@@ -1,6 +1,6 @@
 name: Build Documentation Site
 
-# Manual only — no push/pull_request CI triggers
+# push/PR + workflow_dispatch (fleet self-hosted runners)
 on:
   push:
     branches:

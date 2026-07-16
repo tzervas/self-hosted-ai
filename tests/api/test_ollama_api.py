@@ -13,7 +13,6 @@ if the service is not reachable (e.g., running outside the cluster).
 
 import pytest
 
-
 pytestmark = [pytest.mark.api, pytest.mark.critical]
 
 
@@ -41,9 +40,7 @@ class TestOllamaGPUHealth:
     def test_ollama_gpu_reachable(self, ollama_gpu_client):
         """Ollama GPU endpoint should be reachable."""
         response = ollama_gpu_client.get("/")
-        assert response.status_code == 200, (
-            f"Ollama GPU returned {response.status_code}"
-        )
+        assert response.status_code == 200, f"Ollama GPU returned {response.status_code}"
 
     def test_ollama_gpu_has_models(self, ollama_gpu_client):
         """Ollama GPU should have models loaded."""
@@ -65,16 +62,11 @@ class TestOllamaGPUModels:
 
         missing = []
         for required in platform_config.REQUIRED_MODELS_GPU:
-            found = any(
-                m.startswith(required.split(":")[0]) for m in model_names
-            )
+            found = any(m.startswith(required.split(":")[0]) for m in model_names)
             if not found:
                 missing.append(required)
 
-        assert not missing, (
-            f"Missing GPU models: {missing}\n"
-            f"Available: {sorted(model_names)}"
-        )
+        assert not missing, f"Missing GPU models: {missing}\nAvailable: {sorted(model_names)}"
 
 
 class TestOllamaGeneration:
@@ -108,9 +100,7 @@ class TestOllamaGeneration:
             "/api/chat",
             json={
                 "model": platform_config.TEST_MODEL,
-                "messages": [
-                    {"role": "user", "content": "Say hello in one word."}
-                ],
+                "messages": [{"role": "user", "content": "Say hello in one word."}],
                 "stream": False,
                 "options": {"num_predict": 16},
             },
@@ -140,9 +130,7 @@ class TestOllamaEmbeddings:
         data = response.json()
         assert "embedding" in data, "Missing 'embedding' in response"
         embedding = data["embedding"]
-        assert len(embedding) > 100, (
-            f"Embedding too short: {len(embedding)} dimensions"
-        )
+        assert len(embedding) > 100, f"Embedding too short: {len(embedding)} dimensions"
 
 
 class TestOllamaModelInfo:
@@ -157,6 +145,4 @@ class TestOllamaModelInfo:
         )
         assert response.status_code == 200
         data = response.json()
-        assert "modelfile" in data or "details" in data, (
-            "Missing model details in response"
-        )
+        assert "modelfile" in data or "details" in data, "Missing model details in response"

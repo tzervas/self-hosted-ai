@@ -10,7 +10,6 @@ Tests the LiteLLM proxy service (OpenAI-compatible API):
 
 import pytest
 
-
 pytestmark = [pytest.mark.api, pytest.mark.critical]
 
 
@@ -33,9 +32,7 @@ class TestLiteLLMHealth:
         try:
             response = litellm_client.get("/")
             # LiteLLM may return various codes for root
-            assert response.status_code < 500, (
-                f"LiteLLM server error: {response.status_code}"
-            )
+            assert response.status_code < 500, f"LiteLLM server error: {response.status_code}"
         except Exception as e:
             pytest.fail(f"Cannot reach LiteLLM root: {e}")
 
@@ -48,15 +45,11 @@ class TestLiteLLMModels:
         response = litellm_client.get("/v1/models")
         if response.status_code == 401:
             pytest.skip("LiteLLM requires authentication (behind SSO)")
-        assert response.status_code == 200, (
-            f"Model list failed: {response.status_code}"
-        )
+        assert response.status_code == 200, f"Model list failed: {response.status_code}"
         data = response.json()
         assert "data" in data, "Missing 'data' in models response"
         models = data["data"]
-        assert len(models) >= 3, (
-            f"Expected at least 3 models, found {len(models)}"
-        )
+        assert len(models) >= 3, f"Expected at least 3 models, found {len(models)}"
 
     def test_expected_models_present(self, litellm_client, platform_config):
         """Expected models should be in the model list."""
@@ -71,8 +64,7 @@ class TestLiteLLMModels:
 
         if missing:
             pytest.xfail(
-                f"Expected models not in LiteLLM: {missing}\n"
-                f"Available: {sorted(model_ids)}"
+                f"Expected models not in LiteLLM: {missing}\nAvailable: {sorted(model_ids)}"
             )
 
 
@@ -86,9 +78,7 @@ class TestLiteLLMChatCompletion:
             "/v1/chat/completions",
             json={
                 "model": platform_config.TEST_MODEL,
-                "messages": [
-                    {"role": "user", "content": "Say the word 'hello'."}
-                ],
+                "messages": [{"role": "user", "content": "Say the word 'hello'."}],
                 "max_tokens": 16,
                 "stream": False,
             },
@@ -113,9 +103,7 @@ class TestLiteLLMChatCompletion:
                 "/v1/chat/completions",
                 json={
                     "model": platform_config.TEST_MODEL,
-                    "messages": [
-                        {"role": "user", "content": "Reply with: OK"}
-                    ],
+                    "messages": [{"role": "user", "content": "Reply with: OK"}],
                     "max_tokens": 8,
                     "stream": False,
                 },

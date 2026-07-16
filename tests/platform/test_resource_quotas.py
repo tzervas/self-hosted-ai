@@ -5,7 +5,6 @@ Validates that namespaces have appropriate resource constraints configured.
 
 import pytest
 
-
 pytestmark = [pytest.mark.platform]
 
 
@@ -29,9 +28,7 @@ class TestResourceQuotas:
 
         missing = [ns for ns in QUOTA_NAMESPACES if ns not in quota_ns]
         if missing:
-            pytest.xfail(
-                f"Namespaces without ResourceQuotas (may be intentional): {missing}"
-            )
+            pytest.xfail(f"Namespaces without ResourceQuotas (may be intentional): {missing}")
 
     def test_quotas_have_limits(self, resource_quotas):
         """ResourceQuotas should define CPU and memory limits."""
@@ -43,7 +40,6 @@ class TestResourceQuotas:
             if not hard:
                 no_limits.append(f"{ns}/{name}: no hard limits defined")
 
-        assert not no_limits, (
-            f"ResourceQuotas without limits:\n" +
-            "\n".join(f"  - {q}" for q in no_limits)
+        assert not no_limits, f"ResourceQuotas without limits:\n" + "\n".join(
+            f"  - {q}" for q in no_limits
         )

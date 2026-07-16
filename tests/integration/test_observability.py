@@ -8,7 +8,6 @@ Tests that metrics, traces, and logs flow correctly:
 
 import pytest
 
-
 pytestmark = [pytest.mark.integration]
 
 
@@ -29,10 +28,7 @@ class TestPrometheusMetrics:
             active = data.get("data", {}).get("activeTargets", [])
             up_targets = [t for t in active if t.get("health") == "up"]
 
-            assert len(up_targets) > 0, (
-                f"No healthy scrape targets. "
-                f"Total active: {len(active)}"
-            )
+            assert len(up_targets) > 0, f"No healthy scrape targets. Total active: {len(active)}"
         except Exception as e:
             pytest.skip(f"Cannot query Prometheus targets: {e}")
 
@@ -48,9 +44,7 @@ class TestPrometheusMetrics:
                 pytest.skip(f"Prometheus query returned {response.status_code}")
 
             data = response.json()
-            assert data.get("status") == "success", (
-                f"Query failed: {data.get('error', 'unknown')}"
-            )
+            assert data.get("status") == "success", f"Query failed: {data.get('error', 'unknown')}"
             results = data.get("data", {}).get("result", [])
             assert len(results) > 0, "No results for 'up' metric"
         except Exception as e:
@@ -68,10 +62,7 @@ class TestGrafanaDatasources:
                 pytest.skip("Grafana requires auth")
 
             datasources = response.json()
-            prometheus_ds = [
-                ds for ds in datasources
-                if ds.get("type") == "prometheus"
-            ]
+            prometheus_ds = [ds for ds in datasources if ds.get("type") == "prometheus"]
             assert len(prometheus_ds) > 0, (
                 "No Prometheus data source in Grafana. "
                 f"Available types: {[ds.get('type') for ds in datasources]}"
@@ -87,13 +78,8 @@ class TestGrafanaDatasources:
                 pytest.skip("Grafana requires auth")
 
             datasources = response.json()
-            tempo_ds = [
-                ds for ds in datasources
-                if ds.get("type") == "tempo"
-            ]
+            tempo_ds = [ds for ds in datasources if ds.get("type") == "tempo"]
             if not tempo_ds:
-                pytest.xfail(
-                    "No Tempo data source in Grafana (tracing may not be configured)"
-                )
+                pytest.xfail("No Tempo data source in Grafana (tracing may not be configured)")
         except Exception as e:
             pytest.skip(f"Cannot check Grafana datasources: {e}")

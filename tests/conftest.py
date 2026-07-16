@@ -8,23 +8,22 @@ Root conftest providing:
 
 import os
 import subprocess
-
-import pytest
 from unittest.mock import AsyncMock, Mock
 
 import httpx
+import pytest
 
 from agents.core.base import AgentConfig
-from agents.specialized.research import ResearchAgent
-from agents.specialized.development import DevelopmentAgent
 from agents.specialized.code_review import CodeReviewAgent
-from agents.specialized.testing import TestingAgent
+from agents.specialized.development import DevelopmentAgent
 from agents.specialized.documentation import DocumentationAgent
-
+from agents.specialized.research import ResearchAgent
+from agents.specialized.testing import TestingAgent
 
 # =============================================================================
 # Platform Configuration
 # =============================================================================
+
 
 class PlatformConfig:
     """Central configuration for all platform tests.
@@ -41,59 +40,35 @@ class PlatformConfig:
     DOMAIN = os.environ.get("PLATFORM_DOMAIN", "vectorweight.com")
 
     # Internal service URLs (ClusterIP)
-    OLLAMA_GPU_URL = os.environ.get(
-        "OLLAMA_GPU_URL", "http://ollama-gpu.gpu-workloads:11434"
-    )
-    OLLAMA_CPU_URL = os.environ.get(
-        "OLLAMA_CPU_URL", "http://ollama.ai-services:11434"
-    )
+    OLLAMA_GPU_URL = os.environ.get("OLLAMA_GPU_URL", "http://ollama-gpu.gpu-workloads:11434")
+    OLLAMA_CPU_URL = os.environ.get("OLLAMA_CPU_URL", "http://ollama.ai-services:11434")
     LITELLM_URL = os.environ.get("LITELLM_URL", "http://litellm.ai-services:4000")
-    OPENWEBUI_URL = os.environ.get(
-        "OPENWEBUI_URL", "http://open-webui.ai-services:8080"
-    )
+    OPENWEBUI_URL = os.environ.get("OPENWEBUI_URL", "http://open-webui.ai-services:8080")
     SEARXNG_URL = os.environ.get("SEARXNG_URL", "http://searxng.ai-services:8080")
     N8N_URL = os.environ.get("N8N_URL", "http://n8n.automation:5678")
     KEYCLOAK_URL = os.environ.get("KEYCLOAK_URL", "http://keycloak.auth:8080")
     MCP_URL = os.environ.get("MCP_URL", "http://mcp-servers.ai-services:8000")
     GRAFANA_URL = os.environ.get("GRAFANA_URL", "http://grafana.monitoring:80")
-    PROMETHEUS_URL = os.environ.get(
-        "PROMETHEUS_URL", "http://prometheus.monitoring:9090"
-    )
+    PROMETHEUS_URL = os.environ.get("PROMETHEUS_URL", "http://prometheus.monitoring:9090")
     TEMPO_URL = os.environ.get("TEMPO_URL", "http://tempo.monitoring:3100")
-    POSTGRESQL_HOST = os.environ.get(
-        "POSTGRESQL_HOST", "postgresql.ai-services"
-    )
+    POSTGRESQL_HOST = os.environ.get("POSTGRESQL_HOST", "postgresql.ai-services")
     REDIS_HOST = os.environ.get("REDIS_HOST", "redis.ai-services")
 
     # External URLs (via Traefik ingress)
-    OPENWEBUI_EXTERNAL = os.environ.get(
-        "OPENWEBUI_EXTERNAL", f"https://ai.{DOMAIN}"
-    )
-    LITELLM_EXTERNAL = os.environ.get(
-        "LITELLM_EXTERNAL", f"https://llm.{DOMAIN}"
-    )
-    ARGOCD_EXTERNAL = os.environ.get(
-        "ARGOCD_EXTERNAL", f"https://argocd.{DOMAIN}"
-    )
+    OPENWEBUI_EXTERNAL = os.environ.get("OPENWEBUI_EXTERNAL", f"https://ai.{DOMAIN}")
+    LITELLM_EXTERNAL = os.environ.get("LITELLM_EXTERNAL", f"https://llm.{DOMAIN}")
+    ARGOCD_EXTERNAL = os.environ.get("ARGOCD_EXTERNAL", f"https://argocd.{DOMAIN}")
     N8N_EXTERNAL = os.environ.get("N8N_EXTERNAL", f"https://n8n.{DOMAIN}")
-    GRAFANA_EXTERNAL = os.environ.get(
-        "GRAFANA_EXTERNAL", f"https://grafana.{DOMAIN}"
-    )
-    SEARXNG_EXTERNAL = os.environ.get(
-        "SEARXNG_EXTERNAL", f"https://search.{DOMAIN}"
-    )
+    GRAFANA_EXTERNAL = os.environ.get("GRAFANA_EXTERNAL", f"https://grafana.{DOMAIN}")
+    SEARXNG_EXTERNAL = os.environ.get("SEARXNG_EXTERNAL", f"https://search.{DOMAIN}")
 
     # GPU worker (standalone)
     GPU_WORKER_HOST = os.environ.get("GPU_WORKER_HOST", "192.168.1.99")
-    GPU_WORKER_OLLAMA = os.environ.get(
-        "GPU_WORKER_OLLAMA", f"http://192.168.1.99:11434"
-    )
+    GPU_WORKER_OLLAMA = os.environ.get("GPU_WORKER_OLLAMA", f"http://192.168.1.99:11434")
 
     # Credentials (from env or sealed secrets)
     LITELLM_MASTER_KEY = os.environ.get("LITELLM_MASTER_KEY", "")
-    WEBUI_ADMIN_EMAIL = os.environ.get(
-        "WEBUI_ADMIN_EMAIL", "admin@vectorweight.com"
-    )
+    WEBUI_ADMIN_EMAIL = os.environ.get("WEBUI_ADMIN_EMAIL", "admin@vectorweight.com")
     WEBUI_ADMIN_PASSWORD = os.environ.get("WEBUI_ADMIN_PASSWORD", "")
 
     # Test settings
@@ -116,7 +91,12 @@ class PlatformConfig:
     ]
     CRITICAL_SERVICES = {
         "ai-services": [
-            "open-webui", "litellm", "ollama", "postgresql", "redis", "searxng",
+            "open-webui",
+            "litellm",
+            "ollama",
+            "postgresql",
+            "redis",
+            "searxng",
         ],
         "gpu-workloads": ["ollama-gpu"],
         "monitoring": ["prometheus", "grafana"],
@@ -186,6 +166,7 @@ def kubectl_get_json(resource, namespace=None, all_namespaces=False):
         raise RuntimeError(f"kubectl failed: {result.stderr}")
 
     import json
+
     return json.loads(result.stdout)
 
 
@@ -198,6 +179,7 @@ def kubectl():
 # =============================================================================
 # HTTP Client Fixtures
 # =============================================================================
+
 
 @pytest.fixture(scope="session")
 def http_client():
@@ -231,6 +213,7 @@ def async_http_client():
 # =============================================================================
 # Agent Unit Test Fixtures (no cluster required)
 # =============================================================================
+
 
 @pytest.fixture
 def agent_config():
@@ -315,11 +298,11 @@ def sample_python_code():
 @pytest.fixture
 def sample_rust_code():
     """Sample Rust code for testing."""
-    return '''fn fibonacci(n: u32) -> u32 {
+    return """fn fibonacci(n: u32) -> u32 {
     match n {
         0 => 0,
         1 => 1,
         _ => fibonacci(n - 1) + fibonacci(n - 2),
     }
 }
-'''
+"""

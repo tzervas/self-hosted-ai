@@ -7,7 +7,6 @@ Tests complete user workflows:
 
 import pytest
 
-
 pytestmark = [pytest.mark.e2e, pytest.mark.slow]
 
 
@@ -42,9 +41,7 @@ class TestChatWorkflow:
             },
             timeout=120,
         )
-        assert chat_response.status_code == 200, (
-            f"Chat failed: {chat_response.status_code}"
-        )
+        assert chat_response.status_code == 200, f"Chat failed: {chat_response.status_code}"
 
         # Step 4: Verify response structure
         data = chat_response.json()
@@ -54,9 +51,7 @@ class TestChatWorkflow:
         assert len(content) > 0, "Empty response"
 
         # Step 5: Verify response quality (should mention Paris)
-        assert "paris" in content.lower(), (
-            f"Expected 'Paris' in response, got: {content}"
-        )
+        assert "paris" in content.lower(), f"Expected 'Paris' in response, got: {content}"
 
     def test_multi_turn_conversation(self, litellm_client, platform_config):
         """Multi-turn conversation should maintain context."""
@@ -84,9 +79,7 @@ class TestChatWorkflow:
         messages.append(assistant_msg)
 
         # Turn 2: Ask about previous context
-        messages.append(
-            {"role": "user", "content": "What is my name?"}
-        )
+        messages.append({"role": "user", "content": "What is my name?"})
 
         response2 = litellm_client.post(
             "/v1/chat/completions",
@@ -101,9 +94,7 @@ class TestChatWorkflow:
         assert response2.status_code == 200
 
         content = response2.json()["choices"][0]["message"]["content"]
-        assert "testbot" in content.lower(), (
-            f"Model did not remember name. Response: {content}"
-        )
+        assert "testbot" in content.lower(), f"Model did not remember name. Response: {content}"
 
 
 class TestModelComparison:
@@ -135,6 +126,4 @@ class TestModelComparison:
                 results[model] = f"ERROR: {e}"
 
         successful = {m: r for m, r in results.items() if not r.startswith("ERROR")}
-        assert len(successful) >= 1, (
-            f"No models responded successfully. Results: {results}"
-        )
+        assert len(successful) >= 1, f"No models responded successfully. Results: {results}"

@@ -2,15 +2,14 @@
 
 import asyncio
 import logging
+import uuid
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from datetime import datetime
-import uuid
 
 from agents.core.base import Agent, AgentResult
 from agents.core.task import Task, TaskConfig, TaskResult, TaskStatus
-
 
 logger = logging.getLogger(__name__)
 
@@ -305,15 +304,17 @@ class WorkflowOrchestrator:
                 if isinstance(result, Exception):
                     self.logger.error(f"Task {task.config.name} raised exception: {result}")
                     result = task.mark_failed(str(result))
-                
+
                 # Type guard: only append and process valid TaskResult objects
                 if not isinstance(result, Exception):
                     task_results.append(result)
-                    
+
                     if result.is_success():
                         completed_task_ids.append(task.task_id)
                     elif workflow.config.fail_fast:
-                        self.logger.warning("Fail-fast enabled, stopping workflow due to task failure")
+                        self.logger.warning(
+                            "Fail-fast enabled, stopping workflow due to task failure"
+                        )
                         return task_results
 
                 pending_tasks.remove(task)

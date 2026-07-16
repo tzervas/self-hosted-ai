@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 # Configuration flag for Prometheus export
 prometheus_enabled = False
 
+
 # Agent execution metrics - defined lazily to avoid import-time registration
 def get_agent_executions_counter():
     """Get the agent executions counter."""
@@ -22,6 +23,7 @@ def get_agent_executions_counter():
         "Total number of agent executions",
         ["agent_type", "status"],
     )
+
 
 def get_agent_execution_time_histogram():
     """Get the agent execution time histogram."""
@@ -32,6 +34,7 @@ def get_agent_execution_time_histogram():
         buckets=[0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0, 120.0, 300.0],
     )
 
+
 def get_agent_input_size_histogram():
     """Get the agent input size histogram."""
     return Histogram(
@@ -41,6 +44,7 @@ def get_agent_input_size_histogram():
         buckets=[100, 1000, 10000, 100000, 1000000],
     )
 
+
 def get_agent_output_size_histogram():
     """Get the agent output size histogram."""
     return Histogram(
@@ -48,6 +52,7 @@ def get_agent_output_size_histogram():
         "Size of agent output in bytes",
         ["agent_type"],
     )
+
 
 def get_agent_execution_count_counter():
     """Get the agent execution count counter."""
@@ -57,6 +62,7 @@ def get_agent_execution_count_counter():
         ["agent_type", "status"],
     )
 
+
 def get_workflow_execution_count_counter():
     """Get the workflow execution count counter."""
     return Counter(
@@ -65,6 +71,7 @@ def get_workflow_execution_count_counter():
         ["workflow_id", "status"],
     )
 
+
 def get_workflow_task_count_histogram():
     """Get the workflow task count histogram."""
     return Histogram(
@@ -72,6 +79,7 @@ def get_workflow_task_count_histogram():
         "Number of tasks per workflow",
         buckets=[1, 2, 5, 10, 20, 50, 100],
     )
+
 
 def get_workflow_duration_histogram():
     """Get the workflow duration histogram."""
@@ -154,22 +162,20 @@ class MetricsCollector:
         self, agent_id: str, agent_type: str, duration: float, status: str, **labels: Any
     ) -> None:
         """Record metrics for an agent execution.
-        
+
         Args:
             agent_id: Unique identifier for the agent instance
             agent_type: Type/category of the agent (e.g., 'research', 'multimodal')
             duration: Execution time in seconds
             status: Execution status ('completed', 'failed', etc.)
             **labels: Additional metric labels to record
-            
+
         Returns:
             None
         """
-        self.agent_executions.labels(
-            agent_id=agent_id, agent_type=agent_type, status=status
-        ).inc()
+        self.agent_executions.labels(agent_id=agent_id, agent_type=agent_type, status=status).inc()
         self.execution_duration.labels(agent_type=agent_type, status=status).observe(duration)
-        
+
         # Update counters
         if status == "completed":
             self.successful_executions.labels(agent_type=agent_type).inc()
@@ -180,13 +186,13 @@ class MetricsCollector:
         self, workflow_id: str, task_count: int, duration: float, success: bool
     ) -> None:
         """Record workflow execution metrics.
-        
+
         Args:
             workflow_id: Unique identifier for the workflow
             task_count: Number of tasks in the workflow
             duration: Total execution time in seconds
             success: Whether the workflow completed successfully
-            
+
         Returns:
             None
         """
@@ -211,10 +217,10 @@ _metrics_collector: Optional[MetricsCollector] = None
 
 def get_metrics_collector() -> MetricsCollector:
     """Get or create global metrics collector instance.
-    
+
     Returns singleton instance of MetricsCollector for recording metrics
     across the application.
-    
+
     Returns:
         MetricsCollector: Global metrics collector instance
     """
@@ -230,7 +236,7 @@ def setup_metrics(
     export_interval: int = 60,
 ) -> None:
     """Configure metrics collection for the agent framework.
-    
+
     Initializes Prometheus metrics server if enabled. This should be called
     once during application startup before any metrics are recorded.
 
@@ -238,10 +244,10 @@ def setup_metrics(
         enable_prometheus: Enable Prometheus metrics HTTP server
         prometheus_port: Port number for Prometheus scraping endpoint
         export_interval: Metrics export interval in seconds (currently unused)
-        
+
     Returns:
         None
-        
+
     Example:
         >>> setup_metrics(enable_prometheus=True, prometheus_port=8000)
         >>> # Metrics now available at http://localhost:8000/metrics

@@ -33,18 +33,18 @@ def count_tokens(text: str) -> int:
 def find_broken_links(index_path: Path) -> List[str]:
     """Find broken links in INDEX.md."""
     index_text = index_path.read_text()
-    links = re.findall(r'\[.*?\]\(([^)]+)\)', index_text)
+    links = re.findall(r"\[.*?\]\(([^)]+)\)", index_text)
 
     broken = []
     for link in links:
-        if link.startswith(('http://', 'https://', '#')):
+        if link.startswith(("http://", "https://", "#")):
             continue  # Skip external links and anchors
 
         # Try both relative to INDEX.md and relative to project root
         candidates = [
             Path(link),
-            Path('docs') / link,
-            Path(link.lstrip('../')),
+            Path("docs") / link,
+            Path(link.lstrip("../")),
         ]
 
         if not any(p.exists() for p in candidates):
@@ -59,15 +59,15 @@ def find_unreferenced_docs(index_path: Path, project_root: Path) -> List[Path]:
 
     # Exclude these from check
     exclude_patterns = [
-        '**/node_modules/**',
-        '**/.venv/**',
-        '**/site-packages/**',
-        '**/dist-info/**',
-        'docs/archive/**',  # Archive docs intentionally not in INDEX
+        "**/node_modules/**",
+        "**/.venv/**",
+        "**/site-packages/**",
+        "**/dist-info/**",
+        "docs/archive/**",  # Archive docs intentionally not in INDEX
     ]
 
     all_docs = []
-    for pattern in ['*.md', '**/*.md']:
+    for pattern in ["*.md", "**/*.md"]:
         for doc in project_root.rglob(pattern):
             if not any(doc.match(excl) for excl in exclude_patterns):
                 all_docs.append(doc)
@@ -80,7 +80,7 @@ def find_unreferenced_docs(index_path: Path, project_root: Path) -> List[Path]:
 
         if str(doc_name) not in index_text and str(relative_path) not in index_text:
             # Exclude README.md in subdirs (usually referenced indirectly)
-            if doc_name != 'README.md':
+            if doc_name != "README.md":
                 unreferenced.append(relative_path)
 
     return unreferenced
@@ -91,12 +91,12 @@ def validate_token_budgets(index_path: Path, project_root: Path) -> List[Tuple[s
     index_text = index_path.read_text()
 
     # Extract token claims from INDEX (e.g., "ARCHITECTURE.md (1,500 tokens)")
-    pattern = r'\[([\w\-\.]+\.md)\]\([^)]+\).*?\(([0-9,]+)\s+tokens\)'
+    pattern = r"\[([\w\-\.]+\.md)\]\([^)]+\).*?\(([0-9,]+)\s+tokens\)"
     claims = re.findall(pattern, index_text)
 
     mismatches = []
     for doc_name, claimed_tokens_str in claims:
-        claimed_tokens = int(claimed_tokens_str.replace(',', ''))
+        claimed_tokens = int(claimed_tokens_str.replace(",", ""))
 
         # Find the actual doc
         candidates = list(project_root.rglob(doc_name))
@@ -118,7 +118,7 @@ def validate_file_counts(index_path: Path, project_root: Path) -> List[Tuple[str
     index_text = index_path.read_text()
 
     # Extract file count claims (e.g., "argocd/applications/ | ~30 |")
-    pattern = r'\|\s*([\w\-\/]+)\s*\|\s*~?(\d+)\s*\|'
+    pattern = r"\|\s*([\w\-\/]+)\s*\|\s*~?(\d+)\s*\|"
     claims = re.findall(pattern, index_text)
 
     mismatches = []
@@ -130,7 +130,7 @@ def validate_file_counts(index_path: Path, project_root: Path) -> List[Tuple[str
         if not dir_full.exists() or not dir_full.is_dir():
             continue
 
-        actual_count = len(list(dir_full.glob('*')))
+        actual_count = len(list(dir_full.glob("*")))
 
         variance = abs(actual_count - claimed_count) / max(claimed_count, 1)
 
@@ -144,7 +144,7 @@ def validate_file_counts(index_path: Path, project_root: Path) -> List[Tuple[str
 def main():
     """Run all validation checks."""
     project_root = Path(__file__).parent.parent
-    index_path = project_root / 'docs' / 'INDEX.md'
+    index_path = project_root / "docs" / "INDEX.md"
 
     if not index_path.exists():
         print("❌ docs/INDEX.md not found!")
@@ -182,7 +182,9 @@ def main():
     if token_mismatches:
         print(f"   ⚠️  Found {len(token_mismatches)} token budget mismatches:")
         for doc, claimed, actual in token_mismatches:
-            print(f"      - {doc}: claimed {claimed}, actual ~{actual} ({abs(claimed-actual)} diff)")
+            print(
+                f"      - {doc}: claimed {claimed}, actual ~{actual} ({abs(claimed - actual)} diff)"
+            )
         print("   (Update INDEX.md summaries if docs changed materially)")
     else:
         print("   ✅ Token budgets accurate")
@@ -214,5 +216,5 @@ def main():
         sys.exit(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

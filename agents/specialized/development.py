@@ -2,10 +2,10 @@
 
 import logging
 from typing import Any, Dict, Optional
+
 import httpx
 
 from agents.core.base import Agent, AgentConfig, AgentResult, AgentStatus
-
 
 logger = logging.getLogger(__name__)
 
@@ -49,31 +49,41 @@ Always:
         await self.validate_input(task, context)
         context = context or {}
         language = context.get("language", "python")
-        
+
         try:
             code_result = await self._generate_code(task, language, context)
             return self._create_result(
                 status=AgentStatus.COMPLETED,
                 output=code_result,
-                metrics={"language": language, "lines_generated": len(code_result.get("code", "").split("\n"))},
+                metrics={
+                    "language": language,
+                    "lines_generated": len(code_result.get("code", "").split("\n")),
+                },
                 context=context,
             )
         except Exception as e:
             self.logger.error(f"Development task failed: {e}", exc_info=True)
             return self._create_result(status=AgentStatus.FAILED, error=str(e), context=context)
 
-    async def _generate_code(self, task: str, language: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def _generate_code(
+        self, task: str, language: str, context: Dict[str, Any]
+    ) -> Dict[str, Any]:
         prompt = f"""Task: {task}\nLanguage: {language}\n\nGenerate production-ready code with:
 1. Implementation
 2. Type hints/types
 3. Error handling
 4. Documentation
 5. Example usage"""
-        
+
         async with httpx.AsyncClient(timeout=self.config.timeout_seconds) as client:
             response = await client.post(
                 f"{self.config.ollama_url}/api/generate",
-                json={"model": self.config.model, "prompt": prompt, "system": self.get_system_prompt(), "stream": False},
+                json={
+                    "model": self.config.model,
+                    "prompt": prompt,
+                    "system": self.get_system_prompt(),
+                    "stream": False,
+                },
             )
             result = response.json()
             return {"code": result.get("response", ""), "language": language}

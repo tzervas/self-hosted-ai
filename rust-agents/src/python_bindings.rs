@@ -1,8 +1,8 @@
+use agent_runtime::{execute_parallel, AgentConfig, RustAgent};
 use pyo3::prelude::*;
 use pyo3_async_runtimes;
 
 use crate::agent_runtime;
-use agent_runtime::{execute_parallel, AgentConfig, RustAgent};
 
 /// Python-facing agent result
 #[pyclass]

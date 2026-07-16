@@ -292,6 +292,7 @@ def show(
         else:
             # Mask secrets
             import re
+
             masked = re.sub(
                 r'(password|key|secret|token):\s*"([^"]+)"',
                 r'\1: "********"',
@@ -312,10 +313,14 @@ async def _apply_secrets(credentials: list) -> None:
             try:
                 if await k8s.secret_exists(cred.secret_name, cred.namespace):
                     await k8s.update_secret(cred.secret_name, cred.keys, cred.namespace)
-                    console.print(f"  [yellow]↻[/yellow] Updated: {cred.namespace}/{cred.secret_name}")
+                    console.print(
+                        f"  [yellow]↻[/yellow] Updated: {cred.namespace}/{cred.secret_name}"
+                    )
                 else:
                     await k8s.create_secret(cred.secret_name, cred.keys, cred.namespace)
-                    console.print(f"  [green]✓[/green] Created: {cred.namespace}/{cred.secret_name}")
+                    console.print(
+                        f"  [green]✓[/green] Created: {cred.namespace}/{cred.secret_name}"
+                    )
             except Exception as e:
                 console.print(f"  [red]✗[/red] Failed: {cred.namespace}/{cred.secret_name}: {e}")
 

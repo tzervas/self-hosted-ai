@@ -191,7 +191,9 @@ class LiteLLMClient(ServiceClient):
         response = await self.client.get("/model/info", headers=self.headers)
         return response.json()
 
-    async def test_completion(self, model: str = "gpt-4", prompt: str = "Say hello") -> dict[str, Any]:
+    async def test_completion(
+        self, model: str = "gpt-4", prompt: str = "Say hello"
+    ) -> dict[str, Any]:
         """Test a completion request."""
         try:
             response = await self.client.post(

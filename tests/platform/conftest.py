@@ -38,7 +38,9 @@ def argocd_apps(kubectl_available):
     try:
         result = subprocess.run(
             ["kubectl", "get", "applications", "-n", "argocd", "-o", "json"],
-            capture_output=True, text=True, timeout=30,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         if result.returncode != 0:
             pytest.skip(f"Cannot get ArgoCD apps: {result.stderr}")
@@ -55,7 +57,9 @@ def cluster_certificates(kubectl_available):
     try:
         result = subprocess.run(
             ["kubectl", "get", "certificates", "-A", "-o", "json"],
-            capture_output=True, text=True, timeout=30,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         if result.returncode != 0:
             return {"items": []}
@@ -70,9 +74,17 @@ def cluster_secrets(kubectl_available, kubectl):
     if not kubectl_available:
         pytest.skip("kubectl not available or cluster not reachable")
     result = subprocess.run(
-        ["kubectl", "get", "secrets", "-A",
-         "-o", "jsonpath={range .items[*]}{.metadata.namespace}/{.metadata.name}{'\\n'}{end}"],
-        capture_output=True, text=True, timeout=30,
+        [
+            "kubectl",
+            "get",
+            "secrets",
+            "-A",
+            "-o",
+            "jsonpath={range .items[*]}{.metadata.namespace}/{.metadata.name}{'\\n'}{end}",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
     )
     if result.returncode != 0:
         pytest.skip("Cannot list secrets")
@@ -87,7 +99,9 @@ def resource_quotas(kubectl_available):
     try:
         result = subprocess.run(
             ["kubectl", "get", "resourcequotas", "-A", "-o", "json"],
-            capture_output=True, text=True, timeout=30,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         if result.returncode != 0:
             return {"items": []}

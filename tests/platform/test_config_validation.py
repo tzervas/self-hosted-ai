@@ -10,7 +10,6 @@ from pathlib import Path
 import pytest
 import yaml
 
-
 pytestmark = [pytest.mark.platform]
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
@@ -20,7 +19,8 @@ class TestHelmCharts:
     """Validate Helm chart structure and syntax."""
 
     @pytest.fixture(scope="class")
-    def helm_charts(self):
+    @classmethod
+    def helm_charts(cls):
         """Discover all Helm charts in the helm/ directory."""
         helm_dir = PROJECT_ROOT / "helm"
         charts = []
@@ -31,9 +31,7 @@ class TestHelmCharts:
 
     def test_helm_charts_discovered(self, helm_charts):
         """At least 10 Helm charts should exist."""
-        assert len(helm_charts) >= 10, (
-            f"Expected at least 10 Helm charts, found {len(helm_charts)}"
-        )
+        assert len(helm_charts) >= 10, f"Expected at least 10 Helm charts, found {len(helm_charts)}"
 
     def test_charts_have_values(self, helm_charts):
         """Each Helm chart should have a values.yaml file."""
@@ -41,12 +39,15 @@ class TestHelmCharts:
         for chart in helm_charts:
             if not (chart / "values.yaml").exists():
                 missing.append(chart.name)
-        assert not missing, (
-            f"Charts missing values.yaml: {missing}"
-        )
+        assert not missing, f"Charts missing values.yaml: {missing}"
 
     def test_helm_lint_passes(self, helm_charts):
         """Active Helm charts should pass helm lint."""
+        import shutil
+
+        if shutil.which("helm") is None:
+            pytest.skip("helm CLI not available")
+
         # Legacy charts that are not actively deployed via ArgoCD
         SKIP_CHARTS = {"server", "workstation", "gpu-worker"}
         failures = []
@@ -55,15 +56,14 @@ class TestHelmCharts:
                 continue
             result = subprocess.run(
                 ["helm", "lint", str(chart)],
-                capture_output=True, text=True, timeout=30,
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
             if result.returncode != 0:
                 failures.append(f"{chart.name}: {result.stderr.strip()}")
 
-        assert not failures, (
-            f"Helm lint failures:\n" +
-            "\n".join(f"  - {f}" for f in failures)
-        )
+        assert not failures, f"Helm lint failures:\n" + "\n".join(f"  - {f}" for f in failures)
 
     def test_chart_yaml_valid(self, helm_charts):
         """Chart.yaml files should be valid YAML with required fields."""
@@ -80,17 +80,15 @@ class TestHelmCharts:
             except yaml.YAMLError as e:
                 issues.append(f"{chart.name}: invalid YAML: {e}")
 
-        assert not issues, (
-            f"Chart.yaml issues:\n" +
-            "\n".join(f"  - {i}" for i in issues)
-        )
+        assert not issues, f"Chart.yaml issues:\n" + "\n".join(f"  - {i}" for i in issues)
 
 
 class TestArgocdApplications:
     """Validate ArgoCD application manifest syntax."""
 
     @pytest.fixture(scope="class")
-    def app_manifests(self):
+    @classmethod
+    def app_manifests(cls):
         """Load all ArgoCD application YAML files."""
         apps_dir = PROJECT_ROOT / "argocd" / "applications"
         manifests = []
@@ -105,10 +103,7 @@ class TestArgocdApplications:
 
     def test_app_manifests_valid_yaml(self, app_manifests):
         """All ArgoCD application files should be valid YAML."""
-        errors = [
-            name for name, data in app_manifests
-            if "_error" in (data or {})
-        ]
+        errors = [name for name, data in app_manifests if "_error" in (data or {})]
         assert not errors, f"Invalid YAML files: {errors}"
 
     def test_apps_have_sync_wave(self, app_manifests):
@@ -123,9 +118,7 @@ class TestArgocdApplications:
 
         # Sync waves are recommended but not always required
         if missing:
-            pytest.xfail(
-                f"Apps without sync-wave annotation (may be intentional): {missing}"
-            )
+            pytest.xfail(f"Apps without sync-wave annotation (may be intentional): {missing}")
 
     def test_apps_reference_valid_paths(self, app_manifests):
         """ArgoCD app sources should reference paths that exist."""
@@ -141,9 +134,8 @@ class TestArgocdApplications:
                 if not full_path.exists():
                     bad_paths.append(f"{name}: {path}")
 
-        assert not bad_paths, (
-            f"ArgoCD apps reference non-existent paths:\n" +
-            "\n".join(f"  - {p}" for p in bad_paths)
+        assert not bad_paths, f"ArgoCD apps reference non-existent paths:\n" + "\n".join(
+            f"  - {p}" for p in bad_paths
         )
 
 
@@ -218,9 +210,7 @@ class TestSealedSecrets:
         secrets_dir = PROJECT_ROOT / "argocd" / "sealed-secrets"
         assert secrets_dir.exists(), "argocd/sealed-secrets/ directory not found"
         secrets = list(secrets_dir.glob("*.yaml"))
-        assert len(secrets) >= 5, (
-            f"Expected at least 5 sealed secrets, found {len(secrets)}"
-        )
+        assert len(secrets) >= 5, f"Expected at least 5 sealed secrets, found {len(secrets)}"
 
     def test_sealed_secrets_valid_yaml(self):
         """All sealed secret files should be valid YAML."""
@@ -235,7 +225,4 @@ class TestSealedSecrets:
             except yaml.YAMLError as e:
                 errors.append(f"{secret_file.name}: {e}")
 
-        assert not errors, (
-            f"Invalid sealed secret files:\n" +
-            "\n".join(f"  - {e}" for e in errors)
-        )
+        assert not errors, f"Invalid sealed secret files:\n" + "\n".join(f"  - {e}" for e in errors)

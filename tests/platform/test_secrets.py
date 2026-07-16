@@ -6,7 +6,6 @@ Does NOT read secret data -- only checks existence.
 
 import pytest
 
-
 pytestmark = [pytest.mark.platform, pytest.mark.critical]
 
 
@@ -50,10 +49,7 @@ class TestRequiredSecrets:
                 if key not in cluster_secrets:
                     missing.append(key)
 
-        assert not missing, (
-            f"Missing required secrets:\n" +
-            "\n".join(f"  - {m}" for m in missing)
-        )
+        assert not missing, f"Missing required secrets:\n" + "\n".join(f"  - {m}" for m in missing)
 
     def test_recommended_secrets_present(self, cluster_secrets):
         """Recommended secrets should exist (warning only)."""
@@ -66,8 +62,8 @@ class TestRequiredSecrets:
 
         if missing:
             pytest.xfail(
-                f"Missing recommended secrets (non-blocking):\n" +
-                "\n".join(f"  - {m}" for m in missing)
+                f"Missing recommended secrets (non-blocking):\n"
+                + "\n".join(f"  - {m}" for m in missing)
             )
 
 
@@ -77,13 +73,12 @@ class TestSealedSecretsController:
     def test_sealed_secrets_controller_running(self, cluster_pods):
         """SealedSecrets controller should be running."""
         controller_pods = [
-            p for p in cluster_pods["items"]
+            p
+            for p in cluster_pods["items"]
             if "sealed-secrets" in p["metadata"]["name"]
             and p["metadata"]["namespace"] in ("kube-system", "sealed-secrets")
         ]
         assert controller_pods, "SealedSecrets controller pod not found"
         for pod in controller_pods:
             phase = pod["status"].get("phase", "Unknown")
-            assert phase == "Running", (
-                f"SealedSecrets controller is {phase}, expected Running"
-            )
+            assert phase == "Running", f"SealedSecrets controller is {phase}, expected Running"
