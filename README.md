@@ -1,5 +1,10 @@
 # Self-Hosted AI Platform
 
+<!-- FLEET-BADGES:BEGIN -->
+[![CI](https://github.com/tzervas/self-hosted-ai/actions/workflows/fleet-ci.yml/badge.svg?branch=main)](https://github.com/tzervas/self-hosted-ai/actions/workflows/fleet-ci.yml?query=branch%3Amain)
+[![Security](https://github.com/tzervas/self-hosted-ai/actions/workflows/fleet-security.yml/badge.svg?branch=main)](https://github.com/tzervas/self-hosted-ai/actions/workflows/fleet-security.yml?query=branch%3Amain)
+<!-- FLEET-BADGES:END -->
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-k3s-326CE5?logo=kubernetes&logoColor=white)](https://k3s.io/)
 [![ArgoCD](https://img.shields.io/badge/GitOps-ArgoCD-EF7B4D?logo=argo&logoColor=white)](https://argoproj.github.io/cd/)
